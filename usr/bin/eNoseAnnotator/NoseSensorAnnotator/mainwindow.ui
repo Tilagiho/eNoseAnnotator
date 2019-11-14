@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>900</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>800</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QSplitter" name="mSplitter">
+      <property name="midLineWidth">
+       <number>1</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <widget class="QSplitter" name="lSplitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="QFrame" name="classification_frame">
+        <property name="minimumSize">
+         <size>
+          <width>500</width>
+          <height>350</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>8</pointsize>
+         </font>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="0">
+          <widget class="QSplitter" name="splitter">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <widget class="ClassifierWidget" name="classificationWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+           </widget>
+           <widget class="lineGraph" name="absLGraph" native="true"/>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QFrame" name="lFrame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>500</width>
+          <height>200</height>
+         </size>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="lineGraph" name="lGraph" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+      <widget class="QSplitter" name="rSplitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="InfoWidget" name="data_info_widget" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>150</horstretch>
+          <verstretch>200</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>350</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QFrame" name="bFrame">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>200</height>
+         </size>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <widget class="BarGraphWidget" name="bGraph" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1200</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>Measurement</string>
+    </property>
+    <widget class="QMenu" name="menuSave">
+     <property name="title">
+      <string>Save...</string>
+     </property>
+     <addaction name="actionSave_Data"/>
+     <addaction name="actionsave_selection"/>
+    </widget>
+    <addaction name="menuSave"/>
+    <addaction name="actionLoad"/>
+    <addaction name="actionStart"/>
+    <addaction name="actionStop"/>
+    <addaction name="actionReset"/>
+    <addaction name="actionSettings"/>
+   </widget>
+   <widget class="QMenu" name="menuAnnotation">
+    <property name="title">
+     <string>Annotation</string>
+    </property>
+    <addaction name="actionSaveAnnotation"/>
+    <addaction name="actionOpenAnnotation"/>
+    <addaction name="actionFunctionalitization"/>
+   </widget>
+   <widget class="QMenu" name="menuClassifier">
+    <property name="title">
+     <string>Classifier</string>
+    </property>
+    <addaction name="actionLoadClassifier"/>
+   </widget>
+   <widget class="QMenu" name="menuConnection">
+    <property name="title">
+     <string>Connection</string>
+    </property>
+    <addaction name="actionSet_USB_Connection"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuAnnotation"/>
+   <addaction name="menuClassifier"/>
+   <addaction name="menuConnection"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionSave_Data">
+   <property name="text">
+    <string>Save  Data...</string>
+   </property>
+  </action>
+  <action name="actionsave_selection">
+   <property name="text">
+    <string>Save Selection...</string>
+   </property>
+  </action>
+  <action name="actionLoad_Measurement">
+   <property name="text">
+    <string>Load Measurement...</string>
+   </property>
+  </action>
+  <action name="actionLoad">
+   <property name="text">
+    <string>Load...</string>
+   </property>
+  </action>
+  <action name="actionSaveAnnotation">
+   <property name="text">
+    <string>Save...</string>
+   </property>
+  </action>
+  <action name="actionOpenAnnotation">
+   <property name="text">
+    <string>Load...</string>
+   </property>
+  </action>
+  <action name="actionLoadClassifier">
+   <property name="text">
+    <string>Load...</string>
+   </property>
+  </action>
+  <action name="actionSet_USB_Connection">
+   <property name="text">
+    <string>Set USB Connection...</string>
+   </property>
+  </action>
+  <action name="actionStart">
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="text">
+    <string>Stop</string>
+   </property>
+   <property name="toolTip">
+    <string>Stop connection to sensor</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="text">
+    <string>Reset base level</string>
+   </property>
+  </action>
+  <action name="actionFunctionalitization">
+   <property name="text">
+    <string>Functionalisation...</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings...</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>lineGraph</class>
+   <extends>QWidget</extends>
+   <header>linegraph.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BarGraphWidget</class>
+   <extends>QWidget</extends>
+   <header>bargraphwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>InfoWidget</class>
+   <extends>QWidget</extends>
+   <header>infowidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ClassifierWidget</class>
+   <extends>QWidget</extends>
+   <header>classifierwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Version=1.0
+Icon=icon
+Type=Application
+Name=eNoseAnnotator
+Exec=eNoseAnnotator
+Categories=Utility;
