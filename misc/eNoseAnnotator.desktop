@@ -3,5 +3,5 @@ Version=1.0
 Icon=icon
 Type=Application
 Name=eNoseAnnotator
-Exec=eNoseAnnotator
+Exec=app
 Categories=Utility;
