@@ -7,7 +7,7 @@ SUBDIRS += \
 # create appdir structure
 linux-g++ {
     isEmpty(PREFIX) {
-        PREFIX = appdir/usr
+        PREFIX = usr
     }
     target.path = $$PREFIX/bin
 
