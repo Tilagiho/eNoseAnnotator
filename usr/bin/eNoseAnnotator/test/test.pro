@@ -6,7 +6,7 @@ TEMPLATE = app
 
 SOURCES +=  tst_enoseannotator.cpp \
     tst_mvector.cpp \
-    ../NoseSensorAnnotator/mvector.cpp \
+    ../app/mvector.cpp \
 
 HEADERS += \
-    ../NoseSensorAnnotator/mvector.h \
+    ../app/mvector.h \

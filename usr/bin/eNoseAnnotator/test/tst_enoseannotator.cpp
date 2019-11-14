@@ -2,7 +2,7 @@
 #include <QCoreApplication>
 
 // add necessary includes here
-#include "../NoseSensorAnnotator/mvector.h"
+#include "../app/mvector.h"
 
 class TestENoseAnnotator : public QObject
 {

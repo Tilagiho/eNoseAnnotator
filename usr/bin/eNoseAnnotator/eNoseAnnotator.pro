@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 
 SUBDIRS += \
-    NoseSensorAnnotator \
+    app \
     test
 
 
