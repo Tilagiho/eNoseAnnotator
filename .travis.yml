@@ -8,13 +8,13 @@ before_install:
   - sudo apt-get update -qq
 
 install:
-  - sudo apt-get -y install qt510base  qt510serialport libgl1-mesa-dev
+  - sudo apt-get -y install qt510base  qt510serialport libgl1-mesa-dev tree
   - source /opt/qt*/bin/qt*-env.sh
 
 script:
   - qmake CONFIG+=release PREFIX=/usr
   - make -j$(nproc)
-  - make INSTALL_ROOT=eNoseAnnotator -j$(nproc) install ; find eNoseAnnotator/
+  - make INSTALL_ROOT=eNoseAnnotator -j$(nproc) install ; tree ; find eNoseAnnotator/
   - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
   - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
   # export VERSION=... # linuxdeployqt uses this for naming the file
