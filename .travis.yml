@@ -26,22 +26,6 @@ matrix:
       # curl --upload-file eNoseAnnotator*.AppImage https://transfer.sh/eNoseAnnotator-git.$(git rev-parse --short HEAD)-x86_64.AppImage
       - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
       - bash upload.sh eNoseAnnotator*.AppImage*
-
-  - os: windows
-    before_install:
-    - dir C:/Program\ Files\ \(x86\)/Windows\ Kits/10/bin/10.0.17134.0/x64
-    - cmd.exe /C 'cd && "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
-      x86 && cd && cd "C:\Users\travis\build\Tilagiho\eNoseAnnotator" && dir'
-    - curl -vLO http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe
-    - curl -vLO https://raw.githubusercontent.com/appveyor/build-images/0d76961abbd8208c709baa89aa1cfbb5778bd17c/scripts/Windows/qt-installer-windows.qs
-    - "./qt-unified-windows-x86-online.exe --verbose --script qt-installer-windows.qs"
-    - ls -la C:/Qt/5.12.3/msvc2017/bin/qtenv2.bat
-    script:
-    - cmd.exe /C 'cd && "C:\Qt\5.12.3\msvc2017\bin\qtenv2.bat" && cd && "C:\Program
-      Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
-      x86 && cd "C:\Users\travis\build\" && cd && qmake eNoseAnnotator.pro
-      && nmake'
-
   
 # safelist
 branches:

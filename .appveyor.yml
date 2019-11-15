@@ -3,12 +3,12 @@ branches:
     - master
 
 install:
-  - set QTDIR=C:\Qt\5.12.5\mingw73_64
+  - set QTDIR=C:\Qt\5.12.5\mingw73_32
   - choco install -y InnoSetup
   - set PATH=%QTDIR%\bin;C:\Qt\Tools\mingw730_32\bin;%PATH%;"C:\Program Files (x86)\Inno Setup 5"
 build_script:
   - qmake eNoseAnnotator.pro
-  - MinGW-w64-make
+  - mingw32-make
   - RENAME release/app.exe eNoseAnnotator.exe
 after_build:
   - windeployqt release/eNoseAnnotator.exe
