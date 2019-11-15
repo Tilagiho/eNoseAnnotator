@@ -27,8 +27,10 @@ after_success:
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - bash upload.sh eNoseAnnotator*.AppImage*
   
+# safelist
 branches:
-  only: 
-    -master
+  only:
+  - master
+  - stable
 
 
