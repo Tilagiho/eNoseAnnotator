@@ -21,7 +21,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # create appdir structure
 linux-g++ {
     isEmpty(PREFIX) {
-        PREFIX = ../usr
+        PREFIX = ../../eNoseAnnotator/usr
     }
     target.path = $$PREFIX/bin
     INSTALLS += target
