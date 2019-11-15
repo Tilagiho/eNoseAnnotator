@@ -29,9 +29,10 @@ matrix:
 
   - os: windows
     before_install:
+    - tree
     - dir C:/Program\ Files\ \(x86\)/Windows\ Kits/10/bin/10.0.17134.0/x64
     - cmd.exe /C 'cd && "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
-      x86 && cd && cd "C:/Users/travis/build/braindef/jamulus" && dir'
+      x86 && cd && cd "C:\Users\travis\build\Tilagiho\eNoseAnnotator" && dir'
     - curl -vLO http://download.qt.io/official_releases/online_installers/qt-unified-windows-x86-online.exe
     install:
     - "./qt-unified-windows-x86-online.exe --verbose --script qt-installer-windows.qs"
