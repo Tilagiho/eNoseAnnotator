@@ -9,6 +9,7 @@ linux-g++ {
     isEmpty(PREFIX) {
         PREFIX = usr
     }
+    target.files = app/eNoseAnnotator/usr/bin/app
     target.path = $$PREFIX/bin
 
     desktop.path = $$PREFIX/share/applications/
