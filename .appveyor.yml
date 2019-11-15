@@ -8,7 +8,7 @@ install:
   - set PATH=%QTDIR%\bin;C:\Qt\Tools\mingw730_32\bin;%PATH%;"C:\Program Files (x86)\Inno Setup 5"
 build_script:
   - qmake eNoseAnnotator.pro
-  - mingw64-make
+  - mingw32-make
 after_build:
   - windeployqt release/eNoseAnnotator.exe
   - cmd: cp LICENSE release/LICENSE.txt"
