@@ -14,7 +14,7 @@ linux-g++ {
 
     desktop.path = $$PREFIX/share/applications/
     desktop.files += misc/eNoseAnnotator.desktop
-    icon512.path = $$PREFIX/share/icons/hicolor/512x512/apps
+    icon512.path = $$PREFIX/share/icons/hicolor/256x256
     icon512.files += misc/eNoseAnnotator.png
 
     INSTALLS += icon512
