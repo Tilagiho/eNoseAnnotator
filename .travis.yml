@@ -14,7 +14,7 @@ install:
 script:
   - qmake CONFIG+=release PREFIX=/usr
   - make -j$(nproc)
-  - make INSTALL_ROOT=eNoseAnnotator -j$(nproc) install ; cp -p app/eNoseAnnotator/usr/bin/app eNoseAnnotator/usr/bin/app; tree ; find eNoseAnnotator/
+  - make INSTALL_ROOT=eNoseAnnotator -j$(nproc) install ; cp -p app/app eNoseAnnotator/usr/bin/app; tree ; find eNoseAnnotator/
   - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
   - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
   # export VERSION=... # linuxdeployqt uses this for naming the file
