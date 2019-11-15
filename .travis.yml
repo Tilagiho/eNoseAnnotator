@@ -29,7 +29,6 @@ matrix:
 
   - os: windows
     before_install:
-    - tree \
     - dir C:/Program\ Files\ \(x86\)/Windows\ Kits/10/bin/10.0.17134.0/x64
     - cmd.exe /C 'cd && "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
       x86 && cd && cd "C:\Users\travis\build\Tilagiho\eNoseAnnotator" && dir'
@@ -38,7 +37,6 @@ matrix:
     - "./qt-unified-windows-x86-online.exe --verbose --script qt-installer-windows.qs"
     - ls -la C:/Qt/5.12.3/msvc2017/bin/qtenv2.bat
     script:
-    - tree \
     - cmd.exe /C 'cd && "C:\Qt\5.12.3\msvc2017\bin\qtenv2.bat" && cd && "C:\Program
       Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat"
       x86 && cd "C:\Users\travis\build\" && cd && qmake eNoseAnnotator.pro
