@@ -1,33 +1,35 @@
 language: cpp
-compiler: gcc
-sudo: require
-dist: trusty
+matrix: include:
+   - os: linux
+	dist: trusty
+	compiler: gcc
+	sudo: require
 
-before_install:
-  - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
-  - sudo apt-get update -qq
+	before_install:
+	  - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
+	  - sudo apt-get update -qq
 
-install:
-  - sudo apt-get -y install qt510base  qt510serialport libgl1-mesa-dev tree
-  - source /opt/qt*/bin/qt*-env.sh
+	install:
+	  - sudo apt-get -y install qt510base  qt510serialport libgl1-mesa-dev tree
+	  - source /opt/qt*/bin/qt*-env.sh
 
-script:
-  - qmake CONFIG+=release PREFIX=/usr
-  - make -j$(nproc)
-  - make INSTALL_ROOT=eNoseAnnotator -j$(nproc) install ; find eNoseAnnotator/
-  - mkdir -p eNoseAnnotator/usr/bin; mkdir -p eNoseAnnotator/share/icons/hicolor/256x256; cp app/app eNoseAnnotator/usr/bin/app; cp misc/icon.png eNoseAnnotator/share/icons/hicolor/256x256/icon.png; tree
-  - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-  # export VERSION=... # linuxdeployqt uses this for naming the file
-  - ./linuxdeployqt-continuous-x86_64.AppImage eNoseAnnotator/usr/share/applications/*.desktop -appimage
+	script:
+	  - qmake CONFIG+=release PREFIX=/usr
+	  - make -j$(nproc)
+	  - make INSTALL_ROOT=eNoseAnnotator -j$(nproc) install ; find eNoseAnnotator/
+	  - mkdir -p eNoseAnnotator/usr/bin; mkdir -p eNoseAnnotator/share/icons/hicolor/256x256; cp app/app eNoseAnnotator/usr/bin/app; cp misc/icon.png eNoseAnnotator/share/icons/hicolor/256x256/icon.png; tree
+	  - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+	  - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+	  # export VERSION=... # linuxdeployqt uses this for naming the file
+	  - ./linuxdeployqt-continuous-x86_64.AppImage eNoseAnnotator/usr/share/applications/*.desktop -appimage
 
-after_success:
-  # find eNoseAnnotator -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
-  # curl --upload-file eNoseAnnotator*.AppImage https://transfer.sh/eNoseAnnotator-git.$(git rev-parse --short HEAD)-x86_64.AppImage
-  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
-  - bash upload.sh eNoseAnnotator*.AppImage*
-  
-branches:
-  except:
-    - # Do not build tags that we create when we upload to GitHub Releases
-    - /^(?i:continuous)/
+	after_success:
+	  # find eNoseAnnotator -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
+	  # curl --upload-file eNoseAnnotator*.AppImage https://transfer.sh/eNoseAnnotator-git.$(git rev-parse --short HEAD)-x86_64.AppImage
+	  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+	  - bash upload.sh eNoseAnnotator*.AppImage*
+	  
+	branches:
+	  except:
+	    - # Do not build tags that we create when we upload to GitHub Releases
+	    - /^(?i:continuous)/
