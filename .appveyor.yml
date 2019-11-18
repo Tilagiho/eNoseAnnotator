@@ -11,8 +11,7 @@ build_script:
   - qmake eNoseAnnotator.pro
   - mingw32-make
   - cd
-  - dir app
-  - ren "app/release/app.exe" eNoseAnnotator.exe
+  - dir app/release
 after_build:
   - windeployqt release/eNoseAnnotator.exe
   - cmd: cp LICENSE release/LICENSE.txt"
