@@ -18,7 +18,6 @@ build_script:
 after_build:
   - cd app
   - windeployqt release/eNoseAnnotator.exe
-  - cmd: cp LICENSE release/LICENSE.txt"
   - iscc innosetup.iss
   - rm release/*.o
   - rm release/*.cpp
