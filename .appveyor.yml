@@ -16,14 +16,15 @@ build_script:
   - ren app.exe eNoseAnnotator.exe
   - cd ../..
 after_build:
-  - cd
-  - windeployqt app/release/eNoseAnnotator.exe
+  - cd app
+  - windeployqt release/eNoseAnnotator.exe
   - cmd: cp LICENSE release/LICENSE.txt"
   - iscc innosetup.iss
-  - rm "release/*.o"
-  - rm "release/*.cpp"
+  - rm release/*.o
+  - rm release/*.cpp
+  - cd ..
 
 artifacts:
   - path: Output\eNoseAnnotator-*.exe
-  - path: release
+  - path: app\release
     type: zip
