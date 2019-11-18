@@ -14,6 +14,10 @@ lineGraph::lineGraph(QWidget *parent, uint startTime) :
     // init start timestamp
     startTimestamp = startTime;
 
+    // zero init sensorFailureFlags
+    for (int i=0; i<MVector::size; i++)
+        sensorFailureFlags[i] = false;
+
     setupGraph();
 
     // connections:
@@ -102,6 +106,31 @@ void lineGraph::setStartTimestamp(uint timestamp)
     startTimestamp = timestamp;
 }
 
+void lineGraph::setSensorFailureFlags(const std::array<bool, MVector::size> flags)
+{
+    bool redraw = false;
+
+    if (flags != sensorFailureFlags)
+    {
+        for (int i=0; i<MVector::size; i++)
+        {
+            if (flags[i] && !sensorFailureFlags[i])
+                ui->chart->graph(i)->data()->clear();
+            else if (!flags[i] && sensorFailureFlags[i])
+            {
+                redraw = true;
+                break;
+            }
+        }
+    }
+    sensorFailureFlags = flags;
+
+    if (redraw)
+        requestRedraw();
+    else
+        replot();
+}
+
 void lineGraph::setXAxis(double x1, double x2)
 {
     ui->chart->xAxis->setRange(x1, x2);
@@ -130,7 +159,7 @@ void lineGraph::setMaxVal(double val)
 }
 
 void lineGraph::replot(uint timestamp)
-{   
+{
     //!set new y-range
     double y_lower = 1000;
     double y_upper = 0;
@@ -189,7 +218,7 @@ void lineGraph::replot(uint timestamp)
     ui->chart->yAxis->setRange(y_lower, y_upper);
 
     // move x-range
-    if (timestamp != 0 && timestamp >= x_axis_range_upper+startTimestamp-4 && timestamp <= x_axis_range_upper+startTimestamp)
+    if (autoMoveGraph && timestamp != 0 && timestamp >= x_axis_range_upper+startTimestamp-4 && timestamp <= x_axis_range_upper+startTimestamp)
         ui->chart->xAxis->setRange(x_axis_range_lower+2, x_axis_range_upper+2);
 
     ui->chart->replot();
@@ -269,28 +298,44 @@ void lineGraph::dataSelected()
     }
 }
 
-void lineGraph::clearGraph()
+void lineGraph::clearGraph(bool replot)
 {
     for (int i=0; i<MVector::size; i++)
     {
         ui->chart->graph(i)->data()->clear();
     }
-    ui->chart->replot();
+    if (replot)
+        ui->chart->replot();
 }
 
 void lineGraph::addMeasurement(MVector measurement, uint timestamp, bool rescale)
 {
-    if (ui->chart->graph(0)->data()->isEmpty())
-        setStartTimestamp(timestamp);
+    // set timestamp:
+    // find first non-failed sensor, set start timestamp if empty
+    for (int i=0; i<MVector::size; i++)
+        if (!sensorFailureFlags[i] && ui->chart->graph(i)->data()->isEmpty())
+        {
+            setStartTimestamp(timestamp);
+            break;
+        }
 
     for (int i=0; i<MVector::size; i++)
     {
-        QCPGraphData graphData;
-        if (!useLimits || (measurement.array[i] > minVal && measurement.array[i] < maxVal))
-            ui->chart->graph(i)->addData(round(timestamp-startTimestamp), measurement.array[i]);
-        else
-            emit sensorFailure(i);
+        // ignore sensors with failures
+        if (!sensorFailureFlags[i])
+        {
+            // draw point, if:
+            // no limits violated
+            // ignore limits if useLimits not true
+            bool drawAllowed = !useLimits || (measurement.array[i] > minVal && measurement.array[i] < maxVal);
+            if (drawAllowed)
+                ui->chart->graph(i)->addData(round(timestamp-startTimestamp), measurement.array[i]);
+            else
+                emit sensorFailure(i);
+        }
     }
+
+    qDebug() << timestamp << " : Added new Data";
 
     if (rescale)
         replot(timestamp);
@@ -298,18 +343,24 @@ void lineGraph::addMeasurement(MVector measurement, uint timestamp, bool rescale
 
 void lineGraph::setData(QMap<uint, MVector> map)
 {
-    clearGraph();
+    clearGraph(false);
 
     if (map.isEmpty())
+    {
+        replot();
         return;
-
-    setStartTimestamp(map.firstKey());
+    }
 
     for (auto timestamp : map.keys())
-        addMeasurement(map[timestamp], timestamp);
+        addMeasurement(map[timestamp], timestamp, false);
 
-    setXAxis(-1, defaultXWidth);
+//    setXAxis(-1, defaultXWidth);
     replot();
+}
+
+void lineGraph::setAutoMoveGraph(bool value)
+{
+    autoMoveGraph = value;
 }
 
 double lineGraph::getMinVal() const

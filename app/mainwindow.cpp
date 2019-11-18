@@ -44,15 +44,18 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars); // clear vector in bGraph
 
     // reset graphs
-    connect(mData, &MeasurementData::dataReset, ui->lGraph, &lineGraph::clearGraph);        // clear lineGraph when data is cleared
-    connect(mData, &MeasurementData::dataReset, ui->bGraph, &BarGraphWidget::clearBars);    // clear lineGraph when data is cleared
+    connect(mData, &MeasurementData::dataReset, this, [this]{
+        ui->lGraph->clearGraph();
+        ui->absLGraph->clearGraph();
+        ui->bGraph->clearBars();
+    }); // clear all graphs when data is reset
 
     // new data
     connect(mData, &MeasurementData::dataAdded, ui->lGraph, &lineGraph::addMeasurement);    // add new data to lGraph                        // add new data to lGraph
     connect(mData, &MeasurementData::absoluteDataAdded, ui->absLGraph, &lineGraph::addMeasurement); // add new absolute measruement
     connect(mData, &MeasurementData::dataSet, ui->lGraph, &lineGraph::setData);     // set loaded data in lGraph
 
-    // sensor failure detected
+    // sensor failures detected
     connect(ui->absLGraph, &lineGraph::sensorFailure, this, [this](int channel){
 
 
@@ -64,8 +67,21 @@ MainWindow::MainWindow(QWidget *parent)
             mData->setFailures(failures);
             ui->data_info_widget->setFailures(failures);
         }
+    }); // absGraph -> mData
+    connect(mData, &MeasurementData::sensorFailuresSet, ui->lGraph, &lineGraph::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
+    connect(mData, &MeasurementData::sensorFailuresSet, ui->absLGraph, &lineGraph::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
+    connect(ui->lGraph, &lineGraph::requestRedraw, this, [this]{
+        // re-add data to graph
+        ui->lGraph->setData(mData->getRelativeData());
     });
-
+    connect(ui->absLGraph, &lineGraph::requestRedraw, this, [this]{
+        // re-add data to graph
+        ui->absLGraph->setData(mData->getAbsoluteData());
+    });
+    connect(mData, &MeasurementData::sensorFailuresSet, this, [this]{
+        MVector selectionVector = mData->getSelectionVector();
+        ui->bGraph->setBars(selectionVector, mData->getSensorFailures());
+    }); // reset bars when sensorFailures changed
 
     // measurement info
     // info -> mData
@@ -166,9 +182,6 @@ MainWindow::MainWindow(QWidget *parent)
     }); // update # of classes & entries, comment
 
     connect(ui->data_info_widget, &InfoWidget::dCommentChanged, aDataModel, &AnnotationDatasetModel::setComment);   // change comment
-
-//    mData->generateRandomWalk();
-//    ui->lGraph->setStartTimestamp(mData->getMap().firstKey());
 }
 
 MainWindow::~MainWindow()

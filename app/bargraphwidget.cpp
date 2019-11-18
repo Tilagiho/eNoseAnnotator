@@ -100,7 +100,7 @@ void BarGraphWidget::replot()
     ui->barGraph->replot();
 }
 
-void BarGraphWidget::setBars(MVector new_vector)
+void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::size> sensorFailures)
 {
     QVector<double> ticks;
     for (int i=0; i<MVector::size; i++)
@@ -115,7 +115,7 @@ void BarGraphWidget::setBars(MVector new_vector)
 
         for (int j=0; j<64; j++)
         {
-            if (i==j)
+            if (i==j && !sensorFailures[i])
                 data << new_vector.array[i];
             else
                 data << 0.0;
@@ -130,11 +130,13 @@ void BarGraphWidget::setBars(MVector new_vector)
 void BarGraphWidget::clearBars()
 {
     MVector data;
+    std::array<bool, MVector::size> failures;
 
     for (int i=0; i<MVector::size; i++)
     {
         data.array[i] = 0.0;
+        failures[i] = false;
     }
 
-    setBars(data);
+    setBars(data, failures);
 }

@@ -56,9 +56,14 @@ public:
     }
 
     /*
-     * returns data in a map<timestamp, vector>
+     * returns relative data in a map<timestamp, vector>
      */
-    const QMap<uint, MVector> getMap();
+    const QMap<uint, MVector> getRelativeData();
+
+    /*
+     * returns absolute data in a map<timestamp, vector>
+     */
+    const QMap<uint, MVector> getAbsoluteData();
 
     /*
      * returns current selection in a map<timestamp, vector>
@@ -132,6 +137,9 @@ public:
      */
     static const MVector getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp=0, MultiMode mode=MultiMode::Average);
 
+    const MVector getSelectionVector(MultiMode mode=MultiMode::Average);
+
+
     QString getSensorId() const;
 
     std::array<bool, 64> getSensorFailures() const;
@@ -169,7 +177,7 @@ public slots:
     void setBaseLevel(uint timestamp, MVector baseLevel);
 
 signals:
-    void selectionChanged(MVector vector);  // emits new vector when dataSelected is changed
+    void selectionChanged(MVector vector, std::array<bool, MVector::size>);  // emits new vector when dataSelected is changed
     void selectionCleared();
     void dataReset();   // emitted when data is reset
     void dataAdded(MVector vector, uint timestamp, bool yRescale);

@@ -21,7 +21,7 @@ public:
     ~BarGraphWidget();
 
 public slots:
-    void setBars(MVector);
+    void setBars(MVector, std::array<bool, MVector::size> sensorFailures);
     void clearBars();
 
 private:

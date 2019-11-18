@@ -109,11 +109,12 @@ void AddSelectionDialog::setFailureBits(const std::array<bool, 64> value)
 
 void AddSelectionDialog::setVector(QMap<uint, MVector> vectorMap)
 {
+    // TODO: delete
     auto beginIter = vectorMap.begin();
     auto endIter = vectorMap.end();
 
     vector = MeasurementData::getSelectionVector(beginIter, endIter);
-    ui->bGraph->setBars(vector);
+
 }
 
 void AddSelectionDialog::setBaseLevel(MVector baseLevel)

@@ -17,9 +17,25 @@ MeasurementData::MeasurementData(QObject *parent) : QObject(parent)
         functionalisation[i] = 0;
 }
 
-const QMap<uint, MVector> MeasurementData::getMap()
+const QMap<uint, MVector> MeasurementData::getRelativeData()
 {
     return data;
+}
+
+const QMap<uint, MVector> MeasurementData::getAbsoluteData()
+{
+    QMap<uint, MVector> absoluteMap;
+    for (uint timestamp : data.keys())
+    {
+        MVector absoluteVector;
+
+        for (int i=0; i<MVector::size; i++)
+            absoluteVector.array[i] = (1+data[timestamp].array[i]) * getBaseLevel(timestamp).array[i];
+
+        absoluteMap[timestamp] = absoluteVector;
+    }
+
+    return absoluteMap;
 }
 
 const QMap<uint, MVector> MeasurementData::getSelectionMap()
@@ -441,8 +457,16 @@ bool MeasurementData::loadData(QWidget* widget)
             {
                 if (line.startsWith("#sensorId:"))
                     setSensorId(line.right(line.length()-QString("#sensorId:").length()));
-                else if (line.startsWith("#failures:"))
-                    setFailures(line.right(line.length()-QString("#failures:").length()));
+                else if (line.startsWith("#failures:")) {
+                    QString failureString = line.right(line.length()-QString("#failures:").length());
+                    failureString=failureString.split(";").join("");
+                    if (failureString.size() != MVector::size)
+                    {
+                        qWarning() << "Failure string not valid. Using empty failure string.";
+                        failureString = "0000000000000000000000000000000000000000000000000000000000000000";
+                    }
+                    setFailures(failureString);
+                }
                 else if (line.startsWith("#functionalisation:"))
                 {
                     QString rawString = line.right(line.length()-QString("#functionalisation:").length());
@@ -627,7 +651,7 @@ void MeasurementData::setSelection(int lower, int upper)
     }
 
     qDebug() << "Selection made: " << selectedData.firstKey() << ", " << selectedData.lastKey() << "\n" << vector.toString() << "\n";
-    emit selectionChanged(vector);
+    emit selectionChanged(vector, sensorFailures);
 }
 
 const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp, MultiMode mode)
@@ -658,6 +682,29 @@ const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator 
     }
     else
         Q_ASSERT ("Error: Invalid MultiMode." && false);
+
+    return vector;
+}
+
+const MVector MeasurementData::getSelectionVector(MultiMode mode)
+{
+    // only average supported
+    Q_ASSERT(mode == MultiMode::Average);
+
+    auto selectionMap = getSelectionMap();
+
+    MVector vector;
+    // zero init
+    for (int i=0; i<MVector::size; i++)
+        vector.array[i] = 0.0;
+
+    for (auto timestamp : selectionMap.keys())
+    {
+        // calculate average
+        if (mode == MultiMode::Average)
+            for (int i=0; i<MVector::size; i++)
+                vector.array[i] += selectionMap[timestamp].array[i] / selectionMap.size();
+    }
 
     return vector;
 }

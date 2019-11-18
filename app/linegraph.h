@@ -19,8 +19,10 @@ public:
 
     explicit lineGraph(QWidget *parent = nullptr, uint startTime = QDateTime::currentDateTime().toTime_t());
     ~lineGraph();
-    void clearGraph();
+    void clearGraph(bool replot = true);
+
     bool selectionEmpty();
+
     std::array<uint, 2> getSelection();  // returns start and end timestamp of selection
     void setStartTimestamp(uint timestamp);
     void setXAxis(double x1, double x2);
@@ -36,16 +38,21 @@ public:
     bool useLimits = true;
 
 
+
 public slots:
     void addMeasurement(MVector measurement, uint timestamp, bool rescale=false);   // add single measurement; rescale y-axis if rescale==true
 //    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements
 //    void addMeasurement(QMap<uint, MVector>);
     void setData(QMap<uint, MVector> map);
+    void setSensorFailureFlags(const std::array<bool, MVector::size> sensorFailureFlags);
+    void setAutoMoveGraph(bool value);
+
 
 signals:
     void selectionChanged(int, int);
     void selectionCleared();
     void sensorFailure(int i);
+    void requestRedraw();
 
 private:
     Ui::lineGraph *ui;
@@ -60,6 +67,9 @@ private:
     // can be ignored with useLimits
     double maxVal = 90000.0;
     double minVal = 300.0;
+
+    std::array<bool, MVector::size> sensorFailureFlags;
+    bool autoMoveGraph = true;
 
     void setupGraph();
 
