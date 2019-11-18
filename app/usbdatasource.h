@@ -12,7 +12,7 @@ class USBDataSource : public QObject
     Q_OBJECT
 public:
     // constants
-    const int nBaseLevel = 5;    // defines how many entries are used to set baseline after reset
+    const int nBaseLevel = 3;    // defines how many entries are used to set baseline after reset
 
     // enumeration for connection status
     enum class Status {
