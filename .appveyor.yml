@@ -18,12 +18,10 @@ build_script:
 after_build:
   - cd app
   - windeployqt release/eNoseAnnotator.exe
-  - iscc innosetup.iss
   - rm release/*.o
   - rm release/*.cpp
   - cd ..
 
 artifacts:
-  - path: Output\eNoseAnnotator-*.exe
   - path: app\release
     type: zip
