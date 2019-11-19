@@ -1,9 +1,5 @@
 skip_non_tags: true
 
-branches:
-  only:
-    - master
-
 image: Visual Studio 2015
 install:
   - set QTDIR=C:\Qt\5.13.2\mingw73_32
