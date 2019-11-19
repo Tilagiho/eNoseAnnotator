@@ -1,6 +1,6 @@
 # eNoseAnnotator
 
-eNoseAnnotator is a program used to view, annotate and store measurements of the eNose sensor.
+eNoseAnnotator is a program used to view, annotate and store measurements of the eNose sensor. Currently Windows and Linux systems are supported.
 
 ## How to install
 Go to the release section of this repository and open the assets of the latest release.
