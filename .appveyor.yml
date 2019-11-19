@@ -7,14 +7,11 @@ branches:
 image: Visual Studio 2015
 install:
   - set QTDIR=C:\Qt\5.13.2\mingw73_32
-  - choco install -y InnoSetup
-  - set PATH=%QTDIR%\bin;C:\Qt\Tools\mingw730_32\bin;%PATH%;"C:\Program Files (x86)\Inno Setup 5"
+  - set PATH=%QTDIR%\bin;C:\Qt\Tools\mingw730_32\bin;%PATH%;
 build_script:
   - qmake eNoseAnnotator.pro
   - mingw32-make
-  - cd
   - cd "app/release/"
-  - dir
   - ren app.exe eNoseAnnotator.exe
   - cd ../..
 after_build:
