@@ -22,18 +22,18 @@ after_build:
   - rm release/*.cpp
   - cd ..
   - echo %appveyor_build_version%
-  - mkdir eNoseAnnotator
-  - mkdir "eNoseAnnotator/eNoseAnnotator/"
-  - cp -r app/release/* "eNoseAnnotator/eNoseAnnotator/"
+  - mkdir eNoseAnnotator-Windows
+  - mkdir "eNoseAnnotator-Windows/eNoseAnnotator/"
+  - cp -r app/release/* "eNoseAnnotator-Windows/eNoseAnnotator/"
 
 artifacts:
-  - path: eNoseAnnotator
+  - path: eNoseAnnotator-Windows
     type: zip
 
 deploy:
   - provider: GitHub
     name: production
-    artifact: eNoseAnnotator.zip
+    artifact: eNoseAnnotator-Windows.zip
     draft: false
     prerelease: false
     force_update: true
