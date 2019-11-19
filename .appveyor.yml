@@ -21,7 +21,22 @@ after_build:
   - rm release/*.o
   - rm release/*.cpp
   - cd ..
+  - mkdir eNoseAnnotator__$(APPVEYOR_BUILD_NUMBER)
+  - mkdir eNoseAnnotator__$(APPVEYOR_BUILD_NUMBER)/eNoseAnnotator__$(APPVEYOR_BUILD_NUMBER)
+  - cp app/release/* eNoseAnnotator_$(APPVEYOR_BUILD_NUMBER)/eNoseAnnotator__$(APPVEYOR_BUILD_NUMBER)
 
 artifacts:
-  - path: app\release
+  - path: eNoseAnnotator_$(APPVEYOR_BUILD_NUMBER)
     type: zip
+
+deploy:
+  - provider: GitHub
+    name: production
+    artifact: eNoseAnnotator_$(APPVEYOR_BUILD_NUMBER).zip
+    draft: false
+    prerelease: false
+    auth_token:
+      secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75
+    on:
+      APPVEYOR_REPO_TAG: true
+
