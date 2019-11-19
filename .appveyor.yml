@@ -21,22 +21,19 @@ after_build:
   - rm release/*.o
   - rm release/*.cpp
   - cd ..
-  - echo $(APPVEYOR_BUILD_NUMBER)
-  - echo $(appveyor_build_number)
-  - echo $(APPVEYOR_BUILD_ID)
-  - echo $(appveyor_build_id)
-  - mkdir eNoseAnnotator_$(appveyor_build_number)
-  - mkdir "eNoseAnnotator_$(appveyor_build_number)/eNoseAnnotator_$(appveyor_build_number)/"
-  - cp app/release/* "eNoseAnnotator_$(appveyor_build_number)/eNoseAnnotator_$(appveyor_build_number)/"
+  - echo %appveyor_build_version%
+  - mkdir eNoseAnnotator_%appveyor_build_version%
+  - mkdir eNoseAnnotator_%appveyor_build_version%/eNoseAnnotator_%appveyor_build_version%/
+  - cp -r app/release/* eNoseAnnotator_%appveyor_build_version%/eNoseAnnotator_%appveyor_build_version%/
 
 artifacts:
-  - path: eNoseAnnotator_$(APPVEYOR_BUILD_NUMBER)
+  - path: eNoseAnnotator_%appveyor_build_version%
     type: zip
 
 deploy:
   - provider: GitHub
     name: production
-    artifact: eNoseAnnotator_$(appveyor_build_number).zip
+    artifact: eNoseAnnotator_%appveyor_build_version%.zip
     draft: false
     prerelease: false
     auth_token:
