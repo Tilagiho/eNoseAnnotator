@@ -7,12 +7,12 @@ Go to the release section of this repository and open the assets of the latest r
 
 ### On Windows:
 Download "eNoseAnnotator-Windows.zip" from the assets of the latest release.
-Unpack the zip file where you want to use the program. Double-click "eNoseAnnotator.exe" in order to run the program.
+Unpack the zip file where you want to use the program. Go into the the directory created and double-click "eNoseAnnotator.exe" in order to run the program.
 
 ### On Linux:
-Download "eNoseAnnotator-\*.AppImage" from the assets of the latest release. "\*" stands for the latest version.
+Download "eNoseAnnotator-\*.AppImage" from the assets of the latest release. "\*" stands for the latest version. Move the.AppImage to the location from where you want to run the program.
 
-Make the AppImage executable: 
+Make the .AppImage executable: 
 - In Nautilus (default ubuntu file browser): Right-click on the "eNoseAnnotator-\*.AppImage" in your file-browser and select "Properties". Under "Permissions" check "Allow executing file as program".
 - In terminal: Open terminal in the directory of the .AppImage. Execute `chmod +x eNoseAnnotator-*.AppImage`.
 You can now run eNoseAnnotator by double-clicking the .AppImage in the file-browser or executing `./eNoseAnnotator-*.AppImage` in the terminal.
@@ -25,4 +25,4 @@ Plug in a eNose sensor. In the menu bar open "Connection->Set USB connection..."
 
 To start the measurement press "Measurement->Start" in the menu bar. After calculating the base vector of the sensor the measurement will be started. 
 
-Select "Measurement->Stop" in order to stop receiving measurements and "Measurement->reset base level" to calculate a new base vector. 
+Select "Measurement->Stop" in order to stop receiving measurements and "Measurement->reset base level" to calculate a new base vector. After stopping you can start a new measurement by pressing "Measurement->Start" again.
