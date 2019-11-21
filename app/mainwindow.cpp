@@ -6,6 +6,7 @@
 #include "editannotationdatawindow.h"
 #include "functionalisationdialog.h"
 #include "generalsettings.h"
+#include "classselector.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,10 +14,28 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // hide annotation menu points
+    // TODO: delete all annotation elements
+    ui->actionSaveAnnotation->setVisible(false);
+    ui->actionOpenAnnotation->setVisible(false);
+    ui->actionFunctionalitization->setVisible(false);
+
+    // hide absolute graph
+    ui->absLGraph->hide();
+
     // prepare menubar
     ui->actionStart->setEnabled(false);
     ui->actionReset->setEnabled(false);
     ui->actionStop->setEnabled(false);
+
+    ui->actionClassify_selection->setEnabled(false);
+    ui->actionSet_detected_class_of_selection->setEnabled(false);
+
+    // user can only set detected class in debug mode
+    #ifdef QT_NO_DEBUG
+    ui->actionSet_detected_class_of_selection->setVisible(false);
+    #endif
+
 
     mData = new MeasurementData();
     // debug: avoid crash
@@ -300,6 +319,7 @@ void MainWindow::on_actionSettings_triggered()
     dialog.setMaxVal(ui->absLGraph->getMaxVal());   // max value for absolute values
     dialog.setMinVal(ui->absLGraph->getMinVal());   // min value for absolute values
     dialog.setUseLimits(ui->absLGraph->useLimits);
+    dialog.setShowAbsGraph(!ui->absLGraph->isHidden());
 
     dialog.setSaveRawInput(mData->getSaveRawInput());
 
@@ -310,6 +330,12 @@ void MainWindow::on_actionSettings_triggered()
         ui->absLGraph->setMinVal(dialog.getMinVal());
         mData->setSaveRawInput(dialog.getSaveRawInput());
         ui->absLGraph->useLimits = dialog.getUseLimits();
+
+        // abs graph
+        if (dialog.getShowAbsGraph() && ui->absLGraph->isHidden())
+            ui->absLGraph->show();
+        else if (!dialog.getShowAbsGraph() && !ui->absLGraph->isHidden())
+            ui->absLGraph->hide();
     }
 }
 

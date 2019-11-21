@@ -14,6 +14,7 @@ InfoWidget::InfoWidget(QWidget *parent) :
     // no selection at start
     ui->addSelectionButton->setEnabled(false);
 
+    ui->annotationbox->hide();
 }
 
 InfoWidget::~InfoWidget()

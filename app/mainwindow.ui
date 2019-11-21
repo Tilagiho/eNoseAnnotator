@@ -37,7 +37,7 @@
         <property name="minimumSize">
          <size>
           <width>500</width>
-          <height>350</height>
+          <height>250</height>
          </size>
         </property>
         <property name="font">
@@ -46,6 +46,21 @@
          </font>
         </property>
         <layout class="QGridLayout" name="gridLayout_4">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>0</number>
+         </property>
+         <property name="spacing">
+          <number>0</number>
+         </property>
          <item row="0" column="0">
           <widget class="QSplitter" name="splitter">
            <property name="orientation">
@@ -108,7 +123,7 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>350</height>
+          <height>250</height>
          </size>
         </property>
        </widget>
