@@ -125,6 +125,16 @@ public:
      */
     bool loadData(QWidget* widget);
 
+    /*
+     * extracts meta data from line
+     * meta data lines always start with '#'
+     */
+    bool getMetaData(QString line);
+
+    /*
+     * extracts measurement data from line
+     */
+    bool getData(QString line);
 
     /*
      *  generates a random walk dataset

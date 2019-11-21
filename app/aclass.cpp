@@ -38,16 +38,24 @@ QString aClass::toString()
 
 bool aClass::isClassString (QString string)
 {
+    // empty string for empty classes
+    if (string == "")
+        return true;
+
     auto list = string.split("[");
 
-    return list.size()==2 && list[1].endsWith("]");
+    return (list.size()==2 && list[1].endsWith("]"));
 }
 
 aClass aClass::fromString(QString string)
 {
+    // emoty string for empty classes
+    if (string == "")
+        return aClass{"", ""};
+
     auto list = string.split("[");
 
-    Q_ASSERT("This is not a valid class string" && list.size()==2 && list[1].endsWith("]"));
+    Q_ASSERT("This is not a valid class string" && (list.size()==2 && list[1].endsWith("]")));
     QString name = list[0];
     QString abreviation = list[1].split("]")[0];
 

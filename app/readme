@@ -3,8 +3,6 @@
 - test: extra thread for serial communication necessary?
 - stop measurement based on gradient, ui symbols for status
 
-- merge annotation and measurement:
-    -> load/ store  classification
 - store absolute values in measurement
     -> relative values are emitted only to relLGraph
 - debug selection
@@ -13,6 +11,8 @@
     -> add absolute values in kOhm
 - clean up saving/ loading
     -> introduce a well defined save/load module ?
+- set label size based on y-range
+- set label color
 
 // optional
 - move multiMode to vector

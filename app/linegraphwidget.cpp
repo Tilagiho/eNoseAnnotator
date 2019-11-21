@@ -330,10 +330,20 @@ void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
 
 void LineGraphWidget::clearGraph(bool replot)
 {
+    // clear graphs
     for (int i=0; i<MVector::size; i++)
     {
         ui->chart->graph(i)->data()->clear();
     }
+    // clear labels
+    for (auto label : userDefinedClassLabels)
+        ui->chart->removeItem(label);
+    for (auto label : detectedClassLabels)
+        ui->chart->removeItem(label);
+
+    userDefinedClassLabels.clear();
+    detectedClassLabels.clear();
+
     if (replot)
         ui->chart->replot();
 }
@@ -367,10 +377,6 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
     }
 
     qDebug() << timestamp << " : Added new Data";
-
-    // add label
-    if (!measurement.userDefinedClass.isEmpty() || !measurement.detectedClass.isEmpty())
-        setLabel(xpos, measurement.userDefinedClass.getAbreviation(), measurement.detectedClass.getAbreviation());
 
     if (rescale)
         replot(timestamp);
