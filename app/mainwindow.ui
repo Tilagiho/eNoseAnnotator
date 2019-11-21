@@ -192,6 +192,8 @@
     <addaction name="actionSaveAnnotation"/>
     <addaction name="actionOpenAnnotation"/>
     <addaction name="actionFunctionalitization"/>
+    <addaction name="actionClassify_selection"/>
+    <addaction name="actionSet_detected_class_of_selection"/>
    </widget>
    <widget class="QMenu" name="menuClassifier">
     <property name="title">
@@ -277,6 +279,21 @@
   <action name="actionSettings">
    <property name="text">
     <string>Settings...</string>
+   </property>
+  </action>
+  <action name="actionAdd">
+   <property name="text">
+    <string>Add...</string>
+   </property>
+  </action>
+  <action name="actionClassify_selection">
+   <property name="text">
+    <string>Set class of selection...</string>
+   </property>
+  </action>
+  <action name="actionSet_detected_class_of_selection">
+   <property name="text">
+    <string>Set detected class of selection...</string>
    </property>
   </action>
  </widget>

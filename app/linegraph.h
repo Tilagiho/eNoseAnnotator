@@ -47,6 +47,10 @@ public slots:
     void setSensorFailureFlags(const std::array<bool, MVector::size> sensorFailureFlags);
     void setAutoMoveGraph(bool value);
 
+    /*
+     * draws selection and class rectangles
+     */
+    void labelSelection(QMap<uint, MVector> selectionMap);
 
 signals:
     void selectionChanged(int, int);
@@ -71,12 +75,26 @@ private:
     std::array<bool, MVector::size> sensorFailureFlags;
     bool autoMoveGraph = true;
 
+    QMap<int, QCPItemText *> userDefinedClassLabels;
+    QMap<int, QCPItemText *> detectedClassLabels;
+
     void setupGraph();
+
+    /*
+     * returns index of data point where x == key on chart
+     * returns -1 if not found
+     */
+    double getIndex (int key);
 
 private slots:
     void replot(uint timestamp=0);
     void mousePressed(QMouseEvent*);
     void dataSelected();
+
+    /*
+     * draws label of user+detected class at top of graph
+     */
+    void setLabel(int xpos, QString userDefinedBrief, QString detectedBrief);
 };
 
 #endif // LINEGRAPH_H

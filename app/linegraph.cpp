@@ -108,6 +108,7 @@ void lineGraph::setStartTimestamp(uint timestamp)
 
 void lineGraph::setSensorFailureFlags(const std::array<bool, MVector::size> flags)
 {
+    // flag redraw: will be set if graph has to be redrawn
     bool redraw = false;
 
     if (flags != sensorFailureFlags)
@@ -256,19 +257,6 @@ void lineGraph::dataSelected()
 
     ui->chart->deselectAll();
 
-//    auto start = ui->chart->graph(0)->data()->findBegin(range.lower, false);
-//    auto end = ui->chart->graph(0)->data()->findEnd(range.upper, false);
-
-//    // create selection base on range found
-//    QCPDataRange dataRange (static_cast<int>(start->key), static_cast<int>(end->key));
-//    QCPDataSelection selection (dataRange);
-
-//    if (selection.isEmpty() || selection.dataRange(0).end() <= selection.dataRange(0).begin())
-//    {
-//        dataSelection.clear();
-//        emit selectionCleared();
-//        qDebug() << "selection cleared:"  << QString::number(getSelection()[0], 'g', 10) << ", " << QString::number(getSelection()[1], 'g', 10);
-//    }
     int lower = ceil(range.lower);
     int upper = floor(range.upper);
 
@@ -283,8 +271,6 @@ void lineGraph::dataSelected()
     {
         qDebug() << "Got selection: " << selection;
 
-//        QCPDataRange dataRange (lower/2, upper/2+1);
-//        QCPDataSelection selection (dataRange);
 
         // select all graphs in range of selection
         for (int i=0; i < ui->chart->graphCount(); i++)
@@ -296,6 +282,34 @@ void lineGraph::dataSelected()
         dataSelection = selection;
         emit selectionChanged(lower+startTimestamp, upper+startTimestamp);
     }
+}
+
+void lineGraph::labelSelection(QMap<uint, MVector> selectionMap)
+{
+    // update class labels
+    for (auto timestamp : selectionMap.keys())
+    {
+        MVector vector = selectionMap[timestamp];
+        int xpos = timestamp-startTimestamp;
+
+        // class changed?
+        bool userClassChanged = false, detectedClassChanged = false;
+
+        if (userDefinedClassLabels.contains(xpos))  // user class changed
+            userClassChanged = userDefinedClassLabels[xpos]->text() != vector.userDefinedClass.getAbreviation();
+        else if (!vector.userDefinedClass.isEmpty())    // vector didn't have user class before
+            userClassChanged = true;
+
+        if (detectedClassLabels.contains(xpos)) // detected class changed
+            detectedClassChanged = detectedClassLabels[xpos]->text() != vector.detectedClass.getAbreviation();
+        else if (!vector.detectedClass.isEmpty())   // vector didn't have detected class before
+            detectedClassChanged = true;
+
+        if (userClassChanged || detectedClassChanged)
+            setLabel(xpos, vector.userDefinedClass.getAbreviation(), vector.detectedClass.getAbreviation());
+    }
+
+    ui->chart->replot();
 }
 
 void lineGraph::clearGraph(bool replot)
@@ -319,6 +333,7 @@ void lineGraph::addMeasurement(MVector measurement, uint timestamp, bool rescale
             break;
         }
 
+    int xpos = timestamp-startTimestamp;
     for (int i=0; i<MVector::size; i++)
     {
         // ignore sensors with failures
@@ -329,13 +344,17 @@ void lineGraph::addMeasurement(MVector measurement, uint timestamp, bool rescale
             // ignore limits if useLimits not true
             bool drawAllowed = !useLimits || (measurement.array[i] > minVal && measurement.array[i] < maxVal);
             if (drawAllowed)
-                ui->chart->graph(i)->addData(round(timestamp-startTimestamp), measurement.array[i]);
+                ui->chart->graph(i)->addData(xpos, measurement.array[i]);
             else
                 emit sensorFailure(i);
         }
     }
 
     qDebug() << timestamp << " : Added new Data";
+
+    // add label
+    if (!measurement.userDefinedClass.isEmpty() || !measurement.detectedClass.isEmpty())
+        setLabel(xpos, measurement.userDefinedClass.getAbreviation(), measurement.detectedClass.getAbreviation());
 
     if (rescale)
         replot(timestamp);
@@ -391,4 +410,72 @@ std::array<uint, 2> lineGraph::getSelection()
     selectionArray[1] = end+startTimestamp-2;
 
     return selectionArray;
+}
+
+void lineGraph::setLabel(int xpos, QString userDefinedBrief, QString detectedBrief)
+{
+    int ymax = ui->chart->yAxis->range().upper;
+
+    // user defined class name brief
+    if (userDefinedBrief != "")
+    {
+        QCPItemText *userLabel;
+
+        if (userDefinedClassLabels.contains(xpos))
+            userLabel = userDefinedClassLabels[xpos];
+        else
+            userLabel = new QCPItemText(ui->chart);
+
+        userLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
+        userLabel->position->setType(QCPItemPosition::ptPlotCoords);
+        userLabel->position->setCoords(xpos, 0.95*ymax); // place position at center/top of axis rect
+        userLabel->setText(userDefinedBrief);
+        userLabel->setPen(QPen(Qt::black)); // show black border around text
+    }
+
+    // detected class name brief
+    if (detectedBrief != "")
+    {
+        QCPItemText *detectedLabel;
+
+        if (userDefinedClassLabels.contains(xpos))
+            detectedLabel = userDefinedClassLabels[xpos];
+        else
+            detectedLabel = new QCPItemText(ui->chart);
+
+        detectedLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
+        detectedLabel->position->setType(QCPItemPosition::ptPlotCoords);
+        detectedLabel->position->setCoords(xpos, 0.90*ymax); // place position at center/top of axis rect
+        detectedLabel->setText(userDefinedBrief);
+        detectedLabel->setPen(QPen(Qt::black)); // show black border around text
+    }
+//    // user defined class already exists
+//    if (userDefinedClassLabels.contains(xpos))
+//    {
+//        // class should not exist
+//        if (userDefinedBrief == "")
+//            ui->chart->removeItem(userDefinedClassLabels[xpos])
+//        // class should exist
+//        else
+//        {
+//            //
+//            userDefinedClassLabels[xpos]->setText(userDefinedBrief);
+//            userDefinedClassLabels[xpos]->position->setCoords(xpos, 0.95*ymax)
+//        }
+//    }
+//    // add the text label at the top:
+//    QCPItemText *userLabel = new QCPItemText(ui->chart);
+//    textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
+//    textLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
+//    textLabel->position->setCoords(0.5, 0); // place position at center/top of axis rect
+//    textLabel->setText(vector.userDefinedClassBrief);
+////    textLabel->setFont(QFont(font().family(), 16)); // make font a bit larger
+//    textLabel->setPen(QPen(Qt::black)); // show black border around text
+}
+
+double lineGraph::getIndex(int key)
+{
+    auto iter = ui->chart->graph(0)->data()->findBegin(key);
+
+    return  iter->key;
 }

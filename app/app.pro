@@ -38,6 +38,8 @@ SOURCES += \
     bargraphwidget.cpp \
     classeditor.cpp \
     classifierwidget.cpp \
+    classinputdialog.cpp \
+    classselector.cpp \
     editannotationdatawindow.cpp \
     functionalisationdialog.cpp \
     generalsettings.cpp \
@@ -63,6 +65,8 @@ HEADERS += \
     bargraphwidget.h \
     classeditor.h \
     classifierwidget.h \
+    classinputdialog.h \
+    classselector.h \
     editannotationdatawindow.h \
     functionalisationdialog.h \
     generalsettings.h \
@@ -84,6 +88,7 @@ FORMS += \
     bargraphwidget.ui \
     classeditor.ui \
     classifierwidget.ui \
+    classselector.ui \
     editannotationdatawindow.ui \
     functionalisationdialog.ui \
     generalsettings.ui \

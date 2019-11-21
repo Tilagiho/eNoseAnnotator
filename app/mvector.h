@@ -30,12 +30,12 @@ public:
      * class annotated by the user
      * -> can be used as base truth
      */
-    aClass userDefinedClass;
+    aClass userDefinedClass{"",""};
 
     /*
      * automatically detected class
      */
-    aClass detectedClass;
+    aClass detectedClass{"",""};
 
     /*
      * returns MVector with all elements being zero initialzed

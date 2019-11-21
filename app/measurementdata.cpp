@@ -213,6 +213,11 @@ void MeasurementData::setBaseLevel(uint timestamp, MVector baseLevel)
     }
 }
 
+QList<aClass> MeasurementData::getClassList() const
+{
+    return classList;
+}
+
 bool MeasurementData::getSaveRawInput() const
 {
     return saveRawInput;
@@ -651,7 +656,8 @@ void MeasurementData::setSelection(int lower, int upper)
     }
 
     qDebug() << "Selection made: " << selectedData.firstKey() << ", " << selectedData.lastKey() << "\n" << vector.toString() << "\n";
-    emit selectionChanged(vector, sensorFailures);
+    emit selectionVectorChanged(vector, sensorFailures);
+    emit selectionMapChanged(selectedData);
 }
 
 const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp, MultiMode mode)
@@ -746,4 +752,54 @@ std::array<bool, MVector::size> MeasurementData::sensorFailureArray(QString fail
             failureArray[4*hex+bit] |= failureInt & (1UL << bit);
         }
     }
+}
+
+void MeasurementData::setUserDefinedClassOfSelection(QString className, QString classBrief)
+{
+    for (auto timestamp : selectedData.keys())
+    {
+        // data and selectedData
+        data[timestamp].userDefinedClass = aClass(className, classBrief);
+
+        selectedData[timestamp].userDefinedClass = aClass(className, classBrief);
+    }
+
+    emit selectionMapChanged(selectedData);
+}
+
+void MeasurementData::setDetectedClassOfSelection(QString className, QString classBrief)
+{
+    for (auto timestamp : selectedData.keys())
+    {
+        // data and selectedData
+        data[timestamp].detectedClass = aClass(className, classBrief);
+
+        selectedData[timestamp].detectedClass = aClass(className, classBrief);
+    }
+
+    emit selectionMapChanged(selectedData);
+}
+
+void MeasurementData::addClass(aClass newClass)
+{
+    Q_ASSERT("Trying to add class that already exists!" && !classList.contains(newClass));
+
+    classList.append(newClass);
+}
+
+void MeasurementData::removeClass(aClass oldClass)
+{
+    Q_ASSERT("Trying to remove class that does not exist!" && classList.contains(oldClass));
+
+    int index = classList.indexOf(oldClass);
+    classList.removeAt(index);
+}
+
+void MeasurementData::changeClass(aClass oldClass, aClass newClass)
+{
+    Q_ASSERT("Trying to change class that does not exist!" && classList.contains(oldClass));
+    Q_ASSERT("Trying to change class to new class that already exists!" && !classList.contains(newClass));
+
+    int index = classList.indexOf(oldClass);
+    classList[index] = newClass;
 }

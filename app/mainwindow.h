@@ -48,6 +48,10 @@ private slots:
 
     void on_actionReset_triggered();
 
+    void on_actionClassify_selection_triggered();
+
+    void on_actionSet_detected_class_of_selection_triggered();
+
 private:
     Ui::MainWindow *ui;
 

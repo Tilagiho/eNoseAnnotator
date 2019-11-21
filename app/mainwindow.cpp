@@ -58,8 +58,19 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->lGraph, &lineGraph::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars);  // clear vector in bGraph
     connect(ui->lGraph, &lineGraph::selectionCleared, ui->data_info_widget, &InfoWidget::hideAddSelectionButton);   // hide add selection button
 
-    connect(mData, &MeasurementData::selectionChanged, ui->bGraph, &BarGraphWidget::setBars);   // plot vector in bGraph
+    connect(mData, &MeasurementData::selectionVectorChanged, ui->bGraph, &BarGraphWidget::setBars);   // plot vector in bGraph
     connect(mData, &MeasurementData::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars); // clear vector in bGraph
+
+    connect(mData, &MeasurementData::selectionMapChanged, ui->lGraph, &lineGraph::labelSelection); // draw selection and classes
+
+    connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::array<bool, MVector::size>){
+        ui->actionClassify_selection->setEnabled(true);
+        ui->actionSet_detected_class_of_selection->setEnabled(true);
+    }); // show classification actions
+    connect(mData, &MeasurementData::selectionCleared, this, [this](){
+        ui->actionClassify_selection->setEnabled(false);
+        ui->actionSet_detected_class_of_selection->setEnabled(false);
+    }); // hide classification actions
 
     // reset graphs
     connect(mData, &MeasurementData::dataReset, this, [this]{
@@ -397,4 +408,58 @@ void MainWindow::on_actionReset_triggered()
     }
 
     usbSource->reset();
+}
+
+void MainWindow::on_actionClassify_selection_triggered()
+{
+    Q_ASSERT(!mData->getSelectionMap().isEmpty());
+
+    ClassSelector* dialog = new ClassSelector(this);
+    dialog->setWindowTitle("Select class of selection");
+    dialog->setClassList(mData->getClassList());
+
+    // connections
+    connect(dialog, &ClassSelector::addClass, mData, &MeasurementData::addClass);
+    connect(dialog, &ClassSelector::removeClass, mData, &MeasurementData::removeClass);
+    connect(dialog, &ClassSelector::changeClass, mData, &MeasurementData::changeClass);
+
+    if (dialog->exec())
+    {
+        aClass selectedClass = dialog->getClass();
+        Q_ASSERT("Selected class is not part of mData!" && (selectedClass.isEmpty() || mData->getClassList().contains(selectedClass)));
+
+        mData->setUserDefinedClassOfSelection(selectedClass.getName(), selectedClass.getAbreviation());
+    }
+
+    // disconnect
+    disconnect(dialog, &ClassSelector::addClass, mData, &MeasurementData::addClass);
+    disconnect(dialog, &ClassSelector::removeClass, mData, &MeasurementData::removeClass);
+    disconnect(dialog, &ClassSelector::changeClass, mData, &MeasurementData::changeClass);
+}
+
+void MainWindow::on_actionSet_detected_class_of_selection_triggered()
+{
+    Q_ASSERT(!mData->getSelectionMap().isEmpty());
+
+    ClassSelector* dialog = new ClassSelector(this);
+    dialog->setWindowTitle("[Debug] Select class of detected selection");
+    dialog->setClassList(mData->getClassList());
+
+    // connections
+    connect(dialog, &ClassSelector::addClass, mData, &MeasurementData::addClass);
+    connect(dialog, &ClassSelector::removeClass, mData, &MeasurementData::removeClass);
+    connect(dialog, &ClassSelector::changeClass, mData, &MeasurementData::changeClass);
+
+    if (dialog->exec())
+    {
+        aClass selectedClass = dialog->getClass();
+        Q_ASSERT("Selected class is not part of mData!" && mData->getClassList().contains(selectedClass));
+
+        mData->setDetectedClassOfSelection(selectedClass.getName(), selectedClass.getAbreviation());
+    }
+
+    // disconnect
+    disconnect(dialog, &ClassSelector::addClass, mData, &MeasurementData::addClass);
+    disconnect(dialog, &ClassSelector::removeClass, mData, &MeasurementData::removeClass);
+    disconnect(dialog, &ClassSelector::changeClass, mData, &MeasurementData::changeClass);
 }
