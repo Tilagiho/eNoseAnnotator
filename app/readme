@@ -9,7 +9,7 @@
     -> load/ store  classification
 - store absolute values in measurement
 -> relative values are emitted only to relLGraph
-- show/ hide absolute graph
+-debug selection
 
 // optional
 - move multiMode to vector

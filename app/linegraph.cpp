@@ -211,7 +211,7 @@ void lineGraph::replot(uint timestamp)
         if (y_lower > -yMin)
             y_lower = -yMin;
 
-        y_upper *= 1.2;
+        y_upper *= 1.4;
         y_lower *= 1.2;
     }
 
@@ -424,13 +424,22 @@ void lineGraph::setLabel(int xpos, QString userDefinedBrief, QString detectedBri
         if (userDefinedClassLabels.contains(xpos))
             userLabel = userDefinedClassLabels[xpos];
         else
+        {
             userLabel = new QCPItemText(ui->chart);
+            userDefinedClassLabels[xpos] = userLabel;
+        }
 
         userLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
         userLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        userLabel->position->setCoords(xpos, 0.95*ymax); // place position at center/top of axis rect
+        userLabel->position->setCoords(xpos, 1.00*ymax); // place position at center/top of axis rect
         userLabel->setText(userDefinedBrief);
         userLabel->setPen(QPen(Qt::black)); // show black border around text
+    }
+    // userDefinedBrief == "" && label exists: label has to be removed
+    else if (userDefinedClassLabels.contains(xpos))
+    {
+        ui->chart->removeItem(userDefinedClassLabels[xpos]);
+        userDefinedClassLabels.remove(xpos);
     }
 
     // detected class name brief
@@ -438,16 +447,25 @@ void lineGraph::setLabel(int xpos, QString userDefinedBrief, QString detectedBri
     {
         QCPItemText *detectedLabel;
 
-        if (userDefinedClassLabels.contains(xpos))
-            detectedLabel = userDefinedClassLabels[xpos];
+        if (detectedClassLabels.contains(xpos))
+            detectedLabel = detectedClassLabels[xpos];
         else
+        {
             detectedLabel = new QCPItemText(ui->chart);
+            detectedClassLabels[xpos] = detectedLabel;
+        }
 
         detectedLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
         detectedLabel->position->setType(QCPItemPosition::ptPlotCoords);
         detectedLabel->position->setCoords(xpos, 0.90*ymax); // place position at center/top of axis rect
-        detectedLabel->setText(userDefinedBrief);
+        detectedLabel->setText(detectedBrief);
         detectedLabel->setPen(QPen(Qt::black)); // show black border around text
+    }
+    // detectedBrief == "" && label exists: label has to be removed
+    else if (detectedClassLabels.contains(xpos))
+    {
+        ui->chart->removeItem(detectedClassLabels[xpos]);
+        detectedClassLabels.remove(xpos);
     }
 //    // user defined class already exists
 //    if (userDefinedClassLabels.contains(xpos))
