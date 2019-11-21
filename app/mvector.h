@@ -3,7 +3,8 @@
 
 #include <QtCore>
 #include <array>
-#include <QtCore>
+
+#include "aclass.h"
 
 
 class MVector
@@ -29,24 +30,12 @@ public:
      * class annotated by the user
      * -> can be used as base truth
      */
-    QString userDefinedClass = "";
-
-    /*
-     * abreviation of the user defined class name
-     * used in lineGraph
-     */
-    QString userDefinedClassBrief = "";
+    aClass userDefinedClass;
 
     /*
      * automatically detected class
      */
-    QString detectedClass = "";
-
-    /*
-     * abreviation of the automatically detected class
-     * should be as short as possible
-     */
-    QString detectedClassBrief = "";
+    aClass detectedClass;
 
     /*
      * returns MVector with all elements being zero initialzed

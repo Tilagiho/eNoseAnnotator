@@ -29,6 +29,7 @@ linux-g++ {
 
 
 SOURCES += \
+    aclass.cpp \
     addattributedialog.cpp \
     addselectiondialog.cpp \
     annotation_old.cpp \
@@ -53,6 +54,7 @@ SOURCES += \
     usbsettingsdialog.cpp
 
 HEADERS += \
+    aclass.h \
     addattributedialog.h \
     addselectiondialog.h \
     annotation_old.h \
