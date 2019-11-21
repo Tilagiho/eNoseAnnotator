@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::selectionVectorChanged, ui->bGraph, &BarGraphWidget::setBars);   // plot vector in bGraph
     connect(mData, &MeasurementData::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars); // clear vector in bGraph
 
-    connect(mData, &MeasurementData::selectionMapChanged, ui->lGraph, &lineGraph::labelSelection); // draw selection and classes
+    connect(mData, &MeasurementData::labelsUpdated, ui->lGraph, &lineGraph::labelSelection); // draw selection and classes
 
     connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::array<bool, MVector::size>){
         ui->actionClassify_selection->setEnabled(true);

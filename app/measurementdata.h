@@ -196,6 +196,7 @@ public slots:
 signals:
     void selectionVectorChanged(MVector vector, std::array<bool, MVector::size> sensorFailures);  // emits new vector when dataSelected is changed
     void selectionMapChanged(QMap<uint, MVector> selectionMap);
+    void labelsUpdated(QMap<uint, MVector> updatedVectors);
     void selectionCleared();
     void dataReset();   // emitted when data is reset
     void dataAdded(MVector vector, uint timestamp, bool yRescale);

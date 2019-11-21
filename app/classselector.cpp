@@ -4,6 +4,7 @@
 #include "classinputdialog.h"
 #include <QMessageBox>
 #include <QtCore>
+#include <QInputDialog>
 
 ClassSelector::ClassSelector(QWidget *parent) :
     QDialog(parent),
@@ -140,6 +141,13 @@ void ClassSelector::on_editButton_clicked()
                 return;
             }
         }
+
+        // question: make sure measurement data should be changed
+        QString questionText = "Are you sure you want to change " + oldClass.toString() + " to " + newClass.toString() + "?\n This will change all instances of " + oldClass.toString() + " in the measurement data.";
+        auto answer = QMessageBox::question(this, "Changing class", questionText);
+        if (answer != QMessageBox::StandardButton::Yes)
+            return;
+
         // change old class int new class
         int index = classList.indexOf(oldClass);
         classList[index] = newClass;
@@ -155,6 +163,13 @@ void ClassSelector::on_deleteButton_clicked()
     // get current class
     aClass currentClass = aClass::fromString(ui->comboBox->currentText());
     Q_ASSERT("Class list has to contain current class!" && classList.contains(currentClass));
+
+
+    // question: make sure measurement data should be changed
+    QString questionText = "Are you sure you want to delete " + currentClass.toString() + "?\n This will delete all instances of " + currentClass.toString() + " in the measurement data.";
+    auto answer = QMessageBox::question(this, "Deleting class", questionText);
+    if (answer != QMessageBox::StandardButton::Yes)
+        return;
 
     // delete current class
     int index = classList.indexOf(currentClass);

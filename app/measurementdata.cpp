@@ -764,7 +764,7 @@ void MeasurementData::setUserDefinedClassOfSelection(QString className, QString 
         selectedData[timestamp].userDefinedClass = aClass(className, classBrief);
     }
 
-    emit selectionMapChanged(selectedData);
+    emit labelsUpdated(selectedData);
 }
 
 void MeasurementData::setDetectedClassOfSelection(QString className, QString classBrief)
@@ -777,7 +777,7 @@ void MeasurementData::setDetectedClassOfSelection(QString className, QString cla
         selectedData[timestamp].detectedClass = aClass(className, classBrief);
     }
 
-    emit selectionMapChanged(selectedData);
+    emit labelsUpdated(selectedData);
 }
 
 void MeasurementData::addClass(aClass newClass)
@@ -793,6 +793,30 @@ void MeasurementData::removeClass(aClass oldClass)
 
     int index = classList.indexOf(oldClass);
     classList.removeAt(index);
+
+    // update measurement data
+    QMap<uint, MVector> updatedVectors;
+
+    for (uint timestamp: data.keys())
+    {
+        bool updated = false;   // flag for updated class
+
+        if (data[timestamp].userDefinedClass == oldClass)
+        {
+            data[timestamp].userDefinedClass = aClass{"", ""};
+            updated = true;
+        }
+        if (data[timestamp].detectedClass == oldClass)
+        {
+            data[timestamp].detectedClass = aClass{"", ""};
+            updated = true;
+        }
+
+        if (updated)
+            updatedVectors[timestamp] = data[timestamp];
+    }
+
+    emit labelsUpdated(updatedVectors);
 }
 
 void MeasurementData::changeClass(aClass oldClass, aClass newClass)
@@ -802,4 +826,28 @@ void MeasurementData::changeClass(aClass oldClass, aClass newClass)
 
     int index = classList.indexOf(oldClass);
     classList[index] = newClass;
+
+    // update measurement data
+    QMap<uint, MVector> updatedVectors;
+
+    for (uint timestamp: data.keys())
+    {
+        bool updated = false;   // flag for updated class
+
+        if (data[timestamp].userDefinedClass == oldClass)
+        {
+            data[timestamp].userDefinedClass = newClass;
+            updated = true;
+        }
+        if (data[timestamp].detectedClass == oldClass)
+        {
+            data[timestamp].detectedClass = newClass;
+            updated = true;
+        }
+
+        if (updated)
+            updatedVectors[timestamp] = data[timestamp];
+    }
+
+    emit labelsUpdated(updatedVectors);
 }
