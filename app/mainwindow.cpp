@@ -1,9 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-
-#include "addselectiondialog.h"
-#include "editannotationdatawindow.h"
 #include "functionalisationdialog.h"
 #include "generalsettings.h"
 #include "classselector.h"
@@ -39,10 +36,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     mData = new MeasurementData();
-    // debug: avoid crash
-//    mData->addMeasurement(QDateTime::currentDateTime().toTime_t(), MVector::zeroes());
 
-    aDataModel = new AnnotationDatasetModel();
     // this->setStyleSheet("QSplitter::handle{background: black;}"); // make splitter visible
 
     // relative graph: ignore limits (minVal, maxVal)
@@ -51,14 +45,9 @@ MainWindow::MainWindow(QWidget *parent)
     // connections:
     // selection flow
     connect(ui->lGraph, &LineGraphWidget::selectionChanged, mData, &MeasurementData::setSelection); // change selection in mData
-    connect(ui->lGraph, &LineGraphWidget::selectionChanged, this, [this](double, double) {
-        ui->data_info_widget->showAddSelectionButton();
-    });   // show add selection button
 
     connect(ui->lGraph, &LineGraphWidget::selectionCleared, mData, &MeasurementData::clearSelection); // clear selection in mData
     connect(ui->lGraph, &LineGraphWidget::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars);  // clear vector in bGraph
-    connect(ui->lGraph, &LineGraphWidget::selectionCleared, ui->data_info_widget, &InfoWidget::hideAddSelectionButton);   // hide add selection button
-
     connect(mData, &MeasurementData::selectionVectorChanged, ui->bGraph, &BarGraphWidget::setBars);   // plot vector in bGraph
     connect(mData, &MeasurementData::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars); // clear vector in bGraph
 
@@ -124,55 +113,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::commentSet, ui->data_info_widget, &InfoWidget::setMComment);            // mData: comment changed -> InfoWidget: show new comment
     connect(mData, &MeasurementData::sensorFailuresSet, ui->data_info_widget, &InfoWidget::setFailures);    // mData: failures changed -> InfoWidget: show new failures
 
-    // add selection dialog
-    connect(ui->data_info_widget, &InfoWidget::addSelection, this, [this](){
-        // init aData
-        if (aDataModel->getAnnotationData().isEmpty())
-        {
-            aDataModel->setFuncArray(mData->getFunctionalities());
-        }
-
-        // check if aData compatible to mData
-        if (!(aDataModel->getFuncArray() == mData->getFunctionalities()))
-        {
-            QMessageBox::critical(this, "Error: Incompatible sensors", "Functionalization of current sensor is different to the one used in the annotation dataset.");
-            return;
-        }
-
-        // get selection data
-        QMap<uint, MVector> sMap = mData->getSelectionMap();
-        MVector baseLevelVector = mData->getBaseLevel(sMap.firstKey());
-
-        // create AddVectorDialg and set properties
-        AddSelectionDialog* dialog = new AddSelectionDialog();
-
-        // connect signals
-        connect(dialog, &AddSelectionDialog::extraAttributeRenamed, aDataModel, &AnnotationDatasetModel::renameAttribute);
-        connect(dialog, &AddSelectionDialog::extraAttributeAdded, aDataModel, &AnnotationDatasetModel::addExtraAttribute);
-        connect(dialog, &AddSelectionDialog::classAdded, aDataModel, &AnnotationDatasetModel::addClass);
-
-        dialog->setVector(sMap);
-        dialog->setBaseLevel(baseLevelVector);
-        dialog->setNVectors(sMap.size());
-        dialog->setSensorId(mData->getSensorId());
-        dialog->setTimestamp(sMap.firstKey());
-        dialog->setFailureBits(mData->getSensorFailures());
-        dialog->setExtraAttributes(aDataModel->getExtraAttributes());
-        dialog->setClassNames(aDataModel->getClasses());
-
-        // execute dialog
-        if (dialog->exec())
-        {
-            // get annotation
-            aDataModel->addAnnotation(dialog->getAnnotation());
-        }
-
-        // disconnect
-        disconnect(dialog, &AddSelectionDialog::extraAttributeRenamed, aDataModel, &AnnotationDatasetModel::renameAttribute);
-        disconnect(dialog, &AddSelectionDialog::extraAttributeAdded, aDataModel, &AnnotationDatasetModel::addExtraAttribute);
-        disconnect(dialog, &AddSelectionDialog::classAdded, aDataModel, &AnnotationDatasetModel::addClass);
-    });
-
     // set functionalities dialog
     connect(ui->data_info_widget, &InfoWidget::setFunctionalities, this, [this](){
         FunctionalisationDialog dialog;
@@ -184,34 +124,6 @@ MainWindow::MainWindow(QWidget *parent)
             mData->setFunctionalities(dialog.getFunctionalities());
         }
     });
-
-
-    // annotation dataset editor
-    connect(ui->data_info_widget, &InfoWidget::editAnnotationData, this, [this](){
-        if (annotationDataWindow == nullptr)
-        {
-            // create window to edit
-            annotationDataWindow = new editAnnotationDataWindow(this);
-            annotationDataWindow->setWindowTitle("Edit Annotation Dataset");
-
-            // create model
-            annotationDataWindow->setModel(aDataModel);
-
-            // show window
-            annotationDataWindow->show();
-        } else if (!annotationDataWindow->isVisible())
-            annotationDataWindow->show();
-    }); // show editor
-
-
-    // annotation info
-    connect(aDataModel, &AnnotationDatasetModel::annotationDatasetChanged, this, [this]() {
-        ui->data_info_widget->setNClasses(aDataModel->getClasses().size());
-        ui->data_info_widget->setNEntries(aDataModel->nAnnotations());
-        ui->data_info_widget->setDComment(aDataModel->getComment());
-    }); // update # of classes & entries, comment
-
-    connect(ui->data_info_widget, &InfoWidget::dCommentChanged, aDataModel, &AnnotationDatasetModel::setComment);   // change comment
 }
 
 MainWindow::~MainWindow()
@@ -219,7 +131,6 @@ MainWindow::~MainWindow()
     delete ui;
 
     delete mData;
-    delete aDataModel;
 }
 
 void MainWindow::on_actionSave_Data_triggered()
@@ -297,30 +208,6 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
 
     else
         usbSource->changeSettings();
-}
-
-void MainWindow::on_actionFunctionalitization_triggered()
-{
-    FunctionalisationDialog dialog;
-    dialog.setFunctionalities(aDataModel->getFuncArray());
-    dialog.setWindowTitle("Annotation Functionality");
-
-    if (dialog.exec())
-    {
-        aDataModel->setFuncArray(dialog.getFunctionalities());
-    }
-}
-
-void MainWindow::on_actionSaveAnnotation_triggered()
-{
-    aDataModel->saveData(this);
-}
-
-
-
-void MainWindow::on_actionOpenAnnotation_triggered()
-{
-    aDataModel->loadData(this);
 }
 
 void MainWindow::on_actionSettings_triggered()

@@ -190,8 +190,6 @@
     <property name="title">
      <string>Annotation</string>
     </property>
-    <addaction name="actionSaveAnnotation"/>
-    <addaction name="actionOpenAnnotation"/>
     <addaction name="actionClassify_selection"/>
     <addaction name="actionSet_detected_class_of_selection"/>
    </widget>

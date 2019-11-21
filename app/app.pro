@@ -31,16 +31,11 @@ linux-g++ {
 SOURCES += \
     aclass.cpp \
     addattributedialog.cpp \
-    addselectiondialog.cpp \
-    annotation_old.cpp \
-    annotationdatasetmodel_old.cpp \
     attributeeditor.cpp \
     bargraphwidget.cpp \
-    classeditor.cpp \
     classifierwidget.cpp \
     classinputdialog.cpp \
     classselector.cpp \
-    editannotationdatawindow.cpp \
     functionalisationdialog.cpp \
     generalsettings.cpp \
     infowidget.cpp \
@@ -58,16 +53,11 @@ SOURCES += \
 HEADERS += \
     aclass.h \
     addattributedialog.h \
-    addselectiondialog.h \
-    annotation_old.h \
-    annotationdatasetmodel_old.h \
     attributeeditor.h \
     bargraphwidget.h \
-    classeditor.h \
     classifierwidget.h \
     classinputdialog.h \
     classselector.h \
-    editannotationdatawindow.h \
     functionalisationdialog.h \
     generalsettings.h \
     infowidget.h \
@@ -83,13 +73,10 @@ HEADERS += \
 
 FORMS += \
     addattributedialog.ui \
-    addselectiondialog.ui \
     attributeeditor.ui \
     bargraphwidget.ui \
-    classeditor.ui \
     classifierwidget.ui \
     classselector.ui \
-    editannotationdatawindow.ui \
     functionalisationdialog.ui \
     generalsettings.ui \
     infowidget.ui \

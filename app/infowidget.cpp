@@ -10,11 +10,6 @@ InfoWidget::InfoWidget(QWidget *parent) :
     ui(new Ui::InfoWidget)
 {
     ui->setupUi(this);
-
-    // no selection at start
-    ui->addSelectionButton->setEnabled(false);
-
-    ui->annotationbox->hide();
 }
 
 InfoWidget::~InfoWidget()
@@ -70,14 +65,6 @@ void InfoWidget::setMComment(QString comment)
         ui->commentTextEdit->setText(comment);
 }
 
-void InfoWidget::setDComment(QString comment)
-{
-    comment = comment.split("\n").join("");
-
-    if (comment != ui->datasetNameLineEdit->text())
-        ui->datasetNameLineEdit->setText(comment);
-}
-
 void InfoWidget::setFailures(std::array<bool, 64> failures)
 {
 
@@ -85,28 +72,6 @@ void InfoWidget::setFailures(std::array<bool, 64> failures)
 
     if (label != ui->failureLabel->text())
         ui->failureLabel->setText(label);
-}
-
-void InfoWidget::showAddSelectionButton()
-{
-    if (!ui->addSelectionButton->isEnabled())
-        ui->addSelectionButton->setEnabled(true);
-}
-
-void InfoWidget::hideAddSelectionButton()
-{
-    if (ui->addSelectionButton->isEnabled())
-        ui->addSelectionButton->setEnabled(false);
-}
-
-void InfoWidget::setNEntries(uint n)
-{
-    ui->nEntriesLabel->setText(QString::number(n));
-}
-
-void InfoWidget::setNClasses(uint n)
-{
-    ui->nClassesLabel->setText(QString::number(n));
 }
 
 void InfoWidget::on_commentTextEdit_textChanged()
@@ -140,22 +105,7 @@ void InfoWidget::on_pushButton_clicked()
     }
 }
 
-void InfoWidget::on_addSelectionButton_clicked()
-{
-    emit addSelection();
-}
-
-void InfoWidget::on_editDatasetButton_clicked()
-{
-    emit editAnnotationData();
-}
-
 void InfoWidget::on_pushButton_2_clicked()
 {
     emit setFunctionalities();
-}
-
-void InfoWidget::on_datasetNameLineEdit_textChanged(const QString &arg1)
-{
-    emit dCommentChanged(arg1);
 }
