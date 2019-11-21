@@ -30,6 +30,9 @@ public:
     bool getUseLimits() const;
     void setUseLimits(bool value);
 
+    bool getShowAbsGraph() const;
+    void setShowAbsGraph(bool value);
+
 private slots:
     void on_buttonBox_accepted();
 
@@ -40,6 +43,7 @@ private:
     double minVal;
     bool saveRawInput = false;
     bool useLimits = true;
+    bool showAbsGraph = false;
 };
 
 #endif // GENERALSETTINGS_H

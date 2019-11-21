@@ -7,18 +7,18 @@
 #include"mvector.h"
 
 namespace Ui {
-class lineGraph;
+class LineGraphWidget;
 }
 
-class lineGraph : public QWidget
+class LineGraphWidget : public QWidget
 {
     Q_OBJECT
 
 public:
 
 
-    explicit lineGraph(QWidget *parent = nullptr, uint startTime = QDateTime::currentDateTime().toTime_t());
-    ~lineGraph();
+    explicit LineGraphWidget(QWidget *parent = nullptr, uint startTime = QDateTime::currentDateTime().toTime_t());
+    ~LineGraphWidget();
     void clearGraph(bool replot = true);
 
     bool selectionEmpty();
@@ -47,6 +47,10 @@ public slots:
     void setSensorFailureFlags(const std::array<bool, MVector::size> sensorFailureFlags);
     void setAutoMoveGraph(bool value);
 
+    /*
+     * draws selection and class rectangles
+     */
+    void labelSelection(QMap<uint, MVector> selectionMap);
 
 signals:
     void selectionChanged(int, int);
@@ -55,7 +59,7 @@ signals:
     void requestRedraw();
 
 private:
-    Ui::lineGraph *ui;
+    Ui::LineGraphWidget *ui;
     const int defaultXWidth = 30; // defines default range of xAxis: (-1; defaultXWidth)
     const double yMin = 2.0;    // defines minimum range of yAxis: (-yMin;yMin)
 
@@ -71,12 +75,26 @@ private:
     std::array<bool, MVector::size> sensorFailureFlags;
     bool autoMoveGraph = true;
 
+    QMap<int, QCPItemText *> userDefinedClassLabels;
+    QMap<int, QCPItemText *> detectedClassLabels;
+
     void setupGraph();
+
+    /*
+     * returns index of data point where x == key on chart
+     * returns -1 if not found
+     */
+    double getIndex (int key);
 
 private slots:
     void replot(uint timestamp=0);
     void mousePressed(QMouseEvent*);
     void dataSelected();
+
+    /*
+     * draws label of user+detected class at top of graph
+     */
+    void setLabel(int xpos, QString userDefinedBrief, QString detectedBrief);
 };
 
 #endif // LINEGRAPH_H

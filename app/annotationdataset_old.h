@@ -2,7 +2,7 @@
 #define ANNOTATIONDATA_H
 
 #include <QObject>
-#include "annotation.h"
+#include "annotation_old.h"
 
 class AnnotationDataset : public QObject
 {

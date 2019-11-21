@@ -4,8 +4,6 @@
 #include <QtCore>
 #include <QMainWindow>
 #include "measurementdata.h"
-#include "annotationdataset_old.h"
-#include "editannotationdatawindow.h"
 #include "usbdatasource.h"
 #include "mvector.h"
 
@@ -34,12 +32,6 @@ private slots:
 
     void on_actionSet_USB_Connection_triggered();
 
-    void on_actionFunctionalitization_triggered();
-
-    void on_actionSaveAnnotation_triggered();
-
-    void on_actionOpenAnnotation_triggered();
-
     void on_actionSettings_triggered();
 
     void on_actionStart_triggered();
@@ -48,13 +40,14 @@ private slots:
 
     void on_actionReset_triggered();
 
+    void on_actionClassify_selection_triggered();
+
+    void on_actionSet_detected_class_of_selection_triggered();
+
 private:
     Ui::MainWindow *ui;
 
     MeasurementData *mData = nullptr;
-    AnnotationDatasetModel *aDataModel = nullptr;
     USBDataSource *usbSource = nullptr;
-
-    editAnnotationDataWindow* annotationDataWindow = nullptr;
 };
 #endif // MAINWINDOW_H

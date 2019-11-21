@@ -22,6 +22,22 @@ void GeneralSettings::on_buttonBox_accepted()
     minVal = ui->minValSpinBox->value();
     saveRawInput = ui->saveRawInputCheckBox->checkState();
     useLimits = ui->useLimitsCheckBox->checkState();
+    showAbsGraph = ui->showAbsGraphCheckBox->checkState();
+}
+
+bool GeneralSettings::getShowAbsGraph() const
+{
+    return showAbsGraph;
+}
+
+void GeneralSettings::setShowAbsGraph(bool value)
+{
+    showAbsGraph = value;
+
+    if (value)
+        ui->showAbsGraphCheckBox->setCheckState(Qt::CheckState::Checked);
+    else
+        ui->showAbsGraphCheckBox->setCheckState(Qt::CheckState::Unchecked);
 }
 
 bool GeneralSettings::getUseLimits() const

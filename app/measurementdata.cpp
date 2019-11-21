@@ -95,7 +95,8 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
 
     for (int i=0; i<MVector::size; i++)
         deviationVector.array[i] = 100.0 * (vector.array[i] / baseLevelVector.array[i] - 1.0);
-
+    deviationVector.userDefinedClass = vector.userDefinedClass;
+    deviationVector.detectedClass = vector.detectedClass;
 
     // add data, update dataChanged
     data[timestamp] = deviationVector;
@@ -140,6 +141,8 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector, MVector bas
 
     for (int i=0; i<MVector::size; i++)
         absoluteVector.array[i] = (1 + vector.array[i]/100.0) * baseLevel.array[i];
+    absoluteVector.userDefinedClass = vector.userDefinedClass;
+    absoluteVector.detectedClass = vector.detectedClass;
 
     addMeasurement(timestamp, absoluteVector);
 }
@@ -211,6 +214,11 @@ void MeasurementData::setBaseLevel(uint timestamp, MVector baseLevel)
         dataChanged = true;
         qDebug() << "New baselevel at " << timestamp << ":\n" << baseLevelMap[timestamp].toString();
     }
+}
+
+QList<aClass> MeasurementData::getClassList() const
+{
+    return classList;
 }
 
 bool MeasurementData::getSaveRawInput() const
@@ -353,7 +361,7 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
             funcList << QString::number(functionalisation[i]);
         out << "#functionalisation:" << funcList.join(";") << "\n";
 
-        // baseLevel
+        // base vector
         for (uint timestamp : baseLevelMap.keys())
         {
             out << "#baseLevel:" << timestamp << ";";
@@ -361,8 +369,27 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
             for (int i=0; i<MVector::size; i++)
                 valueList << QString::number(baseLevelMap[timestamp].array[i], 'g', 10);
             out <<  valueList.join(";") << "\n";
-
         }
+
+        // classes
+        out << "#classes:";
+        QStringList classStringList;
+        for (aClass c : classList)
+            classStringList << c.toString();
+        out << classStringList.join(";") << "\n";
+
+        // write header
+        QStringList headerList;
+
+        headerList << "#header:timestamp";
+
+        for (int i=0; i<MVector::size; i++)
+            headerList << "rv" + QString::number(i+1);
+
+        headerList << "user defined class";
+        headerList << "detected class";
+
+        out << headerList.join(";") << "\n";
 
         // write data
         auto iter = map.begin();
@@ -375,6 +402,8 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
             // vector
             for (int i=0; i<MVector::size; i++)
                 valueList << QString::number(iter.value().array[i], 'g', 10);
+            // classes
+            valueList << iter.value().userDefinedClass.toString() << iter.value().detectedClass.toString();
             out <<  valueList.join(";") << "\n";
 
             iter++;
@@ -453,102 +482,148 @@ bool MeasurementData::loadData(QWidget* widget)
         bool readOk = true;
         while (in.readLineInto(&line))
         {
-            if (line[0] == '#') // meta info
-            {
-                if (line.startsWith("#sensorId:"))
-                    setSensorId(line.right(line.length()-QString("#sensorId:").length()));
-                else if (line.startsWith("#failures:")) {
-                    QString failureString = line.right(line.length()-QString("#failures:").length());
-                    failureString=failureString.split(";").join("");
-                    if (failureString.size() != MVector::size)
-                    {
-                        qWarning() << "Failure string not valid. Using empty failure string.";
-                        failureString = "0000000000000000000000000000000000000000000000000000000000000000";
-                    }
-                    setFailures(failureString);
-                }
-                else if (line.startsWith("#functionalisation:"))
-                {
-                    QString rawString = line.right(line.length()-QString("#functionalisation:").length());
-                    QStringList funcList = rawString.split(";");
-
-                    for (int i=0; i<functionalisation.size(); i++)
-                        functionalisation[i] = funcList[i].toInt();
-                }
-                else if (line.startsWith("#baseLevel:"))
-                {
-                    line = line.split(":")[1];
-                    QStringList valueList = line.split(";");
-
-                    uint timestamp = valueList[0].toUInt();
-                    MVector baseLevel;
-                    for (int i=0; i<MVector::size; i++)
-                        baseLevel.array[i] = valueList[i+1].toDouble();
-
-                    setBaseLevel(timestamp, baseLevel);
-                }
-                else    // comment
-                    comment += line.right(line.length()-1) + "\n";
-            } else  // data
-            {
-                QStringList query = line.split(";");
-
-                // line has to contain vector and baselevel vector
-                if (query.size() != MVector::size+1)
-                {
-                    QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "Data format is not compatible (len=" + QString::number(query.size()) + "):\n" + line);
-                    readOk = false;
-                    break;
-                } else if (baseLevelMap.isEmpty())
-                {
-                    QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "No baseLevel in data");
-                    readOk = false;
-                    break;
-                }
-                // prepare vector
-                uint timestamp = query[0].toUInt(&readOk);
-                MVector vector;
-                for (int i=0; i<MVector::size; i++)
-                {
-                    vector.array[i] = query[i+1].toDouble(&readOk);
-                }
-                addMeasurement(timestamp, vector, getBaseLevel(timestamp));
-            }
-
-            // catch errors reading files
-            if (!readOk)
-            {
-                QMessageBox::critical(widget, "Error reading file", "Error in line:\n" + line);
-                clear();
-                clearSelection();
-                return false;
-            }
+            qDebug() << line;
+            if (line[0] == '~') // file help
+                ; // ignore
+            else if (line[0] == '#') // meta info
+                readOk = getMetaData(line);
+            else  // data
+                readOk = getData(line);
         }
 
-        setComment(comment);
+        // catch errors reading files
+        if (!readOk)
+        {
+            QMessageBox::critical(widget, "Error reading file", "Error in line:\n" + line);
+            clear();
+            clearSelection();
+            return false;
+        }
+
         dataChanged = false;
 
-        // emit signal to replot graphs
-        // DEBUG
-//        emit dataSet(data);
-
-//        // absolute data
-//        QMap<uint, MVector> absoluteData;
-//        for (auto ts : data.keys())
-//        {
-//            MVector baseLevelVector = getBaseLevel(ts);
-//            MVector absoluteVector;
-
-//            for (int i=0; i<MVector::size; i++)
-//                absoluteVector.array[i] = data[ts].array[i] + baseLevelVector.array[i];
-
-//            absoluteData[ts] = absoluteVector;
-//        }
-
-//        emit absoluteDataSet(absoluteData);
+        emit labelsUpdated(data);   // reset labels
 
         return true;
     }
+}
+
+bool MeasurementData::getMetaData(QString line)
+{
+    bool  readOk = true;
+
+    if (line.startsWith("#sensorId:"))
+    {
+        QString sensorId = line.right(line.length()-QString("#sensorId:").length());
+        sensorId = sensorId.split(";").join("");
+        setSensorId(sensorId);
+    }
+    else if (line.startsWith("#failures:"))
+    {
+        QString failureString = line.right(line.length()-QString("#failures:").length());
+        failureString=failureString.split(";").join("");
+        if (failureString.size() != MVector::size)
+        {
+            qWarning() << "Failure string not valid. Using empty failure string.";
+            failureString = "0000000000000000000000000000000000000000000000000000000000000000";
+        }
+        setFailures(failureString);
+    }
+    else if (line.startsWith("#functionalisation:"))
+    {
+        QString rawString = line.right(line.length()-QString("#functionalisation:").length());
+        QStringList funcList = rawString.split(";");
+
+        for (int i=0; i<functionalisation.size(); i++)
+            functionalisation[i] = funcList[i].toInt();
+    }
+    else if (line.startsWith("#baseLevel:"))
+    {
+        line = line.split(":")[1];
+        QStringList valueList = line.split(";");
+
+        uint timestamp = valueList[0].toUInt();
+        MVector baseLevel;
+        for (int i=0; i<MVector::size; i++)
+            baseLevel.array[i] = valueList[i+1].toDouble();
+
+        setBaseLevel(timestamp, baseLevel);
+    }
+    else if (line.startsWith("#classes:"))
+    {
+        QStringList classStringList =  line.right(line.length()-QString("#classes:").length()).split(";");
+        for (QString classString : classStringList)
+        {
+            if (!aClass::isClassString(classString))
+            {
+                QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Invalid class name: " + classString, "The class name is invalid!");
+                readOk = false;
+                break;
+            }
+            aClass c = aClass::fromString(classString);
+
+            // check consistency of classes
+            if (classList.contains(c))
+            {
+                QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Invalid class list", "The class list is invalid!");
+                readOk = false;
+                break;
+            }
+            addClass(c);
+        }
+    }
+    else if (line.startsWith("#header:"))
+        ;   // ignore
+    else    // comment
+        setComment(dataComment + line.right(line.length()-1) + "\n");
+
+    return readOk;
+}
+
+bool MeasurementData::getData(QString line)
+{
+    bool readOk;
+
+    QStringList query = line.split(";");
+
+    // line has to contain vector + [user defined and detected class]
+    if ((query.size() < MVector::size+1) || (query.size() > MVector::size+3))
+    {
+        QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "Data format is not compatible (len=" + QString::number(query.size()) + "):\n" + line);
+        return false;
+    } else if (baseLevelMap.isEmpty())
+    {
+        QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "No baseLevel in data");
+        return false;
+    }
+    // prepare vector
+    uint timestamp = query[0].toUInt(&readOk);
+    MVector vector;
+    for (int i=0; i<MVector::size; i++)
+    {
+        vector.array[i] = query[i+1].toDouble(&readOk);
+    }
+    if (query.size() > MVector::size+1)
+    {
+        if (aClass::isClassString(query[MVector::size+1]))
+            vector.userDefinedClass = aClass::fromString(query[MVector::size+1]);
+        else
+        {
+            return false;
+        }
+    }
+    if (query.size() > MVector::size+2)
+    {
+        if (aClass::isClassString(query[MVector::size+2]))
+            vector.detectedClass = aClass::fromString(query[MVector::size+2]);
+        else
+        {
+            return false;
+        }
+    }
+    addMeasurement(timestamp, vector, getBaseLevel(timestamp));
+
+    return readOk;
 }
 
 void MeasurementData::generateRandomWalk()
@@ -651,7 +726,8 @@ void MeasurementData::setSelection(int lower, int upper)
     }
 
     qDebug() << "Selection made: " << selectedData.firstKey() << ", " << selectedData.lastKey() << "\n" << vector.toString() << "\n";
-    emit selectionChanged(vector, sensorFailures);
+    emit selectionVectorChanged(vector, sensorFailures);
+    emit selectionMapChanged(selectedData);
 }
 
 const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp, MultiMode mode)
@@ -746,4 +822,102 @@ std::array<bool, MVector::size> MeasurementData::sensorFailureArray(QString fail
             failureArray[4*hex+bit] |= failureInt & (1UL << bit);
         }
     }
+}
+
+void MeasurementData::setUserDefinedClassOfSelection(QString className, QString classBrief)
+{
+    for (auto timestamp : selectedData.keys())
+    {
+        // data and selectedData
+        data[timestamp].userDefinedClass = aClass(className, classBrief);
+
+        selectedData[timestamp].userDefinedClass = aClass(className, classBrief);
+    }
+
+    emit labelsUpdated(selectedData);
+}
+
+void MeasurementData::setDetectedClassOfSelection(QString className, QString classBrief)
+{
+    for (auto timestamp : selectedData.keys())
+    {
+        // data and selectedData
+        data[timestamp].detectedClass = aClass(className, classBrief);
+
+        selectedData[timestamp].detectedClass = aClass(className, classBrief);
+    }
+
+    emit labelsUpdated(selectedData);
+}
+
+void MeasurementData::addClass(aClass newClass)
+{
+    Q_ASSERT("Trying to add class that already exists!" && !classList.contains(newClass));
+
+    classList.append(newClass);
+}
+
+void MeasurementData::removeClass(aClass oldClass)
+{
+    Q_ASSERT("Trying to remove class that does not exist!" && classList.contains(oldClass));
+
+    int index = classList.indexOf(oldClass);
+    classList.removeAt(index);
+
+    // update measurement data
+    QMap<uint, MVector> updatedVectors;
+
+    for (uint timestamp: data.keys())
+    {
+        bool updated = false;   // flag for updated class
+
+        if (data[timestamp].userDefinedClass == oldClass)
+        {
+            data[timestamp].userDefinedClass = aClass{"", ""};
+            updated = true;
+        }
+        if (data[timestamp].detectedClass == oldClass)
+        {
+            data[timestamp].detectedClass = aClass{"", ""};
+            updated = true;
+        }
+
+        if (updated)
+            updatedVectors[timestamp] = data[timestamp];
+    }
+
+    emit labelsUpdated(updatedVectors);
+}
+
+void MeasurementData::changeClass(aClass oldClass, aClass newClass)
+{
+    Q_ASSERT("Trying to change class that does not exist!" && classList.contains(oldClass));
+    Q_ASSERT("Trying to change class to new class that already exists!" && !classList.contains(newClass));
+
+    int index = classList.indexOf(oldClass);
+    classList[index] = newClass;
+
+    // update measurement data
+    QMap<uint, MVector> updatedVectors;
+
+    for (uint timestamp: data.keys())
+    {
+        bool updated = false;   // flag for updated class
+
+        if (data[timestamp].userDefinedClass == oldClass)
+        {
+            data[timestamp].userDefinedClass = newClass;
+            updated = true;
+        }
+        if (data[timestamp].detectedClass == oldClass)
+        {
+            data[timestamp].detectedClass = newClass;
+            updated = true;
+        }
+
+        if (updated)
+            updatedVectors[timestamp] = data[timestamp];
+    }
+
+    emit labelsUpdated(updatedVectors);
 }

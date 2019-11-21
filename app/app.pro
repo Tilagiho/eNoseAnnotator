@@ -29,19 +29,17 @@ linux-g++ {
 
 
 SOURCES += \
+    aclass.cpp \
     addattributedialog.cpp \
-    addselectiondialog.cpp \
-    annotation.cpp \
-    annotationdatasetmodel.cpp \
     attributeeditor.cpp \
     bargraphwidget.cpp \
-    classeditor.cpp \
     classifierwidget.cpp \
-    editannotationdatawindow.cpp \
+    classinputdialog.cpp \
+    classselector.cpp \
     functionalisationdialog.cpp \
     generalsettings.cpp \
     infowidget.cpp \
-    linegraph.cpp \
+    linegraphwidget.cpp \
     main.cpp \
     mainwindow.cpp \
     measurementdata.cpp \
@@ -53,19 +51,17 @@ SOURCES += \
     usbsettingsdialog.cpp
 
 HEADERS += \
+    aclass.h \
     addattributedialog.h \
-    addselectiondialog.h \
-    annotation.h \
-    annotationdatasetmodel.h \
     attributeeditor.h \
     bargraphwidget.h \
-    classeditor.h \
     classifierwidget.h \
-    editannotationdatawindow.h \
+    classinputdialog.h \
+    classselector.h \
     functionalisationdialog.h \
     generalsettings.h \
     infowidget.h \
-    linegraph.h \
+    linegraphwidget.h \
     mainwindow.h \
     measurementdata.h \
     mvector.h \
@@ -77,16 +73,14 @@ HEADERS += \
 
 FORMS += \
     addattributedialog.ui \
-    addselectiondialog.ui \
     attributeeditor.ui \
     bargraphwidget.ui \
-    classeditor.ui \
     classifierwidget.ui \
-    editannotationdatawindow.ui \
+    classselector.ui \
     functionalisationdialog.ui \
     generalsettings.ui \
     infowidget.ui \
-    linegraph.ui \
+    linegraphwidget.ui \
     mainwindow.ui \
     setsensorfailuresdialog.ui \
     usbsettingsdialog.ui

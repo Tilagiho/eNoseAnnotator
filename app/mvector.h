@@ -3,7 +3,8 @@
 
 #include <QtCore>
 #include <array>
-#include <QtCore>
+
+#include "aclass.h"
 
 
 class MVector
@@ -20,7 +21,21 @@ public:
 
     bool operator !=(const MVector &other) const;
 
+    /*
+     * contains the sensor values measured
+     */
     std::array<double, size> array;
+
+    /*
+     * class annotated by the user
+     * -> can be used as base truth
+     */
+    aClass userDefinedClass{"",""};
+
+    /*
+     * automatically detected class
+     */
+    aClass detectedClass{"",""};
 
     /*
      * returns MVector with all elements being zero initialzed

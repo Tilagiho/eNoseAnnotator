@@ -27,19 +27,11 @@ public slots:
     void setStatus(USBDataSource::Status status);
     void setTimestamp(double timestamp);
     void setMComment(QString comment);
-    void setDComment(QString comment);
     void setFailures(std::array<bool, 64> failures);
-    void showAddSelectionButton();
-    void hideAddSelectionButton();
-    void setNEntries(uint n);
-    void setNClasses(uint n);
 
 signals:
     void mCommentChanged(QString comment);
-    void dCommentChanged(QString comment);
     void failuresChanged(std::array<bool, 64> failures);
-    void addSelection();
-    void editAnnotationData();
     void setFunctionalities();
 
 private slots:
@@ -47,16 +39,7 @@ private slots:
 
     void on_pushButton_clicked();
 
-    void on_addSelectionButton_clicked();
-
-    void on_editDatasetButton_clicked();
-
-
-
     void on_pushButton_2_clicked();
-
-    void on_datasetNameLineEdit_textChanged(const QString &arg1);
-
 private:
     Ui::InfoWidget *ui;
 

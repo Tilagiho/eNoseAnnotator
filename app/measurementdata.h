@@ -125,6 +125,16 @@ public:
      */
     bool loadData(QWidget* widget);
 
+    /*
+     * extracts meta data from line
+     * meta data lines always start with '#'
+     */
+    bool getMetaData(QString line);
+
+    /*
+     * extracts measurement data from line
+     */
+    bool getData(QString line);
 
     /*
      *  generates a random walk dataset
@@ -164,6 +174,20 @@ public:
     bool getSaveRawInput() const;
     void setSaveRawInput(bool value);
 
+    /*
+     * set the user defined class of the current selection
+     */
+    void setUserDefinedClassOfSelection(QString className, QString classBrief);
+
+    /*
+     * set the detected class of the current selection
+     */
+    void setDetectedClassOfSelection(QString className, QString classBrief);
+
+
+
+    QList<aClass> getClassList() const;
+
 public slots:
     /*
      * clears selectedData and adds all vectors with timestamp between lower and upper to selectedData
@@ -175,9 +199,14 @@ public slots:
     void setFailures(QString failureString);
     void setSensorId(QString sensorId);
     void setBaseLevel(uint timestamp, MVector baseLevel);
+    void addClass(aClass newClass);
+    void removeClass(aClass oldClass);
+    void changeClass(aClass oldClass, aClass newClass);
 
 signals:
-    void selectionChanged(MVector vector, std::array<bool, MVector::size>);  // emits new vector when dataSelected is changed
+    void selectionVectorChanged(MVector vector, std::array<bool, MVector::size> sensorFailures);  // emits new vector when dataSelected is changed
+    void selectionMapChanged(QMap<uint, MVector> selectionMap);
+    void labelsUpdated(QMap<uint, MVector> updatedVectors);
     void selectionCleared();
     void dataReset();   // emitted when data is reset
     void dataAdded(MVector vector, uint timestamp, bool yRescale);
@@ -199,6 +228,7 @@ private:
     QString sensorId = "";
     std::array<bool, 64> sensorFailures;
     bool saveRawInput = false;      // if true: save absolute values in "raw_input_" + timestamp
+    QList<aClass> classList;
 
     QString version = "v0.1";
 };

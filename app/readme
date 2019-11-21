@@ -1,37 +1,21 @@
 // TODO
 // important
-- make dataset comment multiline (textEdit)
-- error: 2 measurements added to 0 after start?
-- menu bar dataset editor
-- Executables generieren
-- Rücksprache Schlesinger
-- use setData to update all data in annotationDatasetmodel
-- test: what happens to timestamps, if dialog is executed while continuing to receive data
-- steigung, ui symbol
+- test: extra thread for serial communication necessary?
+- stop measurement based on gradient, ui symbols for status
 
-- merge annotation and measurement
 - store absolute values in measurement
--> relative values are emitted only to relLGraph
-- show/ hide absolute graph
-
-// test
-- saving/ loading annotation data
-- set channels with same functionality
-- pause, reset connection
+    -> relative values are emitted only to relLGraph
+- debug selection
+- add absolute mode to lineGraph
+    -> Delete x-label, Edit y-label
+    -> add absolute values in kOhm
+- clean up saving/ loading
+    -> introduce a well defined save/load module ?
+- set label size based on y-range
+- set label color
 
 // optional
-- make annotationDatasetmodel editable, sortable
 - move multiMode to vector
-- adjust sizes of tableWidget & tableview automaticallly
+- linegraph: only hide graphs with sensor failures -> no redraw necessary
+- sync relative and absolute graphs
 
-// DONE
-- make all timestamps type uint
-- move lineGraph automatically
-- show usb connection status (record symbol?)
-- debug selection with real data
-- make vector relative
-- show absolute values
-- save absolute values
-- set max_val in lineGrap through GUI
-- add baselevel to MeasurementData
-- turn off usage of limits
