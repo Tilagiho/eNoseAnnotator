@@ -183,6 +183,7 @@
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
     <addaction name="actionReset"/>
+    <addaction name="separator"/>
     <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuAnnotation">
@@ -191,7 +192,6 @@
     </property>
     <addaction name="actionSaveAnnotation"/>
     <addaction name="actionOpenAnnotation"/>
-    <addaction name="actionFunctionalitization"/>
     <addaction name="actionClassify_selection"/>
     <addaction name="actionSet_detected_class_of_selection"/>
    </widget>
@@ -293,7 +293,7 @@
   </action>
   <action name="actionSet_detected_class_of_selection">
    <property name="text">
-    <string>Set detected class of selection...</string>
+    <string>[Debug] Set detected class of selection...</string>
    </property>
   </action>
  </widget>

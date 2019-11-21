@@ -4,14 +4,11 @@
 - stop measurement based on gradient, ui symbols for status
 
 - merge annotation and measurement:
-    -> draw class abreviation on top of graph
-    -> set user defined class of selection
     -> load/ store  classification
 - store absolute values in measurement
 -> relative values are emitted only to relLGraph
--debug selection
+- debug selection
 
 // optional
 - move multiMode to vector
-- adjust sizes of tableWidget & tableview automaticallly
 - linegraph: only hide graphs with sensor failures -> no redraw necessary
