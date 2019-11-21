@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QAbstractTableModel>
 #include "mvector.h"
-#include "annotation.h"
+#include "annotation_old.h"
 
 class AnnotationDatasetModel : public QAbstractTableModel
 {

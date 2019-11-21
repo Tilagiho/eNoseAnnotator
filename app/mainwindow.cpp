@@ -4,7 +4,6 @@
 
 #include "addselectiondialog.h"
 #include "editannotationdatawindow.h"
-#include "annotationdatasetmodel.h"
 #include "functionalisationdialog.h"
 #include "generalsettings.h"
 

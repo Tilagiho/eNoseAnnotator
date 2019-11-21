@@ -31,8 +31,8 @@ linux-g++ {
 SOURCES += \
     addattributedialog.cpp \
     addselectiondialog.cpp \
-    annotation.cpp \
-    annotationdatasetmodel.cpp \
+    annotation_old.cpp \
+    annotationdatasetmodel_old.cpp \
     attributeeditor.cpp \
     bargraphwidget.cpp \
     classeditor.cpp \
@@ -55,8 +55,8 @@ SOURCES += \
 HEADERS += \
     addattributedialog.h \
     addselectiondialog.h \
-    annotation.h \
-    annotationdatasetmodel.h \
+    annotation_old.h \
+    annotationdatasetmodel_old.h \
     attributeeditor.h \
     bargraphwidget.h \
     classeditor.h \
