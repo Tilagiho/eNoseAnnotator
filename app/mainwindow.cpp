@@ -7,6 +7,7 @@
 #include "functionalisationdialog.h"
 #include "generalsettings.h"
 #include "classselector.h"
+#include "linegraphwidget.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -49,19 +50,19 @@ MainWindow::MainWindow(QWidget *parent)
 
     // connections:
     // selection flow
-    connect(ui->lGraph, &lineGraph::selectionChanged, mData, &MeasurementData::setSelection); // change selection in mData
-    connect(ui->lGraph, &lineGraph::selectionChanged, this, [this](double, double) {
+    connect(ui->lGraph, &LineGraphWidget::selectionChanged, mData, &MeasurementData::setSelection); // change selection in mData
+    connect(ui->lGraph, &LineGraphWidget::selectionChanged, this, [this](double, double) {
         ui->data_info_widget->showAddSelectionButton();
     });   // show add selection button
 
-    connect(ui->lGraph, &lineGraph::selectionCleared, mData, &MeasurementData::clearSelection); // clear selection in mData
-    connect(ui->lGraph, &lineGraph::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars);  // clear vector in bGraph
-    connect(ui->lGraph, &lineGraph::selectionCleared, ui->data_info_widget, &InfoWidget::hideAddSelectionButton);   // hide add selection button
+    connect(ui->lGraph, &LineGraphWidget::selectionCleared, mData, &MeasurementData::clearSelection); // clear selection in mData
+    connect(ui->lGraph, &LineGraphWidget::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars);  // clear vector in bGraph
+    connect(ui->lGraph, &LineGraphWidget::selectionCleared, ui->data_info_widget, &InfoWidget::hideAddSelectionButton);   // hide add selection button
 
     connect(mData, &MeasurementData::selectionVectorChanged, ui->bGraph, &BarGraphWidget::setBars);   // plot vector in bGraph
     connect(mData, &MeasurementData::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars); // clear vector in bGraph
 
-    connect(mData, &MeasurementData::labelsUpdated, ui->lGraph, &lineGraph::labelSelection); // draw selection and classes
+    connect(mData, &MeasurementData::labelsUpdated, ui->lGraph, &LineGraphWidget::labelSelection); // draw selection and classes
 
     connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::array<bool, MVector::size>){
         ui->actionClassify_selection->setEnabled(true);
@@ -80,12 +81,12 @@ MainWindow::MainWindow(QWidget *parent)
     }); // clear all graphs when data is reset
 
     // new data
-    connect(mData, &MeasurementData::dataAdded, ui->lGraph, &lineGraph::addMeasurement);    // add new data to lGraph                        // add new data to lGraph
-    connect(mData, &MeasurementData::absoluteDataAdded, ui->absLGraph, &lineGraph::addMeasurement); // add new absolute measruement
-    connect(mData, &MeasurementData::dataSet, ui->lGraph, &lineGraph::setData);     // set loaded data in lGraph
+    connect(mData, &MeasurementData::dataAdded, ui->lGraph, &LineGraphWidget::addMeasurement);    // add new data to lGraph                        // add new data to lGraph
+    connect(mData, &MeasurementData::absoluteDataAdded, ui->absLGraph, &LineGraphWidget::addMeasurement); // add new absolute measruement
+    connect(mData, &MeasurementData::dataSet, ui->lGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
 
     // sensor failures detected
-    connect(ui->absLGraph, &lineGraph::sensorFailure, this, [this](int channel){
+    connect(ui->absLGraph, &LineGraphWidget::sensorFailure, this, [this](int channel){
 
 
         auto failures = mData->getSensorFailures();
@@ -97,13 +98,13 @@ MainWindow::MainWindow(QWidget *parent)
             ui->data_info_widget->setFailures(failures);
         }
     }); // absGraph -> mData
-    connect(mData, &MeasurementData::sensorFailuresSet, ui->lGraph, &lineGraph::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
-    connect(mData, &MeasurementData::sensorFailuresSet, ui->absLGraph, &lineGraph::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
-    connect(ui->lGraph, &lineGraph::requestRedraw, this, [this]{
+    connect(mData, &MeasurementData::sensorFailuresSet, ui->lGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
+    connect(mData, &MeasurementData::sensorFailuresSet, ui->absLGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
+    connect(ui->lGraph, &LineGraphWidget::requestRedraw, this, [this]{
         // re-add data to graph
         ui->lGraph->setData(mData->getRelativeData());
     });
-    connect(ui->absLGraph, &lineGraph::requestRedraw, this, [this]{
+    connect(ui->absLGraph, &LineGraphWidget::requestRedraw, this, [this]{
         // re-add data to graph
         ui->absLGraph->setData(mData->getAbsoluteData());
     });

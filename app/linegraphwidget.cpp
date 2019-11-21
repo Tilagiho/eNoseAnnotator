@@ -1,13 +1,13 @@
-#include "linegraph.h"
-#include "ui_linegraph.h"
+#include "linegraphwidget.h"
+#include "ui_linegraphwidget.h"
 #include "sensorcolor.h"
 
 #include <math.h>
 
 
-lineGraph::lineGraph(QWidget *parent, uint startTime) :
+LineGraphWidget::LineGraphWidget(QWidget *parent, uint startTime) :
     QWidget(parent),
-    ui(new Ui::lineGraph)
+    ui(new Ui::LineGraphWidget)
 {
     ui->setupUi(this);
 
@@ -33,12 +33,12 @@ lineGraph::lineGraph(QWidget *parent, uint startTime) :
     QVector<double> timestampVector;
 }
 
-lineGraph::~lineGraph()
+LineGraphWidget::~LineGraphWidget()
 {
     delete ui;
 }
 
-void lineGraph::setupGraph()
+void LineGraphWidget::setupGraph()
 {
     // graph is dragable & zoomable in x direction
     ui->chart->setInteraction(QCP::iRangeDrag, true);
@@ -76,24 +76,40 @@ void lineGraph::setupGraph()
     ui->chart->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
 
     // set dark background gradient:
-    QLinearGradient gradient(0, 0, 0, 400);
-    gradient.setColorAt(0, QColor(90, 90, 90));
-    gradient.setColorAt(0.38, QColor(105, 105, 105));
-    gradient.setColorAt(1, QColor(70, 70, 70));
-    ui->chart->setBackground(QBrush(gradient));
+//    QLinearGradient gradient(0, 0, 0, 400);
+//    gradient.setColorAt(0, QColor(90, 90, 90));
+//    gradient.setColorAt(0.38, QColor(105, 105, 105));
+//    gradient.setColorAt(1, QColor(70, 70, 70));
+//    ui->chart->setBackground(QBrush(gradient));
+
+    ui->chart->setBackground(QBrush(QColor(255,250,240)));
 
     // set ticker colors
-    ui->chart->xAxis->setTickLabelColor(Qt::white);
-    ui->chart->xAxis->setLabelColor(Qt::white);
-    ui->chart->xAxis->setBasePen(QPen(Qt::white));
-    ui->chart->xAxis->setTickPen(QPen(Qt::white));
-    ui->chart->xAxis->setSubTickPen(QPen(Qt::white));
+//    ui->chart->xAxis->setTickLabelColor(Qt::white);
+//    ui->chart->xAxis->setLabelColor(Qt::white);
+//    ui->chart->xAxis->setBasePen(QPen(Qt::white));
+//    ui->chart->xAxis->setTickPen(QPen(Qt::white));
+//    ui->chart->xAxis->setSubTickPen(QPen(Qt::white));
 
-    ui->chart->yAxis->setTickLabelColor(Qt::white);
-    ui->chart->yAxis->setLabelColor(Qt::white);
-    ui->chart->yAxis->setBasePen(QPen(Qt::white));
-    ui->chart->yAxis->setTickPen(QPen(Qt::white));
-    ui->chart->yAxis->setSubTickPen(QPen(Qt::white));
+//    ui->chart->yAxis->setTickLabelColor(Qt::white);
+//    ui->chart->yAxis->setLabelColor(Qt::white);
+//    ui->chart->yAxis->setBasePen(QPen(Qt::white));
+//    ui->chart->yAxis->setTickPen(QPen(Qt::white));
+//    ui->chart->yAxis->setSubTickPen(QPen(Qt::white));
+
+    ui->chart->xAxis->setTickLabelColor(Qt::black);
+    ui->chart->xAxis->setLabelColor(Qt::black);
+    ui->chart->xAxis->setBasePen(QPen(Qt::black));
+    ui->chart->xAxis->setTickPen(QPen(Qt::black));
+    ui->chart->xAxis->setSubTickPen(QPen(Qt::black));
+    ui->chart->xAxis->setLabel("Time since start of measurement");
+
+    ui->chart->yAxis->setTickLabelColor(Qt::black);
+    ui->chart->yAxis->setLabelColor(Qt::black);
+    ui->chart->yAxis->setBasePen(QPen(Qt::black));
+    ui->chart->yAxis->setTickPen(QPen(Qt::black));
+    ui->chart->yAxis->setSubTickPen(QPen(Qt::black));
+    ui->chart->yAxis->setLabel("Deviation to base vector / %");
 
 
     // set axis ranges to show all data:
@@ -101,12 +117,12 @@ void lineGraph::setupGraph()
     ui->chart->yAxis->rescale(true);
 }
 
-void lineGraph::setStartTimestamp(uint timestamp)
+void LineGraphWidget::setStartTimestamp(uint timestamp)
 {
     startTimestamp = timestamp;
 }
 
-void lineGraph::setSensorFailureFlags(const std::array<bool, MVector::size> flags)
+void LineGraphWidget::setSensorFailureFlags(const std::array<bool, MVector::size> flags)
 {
     // flag redraw: will be set if graph has to be redrawn
     bool redraw = false;
@@ -132,12 +148,12 @@ void lineGraph::setSensorFailureFlags(const std::array<bool, MVector::size> flag
         replot();
 }
 
-void lineGraph::setXAxis(double x1, double x2)
+void LineGraphWidget::setXAxis(double x1, double x2)
 {
     ui->chart->xAxis->setRange(x1, x2);
 }
 
-void lineGraph::setLogXAxis(bool logOn)
+void LineGraphWidget::setLogXAxis(bool logOn)
 {
     if (logOn)
     {
@@ -154,12 +170,12 @@ void lineGraph::setLogXAxis(bool logOn)
     }
 }
 
-void lineGraph::setMaxVal(double val)
+void LineGraphWidget::setMaxVal(double val)
 {
     maxVal = val;
 }
 
-void lineGraph::replot(uint timestamp)
+void LineGraphWidget::replot(uint timestamp)
 {
     //!set new y-range
     double y_lower = 1000;
@@ -225,7 +241,7 @@ void lineGraph::replot(uint timestamp)
     ui->chart->replot();
 }
 
-void lineGraph::mousePressed(QMouseEvent * event)
+void LineGraphWidget::mousePressed(QMouseEvent * event)
 {
     if (event->button() == Qt::LeftButton)
     {
@@ -244,7 +260,7 @@ void lineGraph::mousePressed(QMouseEvent * event)
     }
 }
 
-void lineGraph::dataSelected()
+void LineGraphWidget::dataSelected()
 {
     // get selection
     QCPDataSelection selection;
@@ -284,7 +300,7 @@ void lineGraph::dataSelected()
     }
 }
 
-void lineGraph::labelSelection(QMap<uint, MVector> selectionMap)
+void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
 {
     // update class labels
     for (auto timestamp : selectionMap.keys())
@@ -312,7 +328,7 @@ void lineGraph::labelSelection(QMap<uint, MVector> selectionMap)
     ui->chart->replot();
 }
 
-void lineGraph::clearGraph(bool replot)
+void LineGraphWidget::clearGraph(bool replot)
 {
     for (int i=0; i<MVector::size; i++)
     {
@@ -322,7 +338,7 @@ void lineGraph::clearGraph(bool replot)
         ui->chart->replot();
 }
 
-void lineGraph::addMeasurement(MVector measurement, uint timestamp, bool rescale)
+void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool rescale)
 {
     // set timestamp:
     // find first non-failed sensor, set start timestamp if empty
@@ -360,7 +376,7 @@ void lineGraph::addMeasurement(MVector measurement, uint timestamp, bool rescale
         replot(timestamp);
 }
 
-void lineGraph::setData(QMap<uint, MVector> map)
+void LineGraphWidget::setData(QMap<uint, MVector> map)
 {
     clearGraph(false);
 
@@ -377,27 +393,27 @@ void lineGraph::setData(QMap<uint, MVector> map)
     replot();
 }
 
-void lineGraph::setAutoMoveGraph(bool value)
+void LineGraphWidget::setAutoMoveGraph(bool value)
 {
     autoMoveGraph = value;
 }
 
-double lineGraph::getMinVal() const
+double LineGraphWidget::getMinVal() const
 {
     return minVal;
 }
 
-void lineGraph::setMinVal(double value)
+void LineGraphWidget::setMinVal(double value)
 {
     minVal = value;
 }
 
-double lineGraph::getMaxVal() const
+double LineGraphWidget::getMaxVal() const
 {
     return maxVal;
 }
 
-std::array<uint, 2> lineGraph::getSelection()
+std::array<uint, 2> LineGraphWidget::getSelection()
 {
     // get data range of selected data
     QCPDataRange dataRange = dataSelection.dataRange();
@@ -412,7 +428,7 @@ std::array<uint, 2> lineGraph::getSelection()
     return selectionArray;
 }
 
-void lineGraph::setLabel(int xpos, QString userDefinedBrief, QString detectedBrief)
+void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detectedBrief)
 {
     int ymax = ui->chart->yAxis->range().upper;
 
@@ -491,7 +507,7 @@ void lineGraph::setLabel(int xpos, QString userDefinedBrief, QString detectedBri
 //    textLabel->setPen(QPen(Qt::black)); // show black border around text
 }
 
-double lineGraph::getIndex(int key)
+double LineGraphWidget::getIndex(int key)
 {
     auto iter = ui->chart->graph(0)->data()->findBegin(key);
 

@@ -19,11 +19,13 @@ BarGraphWidget::~BarGraphWidget()
 void BarGraphWidget::initGraph()
 {
     // set dark background gradient:
-    QLinearGradient gradient(0, 0, 0, 400);
-    gradient.setColorAt(0, QColor(90, 90, 90));
-    gradient.setColorAt(0.38, QColor(105, 105, 105));
-    gradient.setColorAt(1, QColor(70, 70, 70));
-    ui->barGraph->setBackground(QBrush(gradient));
+//    QLinearGradient gradient(0, 0, 0, 400);
+//    gradient.setColorAt(0, QColor(90, 90, 90));
+//    gradient.setColorAt(0.38, QColor(105, 105, 105));
+//    gradient.setColorAt(1, QColor(70, 70, 70));
+//    ui->barGraph->setBackground(QBrush(gradient));
+    ui->barGraph->setBackground(QBrush(QColor(255,250,240)));
+
 
     // init bars & ticks
     QVector<double> ticks;
@@ -73,25 +75,27 @@ void BarGraphWidget::initGraph()
     ui->barGraph->xAxis->setSubTicks(false);
     ui->barGraph->xAxis->setTickLength(0, 1);
     ui->barGraph->xAxis->setRange(-1, 65);
-    ui->barGraph->xAxis->setBasePen(QPen(Qt::white));
-    ui->barGraph->xAxis->setTickPen(QPen(Qt::white));
+    ui->barGraph->xAxis->setBasePen(QPen(Qt::black));
+    ui->barGraph->xAxis->setTickPen(QPen(Qt::black));
     ui->barGraph->xAxis->grid()->setVisible(true);
-    ui->barGraph->xAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
-    ui->barGraph->xAxis->setTickLabelColor(Qt::white);
-    ui->barGraph->xAxis->setLabelColor(Qt::white);
+    ui->barGraph->xAxis->grid()->setPen(QPen(Qt::black, 0, Qt::DotLine));
+    ui->barGraph->xAxis->setTickLabelColor(Qt::black);
+    ui->barGraph->xAxis->setLabelColor(Qt::black);
+    ui->barGraph->xAxis->setLabel("Sensor channel");
 
     // prepare y axis:
     ui->barGraph->yAxis->setRange(-2, 2);
     ui->barGraph->yAxis->setPadding(5); // a bit more space to the left border
     //ui->barGraph->yAxis->setLabel("Deviation");
-    ui->barGraph->yAxis->setBasePen(QPen(Qt::white));
-    ui->barGraph->yAxis->setTickPen(QPen(Qt::white));
-    ui->barGraph->yAxis->setSubTickPen(QPen(Qt::white));
+    ui->barGraph->yAxis->setBasePen(QPen(Qt::black));
+    ui->barGraph->yAxis->setTickPen(QPen(Qt::black));
+    ui->barGraph->yAxis->setSubTickPen(QPen(Qt::black));
     ui->barGraph->yAxis->grid()->setSubGridVisible(true);
-    ui->barGraph->yAxis->setTickLabelColor(Qt::white);
-    ui->barGraph->yAxis->setLabelColor(Qt::white);
-    ui->barGraph->yAxis->grid()->setPen(QPen(QColor(130, 130, 130), 0, Qt::SolidLine));
-    ui->barGraph->yAxis->grid()->setSubGridPen(QPen(QColor(130, 130, 130), 0, Qt::DotLine));
+    ui->barGraph->yAxis->setTickLabelColor(Qt::black);
+    ui->barGraph->yAxis->setLabelColor(Qt::black);
+    ui->barGraph->yAxis->grid()->setPen(QPen(Qt::black, 0, Qt::SolidLine));
+    ui->barGraph->yAxis->grid()->setSubGridPen(QPen(Qt::black, 0, Qt::DotLine));
+    ui->barGraph->yAxis->setLabel("Deviation to base vector / %");
 }
 
 void BarGraphWidget::replot()

@@ -7,18 +7,18 @@
 #include"mvector.h"
 
 namespace Ui {
-class lineGraph;
+class LineGraphWidget;
 }
 
-class lineGraph : public QWidget
+class LineGraphWidget : public QWidget
 {
     Q_OBJECT
 
 public:
 
 
-    explicit lineGraph(QWidget *parent = nullptr, uint startTime = QDateTime::currentDateTime().toTime_t());
-    ~lineGraph();
+    explicit LineGraphWidget(QWidget *parent = nullptr, uint startTime = QDateTime::currentDateTime().toTime_t());
+    ~LineGraphWidget();
     void clearGraph(bool replot = true);
 
     bool selectionEmpty();
@@ -59,7 +59,7 @@ signals:
     void requestRedraw();
 
 private:
-    Ui::lineGraph *ui;
+    Ui::LineGraphWidget *ui;
     const int defaultXWidth = 30; // defines default range of xAxis: (-1; defaultXWidth)
     const double yMin = 2.0;    // defines minimum range of yAxis: (-yMin;yMin)
 

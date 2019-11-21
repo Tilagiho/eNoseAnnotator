@@ -74,7 +74,7 @@
              </size>
             </property>
            </widget>
-           <widget class="lineGraph" name="absLGraph" native="true"/>
+           <widget class="LineGraphWidget" name="absLGraph" native="true"/>
           </widget>
          </item>
         </layout>
@@ -97,7 +97,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="0">
-          <widget class="lineGraph" name="lGraph" native="true">
+          <widget class="LineGraphWidget" name="lGraph" native="true">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -299,9 +299,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>lineGraph</class>
+   <class>LineGraphWidget</class>
    <extends>QWidget</extends>
-   <header>linegraph.h</header>
+   <header>linegraphwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

@@ -44,7 +44,7 @@ SOURCES += \
     functionalisationdialog.cpp \
     generalsettings.cpp \
     infowidget.cpp \
-    linegraph.cpp \
+    linegraphwidget.cpp \
     main.cpp \
     mainwindow.cpp \
     measurementdata.cpp \
@@ -71,7 +71,7 @@ HEADERS += \
     functionalisationdialog.h \
     generalsettings.h \
     infowidget.h \
-    linegraph.h \
+    linegraphwidget.h \
     mainwindow.h \
     measurementdata.h \
     mvector.h \
@@ -93,7 +93,7 @@ FORMS += \
     functionalisationdialog.ui \
     generalsettings.ui \
     infowidget.ui \
-    linegraph.ui \
+    linegraphwidget.ui \
     mainwindow.ui \
     setsensorfailuresdialog.ui \
     usbsettingsdialog.ui
