@@ -11,6 +11,8 @@
 - add absolute mode to lineGraph
     -> Delete x-label, Edit y-label
     -> add absolute values in kOhm
+- clean up saving/ loading
+    -> introduce a well defined save/load module ?
 
 // optional
 - move multiMode to vector

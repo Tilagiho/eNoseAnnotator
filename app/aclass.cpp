@@ -1,5 +1,7 @@
 #include "aclass.h"
 
+#include <QtCore>
+
 aClass::aClass(QString className, QString classAbreviation):
     name{className},
     abreviation{classAbreviation}
@@ -34,9 +36,18 @@ QString aClass::toString()
         return getName() + "[" + getAbreviation() + "]";
 }
 
+bool aClass::isClassString (QString string)
+{
+    auto list = string.split("[");
+
+    return list.size()==2 && list[1].endsWith("]");
+}
+
 aClass aClass::fromString(QString string)
 {
     auto list = string.split("[");
+
+    Q_ASSERT("This is not a valid class string" && list.size()==2 && list[1].endsWith("]"));
     QString name = list[0];
     QString abreviation = list[1].split("]")[0];
 

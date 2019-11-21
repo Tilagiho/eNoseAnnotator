@@ -358,7 +358,7 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
             funcList << QString::number(functionalisation[i]);
         out << "#functionalisation:" << funcList.join(";") << "\n";
 
-        // baseLevel
+        // base vector
         for (uint timestamp : baseLevelMap.keys())
         {
             out << "#baseLevel:" << timestamp << ";";
@@ -366,8 +366,27 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
             for (int i=0; i<MVector::size; i++)
                 valueList << QString::number(baseLevelMap[timestamp].array[i], 'g', 10);
             out <<  valueList.join(";") << "\n";
-
         }
+
+        // classes
+        out << "#classes:";
+        QStringList classStringList;
+        for (aClass c : classList)
+            classStringList << c.toString();
+        out << classStringList.join(";") << "\n";
+
+        // write header
+        QStringList headerList;
+
+        headerList << "#header:timestamp";
+
+        for (int i=0; i<MVector::size; i++)
+            headerList << "rv" + QString::number(i+1);
+
+        headerList << "user defined class";
+        headerList << "detected class";
+
+        out << headerList.join(";") << "\n";
 
         // write data
         auto iter = map.begin();
@@ -380,6 +399,8 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
             // vector
             for (int i=0; i<MVector::size; i++)
                 valueList << QString::number(iter.value().array[i], 'g', 10);
+            // classes
+            valueList << iter.value().userDefinedClass.toString() << iter.value().detectedClass.toString();
             out <<  valueList.join(";") << "\n";
 
             iter++;
@@ -461,8 +482,13 @@ bool MeasurementData::loadData(QWidget* widget)
             if (line[0] == '#') // meta info
             {
                 if (line.startsWith("#sensorId:"))
-                    setSensorId(line.right(line.length()-QString("#sensorId:").length()));
-                else if (line.startsWith("#failures:")) {
+                {
+                    QString sensorId = line.right(line.length()-QString("#sensorId:").length());
+                    sensorId = sensorId.split(";").join("");
+                    setSensorId(sensorId);
+                }
+                else if (line.startsWith("#failures:"))
+                {
                     QString failureString = line.right(line.length()-QString("#failures:").length());
                     failureString=failureString.split(";").join("");
                     if (failureString.size() != MVector::size)
@@ -492,14 +518,39 @@ bool MeasurementData::loadData(QWidget* widget)
 
                     setBaseLevel(timestamp, baseLevel);
                 }
+                else if (line.startsWith("#classes:"))
+                {
+                    QStringList classStringList =  line.right(line.length()-QString("#classes:").length()).split(";");
+                    for (QString classString : classStringList)
+                    {
+                        if (!aClass::isClassString(classString))
+                        {
+                            QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Invalid class name: " + classString, "The class name is invalid!");
+                            readOk = false;
+                            break;
+                        }
+                        aClass c = aClass::fromString(classString);
+
+                        // check consistency of classes
+                        if (classList.contains(c))
+                        {
+                            QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Invalid class list", "The class list is invalid!");
+                            readOk = false;
+                            break;
+                        }
+                        addClass(c);
+                    }
+                }
+                else if (line.startsWith("#header:"))
+                    ;   // ignore
                 else    // comment
                     comment += line.right(line.length()-1) + "\n";
             } else  // data
             {
                 QStringList query = line.split(";");
 
-                // line has to contain vector and baselevel vector
-                if (query.size() != MVector::size+1)
+                // line has to contain vector + [user defined and detected class]
+                if ((query.size() < MVector::size+1) || (query.size() > MVector::size+3))
                 {
                     QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "Data format is not compatible (len=" + QString::number(query.size()) + "):\n" + line);
                     readOk = false;
@@ -517,7 +568,28 @@ bool MeasurementData::loadData(QWidget* widget)
                 {
                     vector.array[i] = query[i+1].toDouble(&readOk);
                 }
+                if (query.size() > MVector::size+1)
+                {
+                    if (aClass::isClassString(query[MVector::size+2]))
+                        vector.userDefinedClass = aClass::fromString(query[MVector::size+2]);
+                    else
+                    {
+                        readOk = false;
+                        break;
+                    }
+                }
+                if (query.size() > MVector::size+2)
+                {
+                    if (aClass::isClassString(query[MVector::size+3]))
+                        vector.detectedClass = aClass::fromString(query[MVector::size+3]);
+                    else
+                    {
+                        readOk = false;
+                        break;
+                    }
+                }
                 addMeasurement(timestamp, vector, getBaseLevel(timestamp));
+                }
             }
 
             // catch errors reading files

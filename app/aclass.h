@@ -21,6 +21,8 @@ public:
 
     QString toString();
 
+    static bool isClassString (QString string);
+
     static aClass fromString(QString string);
 
     bool operator ==(const aClass &b) const;
