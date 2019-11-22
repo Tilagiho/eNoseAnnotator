@@ -15,6 +15,8 @@
 - set label color
 - save data before exiting
 - free zoom
+- load data: don't replot before loading all data, rescale to full measurement size
+- load/ save data: make timestamp string
 
 // optional
 - move multiMode to vector

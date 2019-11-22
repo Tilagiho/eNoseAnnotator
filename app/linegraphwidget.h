@@ -46,6 +46,7 @@ public slots:
     void setData(QMap<uint, MVector> map);
     void setSensorFailureFlags(const std::array<bool, MVector::size> sensorFailureFlags);
     void setAutoMoveGraph(bool value);
+    void clearSelection();
 
     /*
      * draws selection and class rectangles

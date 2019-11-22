@@ -19,7 +19,12 @@ MeasurementData::MeasurementData(QObject *parent) : QObject(parent)
 
 const QMap<uint, MVector> MeasurementData::getRelativeData()
 {
-    return data;
+    QMap<uint, MVector> relativeData;
+
+    for (uint timestamp : data.keys())
+        relativeData[timestamp] = data[timestamp].getRelativeVector(getBaseLevel(timestamp));
+
+    return relativeData;
 }
 
 const QMap<uint, MVector> MeasurementData::getAbsoluteData()
@@ -30,7 +35,7 @@ const QMap<uint, MVector> MeasurementData::getAbsoluteData()
         MVector absoluteVector;
 
         for (int i=0; i<MVector::size; i++)
-            absoluteVector.array[i] = (1+data[timestamp].array[i]) * getBaseLevel(timestamp).array[i];
+            absoluteVector[i] = (1+data[timestamp][i]) * getBaseLevel(timestamp)[i];
 
         absoluteMap[timestamp] = absoluteVector;
     }
@@ -93,13 +98,10 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
     MVector deviationVector;
     MVector baseLevelVector = getBaseLevel(timestamp);
 
-    for (int i=0; i<MVector::size; i++)
-        deviationVector.array[i] = 100.0 * (vector.array[i] / baseLevelVector.array[i] - 1.0);
-    deviationVector.userDefinedClass = vector.userDefinedClass;
-    deviationVector.detectedClass = vector.detectedClass;
+    deviationVector = vector.getRelativeVector(baseLevelVector);
 
     // add data, update dataChanged
-    data[timestamp] = deviationVector;
+    data[timestamp] = vector;
     if (!dataChanged)
         dataChanged = true;
 
@@ -121,6 +123,8 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
                 for (int i=0; i<MVector::size; i++)
                     headerList << "channel" + QString::number(i+1);
 
+                headerList << "user defined class" << "detected class";
+
                 stream << headerList.join(";") << "\n";
             }
 
@@ -129,22 +133,18 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
         }
     }
 
-//    qDebug() << timestamp << "Added measurement!";
-
     emit dataAdded(deviationVector, timestamp, true);
     emit absoluteDataAdded(vector, timestamp, true);
 }
 
 void MeasurementData::addMeasurement(uint timestamp, MVector vector, MVector baseLevel)
 {
-    MVector absoluteVector;
+    // if new baseLevel: add to baseLevelMap
+    if (baseLevelMap.isEmpty() || baseLevel != getBaseLevel(timestamp))
+        baseLevelMap[timestamp] = baseLevel;
 
-    for (int i=0; i<MVector::size; i++)
-        absoluteVector.array[i] = (1 + vector.array[i]/100.0) * baseLevel.array[i];
-    absoluteVector.userDefinedClass = vector.userDefinedClass;
-    absoluteVector.detectedClass = vector.detectedClass;
-
-    addMeasurement(timestamp, absoluteVector);
+    // add vector to data
+    addMeasurement(timestamp, vector);
 }
 
 MVector MeasurementData::getMeasurement(uint timestamp)
@@ -367,7 +367,7 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
             out << "#baseLevel:" << timestamp << ";";
             QStringList valueList;
             for (int i=0; i<MVector::size; i++)
-                valueList << QString::number(baseLevelMap[timestamp].array[i], 'g', 10);
+                valueList << QString::number(baseLevelMap[timestamp][i], 'g', 10);
             out <<  valueList.join(";") << "\n";
         }
 
@@ -384,7 +384,7 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
         headerList << "#header:timestamp";
 
         for (int i=0; i<MVector::size; i++)
-            headerList << "rv" + QString::number(i+1);
+            headerList << "ch" + QString::number(i+1);
 
         headerList << "user defined class";
         headerList << "detected class";
@@ -401,7 +401,7 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
 
             // vector
             for (int i=0; i<MVector::size; i++)
-                valueList << QString::number(iter.value().array[i], 'g', 10);
+                valueList << QString::number(iter.value()[i], 'g', 10);
             // classes
             valueList << iter.value().userDefinedClass.toString() << iter.value().detectedClass.toString();
             out <<  valueList.join(";") << "\n";
@@ -446,7 +446,6 @@ bool MeasurementData::loadData(QWidget* widget)
         return false;
     } else
     {
-
         QFile file(fileName);
         if (!file.open(QIODevice::ReadOnly))
         {
@@ -457,7 +456,7 @@ bool MeasurementData::loadData(QWidget* widget)
 
         // clear data
         clear();
-        clearSelection();
+        emit lgClearSelection();
         setComment("");
         setSensorId("");
         setFailures("0000000000000000000000000000000000000000000000000000000000000000");
@@ -545,7 +544,7 @@ bool MeasurementData::getMetaData(QString line)
         uint timestamp = valueList[0].toUInt();
         MVector baseLevel;
         for (int i=0; i<MVector::size; i++)
-            baseLevel.array[i] = valueList[i+1].toDouble();
+            baseLevel[i] = valueList[i+1].toDouble();
 
         setBaseLevel(timestamp, baseLevel);
     }
@@ -563,7 +562,7 @@ bool MeasurementData::getMetaData(QString line)
             aClass c = aClass::fromString(classString);
 
             // check consistency of classes
-            if (classList.contains(c))
+            if (!classList.contains(c))
             {
                 QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Invalid class list", "The class list is invalid!");
                 readOk = false;
@@ -601,7 +600,7 @@ bool MeasurementData::getData(QString line)
     MVector vector;
     for (int i=0; i<MVector::size; i++)
     {
-        vector.array[i] = query[i+1].toDouble(&readOk);
+        vector[i] = query[i+1].toDouble(&readOk);
     }
     if (query.size() > MVector::size+1)
     {
@@ -735,7 +734,7 @@ const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator 
     // init vector
     MVector vector;
     for (int i=0; i<MVector::size; i++)
-        vector.array[i] = 0.0;
+        vector[i] = 0.0;
 
     if (mode == MultiMode::Average)
     {
@@ -746,7 +745,7 @@ const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator 
     while (iter != end && (endTimestamp==0 || iter.key() <= endTimestamp))
     {
         for (int i=0; i<MVector::size; i++)
-            vector.array[i] += iter.value().array[i];
+            vector[i] += iter.value()[i];
 
         iter++;
         n++;
@@ -754,7 +753,7 @@ const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator 
 
 
     for (int i=0; i<MVector::size; i++)
-        vector.array[i] = vector.array[i] / n;
+        vector[i] = vector[i] / n;
     }
     else
         Q_ASSERT ("Error: Invalid MultiMode." && false);
@@ -772,14 +771,14 @@ const MVector MeasurementData::getSelectionVector(MultiMode mode)
     MVector vector;
     // zero init
     for (int i=0; i<MVector::size; i++)
-        vector.array[i] = 0.0;
+        vector[i] = 0.0;
 
     for (auto timestamp : selectionMap.keys())
     {
         // calculate average
         if (mode == MultiMode::Average)
             for (int i=0; i<MVector::size; i++)
-                vector.array[i] += selectionMap[timestamp].array[i] / selectionMap.size();
+                vector[i] += selectionMap[timestamp][i] / selectionMap.size();
     }
 
     return vector;

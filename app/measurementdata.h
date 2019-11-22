@@ -79,7 +79,7 @@ public:
     void addMeasurement(uint timestamp, MVector vector);
 
     /*
-     * add relative vector + baseLevelVector to data
+     * add absolute vector + baseLevelVector to data
      */
     void addMeasurement(uint timestamp, MVector vector, MVector baseLevelVector);
 
@@ -207,7 +207,13 @@ signals:
     void selectionVectorChanged(MVector vector, std::array<bool, MVector::size> sensorFailures);  // emits new vector when dataSelected is changed
     void selectionMapChanged(QMap<uint, MVector> selectionMap);
     void labelsUpdated(QMap<uint, MVector> updatedVectors);
+
+    // emitted when selectionData was cleared
     void selectionCleared();
+
+    // emitted when LineGraphWidget should clear its selection
+    void lgClearSelection();
+
     void dataReset();   // emitted when data is reset
     void dataAdded(MVector vector, uint timestamp, bool yRescale);
     void absoluteDataAdded(MVector vector, uint timestamp, bool yRescale);

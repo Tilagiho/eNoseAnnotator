@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->lGraph, &LineGraphWidget::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars);  // clear vector in bGraph
     connect(mData, &MeasurementData::selectionVectorChanged, ui->bGraph, &BarGraphWidget::setBars);   // plot vector in bGraph
     connect(mData, &MeasurementData::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars); // clear vector in bGraph
+    connect(mData, &MeasurementData::lgClearSelection, ui->lGraph, &LineGraphWidget::clearSelection);
 
     connect(mData, &MeasurementData::labelsUpdated, ui->lGraph, &LineGraphWidget::labelSelection); // draw selection and classes
 

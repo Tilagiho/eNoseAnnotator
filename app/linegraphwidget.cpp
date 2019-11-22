@@ -404,6 +404,11 @@ void LineGraphWidget::setAutoMoveGraph(bool value)
     autoMoveGraph = value;
 }
 
+void LineGraphWidget::clearSelection()
+{
+    ui->chart->deselectAll();
+}
+
 double LineGraphWidget::getMinVal() const
 {
     return minVal;
