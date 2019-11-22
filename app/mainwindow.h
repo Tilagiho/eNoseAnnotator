@@ -6,6 +6,7 @@
 #include "measurementdata.h"
 #include "usbdatasource.h"
 #include "mvector.h"
+#include <QCloseEvent>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -49,5 +50,8 @@ private:
 
     MeasurementData *mData = nullptr;
     USBDataSource *usbSource = nullptr;
+
+    void closeEvent (QCloseEvent *event);
 };
+
 #endif // MAINWINDOW_H

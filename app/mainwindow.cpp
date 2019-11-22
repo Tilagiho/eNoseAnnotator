@@ -352,3 +352,25 @@ void MainWindow::on_actionSet_detected_class_of_selection_triggered()
     disconnect(dialog, &ClassSelector::removeClass, mData, &MeasurementData::removeClass);
     disconnect(dialog, &ClassSelector::changeClass, mData, &MeasurementData::changeClass);
 }
+
+void MainWindow::closeEvent (QCloseEvent *event)
+{
+    if (mData->changed())
+    {
+        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "eNoseAnnotator",
+                                                                    tr("The measurement data has unsaved changes.\nDo you want to save the measurement before leaving?\n"),
+                                                                    QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::Yes);
+
+        if (resBtn == QMessageBox::Yes)
+        {
+            mData->saveData(this);
+            event->accept();
+        } else if (resBtn == QMessageBox::Cancel)
+        {
+            event->ignore();
+        } else
+        {
+            event->accept();
+        }
+    }
+}
