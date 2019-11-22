@@ -3,7 +3,7 @@
 eNoseAnnotator is a program used to view, annotate and store measurements of the eNose sensor. Currently Windows and Linux systems are supported.
 
 ## How to install
-Go to the release section of this repository and open the assets of the latest release.
+You can use eNoseAnnotator without compiling any source code or installing any additional software. Executables for Windows and Linux can be found in the release section of this repository.
 
 ### On Windows:
 Download "eNoseAnnotator-Windows.zip" from the assets of the latest release.
@@ -12,11 +12,11 @@ Unpack the zip file where you want to use the program. Go into the the directory
 ### On Linux:
 Download "eNoseAnnotator-\*.AppImage" from the assets of the latest release. "\*" is replaced by the latest version. Move the.AppImage to the location from where you want to run the program.
 
-Make the .AppImage executable: 
+Make the AppImage executable: 
 - In Nautilus (default ubuntu file browser): Right-click on the "eNoseAnnotator-\*.AppImage" in your file-browser and select "Properties". Under "Permissions" check "Allow executing file as program".
-- In terminal: Open terminal in the directory of the .AppImage. Execute `chmod +x eNoseAnnotator-*.AppImage`.
+- In terminal: Open terminal in the directory of the AppImage. Execute `chmod +x eNoseAnnotator-*.AppImage`.
 
-You can now run eNoseAnnotator by double-clicking the .AppImage in the file-browser or executing `./eNoseAnnotator-*.AppImage` in the terminal.
+You can now run eNoseAnnotator by double-clicking the AppImage in the file-browser or executing `./eNoseAnnotator-*.AppImage` in the terminal.
 
 ## How to use
 
