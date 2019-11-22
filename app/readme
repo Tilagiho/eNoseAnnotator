@@ -13,6 +13,8 @@
     -> introduce a well defined save/load module ?
 - set label size based on y-range
 - set label color
+- save data before exiting
+- free zoom
 
 // optional
 - move multiMode to vector
