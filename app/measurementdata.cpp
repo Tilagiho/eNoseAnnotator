@@ -338,7 +338,7 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
         QTextStream out(&file);
         // write info
         // version
-        out << "#measurement data " << version << "\n";
+        out << "#measurement data v" << version << "\n";
 
         // sensorId
         out << "#sensorId:" << sensorId << "\n";
@@ -471,19 +471,22 @@ bool MeasurementData::loadData(QWidget* widget)
         QString firstLine = in.readLine();
         qDebug() << firstLine;
 
-        if (!firstLine.startsWith("#measurement data "))
+        if (!firstLine.startsWith("#measurement data v"))
         {
             QMessageBox::warning(widget, "Can not read file", "The selected file is not a measurement file!");
             return false;
         }
-        version = line.right(line.length()-QString("#measurement data ").length());
+        version = firstLine.right(firstLine.length()-QString("#measurement data v").length());
+        version = version.split(";").join("");
 
         bool readOk = true;
-        while (in.readLineInto(&line))
+        while (readOk && in.readLineInto(&line))
         {
             qDebug() << line;
+            if (line == "")
+                continue;   // ignore
             if (line[0] == '~') // file help
-                ; // ignore
+                continue; // ignore
             else if (line[0] == '#') // meta info
                 readOk = getMetaData(line);
             else  // data
@@ -553,6 +556,9 @@ bool MeasurementData::getMetaData(QString line)
         QStringList classStringList =  line.right(line.length()-QString("#classes:").length()).split(";");
         for (QString classString : classStringList)
         {
+            if (classString == "")
+                continue;   // ignore empty classStrings
+
             if (!aClass::isClassString(classString))
             {
                 QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Invalid class name: " + classString, "The class name is invalid!");
@@ -562,7 +568,7 @@ bool MeasurementData::getMetaData(QString line)
             aClass c = aClass::fromString(classString);
 
             // check consistency of classes
-            if (!classList.contains(c))
+            if (classList.contains(c))
             {
                 QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Invalid class list", "The class list is invalid!");
                 readOk = false;
@@ -581,48 +587,103 @@ bool MeasurementData::getMetaData(QString line)
 
 bool MeasurementData::getData(QString line)
 {
-    bool readOk;
+    bool readOk = true;
 
-    QStringList query = line.split(";");
+    if (line == "") // ignore empty lines
+        return true;
 
-    // line has to contain vector + [user defined and detected class]
-    if ((query.size() < MVector::size+1) || (query.size() > MVector::size+3))
+    // support old format:
+    // - measurement values stored as relative vectors
+    if (version == "0.1")
     {
-        QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "Data format is not compatible (len=" + QString::number(query.size()) + "):\n" + line);
-        return false;
-    } else if (baseLevelMap.isEmpty())
-    {
-        QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "No baseLevel in data");
-        return false;
-    }
-    // prepare vector
-    uint timestamp = query[0].toUInt(&readOk);
-    MVector vector;
-    for (int i=0; i<MVector::size; i++)
-    {
-        vector[i] = query[i+1].toDouble(&readOk);
-    }
-    if (query.size() > MVector::size+1)
-    {
-        if (aClass::isClassString(query[MVector::size+1]))
-            vector.userDefinedClass = aClass::fromString(query[MVector::size+1]);
-        else
+        QStringList query = line.split(";");
+
+        // line has to contain vector + [user defined and detected class]
+        if ((query.size() < MVector::size+1) || (query.size() > MVector::size+3))
         {
+            QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "Data format is not compatible (len=" + QString::number(query.size()) + "):\n" + line);
+            return false;
+        } else if (baseLevelMap.isEmpty())
+        {
+            QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "No baseLevel in data");
             return false;
         }
-    }
-    if (query.size() > MVector::size+2)
-    {
-        if (aClass::isClassString(query[MVector::size+2]))
-            vector.detectedClass = aClass::fromString(query[MVector::size+2]);
-        else
+        // prepare vector
+        uint timestamp = query[0].toUInt(&readOk);
+        MVector vector;
+        for (int i=0; i<MVector::size; i++)
         {
+            vector[i] = query[i+1].toDouble(&readOk);
+        }
+        if (query.size() > MVector::size+1)
+        {
+            if (aClass::isClassString(query[MVector::size+1]))
+                vector.userDefinedClass = aClass::fromString(query[MVector::size+1]);
+            else
+            {
+                return false;
+            }
+        }
+        if (query.size() > MVector::size+2)
+        {
+            if (aClass::isClassString(query[MVector::size+2]))
+                vector.detectedClass = aClass::fromString(query[MVector::size+2]);
+            else
+            {
+                return false;
+            }
+        }
+        MVector baseVector = getBaseLevel(timestamp);
+
+        addMeasurement(timestamp, vector.getAbsoluteVector(baseVector), baseVector);
+
+        return readOk;
+    }
+    else //if (version == "1.0")   // current version -> default
+    {
+        QStringList query = line.split(";");
+
+        // line has to contain vector + [user defined and detected class]
+        if ((query.size() < MVector::size+1) || (query.size() > MVector::size+3))
+        {
+            QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "Data format is not compatible (len=" + QString::number(query.size()) + "):\n" + line);
+            return false;
+        } else if (baseLevelMap.isEmpty())
+        {
+            QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "No baseLevel in data");
             return false;
         }
-    }
-    addMeasurement(timestamp, vector, getBaseLevel(timestamp));
+        // prepare vector
+        uint timestamp = query[0].toUInt(&readOk);
+        MVector vector;
+        for (int i=0; i<MVector::size; i++)
+        {
+            vector[i] = query[i+1].toDouble(&readOk);
+        }
+        if (query.size() > MVector::size+1)
+        {
+            QString userString = query[MVector::size+1];
+            if (aClass::isClassString(userString))
+                vector.userDefinedClass = aClass::fromString(userString);
+            else
+            {
+                qWarning() << "Warning: User defined class invalid: \"" << userString << "\"";
+            }
+        }
+        if (query.size() > MVector::size+2)
+        {
+            QString classString = query[MVector::size+2];
+            if (aClass::isClassString(classString))
+                vector.detectedClass = aClass::fromString(classString);
+            else
+            {
+                qWarning() << "Warning: Detected class invalid: \"" << classString << "\"";
+            }
+        }
+        addMeasurement(timestamp, vector, getBaseLevel(timestamp));
 
-    return readOk;
+        return readOk;
+    }
 }
 
 void MeasurementData::generateRandomWalk()

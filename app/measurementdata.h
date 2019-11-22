@@ -236,7 +236,7 @@ private:
     bool saveRawInput = false;      // if true: save absolute values in "raw_input_" + timestamp
     QList<aClass> classList;
 
-    QString version = "v0.1";
+    QString version = "1.0";
 };
 
 #endif // MEASUREMENTDATA_H
