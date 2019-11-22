@@ -224,8 +224,8 @@ void LineGraphWidget::replot(uint timestamp)
         setLogXAxis(false);
         if (y_upper < yMin)
             y_upper = yMin;
-        if (y_lower > -yMin)
-            y_lower = -yMin;
+        if (y_lower > -0.6*yMin)
+            y_lower = -yMin*0.6;
 
         y_upper *= 1.4;
         y_lower *= 1.2;
@@ -237,6 +237,26 @@ void LineGraphWidget::replot(uint timestamp)
     // move x-range
     if (autoMoveGraph && timestamp != 0 && timestamp >= x_axis_range_upper+startTimestamp-4 && timestamp <= x_axis_range_upper+startTimestamp)
         ui->chart->xAxis->setRange(x_axis_range_lower+2, x_axis_range_upper+2);
+
+    // TODO:
+    // redraw labels
+    // find matching labels
+    // draw one big label
+    // --> works with current control flow?
+
+
+    // delete labels if too close to each o
+//    QCPRange range = ui->chart->xAxis->range();
+//    int x_width = range.upper-range.lower;
+//    auto iterEnd = userDefinedClassLabels.constEnd();
+//     --iterEnd; // skip last item
+//    for (auto iter = userDefinedClassLabels.constBegin(); iter != iterEnd; iter++)
+//    {
+//        int key = iter.key();
+//        int nextkey = (iter+1).key();
+
+//        if ()
+//    }
 
     ui->chart->replot();
 }
@@ -461,6 +481,7 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
         userLabel->position->setCoords(xpos, 1.00*ymax); // place position at center/top of axis rect
         userLabel->setText(userDefinedBrief);
         userLabel->setPen(QPen(Qt::black)); // show black border around text
+        userLabel->setPadding(QMargins(5,0,5,0));
     }
     // userDefinedBrief == "" && label exists: label has to be removed
     else if (userDefinedClassLabels.contains(xpos))
@@ -484,9 +505,10 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
 
         detectedLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
         detectedLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        detectedLabel->position->setCoords(xpos, 0.90*ymax); // place position at center/top of axis rect
+        detectedLabel->position->setCoords(xpos, 0.87*ymax); // place position at center/top of axis rect
         detectedLabel->setText(detectedBrief);
         detectedLabel->setPen(QPen(Qt::black)); // show black border around text
+        detectedLabel->setPadding(QMargins(5,0,5,0));
     }
     // detectedBrief == "" && label exists: label has to be removed
     else if (detectedClassLabels.contains(xpos))
