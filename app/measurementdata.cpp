@@ -664,10 +664,7 @@ void MeasurementData::setSelection(int lower, int upper)
 
     // selection deselected
     if (upper < lower)
-    {
-        emit selectionCleared();
         return;
-    }
 
     MVector vector;
 
