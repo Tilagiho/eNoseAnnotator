@@ -358,9 +358,8 @@ void MainWindow::closeEvent (QCloseEvent *event)
     if (mData->changed())
     {
         QMessageBox::StandardButton resBtn = QMessageBox::question( this, "eNoseAnnotator",
-                                                                    tr("The measurement data has unsaved changes.\nDo you want to save the measurement before leaving?\n"),
-                                                                    QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::Yes);
-
+                                                                    tr("The measurement data was changed without saving.\nDo you want to save the measurement before leaving?\n"),
+                                                                   QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::Yes);
         if (resBtn == QMessageBox::Yes)
         {
             mData->saveData(this);
