@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     // this->setStyleSheet("QSplitter::handle{background: black;}"); // make splitter visible
 
     // relative graph: ignore limits (minVal, maxVal)
-    ui->lGraph->useLimits = false;
+    ui->lGraph->setUseLimits(false);
 
     // connections:
     // selection flow
@@ -218,7 +218,7 @@ void MainWindow::on_actionSettings_triggered()
     // set current settings
     dialog.setMaxVal(ui->absLGraph->getMaxVal());   // max value for absolute values
     dialog.setMinVal(ui->absLGraph->getMinVal());   // min value for absolute values
-    dialog.setUseLimits(ui->absLGraph->useLimits);
+    dialog.setUseLimits(ui->absLGraph->getUseLimits());
     dialog.setShowAbsGraph(!ui->absLGraph->isHidden());
 
     dialog.setSaveRawInput(mData->getSaveRawInput());

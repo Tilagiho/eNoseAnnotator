@@ -35,9 +35,10 @@ public:
     void setMinVal(double value);
 
     // flag to determine if minVal and maxVal should be used when plotting data
-    bool useLimits = true;
 
 
+    bool getUseLimits() const;
+    void setUseLimits(bool value);
 
 public slots:
     void addMeasurement(MVector measurement, uint timestamp, bool rescale=false);   // add single measurement; rescale y-axis if rescale==true
@@ -65,6 +66,8 @@ private:
     const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
 
     const double labelRatio = 2.0/50.0;
+
+    bool useLimits = true;
 
     uint startTimestamp; // timestamp for start of graph
     QCPDataSelection dataSelection; // holds current data selection

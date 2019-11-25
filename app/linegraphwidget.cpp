@@ -348,6 +348,16 @@ void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
     ui->chart->replot();
 }
 
+bool LineGraphWidget::getUseLimits() const
+{
+    return useLimits;
+}
+
+void LineGraphWidget::setUseLimits(bool value)
+{
+    useLimits = value;
+}
+
 void LineGraphWidget::clearGraph(bool replot)
 {
     // clear graphs
