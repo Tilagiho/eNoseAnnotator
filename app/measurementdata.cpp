@@ -29,18 +29,7 @@ const QMap<uint, MVector> MeasurementData::getRelativeData()
 
 const QMap<uint, MVector> MeasurementData::getAbsoluteData()
 {
-    QMap<uint, MVector> absoluteMap;
-    for (uint timestamp : data.keys())
-    {
-        MVector absoluteVector;
-
-        for (int i=0; i<MVector::size; i++)
-            absoluteVector[i] = (1+data[timestamp][i]) * getBaseLevel(timestamp)[i];
-
-        absoluteMap[timestamp] = absoluteVector;
-    }
-
-    return absoluteMap;
+    return data;
 }
 
 const QMap<uint, MVector> MeasurementData::getSelectionMap()
