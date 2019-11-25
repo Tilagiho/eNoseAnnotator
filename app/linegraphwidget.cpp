@@ -124,28 +124,19 @@ void LineGraphWidget::setStartTimestamp(uint timestamp)
 
 void LineGraphWidget::setSensorFailureFlags(const std::array<bool, MVector::size> flags)
 {
-    // flag redraw: will be set if graph has to be redrawn
-    bool redraw = false;
-
     if (flags != sensorFailureFlags)
     {
         for (int i=0; i<MVector::size; i++)
         {
             if (flags[i] && !sensorFailureFlags[i])
-                ui->chart->graph(i)->data()->clear();
+                ui->chart->graph(i)->setVisible(false);
             else if (!flags[i] && sensorFailureFlags[i])
-            {
-                redraw = true;
-                break;
-            }
+                ui->chart->graph(i)->setVisible(true);
         }
     }
     sensorFailureFlags = flags;
 
-    if (redraw)
-        requestRedraw();
-    else
-        replot();
+    replot();
 }
 
 void LineGraphWidget::setXAxis(double x1, double x2)
@@ -188,6 +179,10 @@ void LineGraphWidget::replot(uint timestamp)
     //iterate through graph(i) data keys and values
 
     for (int i = 0; i < ui->chart->graphCount(); ++i) {
+        // ignore invisible graphs
+        if (!ui->chart->graph(i)->visible())
+            continue;
+
         QCPGraphDataContainer::const_iterator it = ui->chart->graph(i)->data()->constBegin();
         QCPGraphDataContainer::const_iterator itEnd = ui->chart->graph(i)->data()->constEnd();
         while (it != itEnd)
@@ -381,29 +376,18 @@ void LineGraphWidget::clearGraph(bool replot)
 void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool rescale)
 {
     // set timestamp:
-    // find first non-failed sensor, set start timestamp if empty
-    for (int i=0; i<MVector::size; i++)
-        if (!sensorFailureFlags[i] && ui->chart->graph(i)->data()->isEmpty())
-        {
-            setStartTimestamp(timestamp);
-            break;
-        }
+    if (ui->chart->graph(0)->data()->isEmpty())
+        setStartTimestamp(timestamp);
 
     int xpos = timestamp-startTimestamp;
     for (int i=0; i<MVector::size; i++)
     {
-        // ignore sensors with failures
-        if (!sensorFailureFlags[i])
-        {
-            // draw point, if:
-            // no limits violated
-            // ignore limits if useLimits not true
-            bool drawAllowed = !useLimits || (measurement.array[i] > minVal && measurement.array[i] < maxVal);
-            if (drawAllowed)
-                ui->chart->graph(i)->addData(xpos, measurement.array[i]);
-            else
-                emit sensorFailure(i);
-        }
+        // add data point
+        ui->chart->graph(i)->addData(xpos, measurement.array[i]);
+
+        // emit sensor failures
+        if (useLimits && (measurement.array[i] < minVal || measurement.array[i] > maxVal))
+            emit sensorFailure(i);
     }
 
     qDebug() << timestamp << " : Added new Data";
