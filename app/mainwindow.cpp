@@ -226,12 +226,91 @@ void MainWindow::on_actionSettings_triggered()
     if (dialog.exec())
     {
         // get new settings
-        ui->absLGraph->setMaxVal(dialog.getMaxVal());
-        ui->absLGraph->setMinVal(dialog.getMinVal());
+        // --- save raw output? ---
         mData->setSaveRawInput(dialog.getSaveRawInput());
-        ui->absLGraph->useLimits = dialog.getUseLimits();
 
-        // abs graph
+        // --- limits ---
+        // get limits
+        int newMaxVal = dialog.getMaxVal();
+        int newMinVal = dialog.getMinVal();
+        int oldMaxVal = ui->absLGraph->getMaxVal();
+        int oldMinVal = ui->absLGraph->getMinVal();
+
+        // get useLimits
+        bool newUseLimits = dialog.getUseLimits();
+        bool oldUseLimits = ui->absLGraph->getUseLimits();
+
+        // recalc sensor failure flags if limits or useLimits changed
+        bool limitsChanged = (newMaxVal != oldMaxVal) || (newMaxVal != oldMinVal);
+        bool useLimitsChanged = newUseLimits != oldUseLimits;
+
+        auto sensorFailureFlags = mData->getSensorFailures();
+
+        // 4 cases for change
+        // 1. useLimits: true -> false:
+        //      set all sensorFailureFlags added by limit violations to false
+        // 2. useLimits: false -> true:
+        //      find all limit violations and set the according flags to true
+        // 3. limits: minVal gets bigger or maxVal smaller
+        //      find old violations that are no violations anymore and set flag to false
+        // 4. limits: minVal gets smaller or maxVal bigger
+        //      find new violations that were no violations and set flag  to true
+        if (limitsChanged || useLimitsChanged)
+        {
+            auto dataMap = mData->getAbsoluteData();
+
+            for (MVector vector : dataMap)
+            {
+                for (int i = 0; i<MVector::size; i++)
+                {
+                    // case 1+2
+                    if (useLimitsChanged)
+                    {
+                        if (vector[i] < newMinVal || vector[i] > newMaxVal)
+                            sensorFailureFlags[i] = newUseLimits;   // useLimits == true -> set flags, else delete them
+                    }
+                    // case 3+4
+                    else    // limitsChanged
+                    {
+                        // minVal changed
+                        if (newMinVal < oldMinVal)  // case 4
+                        {
+                            for (int i=0; i<MVector::size; i++)
+                                if (vector[i] >= newMinVal && vector[i] < oldMinVal)
+                                    sensorFailureFlags[i] = false;
+                        } else if (newMinVal > oldMinVal)   // case 3
+                        {
+                            for (int i=0; i<MVector::size; i++)
+                                if (vector[i] < newMinVal && vector[i] >= oldMinVal)
+                                    sensorFailureFlags[i] = true;
+                        }
+
+                        // maxVal changed
+                        if (newMaxVal > oldMaxVal)  // case 4
+                        {
+                            for (int i=0; i<MVector::size; i++)
+                                if (vector[i] <= newMaxVal && vector[i] > oldMaxVal)
+                                    sensorFailureFlags[i] = false;
+                        } else if (newMaxVal < oldMaxVal)   // case 3
+                        {
+                            for (int i=0; i<MVector::size; i++)
+                                if (vector[i] > newMaxVal && vector[i] <= oldMaxVal)
+                                    sensorFailureFlags[i] = true;
+                        }
+                    }
+
+                }
+            }
+
+            // set new values
+            ui->absLGraph->setMaxVal(newMaxVal);
+            ui->absLGraph->setMinVal(newMinVal);
+            mData->setSensorFailures(sensorFailureFlags);
+            ui->absLGraph->setUseLimits(newUseLimits);
+        }
+
+
+        // --- show/ hide abs graph ---
         if (dialog.getShowAbsGraph() && ui->absLGraph->isHidden())
             ui->absLGraph->show();
         else if (!dialog.getShowAbsGraph() && !ui->absLGraph->isHidden())
