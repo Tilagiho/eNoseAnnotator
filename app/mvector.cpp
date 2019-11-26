@@ -51,7 +51,7 @@ MVector MVector::zeroes()
     return MVector();
 }
 
-MVector MVector::getRelativeVector(MVector baseVector)
+MVector MVector::toRelativeVector(MVector baseVector)
 {
     // cp vector data
     MVector deviationVector = *this;
@@ -59,7 +59,7 @@ MVector MVector::getRelativeVector(MVector baseVector)
     // calculate deviation / %
     for (int i=0; i<size; i++)
     {
-        deviationVector[i] = 100 * (this->array[i] /  baseVector[i] - 1.0);
+        deviationVector[i] = 100 * ((this->array[i] /  baseVector[i]) - 1.0);
     }
 
     return deviationVector;

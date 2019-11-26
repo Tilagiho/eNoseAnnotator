@@ -22,7 +22,7 @@ const QMap<uint, MVector> MeasurementData::getRelativeData()
     QMap<uint, MVector> relativeData;
 
     for (uint timestamp : data.keys())
-        relativeData[timestamp] = data[timestamp].getRelativeVector(getBaseLevel(timestamp));
+        relativeData[timestamp] = data[timestamp].toRelativeVector(getBaseLevel(timestamp));
 
     return relativeData;
 }
@@ -87,7 +87,7 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
     MVector deviationVector;
     MVector baseLevelVector = getBaseLevel(timestamp);
 
-    deviationVector = vector.getRelativeVector(baseLevelVector);
+    deviationVector = vector.toRelativeVector(baseLevelVector);
 
     // add data, update dataChanged
     data[timestamp] = vector;
