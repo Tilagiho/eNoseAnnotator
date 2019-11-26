@@ -723,9 +723,6 @@ void MeasurementData::setSelection(int lower, int upper)
     // single selection:
     if (lower == upper)
     {
-        // get selected vector
-        vector = data[lower];
-
         // update selectData
         selectedData[lower] = data[lower];
     }
@@ -743,12 +740,13 @@ void MeasurementData::setSelection(int lower, int upper)
                  beginIter = data.find(timestamp);
                 beginIterSet = true;
             }
-            if (!endIterSet && timestamp >= upper)
+            if (!endIterSet && timestamp > upper)
             {
                 endIter = data.find((timestamp));
                 endIterSet = true;
                 // increment endIter in order to point one element further than upper
-                endIter++;
+//                endIter++;
+                break;
             }
         }
 
@@ -758,77 +756,83 @@ void MeasurementData::setSelection(int lower, int upper)
 
         // no vector in the interval [lower; upper]
         if (!beginIterSet || (beginIter != data.end() && beginIter.key()>upper) || (endIter != data.end() && endIter.key()<lower))
-        {
-            clearSelection();
             return;
-        }
-
-        // calculate average vector
-        vector = getSelectionVector(beginIter, endIter);
 
         // add selected vectors to seletedData
         for (auto iter=beginIter; iter != endIter; iter++)
             selectedData[iter.key()] = iter.value();
     }
 
+    // calculate average vector
+    if (selectedData.isEmpty())
+        return;
+
+    vector = getSelectionVector();
+
     qDebug() << "Selection made: " << selectedData.firstKey() << ", " << selectedData.lastKey() << "\n" << vector.toString() << "\n";
-    emit selectionVectorChanged(vector, sensorFailures);
+
+    emit selectionVectorChanged(vector, sensorFailures, functionalisation);
     emit selectionMapChanged(selectedData);
 }
 
-const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp, MultiMode mode)
-{
-    // init vector
-    MVector vector;
-    for (int i=0; i<MVector::size; i++)
-        vector[i] = 0.0;
+//const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp, MultiMode mode)
+//{
+//    // init vector
+//    MVector vector;
+//    for (int i=0; i<MVector::size; i++)
+//        vector[i] = 0.0;
 
-    if (mode == MultiMode::Average)
-    {
-    auto iter = begin;
-    int n = 0;
+//    if (mode == MultiMode::Average)
+//    {
+//    auto iter = begin;
+//    int n = 0;
 
-    // iterate until end; if endTimestamp was set (!= 0) also check for endTimestamp
-    while (iter != end && (endTimestamp==0 || iter.key() <= endTimestamp))
-    {
-        for (int i=0; i<MVector::size; i++)
-            vector[i] += iter.value()[i];
+//    // iterate until end; if endTimestamp was set (!= 0) also check for endTimestamp
+//    while (iter != end && (endTimestamp==0 || iter.key() <= endTimestamp))
+//    {
+//        for (int i=0; i<MVector::size; i++)
+//            vector[i] += iter.value()[i];
 
-        iter++;
-        n++;
-    }
+//        iter++;
+//        n++;
+//    }
 
 
-    for (int i=0; i<MVector::size; i++)
-        vector[i] = vector[i] / n;
-    }
-    else
-        Q_ASSERT ("Error: Invalid MultiMode." && false);
+//    for (int i=0; i<MVector::size; i++)
+//        vector[i] = vector[i] / n;
+//    }
+//    else
+//        Q_ASSERT ("Error: Invalid MultiMode." && false);
 
-    return vector;
-}
+//    return vector;
+//}
 
 const MVector MeasurementData::getSelectionVector(MultiMode mode)
 {
     // only average supported
     Q_ASSERT(mode == MultiMode::Average);
 
-    auto selectionMap = getSelectionMap();
-
-    MVector vector;
+    MVector selectionVector;
     // zero init
     for (int i=0; i<MVector::size; i++)
-        vector[i] = 0.0;
+        selectionVector[i] = 0.0;
 
-    for (auto timestamp : selectionMap.keys())
+    for (auto timestamp : selectedData.keys())
     {
+        // ignore zero vectors
+        if (selectedData[timestamp] == MVector::zeroes())
+            continue;
+
+        // get relative selection vector
+        MVector vector = selectedData[timestamp].toRelativeVector(getBaseLevel(timestamp));
+
         // calculate average
         if (mode == MultiMode::Average)
             for (int i=0; i<MVector::size; i++)
-                vector[i] += selectionMap[timestamp][i] / selectionMap.size();
+                selectionVector[i] += vector[i] / selectedData.size();
     }
 
-    return vector;
+    return selectionVector;
 }
 
 QString MeasurementData::sensorFailureString(std::array<bool, 64> failureBits)

@@ -130,11 +130,11 @@ public:
      */
     void generateRandomWalk();
 
-    /*
-     * calculates average of vectors in range from iterator begin until, but not including, iterator end
-     * if endTimestamp is set: additionally end if timestamp of current vector > endTimestamp
-     */
-    static const MVector getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp=0, MultiMode mode=MultiMode::Average);
+//    /*
+//     * calculates average of vectors in range from iterator begin until, but not including, iterator end
+//     * if endTimestamp is set: additionally end if timestamp of current vector > endTimestamp
+//     */
+//    static const MVector getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp=0, MultiMode mode=MultiMode::Average);
 
     const MVector getSelectionVector(MultiMode mode=MultiMode::Average);
 
@@ -193,7 +193,7 @@ public slots:
     void changeClass(aClass oldClass, aClass newClass);
 
 signals:
-    void selectionVectorChanged(MVector vector, std::array<bool, MVector::size> sensorFailures);  // emits new vector when dataSelected is changed
+    void selectionVectorChanged(MVector vector, std::array<bool, MVector::size> sensorFailures, std::array<int, MVector::size>);  // emits new vector when dataSelected is changed
     void selectionMapChanged(QMap<uint, MVector> selectionMap);
     void labelsUpdated(QMap<uint, MVector> updatedVectors);
 
