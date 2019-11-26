@@ -460,13 +460,17 @@ bool MeasurementData::loadData(QWidget* widget)
         QString firstLine = in.readLine();
         qDebug() << firstLine;
 
-        if (!firstLine.startsWith("#measurement data v"))
+        if (!firstLine.startsWith("#measurement data"))
         {
             QMessageBox::warning(widget, "Can not read file", "The selected file is not a measurement file!");
             return false;
         }
-        version = firstLine.right(firstLine.length()-QString("#measurement data v").length());
-        version = version.split(";").join("");
+        if (firstLine.startsWith("#measurement data v"))
+        {
+            version = firstLine.right(firstLine.length()-QString("#measurement data v").length());
+            version = version.split(";").join("");
+        } else
+            version = "0.1";
 
         bool readOk = true;
         while (readOk && in.readLineInto(&line))
