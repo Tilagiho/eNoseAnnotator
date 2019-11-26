@@ -430,7 +430,7 @@ void MainWindow::on_actionSet_detected_class_of_selection_triggered()
     if (dialog->exec())
     {
         aClass selectedClass = dialog->getClass();
-        Q_ASSERT("Selected class is not part of mData!" && mData->getClassList().contains(selectedClass));
+        Q_ASSERT("Selected class is not part of mData!" && (selectedClass.isEmpty() || mData->getClassList().contains(selectedClass)));
 
         mData->setDetectedClassOfSelection(selectedClass.getName(), selectedClass.getAbreviation());
     }
