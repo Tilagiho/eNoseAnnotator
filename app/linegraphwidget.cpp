@@ -233,6 +233,8 @@ void LineGraphWidget::replot(uint timestamp)
     if (autoMoveGraph && timestamp != 0 && timestamp >= x_axis_range_upper+startTimestamp-4 && timestamp <= x_axis_range_upper+startTimestamp)
         ui->chart->xAxis->setRange(x_axis_range_lower+2, x_axis_range_upper+2);
 
+    redrawLabels();
+
     // TODO:
     // redraw labels
     // find matching labels
@@ -280,8 +282,12 @@ void LineGraphWidget::dataSelected()
     // get selection
     QCPDataSelection selection;
     for (int i=0; i<MVector::size; i++)
-        if (ui->chart->graph(i)->selected())
-            selection = ui->chart->graph(0)->selection();
+    {
+        selection = ui->chart->graph(0)->selection();
+
+        if (!selection.isEmpty())
+            break;
+    }
 
     // find x range of selection rectangle
     QCPRange range = ui->chart->selectionRect()->range(ui->chart->xAxis);
@@ -293,26 +299,25 @@ void LineGraphWidget::dataSelected()
 
     qDebug() << "Selection Rect: " << lower << ", " << upper;
 
-    if (upper<lower)
+    if (upper<lower || selection.isEmpty())
     {
         dataSelection.clear();
         emit selectionCleared();
+        return;
     }
-    else
+
+    qDebug() << "Got selection: " << selection;
+
+
+    // select all graphs in range of selection
+    for (int i=0; i < ui->chart->graphCount(); i++)
     {
-        qDebug() << "Got selection: " << selection;
-
-
-        // select all graphs in range of selection
-        for (int i=0; i < ui->chart->graphCount(); i++)
-        {
-            ui->chart->graph(i)->setSelection(selection);
-        }
-
-        // save selection and emit signal for changed selection
-        dataSelection = selection;
-        emit selectionChanged(lower+startTimestamp, upper+startTimestamp);
+        ui->chart->graph(i)->setSelection(selection);
     }
+
+    // save selection and emit signal for changed selection
+    dataSelection = selection;
+    emit selectionChanged(lower+startTimestamp, upper+startTimestamp);
 }
 
 void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
@@ -340,7 +345,7 @@ void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
             setLabel(xpos, vector.userDefinedClass.getAbreviation(), vector.detectedClass.getAbreviation());
     }
 
-    ui->chart->replot();
+    redrawLabels();
 }
 
 bool LineGraphWidget::getUseLimits() const
@@ -510,28 +515,177 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
         ui->chart->removeItem(detectedClassLabels[xpos]);
         detectedClassLabels.remove(xpos);
     }
-//    // user defined class already exists
-//    if (userDefinedClassLabels.contains(xpos))
-//    {
-//        // class should not exist
-//        if (userDefinedBrief == "")
-//            ui->chart->removeItem(userDefinedClassLabels[xpos])
-//        // class should exist
-//        else
-//        {
-//            //
-//            userDefinedClassLabels[xpos]->setText(userDefinedBrief);
-//            userDefinedClassLabels[xpos]->position->setCoords(xpos, 0.95*ymax)
-//        }
-//    }
-//    // add the text label at the top:
-//    QCPItemText *userLabel = new QCPItemText(ui->chart);
-//    textLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
-//    textLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
-//    textLabel->position->setCoords(0.5, 0); // place position at center/top of axis rect
-//    textLabel->setText(vector.userDefinedClassBrief);
-////    textLabel->setFont(QFont(font().family(), 16)); // make font a bit larger
-//    textLabel->setPen(QPen(Qt::black)); // show black border around text
+}
+
+void LineGraphWidget::redrawLabels()
+{
+   for (auto label : joinedUserDefinedClassLabels)
+       ui->chart->removeItem(label);
+    joinedUserDefinedClassLabels.clear();
+
+    for (auto label : joinedDetectedClassLabels)
+        ui->chart->removeItem(label);
+     joinedDetectedClassLabels.clear();
+
+    QCPRange xRange = ui->chart->xAxis->range();
+    QCPRange yRange = ui->chart->yAxis->range();
+
+    // ___ user defined labels ___
+    QCPItemText* beginLabel = nullptr;    // marks the begin of labels of labels with the current class
+    QCPItemText* lastLabel = nullptr;
+    QList<QList<QCPItemText*>> matchingLabels;
+    QList<QCPItemText*> currentMatches;
+
+    for (int xpos : userDefinedClassLabels.keys())
+    {
+        if (xRange.lower-2 <= xpos && xpos <= xRange.upper+2)
+        {
+            auto currentLabel = userDefinedClassLabels[xpos];
+            currentLabel->setVisible(true);
+
+            // set first beginlabel
+            if (beginLabel == nullptr)
+                beginLabel = currentLabel;
+
+            // matching classes
+            if (beginLabel->text() == currentLabel->text())
+                currentMatches << currentLabel;
+            // new class begins
+            // store current matches & begin next match
+            else
+            {
+                matchingLabels << currentMatches;
+                currentMatches.clear();
+                beginLabel = currentLabel;
+            }
+            lastLabel = currentLabel;
+        }
+    }
+    // store last match
+    matchingLabels << currentMatches;
+
+    // go through matches & create joined labels
+    for (auto matchList : matchingLabels)
+    {
+        if (matchList.size() > 1)
+        {
+            // hide single labels
+            for (auto label : matchList)
+                label->setVisible(false);
+            QCPItemText* joinedUserLabel = new QCPItemText(ui->chart);
+
+            joinedUserLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
+            joinedUserLabel->position->setType(QCPItemPosition::ptPlotCoords);
+            joinedUserLabel->setText(beginLabel->text());
+            joinedUserLabel->setPen(QPen(Qt::black)); // show black border around text
+
+            // set coords
+            int beginX = matchList.first()->positions()[0]->coords().x();
+            int visBeginX;   // visible begin
+            if (beginX >= xRange.lower)
+                visBeginX = beginX;
+            else
+                visBeginX = matchList.at(1)->positions()[0]->coords().x();
+
+            int endX = matchList.last()->positions()[0]->coords().x();
+            int visEndX;
+            if (endX <= xRange.upper)
+                visEndX = endX;
+            else
+                visEndX = matchList.at(matchList.size()-2)->positions()[0]->coords().x();
+
+            double xmid = (visBeginX+visEndX)/2.0;
+            joinedUserLabel->position->setCoords(xmid, 1.00*yRange.upper); // place position at center/top of axis rect
+
+            // set width
+            int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
+            double relativeClassWidth = (endX - beginX) / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
+            int margin = qRound(relativeClassWidth * xAxisWidth / 2.0);
+            joinedUserLabel->setPadding(QMargins(margin,0,margin,0));
+
+            joinedUserDefinedClassLabels[xmid] = joinedUserLabel;
+        }
+    }
+
+    // ___ detected labels ___
+    beginLabel = nullptr;    // marks the begin of labels of labels with the current class
+    lastLabel = nullptr;
+    matchingLabels.clear();
+    currentMatches.clear();
+
+    for (int xpos : detectedClassLabels.keys())
+    {
+        if (xRange.lower-2 <= xpos && xpos <= xRange.upper+2)
+        {
+            auto currentLabel = detectedClassLabels[xpos];
+            currentLabel->setVisible(true);
+
+            // set first beginlabel
+            if (beginLabel == nullptr)
+                beginLabel = currentLabel;
+
+            // matching classes
+            if (beginLabel->text() == currentLabel->text())
+                currentMatches << currentLabel;
+            // new class begins
+            // store current matches & begin next match
+            else
+            {
+                matchingLabels << currentMatches;
+                currentMatches.clear();
+                beginLabel = currentLabel;
+            }
+            lastLabel = currentLabel;
+        }
+    }
+    // store last match
+    matchingLabels << currentMatches;
+
+    // go through matches & create joined labels
+    for (auto matchList : matchingLabels)
+    {
+        if (matchList.size() > 1)
+        {
+            // hide single labels
+            for (auto label : matchList)
+                label->setVisible(false);
+            QCPItemText* joinedDetectedLabel = new QCPItemText(ui->chart);
+
+            joinedDetectedLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
+            joinedDetectedLabel->position->setType(QCPItemPosition::ptPlotCoords);
+            joinedDetectedLabel->setText(beginLabel->text());
+            joinedDetectedLabel->setPen(QPen(Qt::black)); // show black border around text
+
+            // set coords
+            int beginX = matchList.first()->positions()[0]->coords().x();
+            int visBeginX;   // visible begin
+            if (beginX >= xRange.lower)
+                visBeginX = beginX;
+            else
+                visBeginX = matchList.at(1)->positions()[0]->coords().x();
+
+            int endX = matchList.last()->positions()[0]->coords().x();
+            int visEndX;
+            if (endX <= xRange.upper)
+                visEndX = endX;
+            else
+                visEndX = matchList.at(matchList.size()-2)->positions()[0]->coords().x();
+
+            double xmid = (visBeginX+visEndX)/2.0;
+            joinedDetectedLabel->position->setCoords(xmid, 0.87*yRange.upper); // place position at center/top of axis rect
+
+            // set width
+            int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
+            double relativeClassWidth = (endX - beginX) / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
+            int margin = qRound(relativeClassWidth * xAxisWidth / 2.0);
+
+            joinedDetectedLabel->setPadding(QMargins(margin,0,margin,0));
+
+            joinedDetectedClassLabels[xmid] = joinedDetectedLabel;
+        }
+    }
+
+    ui->chart->replot();
 }
 
 double LineGraphWidget::getIndex(int key)

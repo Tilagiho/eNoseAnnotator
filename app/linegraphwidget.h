@@ -84,6 +84,9 @@ private:
     QMap<int, QCPItemText *> userDefinedClassLabels;
     QMap<int, QCPItemText *> detectedClassLabels;
 
+    QMap<double, QCPItemText *> joinedUserDefinedClassLabels;
+    QMap<double, QCPItemText *> joinedDetectedClassLabels;
+
     void setupGraph();
 
     /*
@@ -101,6 +104,12 @@ private slots:
      * draws label of user+detected class at top of graph
      */
     void setLabel(int xpos, QString userDefinedBrief, QString detectedBrief);
+
+    /*
+     *  goes through userDefinedLabels and detectedLabels in range of x-axis
+     *  joins successive labels with matching classes
+     */
+    void redrawLabels();
 };
 
 #endif // LINEGRAPH_H
