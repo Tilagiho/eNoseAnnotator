@@ -35,9 +35,10 @@ public:
     void setMinVal(double value);
 
     // flag to determine if minVal and maxVal should be used when plotting data
-    bool useLimits = true;
 
 
+    bool getUseLimits() const;
+    void setUseLimits(bool value);
 
 public slots:
     void addMeasurement(MVector measurement, uint timestamp, bool rescale=false);   // add single measurement; rescale y-axis if rescale==true
@@ -46,6 +47,7 @@ public slots:
     void setData(QMap<uint, MVector> map);
     void setSensorFailureFlags(const std::array<bool, MVector::size> sensorFailureFlags);
     void setAutoMoveGraph(bool value);
+    void clearSelection();
 
     /*
      * draws selection and class rectangles
@@ -61,7 +63,11 @@ signals:
 private:
     Ui::LineGraphWidget *ui;
     const int defaultXWidth = 30; // defines default range of xAxis: (-1; defaultXWidth)
-    const double yMin = 2.0;    // defines minimum range of yAxis: (-yMin;yMin)
+    const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
+
+    const double labelRatio = 2.0/50.0;
+
+    bool useLimits = true;
 
     uint startTimestamp; // timestamp for start of graph
     QCPDataSelection dataSelection; // holds current data selection

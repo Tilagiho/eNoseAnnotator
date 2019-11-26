@@ -56,7 +56,7 @@ void LineGraphWidget::setupGraph()
         ui->chart->addGraph();
 
         // style of plotted lines
-        QColor color = SensorColor::getColor(i);
+        QColor color = SensorColor::getSensorColor(i);
         ui->chart->graph(i)->setLineStyle(QCPGraph::lsLine);
         ui->chart->graph(i)->setPen(QPen(color));
         ui->chart->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 3));
@@ -124,28 +124,19 @@ void LineGraphWidget::setStartTimestamp(uint timestamp)
 
 void LineGraphWidget::setSensorFailureFlags(const std::array<bool, MVector::size> flags)
 {
-    // flag redraw: will be set if graph has to be redrawn
-    bool redraw = false;
-
     if (flags != sensorFailureFlags)
     {
         for (int i=0; i<MVector::size; i++)
         {
             if (flags[i] && !sensorFailureFlags[i])
-                ui->chart->graph(i)->data()->clear();
+                ui->chart->graph(i)->setVisible(false);
             else if (!flags[i] && sensorFailureFlags[i])
-            {
-                redraw = true;
-                break;
-            }
+                ui->chart->graph(i)->setVisible(true);
         }
     }
     sensorFailureFlags = flags;
 
-    if (redraw)
-        requestRedraw();
-    else
-        replot();
+    replot();
 }
 
 void LineGraphWidget::setXAxis(double x1, double x2)
@@ -188,6 +179,10 @@ void LineGraphWidget::replot(uint timestamp)
     //iterate through graph(i) data keys and values
 
     for (int i = 0; i < ui->chart->graphCount(); ++i) {
+        // ignore invisible graphs
+        if (!ui->chart->graph(i)->visible())
+            continue;
+
         QCPGraphDataContainer::const_iterator it = ui->chart->graph(i)->data()->constBegin();
         QCPGraphDataContainer::const_iterator itEnd = ui->chart->graph(i)->data()->constEnd();
         while (it != itEnd)
@@ -224,8 +219,8 @@ void LineGraphWidget::replot(uint timestamp)
         setLogXAxis(false);
         if (y_upper < yMin)
             y_upper = yMin;
-        if (y_lower > -yMin)
-            y_lower = -yMin;
+        if (y_lower > -0.6*yMin)
+            y_lower = -yMin*0.6;
 
         y_upper *= 1.4;
         y_lower *= 1.2;
@@ -237,6 +232,26 @@ void LineGraphWidget::replot(uint timestamp)
     // move x-range
     if (autoMoveGraph && timestamp != 0 && timestamp >= x_axis_range_upper+startTimestamp-4 && timestamp <= x_axis_range_upper+startTimestamp)
         ui->chart->xAxis->setRange(x_axis_range_lower+2, x_axis_range_upper+2);
+
+    // TODO:
+    // redraw labels
+    // find matching labels
+    // draw one big label
+    // --> works with current control flow?
+
+
+    // delete labels if too close to each o
+//    QCPRange range = ui->chart->xAxis->range();
+//    int x_width = range.upper-range.lower;
+//    auto iterEnd = userDefinedClassLabels.constEnd();
+//     --iterEnd; // skip last item
+//    for (auto iter = userDefinedClassLabels.constBegin(); iter != iterEnd; iter++)
+//    {
+//        int key = iter.key();
+//        int nextkey = (iter+1).key();
+
+//        if ()
+//    }
 
     ui->chart->replot();
 }
@@ -328,6 +343,16 @@ void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
     ui->chart->replot();
 }
 
+bool LineGraphWidget::getUseLimits() const
+{
+    return useLimits;
+}
+
+void LineGraphWidget::setUseLimits(bool value)
+{
+    useLimits = value;
+}
+
 void LineGraphWidget::clearGraph(bool replot)
 {
     // clear graphs
@@ -351,29 +376,18 @@ void LineGraphWidget::clearGraph(bool replot)
 void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool rescale)
 {
     // set timestamp:
-    // find first non-failed sensor, set start timestamp if empty
-    for (int i=0; i<MVector::size; i++)
-        if (!sensorFailureFlags[i] && ui->chart->graph(i)->data()->isEmpty())
-        {
-            setStartTimestamp(timestamp);
-            break;
-        }
+    if (ui->chart->graph(0)->data()->isEmpty())
+        setStartTimestamp(timestamp);
 
     int xpos = timestamp-startTimestamp;
     for (int i=0; i<MVector::size; i++)
     {
-        // ignore sensors with failures
-        if (!sensorFailureFlags[i])
-        {
-            // draw point, if:
-            // no limits violated
-            // ignore limits if useLimits not true
-            bool drawAllowed = !useLimits || (measurement.array[i] > minVal && measurement.array[i] < maxVal);
-            if (drawAllowed)
-                ui->chart->graph(i)->addData(xpos, measurement.array[i]);
-            else
-                emit sensorFailure(i);
-        }
+        // add data point
+        ui->chart->graph(i)->addData(xpos, measurement.array[i]);
+
+        // emit sensor failures
+        if (useLimits && (measurement.array[i] < minVal || measurement.array[i] > maxVal))
+            emit sensorFailure(i);
     }
 
     qDebug() << timestamp << " : Added new Data";
@@ -402,6 +416,11 @@ void LineGraphWidget::setData(QMap<uint, MVector> map)
 void LineGraphWidget::setAutoMoveGraph(bool value)
 {
     autoMoveGraph = value;
+}
+
+void LineGraphWidget::clearSelection()
+{
+    ui->chart->deselectAll();
 }
 
 double LineGraphWidget::getMinVal() const
@@ -456,6 +475,7 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
         userLabel->position->setCoords(xpos, 1.00*ymax); // place position at center/top of axis rect
         userLabel->setText(userDefinedBrief);
         userLabel->setPen(QPen(Qt::black)); // show black border around text
+        userLabel->setPadding(QMargins(5,0,5,0));
     }
     // userDefinedBrief == "" && label exists: label has to be removed
     else if (userDefinedClassLabels.contains(xpos))
@@ -479,9 +499,10 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
 
         detectedLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
         detectedLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        detectedLabel->position->setCoords(xpos, 0.90*ymax); // place position at center/top of axis rect
+        detectedLabel->position->setCoords(xpos, 0.87*ymax); // place position at center/top of axis rect
         detectedLabel->setText(detectedBrief);
         detectedLabel->setPen(QPen(Qt::black)); // show black border around text
+        detectedLabel->setPadding(QMargins(5,0,5,0));
     }
     // detectedBrief == "" && label exists: label has to be removed
     else if (detectedClassLabels.contains(xpos))

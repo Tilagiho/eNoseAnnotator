@@ -79,7 +79,7 @@ public:
     void addMeasurement(uint timestamp, MVector vector);
 
     /*
-     * add relative vector + baseLevelVector to data
+     * add absolute vector + baseLevelVector to data
      */
     void addMeasurement(uint timestamp, MVector vector, MVector baseLevelVector);
 
@@ -126,26 +126,15 @@ public:
     bool loadData(QWidget* widget);
 
     /*
-     * extracts meta data from line
-     * meta data lines always start with '#'
-     */
-    bool getMetaData(QString line);
-
-    /*
-     * extracts measurement data from line
-     */
-    bool getData(QString line);
-
-    /*
      *  generates a random walk dataset
      */
     void generateRandomWalk();
 
-    /*
-     * calculates average of vectors in range from iterator begin until, but not including, iterator end
-     * if endTimestamp is set: additionally end if timestamp of current vector > endTimestamp
-     */
-    static const MVector getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp=0, MultiMode mode=MultiMode::Average);
+//    /*
+//     * calculates average of vectors in range from iterator begin until, but not including, iterator end
+//     * if endTimestamp is set: additionally end if timestamp of current vector > endTimestamp
+//     */
+//    static const MVector getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp=0, MultiMode mode=MultiMode::Average);
 
     const MVector getSelectionVector(MultiMode mode=MultiMode::Average);
 
@@ -204,10 +193,16 @@ public slots:
     void changeClass(aClass oldClass, aClass newClass);
 
 signals:
-    void selectionVectorChanged(MVector vector, std::array<bool, MVector::size> sensorFailures);  // emits new vector when dataSelected is changed
+    void selectionVectorChanged(MVector vector, std::array<bool, MVector::size> sensorFailures, std::array<int, MVector::size>);  // emits new vector when dataSelected is changed
     void selectionMapChanged(QMap<uint, MVector> selectionMap);
     void labelsUpdated(QMap<uint, MVector> updatedVectors);
+
+    // emitted when selectionData was cleared
     void selectionCleared();
+
+    // emitted when LineGraphWidget should clear its selection
+    void lgClearSelection();
+
     void dataReset();   // emitted when data is reset
     void dataAdded(MVector vector, uint timestamp, bool yRescale);
     void absoluteDataAdded(MVector vector, uint timestamp, bool yRescale);
@@ -230,7 +225,18 @@ private:
     bool saveRawInput = false;      // if true: save absolute values in "raw_input_" + timestamp
     QList<aClass> classList;
 
-    QString version = "v0.1";
+    QString version = "1.0";
+
+    /*
+     * extracts measurement data from line
+     */
+    bool getData(QString line);
+
+    /*
+     * extracts meta data from line
+     * meta data lines always start with '#'
+     */
+    bool getMetaData(QString line);
 };
 
 #endif // MEASUREMENTDATA_H

@@ -17,9 +17,14 @@ public:
 
     QString toString();
 
+    // Overloading == operator to access elements in array style
     bool operator ==(const MVector &other) const;
 
+    // Overloading != operator to access elements in array style
     bool operator !=(const MVector &other) const;
+
+    // Overloading [] operator to access elements in array style
+    double &operator[] (int index);
 
     /*
      * contains the sensor values measured
@@ -42,6 +47,17 @@ public:
      */
     static MVector zeroes();
 
+    /*
+     * returns the deviation vector (/ %) of this relative to baseVector
+     * WARNING: only use this function with an absolute vector
+     */
+    MVector toRelativeVector(MVector baseVector);
+
+    /*
+     * returns the absolute vector (/ Ohm) of this based on baseVector
+     * WARNING: only use this function with relative vector
+     */
+    MVector getAbsoluteVector(MVector baseVector);
 };
 
 #endif // MVECTOR_H

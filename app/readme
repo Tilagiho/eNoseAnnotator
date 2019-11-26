@@ -1,10 +1,10 @@
 // TODO
 // important
+- pick LineGraphWidget colors based on BarGraphWidget::Mode
+
 - test: extra thread for serial communication necessary?
 - stop measurement based on gradient, ui symbols for status
 
-- store absolute values in measurement
-    -> relative values are emitted only to relLGraph
 - debug selection
 - add absolute mode to lineGraph
     -> Delete x-label, Edit y-label
@@ -13,11 +13,10 @@
     -> introduce a well defined save/load module ?
 - set label size based on y-range
 - set label color
-- save data before exiting
 - free zoom
+- load data: don't replot before loading all data, rescale to full measurement size
+- load/ save data: make timestamp string
 
 // optional
 - move multiMode to vector
-- linegraph: only hide graphs with sensor failures -> no redraw necessary
 - sync relative and absolute graphs
-

@@ -12,6 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // DEBUG: set BarGraphWidgetMode
+//    ui->bGraph->setMode(BarGraphWidget::Mode::showAll);
+
     // hide annotation menu points
     // TODO: delete all annotation elements
     ui->actionSaveAnnotation->setVisible(false);
@@ -40,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
     // this->setStyleSheet("QSplitter::handle{background: black;}"); // make splitter visible
 
     // relative graph: ignore limits (minVal, maxVal)
-    ui->lGraph->useLimits = false;
+    ui->lGraph->setUseLimits(false);
 
     // connections:
     // selection flow
@@ -50,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->lGraph, &LineGraphWidget::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars);  // clear vector in bGraph
     connect(mData, &MeasurementData::selectionVectorChanged, ui->bGraph, &BarGraphWidget::setBars);   // plot vector in bGraph
     connect(mData, &MeasurementData::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars); // clear vector in bGraph
+    connect(mData, &MeasurementData::lgClearSelection, ui->lGraph, &LineGraphWidget::clearSelection);
 
     connect(mData, &MeasurementData::labelsUpdated, ui->lGraph, &LineGraphWidget::labelSelection); // draw selection and classes
 
@@ -99,7 +103,8 @@ MainWindow::MainWindow(QWidget *parent)
     });
     connect(mData, &MeasurementData::sensorFailuresSet, this, [this]{
         MVector selectionVector = mData->getSelectionVector();
-        ui->bGraph->setBars(selectionVector, mData->getSensorFailures());
+
+        ui->bGraph->setBars(selectionVector, mData->getSensorFailures(), mData->getFunctionalities());
     }); // reset bars when sensorFailures changed
 
     // measurement info
@@ -217,7 +222,7 @@ void MainWindow::on_actionSettings_triggered()
     // set current settings
     dialog.setMaxVal(ui->absLGraph->getMaxVal());   // max value for absolute values
     dialog.setMinVal(ui->absLGraph->getMinVal());   // min value for absolute values
-    dialog.setUseLimits(ui->absLGraph->useLimits);
+    dialog.setUseLimits(ui->absLGraph->getUseLimits());
     dialog.setShowAbsGraph(!ui->absLGraph->isHidden());
 
     dialog.setSaveRawInput(mData->getSaveRawInput());
@@ -225,12 +230,91 @@ void MainWindow::on_actionSettings_triggered()
     if (dialog.exec())
     {
         // get new settings
-        ui->absLGraph->setMaxVal(dialog.getMaxVal());
-        ui->absLGraph->setMinVal(dialog.getMinVal());
+        // --- save raw output? ---
         mData->setSaveRawInput(dialog.getSaveRawInput());
-        ui->absLGraph->useLimits = dialog.getUseLimits();
 
-        // abs graph
+        // --- limits ---
+        // get limits
+        int newMaxVal = dialog.getMaxVal();
+        int newMinVal = dialog.getMinVal();
+        int oldMaxVal = ui->absLGraph->getMaxVal();
+        int oldMinVal = ui->absLGraph->getMinVal();
+
+        // get useLimits
+        bool newUseLimits = dialog.getUseLimits();
+        bool oldUseLimits = ui->absLGraph->getUseLimits();
+
+        // recalc sensor failure flags if limits or useLimits changed
+        bool limitsChanged = (newMaxVal != oldMaxVal) || (newMaxVal != oldMinVal);
+        bool useLimitsChanged = newUseLimits != oldUseLimits;
+
+        auto sensorFailureFlags = mData->getSensorFailures();
+
+        // 4 cases for change
+        // 1. useLimits: true -> false:
+        //      set all sensorFailureFlags added by limit violations to false
+        // 2. useLimits: false -> true:
+        //      find all limit violations and set the according flags to true
+        // 3. limits: minVal gets bigger or maxVal smaller
+        //      find old violations that are no violations anymore and set flag to false
+        // 4. limits: minVal gets smaller or maxVal bigger
+        //      find new violations that were no violations and set flag  to true
+        if (limitsChanged || useLimitsChanged)
+        {
+            auto dataMap = mData->getAbsoluteData();
+
+            for (MVector vector : dataMap)
+            {
+                for (int i = 0; i<MVector::size; i++)
+                {
+                    // case 1+2
+                    if (useLimitsChanged)
+                    {
+                        if (vector[i] < newMinVal || vector[i] > newMaxVal)
+                            sensorFailureFlags[i] = newUseLimits;   // useLimits == true -> set flags, else delete them
+                    }
+                    // case 3+4
+                    else    // limitsChanged
+                    {
+                        // minVal changed
+                        if (newMinVal < oldMinVal)  // case 4
+                        {
+                            for (int i=0; i<MVector::size; i++)
+                                if (vector[i] >= newMinVal && vector[i] < oldMinVal)
+                                    sensorFailureFlags[i] = false;
+                        } else if (newMinVal > oldMinVal)   // case 3
+                        {
+                            for (int i=0; i<MVector::size; i++)
+                                if (vector[i] < newMinVal && vector[i] >= oldMinVal)
+                                    sensorFailureFlags[i] = true;
+                        }
+
+                        // maxVal changed
+                        if (newMaxVal > oldMaxVal)  // case 4
+                        {
+                            for (int i=0; i<MVector::size; i++)
+                                if (vector[i] <= newMaxVal && vector[i] > oldMaxVal)
+                                    sensorFailureFlags[i] = false;
+                        } else if (newMaxVal < oldMaxVal)   // case 3
+                        {
+                            for (int i=0; i<MVector::size; i++)
+                                if (vector[i] > newMaxVal && vector[i] <= oldMaxVal)
+                                    sensorFailureFlags[i] = true;
+                        }
+                    }
+
+                }
+            }
+
+            // set new values
+            ui->absLGraph->setMaxVal(newMaxVal);
+            ui->absLGraph->setMinVal(newMinVal);
+            mData->setSensorFailures(sensorFailureFlags);
+            ui->absLGraph->setUseLimits(newUseLimits);
+        }
+
+
+        // --- show/ hide abs graph ---
         if (dialog.getShowAbsGraph() && ui->absLGraph->isHidden())
             ui->absLGraph->show();
         else if (!dialog.getShowAbsGraph() && !ui->absLGraph->isHidden())
@@ -350,4 +434,25 @@ void MainWindow::on_actionSet_detected_class_of_selection_triggered()
     disconnect(dialog, &ClassSelector::addClass, mData, &MeasurementData::addClass);
     disconnect(dialog, &ClassSelector::removeClass, mData, &MeasurementData::removeClass);
     disconnect(dialog, &ClassSelector::changeClass, mData, &MeasurementData::changeClass);
+}
+
+void MainWindow::closeEvent (QCloseEvent *event)
+{
+    if (mData->changed())
+    {
+        QMessageBox::StandardButton resBtn = QMessageBox::question( this, "eNoseAnnotator",
+                                                                    tr("The measurement data was changed without saving.\nDo you want to save the measurement before leaving?\n"),
+                                                                   QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::Yes);
+        if (resBtn == QMessageBox::Yes)
+        {
+            mData->saveData(this);
+            event->accept();
+        } else if (resBtn == QMessageBox::Cancel)
+        {
+            event->ignore();
+        } else
+        {
+            event->accept();
+        }
+    }
 }

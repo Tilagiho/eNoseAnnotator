@@ -8,7 +8,8 @@
 class SensorColor
 {
 public:
-    static QColor getColor(int i);
+    static QColor getSensorColor(int i);
+    static QColor getFuncColor(int func, int funcSize);
 
 private:
     SensorColor();
