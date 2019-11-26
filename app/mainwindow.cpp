@@ -226,6 +226,7 @@ void MainWindow::on_actionSettings_triggered()
     dialog.setShowAbsGraph(!ui->absLGraph->isHidden());
 
     dialog.setSaveRawInput(mData->getSaveRawInput());
+    dialog.setBarGraphMode(ui->bGraph->getMode());
 
     if (dialog.exec())
     {
@@ -319,6 +320,10 @@ void MainWindow::on_actionSettings_triggered()
             ui->absLGraph->show();
         else if (!dialog.getShowAbsGraph() && !ui->absLGraph->isHidden())
             ui->absLGraph->hide();
+
+        // -- BarGraphWidget::Mode --
+        ui->bGraph->setMode(dialog.getBarGraphMode());
+
     }
 }
 

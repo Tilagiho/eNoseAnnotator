@@ -4,6 +4,8 @@
 #include <QtCore>
 #include <QDialog>
 
+#include "bargraphwidget.h"
+
 namespace Ui {
 class GeneralSettings;
 }
@@ -33,6 +35,9 @@ public:
     bool getShowAbsGraph() const;
     void setShowAbsGraph(bool value);
 
+    BarGraphWidget::Mode getBarGraphMode() const;
+    void setBarGraphMode(const BarGraphWidget::Mode &value);
+
 private slots:
     void on_buttonBox_accepted();
 
@@ -44,6 +49,7 @@ private:
     bool saveRawInput = false;
     bool useLimits = true;
     bool showAbsGraph = false;
+    BarGraphWidget::Mode barGraphMode = BarGraphWidget::Mode::showFunc;
 };
 
 #endif // GENERALSETTINGS_H
