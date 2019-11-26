@@ -12,6 +12,9 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    // DEBUG: set BarGraphWidgetMode
+//    ui->bGraph->setMode(BarGraphWidget::Mode::showAll);
+
     // hide annotation menu points
     // TODO: delete all annotation elements
     ui->actionSaveAnnotation->setVisible(false);
@@ -100,7 +103,8 @@ MainWindow::MainWindow(QWidget *parent)
     });
     connect(mData, &MeasurementData::sensorFailuresSet, this, [this]{
         MVector selectionVector = mData->getSelectionVector();
-        ui->bGraph->setBars(selectionVector, mData->getSensorFailures());
+
+        ui->bGraph->setBars(selectionVector, mData->getSensorFailures(), mData->getFunctionalities());
     }); // reset bars when sensorFailures changed
 
     // measurement info

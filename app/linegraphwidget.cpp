@@ -56,7 +56,7 @@ void LineGraphWidget::setupGraph()
         ui->chart->addGraph();
 
         // style of plotted lines
-        QColor color = SensorColor::getColor(i);
+        QColor color = SensorColor::getSensorColor(i);
         ui->chart->graph(i)->setLineStyle(QCPGraph::lsLine);
         ui->chart->graph(i)->setPen(QPen(color));
         ui->chart->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 3));
