@@ -173,6 +173,8 @@ public:
      */
     void setDetectedClassOfSelection(QString className, QString classBrief);
 
+    static QString getTimestampStringFromUInt(uint timestamp);
+    static uint getTimestampUIntfromString (QString string);
 
 
     QList<aClass> getClassList() const;
@@ -213,6 +215,9 @@ signals:
     void commentSet(QString comment);
     void sensorFailuresSet(std::array<bool, 64>);
 
+    // emitted when replotStatus in LinegraphWidgets should be set
+    void setReplotStatus(bool status);
+
 private:
     QMap<uint, MVector> data;  // map containing vectors of measurements with timestamps as keys
     QMap<uint, MVector> selectedData;
@@ -237,6 +242,8 @@ private:
      * meta data lines always start with '#'
      */
     bool getMetaData(QString line);
+
+
 };
 
 #endif // MEASUREMENTDATA_H

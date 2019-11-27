@@ -52,8 +52,7 @@ void InfoWidget::setStatus(USBDataSource::Status status)
 
 void InfoWidget::setTimestamp(double timestamp)
 {
-    QDateTime dateTime = QDateTime::fromTime_t(timestamp);
-    QString timeString = dateTime.toString("d.M.yyyy - h:mm:ss");
+    QString timeString = MeasurementData::getTimestampStringFromUInt(timestamp);
 
     if (timeString != ui->startLabel->text())
         ui->startLabel->setText(timeString);

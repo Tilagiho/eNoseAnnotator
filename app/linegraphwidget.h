@@ -40,6 +40,7 @@ public:
     bool getUseLimits() const;
     void setUseLimits(bool value);
 
+
 public slots:
     void addMeasurement(MVector measurement, uint timestamp, bool rescale=false);   // add single measurement; rescale y-axis if rescale==true
 //    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements
@@ -48,6 +49,9 @@ public slots:
     void setSensorFailureFlags(const std::array<bool, MVector::size> sensorFailureFlags);
     void setAutoMoveGraph(bool value);
     void clearSelection();
+
+    void setReplotStatus(bool value);
+
 
     /*
      * draws selection and class rectangles
@@ -72,6 +76,7 @@ private:
     uint startTimestamp; // timestamp for start of graph
     QCPDataSelection dataSelection; // holds current data selection
     bool selectionFlag = false;     // used to avoid looping behaviour when selecting data
+    bool replotStatus = true;   // replot() is only active if true
 
     // interval in which data is plotted: data > maxVal or < minVal is ignored
     // can be ignored with useLimits
@@ -110,6 +115,7 @@ private slots:
      *  joins successive labels with matching classes
      */
     void redrawLabels();
+
 };
 
 #endif // LINEGRAPH_H

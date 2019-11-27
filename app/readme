@@ -1,24 +1,20 @@
 // TODO
 // important
-- pick LineGraphWidget colors based on BarGraphWidget::Mode
 
 - test: extra thread for serial communication necessary?
 - stop measurement based on gradient, ui symbols for status
 
-- debug selection
 - add absolute mode to lineGraph
     -> Delete x-label, Edit y-label
     -> add absolute values in kOhm
 - clean up saving/ loading
     -> introduce a well defined save/load module ?
 - set label size based on y-range
-- set label color
-- free zoom
-- load data: don't replot before loading all data, rescale to full measurement size
-- load/ save data: make timestamp string
-- getSelection is buggy -> use different selection marker
-- bug: class changes don't trigger dataChanged
 
 // optional
 - move multiMode to vector
 - sync relative and absolute graphs
+- free zoom
+- pick LineGraphWidget colors based on BarGraphWidget::Mode
+
+
