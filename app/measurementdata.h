@@ -173,6 +173,8 @@ public:
      */
     void setDetectedClassOfSelection(QString className, QString classBrief);
 
+    static QString getTimestampStringFromUInt(uint timestamp);
+    static uint getTimestampUIntfromString (QString string);
 
 
     QList<aClass> getClassList() const;
@@ -237,6 +239,8 @@ private:
      * meta data lines always start with '#'
      */
     bool getMetaData(QString line);
+
+
 };
 
 #endif // MEASUREMENTDATA_H

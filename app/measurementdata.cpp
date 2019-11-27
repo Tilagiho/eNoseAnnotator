@@ -353,7 +353,7 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
         // base vector
         for (uint timestamp : baseLevelMap.keys())
         {
-            out << "#baseLevel:" << timestamp << ";";
+            out << "#baseLevel:" << getTimestampStringFromUInt(timestamp) << ";";
             QStringList valueList;
             for (int i=0; i<MVector::size; i++)
                 valueList << QString::number(baseLevelMap[timestamp][i], 'g', 10);
@@ -386,7 +386,7 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
         while (iter != map.end())
         {
             QStringList valueList;
-            valueList << QString::number(iter.key(), 'g', 10);      // timestamp
+            valueList << getTimestampStringFromUInt(iter.key());      // timestamp
 
             // vector
             for (int i=0; i<MVector::size; i++)
@@ -534,10 +534,19 @@ bool MeasurementData::getMetaData(QString line)
     }
     else if (line.startsWith("#baseLevel:"))
     {
-        line = line.split(":")[1];
+
+        line = line.right(line.length()-QString("#baseLevel:").size());
         QStringList valueList = line.split(";");
 
-        uint timestamp = valueList[0].toUInt();
+        // get timestamp: uint or string
+        uint timestamp;
+        bool isInt;
+        timestamp = valueList[0].toUInt(&isInt);
+
+        if (!isInt)
+            timestamp = getTimestampUIntfromString(valueList[0]);
+
+        // get base level vector
         MVector baseLevel;
         for (int i=0; i<MVector::size; i++)
             baseLevel[i] = valueList[i+1].toDouble();
@@ -647,7 +656,14 @@ bool MeasurementData::getData(QString line)
             return false;
         }
         // prepare vector
-        uint timestamp = query[0].toUInt(&readOk);
+        // get timestamp: uint or string
+        uint timestamp;
+        bool isInt;
+        timestamp = query[0].toUInt(&isInt);
+
+        if(!isInt)
+            timestamp = getTimestampUIntfromString(query[0]);
+
         MVector vector;
         for (int i=0; i<MVector::size; i++)
         {
@@ -979,4 +995,16 @@ void MeasurementData::changeClass(aClass oldClass, aClass newClass)
 
     dataChanged = true;
     emit labelsUpdated(updatedVectors);
+}
+
+QString MeasurementData::getTimestampStringFromUInt(uint timestamp)
+{
+    QDateTime dateTime = QDateTime::fromTime_t(timestamp);
+    return dateTime.toString("d.M.yyyy - h:mm:ss");
+}
+
+uint MeasurementData::getTimestampUIntfromString(QString string)
+{
+    QDateTime dateTime = QDateTime::fromString(string, "d.M.yyyy - h:mm:ss");
+    return dateTime.toTime_t();
 }
