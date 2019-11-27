@@ -5,7 +5,7 @@
 - test: extra thread for serial communication necessary?
 - stop measurement based on gradient, ui symbols for status
 
-- debug selection
+-> debug selection
 - add absolute mode to lineGraph
     -> Delete x-label, Edit y-label
     -> add absolute values in kOhm
@@ -14,8 +14,8 @@
 - set label size based on y-range
 - set label color
 - free zoom
-- load data: don't replot before loading all data, rescale to full measurement size
-- load/ save data: make timestamp string
+-> load data: don't replot before loading all data, rescale to full measurement size
+-> load/ save data: make timestamp string
 - getSelection is buggy -> use different selection marker
 
 // optional

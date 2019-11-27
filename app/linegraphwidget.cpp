@@ -283,7 +283,7 @@ void LineGraphWidget::dataSelected()
     QCPDataSelection selection;
     for (int i=0; i<MVector::size; i++)
     {
-        selection = ui->chart->graph(0)->selection();
+        selection = ui->chart->graph(i)->selection();
 
         if (!selection.isEmpty())
             break;
