@@ -519,6 +519,10 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
 
 void LineGraphWidget::redrawLabels()
 {
+    // no work to do if no labels exist
+    if (userDefinedClassLabels.isEmpty() && detectedClassLabels.isEmpty())
+        return;
+
    for (auto label : joinedUserDefinedClassLabels)
        ui->chart->removeItem(label);
     joinedUserDefinedClassLabels.clear();
@@ -531,39 +535,103 @@ void LineGraphWidget::redrawLabels()
     QCPRange yRange = ui->chart->yAxis->range();
 
     // ___ user defined labels ___
-    QCPItemText* beginLabel = nullptr;    // marks the begin of labels of labels with the current class
-    QList<QList<QCPItemText*>> matchingLabels;
-    QList<QCPItemText*> currentMatches;
+    QCPItemText* userBeginLabel = nullptr;
+    QCPItemText* detectedBeginLabel = nullptr;    // marks the begin of labels of labels with the current class
+    QList<QList<QCPItemText*>> matchingUserLabels, matchingDetectedLabels;
+    QList<QCPItemText*> currentUserMatches, currentDetectedLabels;
 
-    for (int xpos : userDefinedClassLabels.keys())
+    auto keyRange = ui->chart->graph(0)->data()->dataRange();
+
+    // go through all data
+    for (int sortKey=keyRange.begin(); sortKey<keyRange.end(); sortKey++)
     {
+        int xpos = qRound(ui->chart->graph(0)->data()->at(sortKey)->mainKey());
+
+        // xpos in xRange+-2
         if (xRange.lower-2 <= xpos && xpos <= xRange.upper+2)
         {
-            auto currentLabel = userDefinedClassLabels[xpos];
-            currentLabel->setVisible(true);
+            // --- user defined labels ---
+            // user label at xpos exists
+            if (userDefinedClassLabels.contains(xpos))
+            {
+                auto currentLabel = userDefinedClassLabels[xpos];
+                currentLabel->setVisible(true);
 
-            // set first beginlabel
-            if (beginLabel == nullptr)
-                beginLabel = currentLabel;
+                // set first beginlabel
+                if (userBeginLabel == nullptr)
+                    userBeginLabel = currentLabel;
 
-            // matching classes
-            if (beginLabel->text() == currentLabel->text())
-                currentMatches << currentLabel;
-            // new class begins
-            // store current matches & begin next match
+                // matching classes
+                if (userBeginLabel->text() == currentLabel->text())
+                    currentUserMatches << currentLabel;
+                // new class begins
+                // store current matches & begin next match
+                else
+                {
+                    matchingUserLabels << currentUserMatches;
+                    currentUserMatches.clear();
+                    userBeginLabel = currentLabel;
+                    currentUserMatches << currentLabel;
+                }
+            }
+            // no label at xpos
             else
             {
-                matchingLabels << currentMatches;
-                currentMatches.clear();
-                beginLabel = currentLabel;
+                // save last matches
+                if (currentUserMatches.size() > 1)
+                {
+                    matchingUserLabels << currentUserMatches;
+                }
+                // reset matching labels
+                currentUserMatches.clear();
+                userBeginLabel = nullptr;
+            }
+
+            // --- detected labels ---
+            // detected label at xpos exists
+            if (detectedClassLabels.contains(xpos))
+            {
+                auto currentLabel = detectedClassLabels[xpos];
+                currentLabel->setVisible(true);
+
+                // set first beginlabel
+                if (detectedBeginLabel == nullptr)
+                    detectedBeginLabel = currentLabel;
+
+                // matching classes
+                if (currentLabel->text() == detectedBeginLabel->text())
+                    currentDetectedLabels << currentLabel;
+                // new class begins
+                // store current matches & begin next match
+                else
+                {
+                    matchingDetectedLabels << currentDetectedLabels;
+                    currentDetectedLabels.clear();
+                    detectedBeginLabel = currentLabel;
+                    currentDetectedLabels << currentLabel;
+                }
+            }
+            // no label at xpos or not in xRange
+            else
+            {
+                // save last matches
+                if (currentDetectedLabels.size() > 1)
+                {
+                    matchingDetectedLabels << currentDetectedLabels;
+                }
+                // reset matching labels
+                currentDetectedLabels.clear();
+                detectedBeginLabel = nullptr;
             }
         }
     }
-    // store last match
-    matchingLabels << currentMatches;
 
-    // go through matches & create joined labels
-    for (auto matchList : matchingLabels)
+    // store last match
+    matchingUserLabels << currentUserMatches;
+    matchingDetectedLabels << currentDetectedLabels;
+
+    // go through user matches & create joined labels
+    for (auto matchList : matchingUserLabels)
     {
         if (matchList.size() > 1)
         {
@@ -574,7 +642,7 @@ void LineGraphWidget::redrawLabels()
 
             joinedUserLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
             joinedUserLabel->position->setType(QCPItemPosition::ptPlotCoords);
-            joinedUserLabel->setText(beginLabel->text());
+            joinedUserLabel->setText(matchList.first()->text());
             joinedUserLabel->setPen(QPen(Qt::black)); // show black border around text
 
             // set coords
@@ -605,41 +673,8 @@ void LineGraphWidget::redrawLabels()
         }
     }
 
-    // ___ detected labels ___
-    beginLabel = nullptr;    // marks the begin of labels of labels with the current class
-    matchingLabels.clear();
-    currentMatches.clear();
-
-    for (int xpos : detectedClassLabels.keys())
-    {
-        if (xRange.lower-2 <= xpos && xpos <= xRange.upper+2)
-        {
-            auto currentLabel = detectedClassLabels[xpos];
-            currentLabel->setVisible(true);
-
-            // set first beginlabel
-            if (beginLabel == nullptr)
-                beginLabel = currentLabel;
-
-            // matching classes
-            if (currentLabel->text() == beginLabel->text())
-                currentMatches << currentLabel;
-            // new class begins
-            // store current matches & begin next match
-            else
-            {
-                matchingLabels << currentMatches;
-                currentMatches.clear();
-                beginLabel = currentLabel;
-                currentMatches << currentLabel;
-            }
-        }
-    }
-    // store last match
-    matchingLabels << currentMatches;
-
-    // go through matches & create joined labels
-    for (auto matchList : matchingLabels)
+    // go through defined matches & create joined labels
+    for (auto matchList : matchingDetectedLabels)
     {
         if (matchList.size() > 1)
         {
@@ -650,7 +685,7 @@ void LineGraphWidget::redrawLabels()
 
             joinedDetectedLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
             joinedDetectedLabel->position->setType(QCPItemPosition::ptPlotCoords);
-            joinedDetectedLabel->setText(beginLabel->text());
+            joinedDetectedLabel->setText(matchList.first()->text());
             joinedDetectedLabel->setPen(QPen(Qt::black)); // show black border around text
 
             // set coords
