@@ -573,14 +573,8 @@ bool MeasurementData::getMetaData(QString line)
             }
             aClass c = aClass::fromString(classString);
 
-            // check consistency of classes
-            if (classList.contains(c))
-            {
-                QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Invalid class list", "The class list is invalid!");
-                readOk = false;
-                break;
-            }
-            addClass(c);
+            if (!classList.contains(c))
+                addClass(c);
         }
     }
     else if (line.startsWith("#header:"))
