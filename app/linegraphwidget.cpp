@@ -532,7 +532,6 @@ void LineGraphWidget::redrawLabels()
 
     // ___ user defined labels ___
     QCPItemText* beginLabel = nullptr;    // marks the begin of labels of labels with the current class
-    QCPItemText* lastLabel = nullptr;
     QList<QList<QCPItemText*>> matchingLabels;
     QList<QCPItemText*> currentMatches;
 
@@ -558,7 +557,6 @@ void LineGraphWidget::redrawLabels()
                 currentMatches.clear();
                 beginLabel = currentLabel;
             }
-            lastLabel = currentLabel;
         }
     }
     // store last match
@@ -609,7 +607,6 @@ void LineGraphWidget::redrawLabels()
 
     // ___ detected labels ___
     beginLabel = nullptr;    // marks the begin of labels of labels with the current class
-    lastLabel = nullptr;
     matchingLabels.clear();
     currentMatches.clear();
 
@@ -625,7 +622,7 @@ void LineGraphWidget::redrawLabels()
                 beginLabel = currentLabel;
 
             // matching classes
-            if (beginLabel->text() == currentLabel->text())
+            if (currentLabel->text() == beginLabel->text())
                 currentMatches << currentLabel;
             // new class begins
             // store current matches & begin next match
@@ -634,8 +631,8 @@ void LineGraphWidget::redrawLabels()
                 matchingLabels << currentMatches;
                 currentMatches.clear();
                 beginLabel = currentLabel;
+                currentMatches << currentLabel;
             }
-            lastLabel = currentLabel;
         }
     }
     // store last match
