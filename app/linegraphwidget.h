@@ -116,7 +116,6 @@ private slots:
      */
     void redrawLabels();
 
-
 };
 
 #endif // LINEGRAPH_H
