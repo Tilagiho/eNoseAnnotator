@@ -123,8 +123,6 @@ private slots:
      * else: for detected labels
      */
     double getLabelYCoord(bool userDefinedLabel);
-
-
 };
 
 #endif // LINEGRAPH_H
