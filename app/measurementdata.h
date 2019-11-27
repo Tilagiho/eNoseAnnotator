@@ -215,6 +215,9 @@ signals:
     void commentSet(QString comment);
     void sensorFailuresSet(std::array<bool, 64>);
 
+    // emitted when replotStatus in LinegraphWidgets should be set
+    void setReplotStatus(bool status);
+
 private:
     QMap<uint, MVector> data;  // map containing vectors of measurements with timestamps as keys
     QMap<uint, MVector> selectedData;

@@ -472,6 +472,8 @@ bool MeasurementData::loadData(QWidget* widget)
         } else
             version = "0.1";
 
+        emit setReplotStatus(false);
+
         bool readOk = true;
         while (readOk && in.readLineInto(&line))
         {
@@ -485,6 +487,8 @@ bool MeasurementData::loadData(QWidget* widget)
             else  // data
                 readOk = getData(line);
         }
+
+        emit setReplotStatus (true);
 
         // catch errors reading files
         if (!readOk)

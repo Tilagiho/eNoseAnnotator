@@ -168,6 +168,9 @@ void LineGraphWidget::setMaxVal(double val)
 
 void LineGraphWidget::replot(uint timestamp)
 {
+    if (!replotStatus)
+        return;
+
     //!set new y-range
     double y_lower = 1000;
     double y_upper = 0;
@@ -346,6 +349,24 @@ void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
     }
 
     redrawLabels();
+}
+
+void LineGraphWidget::setReplotStatus(bool value)
+{
+    if (!replotStatus && value)
+    {
+        replotStatus = true;    // has to be set before replotting
+
+        // reset xRange to show all data
+        bool foundRange;
+        auto range = ui->chart->graph(0)->getKeyRange(foundRange);
+        if (foundRange)
+            ui->chart->xAxis->setRange(range.lower, range.upper);
+        replot();
+    } else
+    {
+        replotStatus = value;
+    }
 }
 
 bool LineGraphWidget::getUseLimits() const

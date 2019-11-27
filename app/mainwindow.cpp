@@ -77,6 +77,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::dataAdded, ui->lGraph, &LineGraphWidget::addMeasurement);    // add new data to lGraph                        // add new data to lGraph
     connect(mData, &MeasurementData::absoluteDataAdded, ui->absLGraph, &LineGraphWidget::addMeasurement); // add new absolute measruement
     connect(mData, &MeasurementData::dataSet, ui->lGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
+    connect(mData, &MeasurementData::setReplotStatus, ui->lGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
+    connect(mData, &MeasurementData::setReplotStatus, ui->absLGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
+
 
     // sensor failures detected
     connect(ui->absLGraph, &LineGraphWidget::sensorFailure, this, [this](int channel){
