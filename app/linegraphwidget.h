@@ -41,6 +41,8 @@ public:
     void setUseLimits(bool value);
 
 
+    void setIsAbsolute(bool value);
+
 public slots:
     void addMeasurement(MVector measurement, uint timestamp, bool rescale=false);   // add single measurement; rescale y-axis if rescale==true
 //    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements
@@ -52,17 +54,22 @@ public slots:
 
     void setReplotStatus(bool value);
 
+    void setSelection (QCPDataSelection selection);
 
     /*
      * draws selection and class rectangles
      */
     void labelSelection(QMap<uint, MVector> selectionMap);
 
+    void setXRange(QCPRange range);
+
 signals:
     void selectionChanged(int, int);
+    void dataSelectionChanged(QCPDataSelection);
     void selectionCleared();
     void sensorFailure(int i);
     void requestRedraw();
+    void xRangeChanged(const QCPRange new_range);
 
 private:
     Ui::LineGraphWidget *ui;
@@ -73,6 +80,7 @@ private:
     const double labelRatio = 2.0/50.0;
 
     bool useLimits = true;
+    bool isAbsolute = false;
 
     uint startTimestamp; // timestamp for start of graph
     QCPDataSelection dataSelection; // holds current data selection
@@ -105,6 +113,7 @@ private slots:
     void replot(uint timestamp=0);
     void mousePressed(QMouseEvent*);
     void dataSelected();
+    void onXRangeChanged(QCPRange range);
 
     /*
      * draws label of user+detected class at top of graph

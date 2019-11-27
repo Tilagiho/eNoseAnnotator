@@ -21,6 +21,9 @@ LineGraphWidget::LineGraphWidget(QWidget *parent, uint startTime) :
     setupGraph();
 
     // connections:
+    // emit xAxis range changes
+    connect(ui->chart->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(onXRangeChanged(QCPRange)));
+
     // update y-scale when changing x-range
     connect(ui->chart->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(replot()));
     // set selectionRectMode when mouse is pressed
@@ -158,6 +161,15 @@ void LineGraphWidget::setLogXAxis(bool logOn)
         ui->chart->yAxis->setScaleType(QCPAxis::ScaleType::stLinear);
         QSharedPointer<QCPAxisTicker> linTicker(new QCPAxisTicker);
         ui->chart->yAxis->setTicker(linTicker);
+    }
+}
+
+void LineGraphWidget::setXRange(QCPRange range)
+{
+    if (range != ui->chart->xAxis->range())
+    {
+        ui->chart->xAxis->setRange(range);
+        replot();
     }
 }
 
@@ -301,6 +313,12 @@ void LineGraphWidget::dataSelected()
     // save selection and emit signal for changed selection
     dataSelection = selection;
     emit selectionChanged(lower+startTimestamp, upper+startTimestamp);
+    emit dataSelectionChanged(selection);
+}
+
+void LineGraphWidget::onXRangeChanged(QCPRange range)
+{
+    emit xRangeChanged(range);
 }
 
 void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
@@ -331,6 +349,17 @@ void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
     redrawLabels();
 }
 
+void LineGraphWidget::setIsAbsolute(bool value)
+{
+    isAbsolute = value;
+
+    if (isAbsolute)
+    {
+        ui->chart->xAxis->setLabel("");
+        ui->chart->yAxis->setLabel("Resistance / kOhm");
+    }
+}
+
 void LineGraphWidget::setReplotStatus(bool value)
 {
     if (!replotStatus && value)
@@ -346,6 +375,34 @@ void LineGraphWidget::setReplotStatus(bool value)
     } else
     {
         replotStatus = value;
+    }
+}
+
+void LineGraphWidget::setSelection(QCPDataSelection newSelection)
+{
+    QCPDataSelection oldSelection = ui->chart->graph(0)->selection();
+
+    if (newSelection.dataRange(0).end() < newSelection.dataRange(0).begin())
+    {
+        clearSelection();
+        emit selectionCleared();
+        return;
+    }
+
+    if (newSelection != oldSelection)
+    {
+        ui->chart->deselectAll();
+
+        for (int i=0; i<MVector::size; i++)
+            ui->chart->graph(i)->setSelection(newSelection);
+
+        int lower = qRound(ui->chart->graph(0)->data()->at(newSelection.dataRange(0).begin())->mainKey());
+        int upper = qRound(ui->chart->graph(0)->data()->at(newSelection.dataRange(0).end()-1)->mainKey());
+
+        qDebug() << "Selection synced: " << lower << ", " << upper;
+
+        ui->chart->replot();
+        emit selectionChanged(lower+startTimestamp, upper+startTimestamp);
     }
 }
 
@@ -395,7 +452,11 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
     for (int i=0; i<MVector::size; i++)
     {
         // add data point
-        ui->chart->graph(i)->addData(xpos, measurement.array[i]);
+        if (!isAbsolute)
+            ui->chart->graph(i)->addData(xpos, measurement.array[i]);
+        else // isAbsolute: values / kOhm
+            ui->chart->graph(i)->addData(xpos, measurement.array[i] / 1000);
+
 
         // emit sensor failures
         if (useLimits && (measurement.array[i] < minVal || measurement.array[i] > maxVal))
@@ -433,6 +494,7 @@ void LineGraphWidget::setAutoMoveGraph(bool value)
 void LineGraphWidget::clearSelection()
 {
     ui->chart->deselectAll();
+    ui->chart->replot();
 }
 
 double LineGraphWidget::getMinVal() const
