@@ -370,9 +370,15 @@ void LineGraphWidget::clearGraph(bool replot)
         ui->chart->removeItem(label);
     for (auto label : detectedClassLabels)
         ui->chart->removeItem(label);
+    for (auto label : joinedUserDefinedClassLabels)
+        ui->chart->removeItem(label);
+    for (auto label : joinedDetectedClassLabels)
+        ui->chart->removeItem(label);
 
     userDefinedClassLabels.clear();
     detectedClassLabels.clear();
+    joinedUserDefinedClassLabels.clear();
+    joinedDetectedClassLabels.clear();
 
     if (replot)
         ui->chart->replot();
