@@ -23,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // hide absolute graph
     ui->absLGraph->hide();
+    ui->absLGraph->setIsAbsolute(true);
 
     // prepare menubar
     ui->actionStart->setEnabled(false);

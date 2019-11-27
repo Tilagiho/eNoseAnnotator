@@ -331,6 +331,17 @@ void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
     redrawLabels();
 }
 
+void LineGraphWidget::setIsAbsolute(bool value)
+{
+    isAbsolute = value;
+
+    if (isAbsolute)
+    {
+        ui->chart->xAxis->setLabel("");
+        ui->chart->yAxis->setLabel("Resistance / kOhm");
+    }
+}
+
 void LineGraphWidget::setReplotStatus(bool value)
 {
     if (!replotStatus && value)
@@ -395,7 +406,11 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
     for (int i=0; i<MVector::size; i++)
     {
         // add data point
-        ui->chart->graph(i)->addData(xpos, measurement.array[i]);
+        if (!isAbsolute)
+            ui->chart->graph(i)->addData(xpos, measurement.array[i]);
+        else // isAbsolute: values / kOhm
+            ui->chart->graph(i)->addData(xpos, measurement.array[i] / 1000);
+
 
         // emit sensor failures
         if (useLimits && (measurement.array[i] < minVal || measurement.array[i] > maxVal))

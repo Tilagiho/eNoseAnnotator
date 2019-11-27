@@ -41,6 +41,8 @@ public:
     void setUseLimits(bool value);
 
 
+    void setIsAbsolute(bool value);
+
 public slots:
     void addMeasurement(MVector measurement, uint timestamp, bool rescale=false);   // add single measurement; rescale y-axis if rescale==true
 //    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements
@@ -73,6 +75,7 @@ private:
     const double labelRatio = 2.0/50.0;
 
     bool useLimits = true;
+    bool isAbsolute = false;
 
     uint startTimestamp; // timestamp for start of graph
     QCPDataSelection dataSelection; // holds current data selection
