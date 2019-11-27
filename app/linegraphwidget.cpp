@@ -180,7 +180,6 @@ void LineGraphWidget::replot(uint timestamp)
     double x_axis_range_upper = ui->chart->xAxis->range().upper;
 
     //iterate through graph(i) data keys and values
-
     for (int i = 0; i < ui->chart->graphCount(); ++i) {
         // ignore invisible graphs
         if (!ui->chart->graph(i)->visible())
@@ -218,15 +217,16 @@ void LineGraphWidget::replot(uint timestamp)
     // plot around 0 for small y-intervals
     else
     {
-        // check for minimal y range
         setLogXAxis(false);
+
+        // check for minimal y range
         if (y_upper < yMin)
             y_upper = yMin;
-        if (y_lower > -0.6*yMin)
-            y_lower = -yMin*0.6;
+        if (y_lower > -0.8*yMin)
+            y_lower = -yMin*0.8;
 
-        y_upper *= 1.4;
-        y_lower *= 1.2;
+        // make space for labels
+        y_upper += labelSpace * (y_upper - y_lower);
     }
 
     //set y-range
@@ -237,26 +237,6 @@ void LineGraphWidget::replot(uint timestamp)
         ui->chart->xAxis->setRange(x_axis_range_lower+2, x_axis_range_upper+2);
 
     redrawLabels();
-
-    // TODO:
-    // redraw labels
-    // find matching labels
-    // draw one big label
-    // --> works with current control flow?
-
-
-    // delete labels if too close to each o
-//    QCPRange range = ui->chart->xAxis->range();
-//    int x_width = range.upper-range.lower;
-//    auto iterEnd = userDefinedClassLabels.constEnd();
-//     --iterEnd; // skip last item
-//    for (auto iter = userDefinedClassLabels.constBegin(); iter != iterEnd; iter++)
-//    {
-//        int key = iter.key();
-//        int nextkey = (iter+1).key();
-
-//        if ()
-//    }
 
     ui->chart->replot();
 }
@@ -504,7 +484,7 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
 
         userLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
         userLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        userLabel->position->setCoords(xpos, 1.00*yRange.upper); // place position at center/top of axis rect
+        userLabel->position->setCoords(xpos, getLabelYCoord(true)); // place position at center/top of axis rect
         userLabel->setText(userDefinedBrief);
         userLabel->setPen(QPen(Qt::black)); // show black border around text
         userLabel->setPadding(QMargins(5,0,5,0));
@@ -531,7 +511,7 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
 
         detectedLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
         detectedLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        detectedLabel->position->setCoords(xpos, 0.87*yRange.upper); // place position at center/top of axis rect
+        detectedLabel->position->setCoords(xpos, getLabelYCoord(false)); // place position at center/top of axis rect
         detectedLabel->setText(detectedBrief);
         detectedLabel->setPen(QPen(Qt::black)); // show black border around text
         detectedLabel->setPadding(QMargins(5,0,5,0));
@@ -559,7 +539,6 @@ void LineGraphWidget::redrawLabels()
      joinedDetectedClassLabels.clear();
 
     QCPRange xRange = ui->chart->xAxis->range();
-    QCPRange yRange = ui->chart->yAxis->range();
 
     // ___ user defined labels ___
     QCPItemText* userBeginLabel = nullptr;
@@ -688,7 +667,7 @@ void LineGraphWidget::redrawLabels()
                 visEndX = matchList.at(matchList.size()-2)->positions()[0]->coords().x();
 
             double xmid = (visBeginX+visEndX)/2.0;
-            joinedUserLabel->position->setCoords(xmid, 1.00*yRange.upper); // place position at center/top of axis rect
+            joinedUserLabel->position->setCoords(xmid, getLabelYCoord(true)); // place position at center/top of axis rect
 
             // set width
             int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
@@ -731,7 +710,7 @@ void LineGraphWidget::redrawLabels()
                 visEndX = matchList.at(matchList.size()-2)->positions()[0]->coords().x();
 
             double xmid = (visBeginX+visEndX)/2.0;
-            joinedDetectedLabel->position->setCoords(xmid, 0.87*yRange.upper); // place position at center/top of axis rect
+            joinedDetectedLabel->position->setCoords(xmid, getLabelYCoord(false)); // place position at center/top of axis rect
 
             // set width
             int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
@@ -752,4 +731,16 @@ double LineGraphWidget::getIndex(int key)
     auto iter = ui->chart->graph(0)->data()->findBegin(key);
 
     return  iter->key;
+}
+
+double LineGraphWidget::getLabelYCoord(bool isUserDefined)
+{
+    auto yRange = ui->chart->yAxis->range();
+
+    double yBaseHeight = (yRange.upper-yRange.lower) / (1.0+labelSpace);
+
+    if (isUserDefined)
+        return yRange.upper;
+    else
+        return yRange.upper - labelSpace / 2.0 * yBaseHeight;
 }

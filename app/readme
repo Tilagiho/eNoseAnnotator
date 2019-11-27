@@ -9,7 +9,6 @@
     -> add absolute values in kOhm
 - clean up saving/ loading
     -> introduce a well defined save/load module ?
-- set label size based on y-range
 
 // optional
 - move multiMode to vector
