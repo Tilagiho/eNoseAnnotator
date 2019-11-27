@@ -91,4 +91,8 @@ FORMS += \
 # !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
+    icon.png \
     readme
+
+RESOURCES += \
+    eNoseAnnotator.qrc

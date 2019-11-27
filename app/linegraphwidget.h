@@ -68,6 +68,7 @@ private:
     Ui::LineGraphWidget *ui;
     const int defaultXWidth = 30; // defines default range of xAxis: (-1; defaultXWidth)
     const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
+    const double labelSpace = 0.2;
 
     const double labelRatio = 2.0/50.0;
 
@@ -116,6 +117,12 @@ private slots:
      */
     void redrawLabels();
 
+    /*
+     * returns y-coord based on current y-range
+     * userDefinedLabel == true: for user defined labels
+     * else: for detected labels
+     */
+    double getLabelYCoord(bool userDefinedLabel);
 };
 
 #endif // LINEGRAPH_H
