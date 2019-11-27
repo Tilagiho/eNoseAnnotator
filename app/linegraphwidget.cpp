@@ -487,7 +487,7 @@ std::array<uint, 2> LineGraphWidget::getSelection()
 
 void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detectedBrief)
 {
-    int ymax = ui->chart->yAxis->range().upper;
+    auto yRange = ui->chart->yAxis->range();
 
     // user defined class name brief
     if (userDefinedBrief != "")
@@ -504,7 +504,7 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
 
         userLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
         userLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        userLabel->position->setCoords(xpos, 1.00*ymax); // place position at center/top of axis rect
+        userLabel->position->setCoords(xpos, 1.00*yRange.upper); // place position at center/top of axis rect
         userLabel->setText(userDefinedBrief);
         userLabel->setPen(QPen(Qt::black)); // show black border around text
         userLabel->setPadding(QMargins(5,0,5,0));
@@ -531,7 +531,7 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
 
         detectedLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
         detectedLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        detectedLabel->position->setCoords(xpos, 0.87*ymax); // place position at center/top of axis rect
+        detectedLabel->position->setCoords(xpos, 0.87*yRange.upper); // place position at center/top of axis rect
         detectedLabel->setText(detectedBrief);
         detectedLabel->setPen(QPen(Qt::black)); // show black border around text
         detectedLabel->setPadding(QMargins(5,0,5,0));
