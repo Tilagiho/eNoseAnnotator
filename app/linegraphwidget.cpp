@@ -467,6 +467,7 @@ std::array<uint, 2> LineGraphWidget::getSelection()
 
 void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detectedBrief)
 {
+    auto xRange = ui->chart->xAxis->range();
     auto yRange = ui->chart->yAxis->range();
 
     // user defined class name brief
@@ -487,7 +488,12 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
         userLabel->position->setCoords(xpos, getLabelYCoord(true)); // place position at center/top of axis rect
         userLabel->setText(userDefinedBrief);
         userLabel->setPen(QPen(Qt::black)); // show black border around text
-        userLabel->setPadding(QMargins(5,0,5,0));
+
+        // set width
+        int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
+        double relativeClassWidth = 1 / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
+        int margin = qRound(relativeClassWidth * xAxisWidth / 2.0);
+        userLabel->setPadding(QMargins(margin,0,margin,0));
     }
     // userDefinedBrief == "" && label exists: label has to be removed
     else if (userDefinedClassLabels.contains(xpos))
@@ -514,7 +520,12 @@ void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detec
         detectedLabel->position->setCoords(xpos, getLabelYCoord(false)); // place position at center/top of axis rect
         detectedLabel->setText(detectedBrief);
         detectedLabel->setPen(QPen(Qt::black)); // show black border around text
-        detectedLabel->setPadding(QMargins(5,0,5,0));
+
+        // set width
+        int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
+        double relativeClassWidth = 1 / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
+        int margin = qRound(relativeClassWidth * xAxisWidth / 2.0);
+        detectedLabel->setPadding(QMargins(margin,0,margin,0));
     }
     // detectedBrief == "" && label exists: label has to be removed
     else if (detectedClassLabels.contains(xpos))
@@ -553,8 +564,8 @@ void LineGraphWidget::redrawLabels()
     {
         int xpos = qRound(ui->chart->graph(0)->data()->at(sortKey)->mainKey());
 
-        // xpos in xRange+-2
-        if (xRange.lower-2 <= xpos && xpos <= xRange.upper+2)
+        // xpos in xRange+-1
+        if (xRange.lower-1 <= xpos && xpos <= xRange.upper+1)
         {
             // --- user defined labels ---
             // user label at xpos exists
@@ -653,25 +664,14 @@ void LineGraphWidget::redrawLabels()
 
             // set coords
             int beginX = matchList.first()->positions()[0]->coords().x();
-            int visBeginX;   // visible begin
-            if (beginX >= xRange.lower)
-                visBeginX = beginX;
-            else
-                visBeginX = matchList.at(1)->positions()[0]->coords().x();
-
             int endX = matchList.last()->positions()[0]->coords().x();
-            int visEndX;
-            if (endX <= xRange.upper)
-                visEndX = endX;
-            else
-                visEndX = matchList.at(matchList.size()-2)->positions()[0]->coords().x();
 
-            double xmid = (visBeginX+visEndX)/2.0;
+            double xmid = (beginX+endX)/2.0;
             joinedUserLabel->position->setCoords(xmid, getLabelYCoord(true)); // place position at center/top of axis rect
 
             // set width
             int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
-            double relativeClassWidth = (endX - beginX) / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
+            double relativeClassWidth = (endX - beginX + 1) / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
             int margin = qRound(relativeClassWidth * xAxisWidth / 2.0);
             joinedUserLabel->setPadding(QMargins(margin,0,margin,0));
 
@@ -696,25 +696,14 @@ void LineGraphWidget::redrawLabels()
 
             // set coords
             int beginX = matchList.first()->positions()[0]->coords().x();
-            int visBeginX;   // visible begin
-            if (beginX >= xRange.lower)
-                visBeginX = beginX;
-            else
-                visBeginX = matchList.at(1)->positions()[0]->coords().x();
-
             int endX = matchList.last()->positions()[0]->coords().x();
-            int visEndX;
-            if (endX <= xRange.upper)
-                visEndX = endX;
-            else
-                visEndX = matchList.at(matchList.size()-2)->positions()[0]->coords().x();
 
-            double xmid = (visBeginX+visEndX)/2.0;
+            double xmid = (beginX+endX)/2.0;
             joinedDetectedLabel->position->setCoords(xmid, getLabelYCoord(false)); // place position at center/top of axis rect
 
             // set width
             int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
-            double relativeClassWidth = (endX - beginX) / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
+            double relativeClassWidth = (endX - beginX + 1) / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
             int margin = qRound(relativeClassWidth * xAxisWidth / 2.0);
 
             joinedDetectedLabel->setPadding(QMargins(margin,0,margin,0));
