@@ -47,6 +47,19 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lGraph->setUseLimits(false);
 
     // connections:
+    // connect lGraph & absLGraph
+    // xAxis
+    connect(ui->lGraph, &LineGraphWidget::xRangeChanged, ui->absLGraph, &LineGraphWidget::setXRange);
+    connect(ui->absLGraph, &LineGraphWidget::xRangeChanged, ui->lGraph, &LineGraphWidget::setXRange);
+    // selection
+    connect(ui->lGraph, &LineGraphWidget::dataSelectionChanged, ui->absLGraph, &LineGraphWidget::setSelection);
+    connect(ui->lGraph, &LineGraphWidget::selectionCleared, ui->absLGraph, &LineGraphWidget::clearSelection);
+    connect(ui->absLGraph, &LineGraphWidget::dataSelectionChanged, ui->lGraph, &LineGraphWidget::setSelection);
+    connect(ui->absLGraph, &LineGraphWidget::selectionCleared, this, [this](){
+        // illegal data selection: force selectionCleared signal
+        ui->lGraph->setSelection(QCPDataSelection(QCPDataRange(2,1)));
+    });
+
     // selection flow
     connect(ui->lGraph, &LineGraphWidget::selectionChanged, mData, &MeasurementData::setSelection); // change selection in mData
 

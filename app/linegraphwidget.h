@@ -54,17 +54,22 @@ public slots:
 
     void setReplotStatus(bool value);
 
+    void setSelection (QCPDataSelection selection);
 
     /*
      * draws selection and class rectangles
      */
     void labelSelection(QMap<uint, MVector> selectionMap);
 
+    void setXRange(QCPRange range);
+
 signals:
     void selectionChanged(int, int);
+    void dataSelectionChanged(QCPDataSelection);
     void selectionCleared();
     void sensorFailure(int i);
     void requestRedraw();
+    void xRangeChanged(const QCPRange new_range);
 
 private:
     Ui::LineGraphWidget *ui;
@@ -108,6 +113,7 @@ private slots:
     void replot(uint timestamp=0);
     void mousePressed(QMouseEvent*);
     void dataSelected();
+    void onXRangeChanged(QCPRange range);
 
     /*
      * draws label of user+detected class at top of graph
