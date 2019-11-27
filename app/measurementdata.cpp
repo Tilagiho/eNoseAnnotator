@@ -888,6 +888,7 @@ void MeasurementData::setUserDefinedClassOfSelection(QString className, QString 
         selectedData[timestamp].userDefinedClass = aClass(className, classBrief);
     }
 
+    dataChanged = true;
     emit labelsUpdated(selectedData);
 }
 
@@ -901,6 +902,7 @@ void MeasurementData::setDetectedClassOfSelection(QString className, QString cla
         selectedData[timestamp].detectedClass = aClass(className, classBrief);
     }
 
+    dataChanged = true;
     emit labelsUpdated(selectedData);
 }
 
@@ -909,6 +911,7 @@ void MeasurementData::addClass(aClass newClass)
     Q_ASSERT("Trying to add class that already exists!" && !classList.contains(newClass));
 
     classList.append(newClass);
+    dataChanged = true;
 }
 
 void MeasurementData::removeClass(aClass oldClass)
@@ -940,6 +943,7 @@ void MeasurementData::removeClass(aClass oldClass)
             updatedVectors[timestamp] = data[timestamp];
     }
 
+    dataChanged = true;
     emit labelsUpdated(updatedVectors);
 }
 
@@ -973,5 +977,6 @@ void MeasurementData::changeClass(aClass oldClass, aClass newClass)
             updatedVectors[timestamp] = data[timestamp];
     }
 
+    dataChanged = true;
     emit labelsUpdated(updatedVectors);
 }

@@ -17,7 +17,6 @@
 - load data: don't replot before loading all data, rescale to full measurement size
 - load/ save data: make timestamp string
 - getSelection is buggy -> use different selection marker
-- bug: class changes don't trigger dataChanged
 
 // optional
 - move multiMode to vector
