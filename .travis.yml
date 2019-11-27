@@ -24,8 +24,8 @@ matrix:
     after_success:
       # find eNoseAnnotator -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
       # curl --upload-file eNoseAnnotator*.AppImage https://transfer.sh/eNoseAnnotator-git.$(git rev-parse --short HEAD)-x86_64.AppImage
-      - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh; fi'
-      - 'if [ "$TRAVIS_PULL_REQUEST" != "false" ]; then bash upload.sh eNoseAnnotator*.AppImage*; fi'
+      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh; fi'
+      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then bash upload.sh eNoseAnnotator*.AppImage*; fi'
 
 # safelist
 branches:
