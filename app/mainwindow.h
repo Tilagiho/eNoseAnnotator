@@ -7,6 +7,7 @@
 #include "usbdatasource.h"
 #include "mvector.h"
 #include <QCloseEvent>
+#include <QStatusBar>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -52,6 +53,8 @@ private:
     USBDataSource *usbSource = nullptr;
 
     void closeEvent (QCloseEvent *event);
+
+    void createStatusBar();
 };
 
 #endif // MAINWINDOW_H

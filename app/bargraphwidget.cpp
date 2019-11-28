@@ -84,7 +84,7 @@ void BarGraphWidget::initGraph()
     ui->barGraph->yAxis->setLabelColor(Qt::black);
     ui->barGraph->yAxis->grid()->setPen(QPen(Qt::black, 0, Qt::SolidLine));
     ui->barGraph->yAxis->grid()->setSubGridPen(QPen(Qt::black, 0, Qt::DotLine));
-    ui->barGraph->yAxis->setLabel("Deviation to base vector / %");
+    ui->barGraph->yAxis->setLabel("R / R0 [%]");
 
     // prepare funcBarGraph
     ui->funcBarGraph->xAxis->setTickLabelRotation(60);
@@ -108,7 +108,7 @@ void BarGraphWidget::initGraph()
     ui->funcBarGraph->yAxis->setLabelColor(Qt::black);
     ui->funcBarGraph->yAxis->grid()->setPen(QPen(Qt::black, 0, Qt::SolidLine));
     ui->funcBarGraph->yAxis->grid()->setSubGridPen(QPen(Qt::black, 0, Qt::DotLine));
-    ui->funcBarGraph->yAxis->setLabel("Deviation to base vector / %");
+    ui->funcBarGraph->yAxis->setLabel("R  / R0 [%]");
 }
 
 void BarGraphWidget::replot()
