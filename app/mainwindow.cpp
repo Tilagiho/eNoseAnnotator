@@ -12,6 +12,10 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
+    QLabel *statusLabel = new QLabel(statusBar());
+    statusLabel->setText("Sensor status: Not connected ");
+    statusBar()->addPermanentWidget(statusLabel);
+
     // DEBUG: set BarGraphWidgetMode
 //    ui->bGraph->setMode(BarGraphWidget::Mode::showAll);
 
@@ -477,4 +481,9 @@ void MainWindow::closeEvent (QCloseEvent *event)
             event->accept();
         }
     }
+}
+
+void MainWindow::createStatusBar()
+{
+    statusBar()->showMessage(tr("Ready"));
 }

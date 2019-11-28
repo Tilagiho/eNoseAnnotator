@@ -112,7 +112,7 @@ void LineGraphWidget::setupGraph()
     ui->chart->yAxis->setBasePen(QPen(Qt::black));
     ui->chart->yAxis->setTickPen(QPen(Qt::black));
     ui->chart->yAxis->setSubTickPen(QPen(Qt::black));
-    ui->chart->yAxis->setLabel("Deviation to base vector / %");
+    ui->chart->yAxis->setLabel("R / R0 [%]");
 
 
     // set axis ranges to show all data:
@@ -356,7 +356,7 @@ void LineGraphWidget::setIsAbsolute(bool value)
     if (isAbsolute)
     {
         ui->chart->xAxis->setLabel("");
-        ui->chart->yAxis->setLabel("Resistance / kOhm");
+        ui->chart->yAxis->setLabel("R  [kOhm]");
     }
 }
 
