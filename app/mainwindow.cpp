@@ -559,3 +559,14 @@ void MainWindow::on_actionSave_triggered()
 
     mData->saveData(this, filename);
 }
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QString iconCredits = "Application Icon made by: Timo Land<br>USB icons from <a href='https://www.icons8.de'>Icons8</a><br>All other icons made by <a href='https://smashicons.com'>SmashIcons</a> from <a href='https://www.flaticon.com'>www.flaticon.com</a>";
+
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle("About eNoseAnnotator");
+    msgBox.setTextFormat(Qt::RichText);   //this is what makes the links clickable
+    msgBox.setText(iconCredits);
+    msgBox.exec();
+}
