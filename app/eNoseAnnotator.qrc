@@ -1,5 +1,18 @@
 <RCC>
     <qresource prefix="/icons">
-        <file>icon.png</file>
+        <file alias="icon">images/icon.png</file>
+        <file alias="warning">images/warning.png</file>
+        <file alias="success">images/success.png</file>
+        <file alias="stop">images/stop-1.png</file>
+        <file alias="settings">images/settings-4.png</file>
+        <file alias="save">images/save.png</file>
+        <file alias="repeat">images/repeat.png</file>
+        <file alias="start">images/play-button-1.png</file>
+        <file alias="load">images/folder-10.png</file>
+        <file alias="error">images/error.png</file>
+        <file alias="unknown">images/info.png</file>
+        <file alias="connected">images/icons8-usb-verbunden-500.png</file>
+        <file alias="disconnected">images/icons8-usb-getrennt-100-3.png</file>
+        <file alias="recording">images/icons8-undefined-500.png</file>
     </qresource>
 </RCC>
