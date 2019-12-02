@@ -70,13 +70,7 @@ void USBDataSource::changeSettings()
     settings = new USBSettingsDialog(static_cast<QWidget*>(this->parent()));
     settings->setSettings(s);
 
-    if (settings->exec())
-    {
-        timer.setSingleShot(true);
-        timer.start(5000);
-
-        openSerialPort();
-    }
+    settings->exec();
 }
 
 void USBDataSource::openSerialPort()
@@ -93,8 +87,6 @@ void USBDataSource::openSerialPort()
     serial->setParity(dParity);
     serial->setStopBits(dStopBits);
     serial->setFlowControl(dFlowControl);
-
-
 
     // open connection
     if (serial->open(QIODevice::ReadOnly))
