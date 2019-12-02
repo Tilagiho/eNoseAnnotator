@@ -278,20 +278,26 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
                 ui->actionStart->setEnabled(true);
                 ui->actionStop->setEnabled(false);
                 ui->actionReset->setEnabled(false);
+                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
             }); // error
             connect(usbSource, &USBDataSource::serialTimeout, this, [this] () {
                 ui->data_info_widget->setStatus(USBDataSource::Status::ERR);
                 ui->actionStart->setEnabled(true);
                 ui->actionStop->setEnabled(false);
                 ui->actionReset->setEnabled(false);
+                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
             }); // timeout
 
             ui->actionStart->setEnabled(true);
+            ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
         }
     }
 
     else
+    {
         usbSource->changeSettings();
+        ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
+    }
 }
 
 void MainWindow::on_actionSettings_triggered()
