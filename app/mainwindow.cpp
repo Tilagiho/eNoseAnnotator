@@ -12,18 +12,17 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    QLabel *statusLabel = new QLabel(statusBar());
-    statusLabel->setText("Sensor status: Not connected ");
-    statusBar()->addPermanentWidget(statusLabel);
+    this->setWindowIcon(QIcon(":/icons/icon"));
 
-    // DEBUG: set BarGraphWidgetMode
-//    ui->bGraph->setMode(BarGraphWidget::Mode::showAll);
-
-    // hide annotation menu points
-    // TODO: delete all annotation elements
-    ui->actionSaveAnnotation->setVisible(false);
-    ui->actionOpenAnnotation->setVisible(false);
-    ui->actionFunctionalitization->setVisible(false);
+    // init statusbar
+    statusTextLabel = new QLabel(statusBar());
+    statusImageLabel = new QLabel(statusBar());
+    statusTextLabel->setText("Sensor status: Not connected ");
+    statusImageLabel->setPixmap(QPixmap(":/icons/disconnected"));
+    statusImageLabel->setScaledContents(true);
+    statusImageLabel->setMaximumSize(16,16);
+    statusBar()->addPermanentWidget(statusTextLabel);
+    statusBar()->addPermanentWidget(statusImageLabel);
 
     // hide absolute graph
     ui->absLGraph->hide();

@@ -16,4 +16,8 @@
 - free zoom
 - pick LineGraphWidget colors based on BarGraphWidget::Mode
 
+// measurements
+- zero-vectors in save file?
+- continuous marking -> only part is selected
+- resetting connection: measurement is started
 

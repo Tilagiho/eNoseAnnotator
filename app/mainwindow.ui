@@ -20,7 +20,7 @@
    <string>eNoseAnnotator</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="eNoseAnnotator.qrc">
+   <iconset>
     <normaloff>:/icons/icon.png</normaloff>:/icons/icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -184,13 +184,15 @@
     </property>
     <widget class="QMenu" name="menuSave">
      <property name="title">
-      <string>Save...</string>
+      <string>Save as...</string>
      </property>
      <addaction name="actionSave_Data"/>
      <addaction name="actionsave_selection"/>
     </widget>
+    <addaction name="actionSave"/>
     <addaction name="menuSave"/>
     <addaction name="actionLoad"/>
+    <addaction name="separator"/>
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
     <addaction name="actionReset"/>
@@ -224,30 +226,15 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionSave_Data">
    <property name="text">
-    <string>Save  Data...</string>
+    <string>Save Data As...</string>
    </property>
   </action>
   <action name="actionsave_selection">
    <property name="text">
-    <string>Save Selection...</string>
-   </property>
-  </action>
-  <action name="actionLoad_Measurement">
-   <property name="text">
-    <string>Load Measurement...</string>
+    <string>Save Selection As...</string>
    </property>
   </action>
   <action name="actionLoad">
-   <property name="text">
-    <string>Load...</string>
-   </property>
-  </action>
-  <action name="actionSaveAnnotation">
-   <property name="text">
-    <string>Save...</string>
-   </property>
-  </action>
-  <action name="actionOpenAnnotation">
    <property name="text">
     <string>Load...</string>
    </property>
@@ -280,19 +267,9 @@
     <string>Reset base level</string>
    </property>
   </action>
-  <action name="actionFunctionalitization">
-   <property name="text">
-    <string>Functionalisation...</string>
-   </property>
-  </action>
   <action name="actionSettings">
    <property name="text">
     <string>Settings...</string>
-   </property>
-  </action>
-  <action name="actionAdd">
-   <property name="text">
-    <string>Add...</string>
    </property>
   </action>
   <action name="actionClassify_selection">
@@ -303,6 +280,11 @@
   <action name="actionSet_detected_class_of_selection">
    <property name="text">
     <string>[Debug] Set detected class of selection...</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>&amp;Save</string>
    </property>
   </action>
  </widget>
@@ -332,8 +314,6 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="eNoseAnnotator.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

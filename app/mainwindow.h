@@ -7,7 +7,7 @@
 #include "usbdatasource.h"
 #include "mvector.h"
 #include <QCloseEvent>
-#include <QStatusBar>
+#include <QLabel>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -46,8 +46,13 @@ private slots:
 
     void on_actionSet_detected_class_of_selection_triggered();
 
+    void on_actionSave_triggered();
+
 private:
     Ui::MainWindow *ui;
+
+    QLabel *statusTextLabel;
+    QLabel *statusImageLabel;
 
     MeasurementData *mData = nullptr;
     USBDataSource *usbSource = nullptr;
