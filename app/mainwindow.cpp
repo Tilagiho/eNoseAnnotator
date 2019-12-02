@@ -150,6 +150,65 @@ MainWindow::MainWindow(QWidget *parent)
             mData->setFunctionalities(dialog.getFunctionalities());
         }
     });
+
+    // image saves
+    connect(ui->lGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
+        // create export folder
+        if(!QDir ("./export").exists())
+            QDir().mkdir("./export");
+
+        // save file dialog
+        QString selectedExtension;
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
+
+        // save image
+        if (filename != "")
+        {
+            // add extension if none was set
+            QStringList splitList = filename.split(".");
+            if (splitList.size() < 2)
+                filename += ".jpg";
+            // unknown file extension
+            else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
+                filename += ".jpg";
+
+            ui->lGraph->saveImage(filename);
+        }
+    });
+
+    connect(ui->bGraph, &BarGraphWidget::imageSaveRequested, this, [this](){
+        // create export folder
+        if(!QDir ("./export").exists())
+            QDir().mkdir("./export");
+
+        // save file dialog
+        QString selectedExtension;
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
+
+        // save image
+        if (filename != "")
+        {
+            // add extension if none was set
+            QStringList splitList = filename.split(".");
+            if (splitList.size() < 2)
+                filename += ".jpg";
+            // unknown file extension
+            else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
+                filename += ".jpg";
+
+            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the selection data that created the bar graph alongside the image?");
+
+            if (answer == QMessageBox::StandardButton::Yes)
+            {
+                // dataFilemame = filename - image extension + ".csv"
+                QStringList list = filename.split(".");
+                QString dataFilename = list.mid(0, list.length()-1).join(".") + ".csv";
+                mData->saveSelection(this, dataFilename);
+            }
+
+            ui->bGraph->saveImage(filename);
+        }
+    });
 }
 
 MainWindow::~MainWindow()
@@ -486,4 +545,12 @@ void MainWindow::closeEvent (QCloseEvent *event)
 void MainWindow::createStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    QString filename = mData->getSaveFilename();
+    Q_ASSERT("No saveFilename is set in MeasurementData!" && filename != "");
+
+    mData->saveData(this, filename);
 }

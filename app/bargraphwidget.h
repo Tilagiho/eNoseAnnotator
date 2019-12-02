@@ -31,6 +31,10 @@ public:
 public slots:
     void setBars(MVector, std::array<bool, MVector::size> sensorFailures, std::array<int, MVector::size> functionalisation);
     void clearBars();
+    bool saveImage(const QString &filename);
+
+signals:
+    void imageSaveRequested();
 
 private:
     Ui::BarGraphWidget *ui;
@@ -42,6 +46,9 @@ private:
 
     void initGraph();
     void replot();
+
+private slots:
+    void mousePressed(QMouseEvent*);
 
 };
 

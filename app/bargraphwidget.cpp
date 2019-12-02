@@ -9,6 +9,9 @@ BarGraphWidget::BarGraphWidget(QWidget *parent) :
     ui->setupUi(this);
 
     ui->stackedWidget->setCurrentWidget(ui->funcBarGraph);
+    connect(ui->barGraph, &QCustomPlot::mousePress, this, &BarGraphWidget::mousePressed);
+    connect(ui->funcBarGraph, &QCustomPlot::mousePress, this, &BarGraphWidget::mousePressed);
+
     initGraph();
 }
 
@@ -268,4 +271,44 @@ void BarGraphWidget::setMode(const Mode &value)
         ui->stackedWidget->setCurrentWidget(ui->barGraph);
     else
         ui->stackedWidget->setCurrentWidget(ui->funcBarGraph);
+}
+
+void BarGraphWidget::mousePressed(QMouseEvent* event)
+{
+    if (event->button() == Qt::RightButton)
+    {
+        QCustomPlot* plot = static_cast<QCustomPlot*> (ui->stackedWidget->currentWidget());
+
+        QMenu *menu = new QMenu(this);
+        menu->setAttribute(Qt::WA_DeleteOnClose);
+
+        menu->addAction("Save Graph...", this, [this](){
+            emit imageSaveRequested();
+        });
+
+        menu->popup(plot->mapToGlobal(event->pos()));
+    }
+}
+
+bool BarGraphWidget::saveImage(const QString &filename)
+{
+    QStringList splitFilename = filename.split(".");
+    Q_ASSERT("No file extension set!" && splitFilename.size() > 1);
+
+    bool writeOk;
+    QString extension = splitFilename.last();
+    QCustomPlot* plot = static_cast<QCustomPlot*> (ui->stackedWidget->currentWidget());
+
+    if (extension == "pdf")
+        writeOk = plot->savePdf(filename);
+    else if (extension == "bmp")
+        writeOk = plot->saveBmp(filename);
+    else if (extension == "jpg" || extension == "jpeg")
+        writeOk = plot->saveJpg(filename);
+    else if (extension == "png")
+        writeOk = plot->savePng(filename);
+    else
+        Q_ASSERT("Unknown file extension!" && false);
+
+    return writeOk;
 }

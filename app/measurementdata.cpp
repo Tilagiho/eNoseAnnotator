@@ -306,112 +306,123 @@ bool MeasurementData::saveData(QWidget *widget)
     return saveData(widget, data);
 }
 
+bool MeasurementData::saveData(QWidget *widget, QString filename)
+{
+    return  saveData(widget, filename, data);
+}
+
 bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
 {
-    QString fileName = QFileDialog::getSaveFileName(widget, QString("Save data"), QString(""), "Data files (*.csv)");
+    QString path = (saveFilename != "") ? saveFilename : "./data";
+    QString fileName = QFileDialog::getSaveFileName(widget, QString("Save data"), path, "Data files (*.csv)");
 
     if (fileName.isEmpty())
     {
         return false;
-    } else
-    {
-
-        QFile file(fileName);
-        if (!file.open(QIODevice::WriteOnly))
-        {
-            QMessageBox::information(widget, tr("Unable to open file"),
-                file.errorString());
-            return false;
-        }
-
-        QTextStream out(&file);
-        // write info
-        // version
-        out << "#measurement data v" << version << "\n";
-
-        // sensorId
-        out << "#sensorId:" << sensorId << "\n";
-
-        // sensor failures
-        out << "#failures:" << getFailureString() << "\n";
-        if (!dataComment.isEmpty())
-        {
-            // go through dataComment line-by-line
-            QTextStream commentStream(&dataComment);
-            QString line;
-
-            while (commentStream.readLineInto(&line))
-                out << "#" << line << "\n";
-        }
-
-        // sensor functionalisation
-        QStringList funcList;
-        for (int i=0; i<functionalisation.size(); i++)
-            funcList << QString::number(functionalisation[i]);
-        out << "#functionalisation:" << funcList.join(";") << "\n";
-
-        // base vector
-        for (uint timestamp : baseLevelMap.keys())
-        {
-            out << "#baseLevel:" << getTimestampStringFromUInt(timestamp) << ";";
-            QStringList valueList;
-            for (int i=0; i<MVector::size; i++)
-                valueList << QString::number(baseLevelMap[timestamp][i], 'g', 10);
-            out <<  valueList.join(";") << "\n";
-        }
-
-        // classes
-        out << "#classes:";
-        QStringList classStringList;
-        for (aClass c : classList)
-            classStringList << c.toString();
-        out << classStringList.join(";") << "\n";
-
-        // write header
-        QStringList headerList;
-
-        headerList << "#header:timestamp";
-
-        for (int i=0; i<MVector::size; i++)
-            headerList << "ch" + QString::number(i+1);
-
-        headerList << "user defined class";
-        headerList << "detected class";
-
-        out << headerList.join(";") << "\n";
-
-        // write data
-        auto iter = map.begin();
-
-        while (iter != map.end())
-        {
-            QStringList valueList;
-            valueList << getTimestampStringFromUInt(iter.key());      // timestamp
-
-            // vector
-            for (int i=0; i<MVector::size; i++)
-                valueList << QString::number(iter.value()[i], 'g', 10);
-            // classes
-            valueList << iter.value().userDefinedClass.toString() << iter.value().detectedClass.toString();
-            out <<  valueList.join(";") << "\n";
-
-            iter++;
-        }
-        dataChanged = false;
-        return true;
     }
 
+    // update saveFilename
+    saveFilename = fileName;
+    return saveData(widget, fileName, map);
+}
+
+bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVector> map)
+{
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        QMessageBox::information(widget, tr("Unable to open file"),
+            file.errorString());
+        return false;
+    }
+
+    QTextStream out(&file);
+    // write info
+    // version
+    out << "#measurement data v" << version << "\n";
+
+    // sensorId
+    out << "#sensorId:" << sensorId << "\n";
+
+    // sensor failures
+    out << "#failures:" << getFailureString() << "\n";
+    if (!dataComment.isEmpty())
+    {
+        // go through dataComment line-by-line
+        QTextStream commentStream(&dataComment);
+        QString line;
+
+        while (commentStream.readLineInto(&line))
+            out << "#" << line << "\n";
+    }
+
+    // sensor functionalisation
+    QStringList funcList;
+    for (int i=0; i<functionalisation.size(); i++)
+        funcList << QString::number(functionalisation[i]);
+    out << "#functionalisation:" << funcList.join(";") << "\n";
+
+    // base vector
+    for (uint timestamp : baseLevelMap.keys())
+    {
+        out << "#baseLevel:" << getTimestampStringFromUInt(timestamp) << ";";
+        QStringList valueList;
+        for (int i=0; i<MVector::size; i++)
+            valueList << QString::number(baseLevelMap[timestamp][i], 'g', 10);
+        out <<  valueList.join(";") << "\n";
+    }
+
+    // classes
+    out << "#classes:";
+    QStringList classStringList;
+    for (aClass c : classList)
+        classStringList << c.toString();
+    out << classStringList.join(";") << "\n";
+
+    // write header
+    QStringList headerList;
+
+    headerList << "#header:timestamp";
+
+    for (int i=0; i<MVector::size; i++)
+        headerList << "ch" + QString::number(i+1);
+
+    headerList << "user defined class";
+    headerList << "detected class";
+
+    out << headerList.join(";") << "\n";
+
+    // write data
+    auto iter = map.begin();
+
+    while (iter != map.end())
+    {
+        QStringList valueList;
+        valueList << getTimestampStringFromUInt(iter.key());      // timestamp
+
+        // vector
+        for (int i=0; i<MVector::size; i++)
+            valueList << QString::number(iter.value()[i], 'g', 10);
+        // classes
+        valueList << iter.value().userDefinedClass.toString() << iter.value().detectedClass.toString();
+        out <<  valueList.join(";") << "\n";
+
+        iter++;
+    }
+    dataChanged = false;
+    return true;
 }
 
 bool MeasurementData::saveSelection(QWidget *widget)
 {
-    if (selectedData.isEmpty())
-    {
-        QMessageBox::information(widget, tr("Save failed"),
-            "Please select data first!\t");
-        return false;
-    }
+    Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
     return saveData(widget, selectedData);
+}
+
+bool MeasurementData::saveSelection(QWidget *widget, QString filename)
+{
+    Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
+    return saveData(widget, filename, selectedData);
 }
 
 bool MeasurementData::loadData(QWidget* widget)
@@ -428,7 +439,12 @@ bool MeasurementData::loadData(QWidget* widget)
     if (!dataSaved)
         return false;
 
-    QString fileName = QFileDialog::getOpenFileName(widget, "Open data file", "", "Data files (*.csv)");
+    // make data directory
+    if (!QDir("data").exists())
+        QDir().mkdir("data");
+
+    QString path = (saveFilename != "") ? saveFilename : "./data";
+    QString fileName = QFileDialog::getOpenFileName(widget, "Open data file", path, "Data files (*.csv)");
 
     if (fileName.isEmpty())
     {
@@ -500,6 +516,9 @@ bool MeasurementData::loadData(QWidget* widget)
         }
 
         dataChanged = false;
+
+        // set filename
+        saveFilename = fileName;
 
         emit labelsUpdated(data);   // reset labels
 
@@ -587,6 +606,8 @@ bool MeasurementData::getMetaData(QString line)
 
 bool MeasurementData::getData(QString line)
 {
+    uint timestamp;
+    MVector vector;
     bool readOk = true;
 
     if (line == "") // ignore empty lines
@@ -609,8 +630,8 @@ bool MeasurementData::getData(QString line)
             return false;
         }
         // prepare vector
-        uint timestamp = query[0].toUInt(&readOk);
-        MVector vector;
+        timestamp = query[0].toUInt(&readOk);
+        vector;
         for (int i=0; i<MVector::size; i++)
         {
             vector[i] = query[i+1].toDouble(&readOk);
@@ -633,11 +654,7 @@ bool MeasurementData::getData(QString line)
                 return false;
             }
         }
-        MVector baseVector = getBaseLevel(timestamp);
-
-        addMeasurement(timestamp, vector.getAbsoluteVector(baseVector), baseVector);
-
-        return readOk;
+        vector = vector.getAbsoluteVector(getBaseLevel(timestamp));
     }
     else //if (version == "1.0")   // current version -> default
     {
@@ -655,14 +672,13 @@ bool MeasurementData::getData(QString line)
         }
         // prepare vector
         // get timestamp: uint or string
-        uint timestamp;
+        timestamp;
         bool isInt;
         timestamp = query[0].toUInt(&isInt);
 
         if(!isInt)
             timestamp = getTimestampUIntfromString(query[0]);
 
-        MVector vector;
         for (int i=0; i<MVector::size; i++)
         {
             vector[i] = query[i+1].toDouble(&readOk);
@@ -687,10 +703,14 @@ bool MeasurementData::getData(QString line)
                 qWarning() << "Warning: Detected class invalid: \"" << classString << "\"";
             }
         }
+
+    }
+
+    // ignore zero vectors
+    if (vector != MVector::zeroes())
         addMeasurement(timestamp, vector, getBaseLevel(timestamp));
 
-        return readOk;
-    }
+    return readOk;
 }
 
 void MeasurementData::generateRandomWalk()
@@ -790,7 +810,6 @@ void MeasurementData::setSelection(int lower, int upper)
     qDebug() << "Selection made: " << selectedData.firstKey() << ", " << selectedData.lastKey() << "\n" << vector.toString() << "\n";
 
     emit selectionVectorChanged(vector, sensorFailures, functionalisation);
-    emit selectionMapChanged(selectedData);
 }
 
 //const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp, MultiMode mode)
@@ -993,6 +1012,11 @@ void MeasurementData::changeClass(aClass oldClass, aClass newClass)
 
     dataChanged = true;
     emit labelsUpdated(updatedVectors);
+}
+
+QString MeasurementData::getSaveFilename() const
+{
+    return saveFilename;
 }
 
 QString MeasurementData::getTimestampStringFromUInt(uint timestamp)

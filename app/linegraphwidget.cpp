@@ -255,6 +255,7 @@ void LineGraphWidget::replot(uint timestamp)
 
 void LineGraphWidget::mousePressed(QMouseEvent * event)
 {
+    // dragging vs selection
     if (event->button() == Qt::LeftButton)
     {
         if (QGuiApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
@@ -269,6 +270,18 @@ void LineGraphWidget::mousePressed(QMouseEvent * event)
         else
             // disable rectangle selection
             ui->chart->setSelectionRectMode(QCP::srmNone);
+    }
+    // context menu
+    else if (event->button() == Qt::RightButton)
+    {
+        QMenu *menu = new QMenu(this);
+        menu->setAttribute(Qt::WA_DeleteOnClose);
+
+        menu->addAction("Save Graph...", this, [this](){
+            emit ImageSaveRequested();
+        });
+
+        menu->popup(ui->chart->mapToGlobal(event->pos()));
     }
 }
 
@@ -358,6 +371,34 @@ void LineGraphWidget::setIsAbsolute(bool value)
         ui->chart->xAxis->setLabel("");
         ui->chart->yAxis->setLabel("R  [kOhm]");
     }
+}
+
+bool LineGraphWidget::saveImage(const QString &filename)
+{
+    QStringList splitFilename = filename.split(".");
+
+    Q_ASSERT("No file extension set!" && splitFilename.size() > 1);
+
+    QString extension = splitFilename.last();
+
+    bool writeOk;
+    if (extension == "pdf")
+        writeOk = ui->chart->savePdf(filename);
+    else if (extension == "bmp")
+        writeOk = ui->chart->saveBmp(filename);
+    else if (extension == "jpg" || extension == "jpeg")
+        writeOk = ui->chart->saveJpg(filename);
+    else if (extension == "png")
+        writeOk = ui->chart->savePng(filename);
+    else
+        Q_ASSERT("Unknown file extension!" && false);
+
+    return writeOk;
+}
+
+QPixmap LineGraphWidget::getPixmap()
+{
+    return ui->chart->toPixmap();
 }
 
 void LineGraphWidget::setReplotStatus(bool value)

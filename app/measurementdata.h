@@ -106,18 +106,22 @@ public:
      * opens QFileDialog in order to get the save path
      */
     bool saveData(QWidget* widget);
+    bool saveData(QWidget* widget, QString filename);
+
 
     /*
      * saves the content of map
      * opens QFileDialog in order to get the save path
      */
     bool saveData(QWidget* widget, QMap<uint, MVector> map);
+    bool saveData(QWidget* widget, QString filename, QMap<uint, MVector> map);
 
     /*
      *  saves current selection
      * opens QFileDialog in order to get the save path
      */
     bool saveSelection(QWidget* widget);
+    bool saveSelection(QWidget* widget, QString filename);
 
     /*
      * loads data file
@@ -179,6 +183,8 @@ public:
 
     QList<aClass> getClassList() const;
 
+    QString getSaveFilename() const;
+
 public slots:
     /*
      * clears selectedData and adds all vectors with timestamp between lower and upper to selectedData
@@ -231,6 +237,8 @@ private:
     QList<aClass> classList;
 
     QString version = "1.0";
+
+    QString saveFilename = "";
 
     /*
      * extracts measurement data from line

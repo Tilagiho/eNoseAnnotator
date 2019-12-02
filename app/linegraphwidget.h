@@ -56,6 +56,9 @@ public slots:
 
     void setSelection (QCPDataSelection selection);
 
+    bool saveImage(const QString &filename);
+    QPixmap getPixmap();
+
     /*
      * draws selection and class rectangles
      */
@@ -70,6 +73,7 @@ signals:
     void sensorFailure(int i);
     void requestRedraw();
     void xRangeChanged(const QCPRange new_range);
+    void ImageSaveRequested();
 
 private:
     Ui::LineGraphWidget *ui;
