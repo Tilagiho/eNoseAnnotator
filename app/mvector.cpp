@@ -9,6 +9,11 @@ MVector::MVector()
         array[i] = 0.0;
 }
 
+MVector::~MVector()
+{
+
+}
+
 QString MVector::toString()
 {
     QStringList stringList;
@@ -39,10 +44,51 @@ bool MVector::operator!=(const MVector &other) const
     return !this->operator==(other);
 }
 
+MVector MVector::operator*(const double multiplier)
+{
+    MVector vector;
+
+    for (int i=0; i<size; i++)
+        vector[i] = this->array[i] * multiplier;
+
+    return vector;
+}
+
+MVector MVector::operator*(const int multiplier)
+{
+    return *this * static_cast<double>(multiplier);
+}
+
+MVector MVector::operator/(const double denominator)
+{
+    MVector vector;
+
+    for (int i=0; i<size; i++)
+        vector[i] = this->array[i] / denominator;
+
+    return vector;
+}
+
+MVector MVector::operator/(const int denominator)
+{
+    return *this / static_cast<double>(denominator);
+}
+
+MVector MVector::operator+(const MVector other)
+{
+    MVector vector;
+
+    for (int i=0; i<size; i++)
+        vector[i] = this->array[i] + other.array[i];
+
+    return vector;
+}
+
 double &MVector::operator[](int index)
 {
     Q_ASSERT("index out of range!" && index >= 0 && index < size);
 
+    array.at(index);
     return array[index];
 }
 

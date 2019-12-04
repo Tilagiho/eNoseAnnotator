@@ -14,14 +14,20 @@ public:
     static const int size = 64;    // number of sensor inputs
 
     MVector();
+    ~MVector();
 
     QString toString();
 
-    // Overloading == operator to access elements in array style
     bool operator ==(const MVector &other) const;
 
-    // Overloading != operator to access elements in array style
     bool operator !=(const MVector &other) const;
+
+    MVector operator *(const double denominator);
+    MVector operator *(const int denominator);
+    MVector operator /(const double denominator);
+    MVector operator /(const int denominator);
+
+    MVector operator +(const MVector other);
 
     // Overloading [] operator to access elements in array style
     double &operator[] (int index);
