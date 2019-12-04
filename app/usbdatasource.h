@@ -17,11 +17,10 @@ public:
     // enumeration for connection status
     enum class Status {
         NOT_CONNECTED,  // usb connection not open
+        CONNECTED,
         SET_BASELEVEL,  // base level is being set
-        OPEN,           // connected
-        PAUSED,
-        CLOSED,
-        ERR           // error occurred
+        RECEIVING_DATA,           // measurement data is being received
+        CONNECTION_ERROR           // error occurred
     };
 
 
@@ -62,7 +61,7 @@ private:
     USBSettingsDialog *settings = nullptr;
     QSerialPort *serial = nullptr;
     QTimer timer;
-    MVector baselevelVector;
+    QMap<uint, MVector> baselevelVectorMap;
     int startCount = 0;     // used to store first count received in order to calculate baselevel vector
     Status status = Status::NOT_CONNECTED;
     bool paused = false;

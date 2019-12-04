@@ -30,19 +30,16 @@ void InfoWidget::setStatus(USBDataSource::Status status)
     case USBDataSource::Status::NOT_CONNECTED:
         ui->statusLabel->setText("Not connected");
         break;
+    case USBDataSource::Status::CONNECTED:
+        ui->statusLabel->setText("Connected");
+        break;
     case USBDataSource::Status::SET_BASELEVEL:
         ui->statusLabel->setText("Setting baselevel...");
         break;
-    case USBDataSource::Status::OPEN:
+    case USBDataSource::Status::RECEIVING_DATA:
         ui->statusLabel->setText("Receiving data");
         break;
-    case USBDataSource::Status::PAUSED:
-        ui->statusLabel->setText("Paused");
-        break;
-    case USBDataSource::Status::CLOSED:
-        ui->statusLabel->setText("Closed");
-        break;
-    case USBDataSource::Status::ERR:
+    case USBDataSource::Status::CONNECTION_ERROR:
         ui->statusLabel->setText("Error");
         break;
     }

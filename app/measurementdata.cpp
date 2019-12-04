@@ -250,11 +250,18 @@ MVector MeasurementData::getBaseLevel(uint timestamp)
     uint bsTimestamp = 0;
 
     //  go through baseLevelMap and store ts in bsTimestamp until timestamp < ts
-    // -> bsTimestamp is
+    // -> bsTimestamp is last ts
+    // or until timestamp == ts
+    // -> bsTimestamp = ts
     for (auto  ts: baseLevelMap.keys())
     {
         if (ts > timestamp)
             break;
+        else if (ts == timestamp)
+        {
+            bsTimestamp = ts;
+            break;
+        }
 
         bsTimestamp = ts;
     }
@@ -909,6 +916,8 @@ std::array<bool, MVector::size> MeasurementData::sensorFailureArray(QString fail
             failureArray[4*hex+bit] |= failureInt & (1UL << bit);
         }
     }
+
+    return failureArray;
 }
 
 void MeasurementData::setUserDefinedClassOfSelection(QString className, QString classBrief)
