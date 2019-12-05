@@ -11,7 +11,7 @@
 ClassInputDialog::ClassInputDialog(QWidget *parent, QString name, QString abreviation) : QDialog(parent)
 {
     this->setWindowTitle("Add class");
-    QRegExp rx("\\w*");
+    QRegExp rx("[\\w| ]*");
 
     QFormLayout *lytMain = new QFormLayout(this);
 

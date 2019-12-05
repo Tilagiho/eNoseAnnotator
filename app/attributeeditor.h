@@ -3,7 +3,6 @@
 
 #include <QtCore>
 #include <QDialog>
-#include <QtCore>
 
 namespace Ui {
 class AttributeEditor;
