@@ -156,6 +156,8 @@ public:
      */
     bool changed() const;
 
+    void setDataNotChanged();
+
     /*
      * returns baselevel at timestamp
      */

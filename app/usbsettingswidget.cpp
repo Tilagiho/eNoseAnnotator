@@ -1,30 +1,30 @@
-#include "usbsettingsdialog.h"
-#include "ui_usbsettingsdialog.h"
+#include "usbsettingswidget.h"
+#include "ui_usbsettingswidget.h"
 
 #include <QtSerialPort/QSerialPortInfo>
 #include <QMessageBox>
 
 static const char blankString[] = QT_TRANSLATE_NOOP("SettingsDialog", "N/A");
 
-USBSettingsDialog::USBSettingsDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::USBSettingsDialog)
+USBSettingsWidget::USBSettingsWidget(QWidget *parent) :
+    QWidget(parent),
+    ui(new Ui::USBSettingsWidget)
 {
     ui->setupUi(this);
 
     // show selected port info
     connect(ui->serialPortInfoListBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &USBSettingsDialog::showPortInfo);
+            this, &USBSettingsWidget::showPortInfo);
 
     fillPortsInfo();
 }
 
-USBSettingsDialog::~USBSettingsDialog()
+USBSettingsWidget::~USBSettingsWidget()
 {
     delete ui;
 }
 
-void USBSettingsDialog::showPortInfo(int idx)
+void USBSettingsWidget::showPortInfo(int idx)
 {
     if (idx == -1)
         return;
@@ -39,7 +39,7 @@ void USBSettingsDialog::showPortInfo(int idx)
 }
 
 
-void USBSettingsDialog::fillPortsInfo()
+void USBSettingsWidget::fillPortsInfo()
 {
     ui->serialPortInfoListBox->clear();
     QString description;
@@ -65,62 +65,21 @@ void USBSettingsDialog::fillPortsInfo()
     ui->serialPortInfoListBox->addItem(tr("Custom"));
 }
 
-USBSettingsDialog::Settings USBSettingsDialog::getSettings()
+QString USBSettingsWidget::getPortName()
 {
-    return currentSettings;
+    return ui->serialPortInfoListBox->currentText();
 }
 
-bool USBSettingsDialog::setSettings(Settings settings)
+void USBSettingsWidget::setPortName(QString portName)
 {
-    fillPortsInfo();
-
     // check if serialPortInfoListBox contains settings.portName
     QStringList itemsInComboBox;
     for (int index = 0; index < ui->serialPortInfoListBox->count(); index++)
         itemsInComboBox << ui->serialPortInfoListBox->itemText(index);
 
-    if (!itemsInComboBox.contains(settings.portName))
-        return false;
-
-    ui->serialPortInfoListBox->setCurrentText(settings.portName);
-    ui->sensorIdLineEdit->setText(settings.sensorId);
-
-
-
-    currentSettings.portName = settings.portName;
-    currentSettings.sensorId = settings.sensorId;
-
-    return true;
-}
-
-void USBSettingsDialog::updateSettings()
-{
-    currentSettings.portName = ui->serialPortInfoListBox->currentText();
-    currentSettings.sensorId = ui->sensorIdLineEdit->text();
-}
-
-void USBSettingsDialog::on_pushButton_clicked()
-{
-    updateSettings();
-
-    // check sensorId
-    if (currentSettings.sensorId == "")
-    {
-        QMessageBox::warning(this, "Settings not accepted", "Please set a sensorId!");
+    // behaviour: portName not available -> ignore
+    if (!itemsInComboBox.contains(portName))
         return;
-    }
 
-    // close dialog as accepted
-    accept();
-}
-
-
-USBSettingsDialog::Settings USBSettingsDialog::getDefaultSettings()
-{
-    Settings settings;
-
-    settings.portName = "default";
-    settings.sensorId = "default";
-
-    return settings;
+    ui->serialPortInfoListBox->setCurrentText(portName);
 }

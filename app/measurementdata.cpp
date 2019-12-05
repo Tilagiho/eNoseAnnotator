@@ -188,7 +188,11 @@ void MeasurementData::setSensorId(QString newSensorId)
     if (newSensorId != sensorId)
     {
         sensorId = newSensorId;
-        dataChanged = true;
+
+        // changing sensor id of empty measurement data should not trigger dataChanged
+        if (!data.isEmpty())
+            dataChanged = true;
+
         emit sensorIdSet(sensorId);
     }
 }
@@ -237,6 +241,11 @@ void MeasurementData::setFunctionalities(const std::array<int, MVector::size> &v
 bool MeasurementData::changed() const
 {
     return dataChanged;
+}
+
+void MeasurementData::setDataNotChanged()
+{
+    dataChanged = false;
 }
 
 MVector MeasurementData::getBaseLevel(uint timestamp)

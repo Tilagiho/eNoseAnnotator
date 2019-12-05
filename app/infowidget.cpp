@@ -23,23 +23,26 @@ void InfoWidget::setSensor(QString sensor)
         ui->sensorLabel->setText(sensor);
 }
 
-void InfoWidget::setStatus(USBDataSource::Status status)
+void InfoWidget::setStatus(DataSource::Status status)
 {
     switch (status)
     {
-    case USBDataSource::Status::NOT_CONNECTED:
+    case DataSource::Status::NOT_CONNECTED:
         ui->statusLabel->setText("Not connected");
         break;
-    case USBDataSource::Status::CONNECTED:
+    case DataSource::Status::CONNECTING:
+        ui->statusLabel->setText("Connecting...");
+        break;
+    case DataSource::Status::CONNECTED:
         ui->statusLabel->setText("Connected");
         break;
-    case USBDataSource::Status::SET_BASELEVEL:
-        ui->statusLabel->setText("Setting baselevel...");
+    case DataSource::Status::SET_BASEVECTOR:
+        ui->statusLabel->setText("Setting Base Vector (R0)...");
         break;
-    case USBDataSource::Status::RECEIVING_DATA:
+    case DataSource::Status::RECEIVING_DATA:
         ui->statusLabel->setText("Receiving data");
         break;
-    case USBDataSource::Status::CONNECTION_ERROR:
+    case DataSource::Status::CONNECTION_ERROR:
         ui->statusLabel->setText("Error");
         break;
     }

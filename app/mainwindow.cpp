@@ -5,6 +5,9 @@
 #include "generalsettings.h"
 #include "classselector.h"
 #include "linegraphwidget.h"
+#include "datasource.h"
+#include "usbdatasource.h"
+#include "sourcedialog.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -244,71 +247,80 @@ void MainWindow::on_rSplitter_splitterMoved(int, int)
 
 void MainWindow::on_actionSet_USB_Connection_triggered()
 {
-    if (usbSource == nullptr)
+    SourceDialog* dialog = new SourceDialog(static_cast<QWidget*>(this->parent()));
+
+    // source was set before
+    if (source != nullptr)
     {
-        // clear mData
-        mData->clear();
+        // set previous settings
+        dialog->setSensorId(mData->getSensorId());
 
-        USBSettingsDialog* dialog = new USBSettingsDialog(static_cast<QWidget*>(this->parent()));
-        if (dialog->exec())
+        // usb specific
+        if (source->sourceType() == DataSource::SourceType::USB)
         {
+            USBDataSource::Settings usbSettings;
+            usbSettings.portName = source->identifier();
 
-            usbSource = new USBDataSource(this, dialog->getSettings());
-
-            // connect
-            // usb connection
-            connect (usbSource, &USBDataSource::newMeasurement, this, [this](QString sensorId){
-                mData->clear();
-                mData->setSensorId(sensorId);
-                ui->data_info_widget->setStatus(USBDataSource::Status::SET_BASELEVEL);
-            }); //  usb sensor connected
-            connect(usbSource, &USBDataSource::beginSetBaseLevel, this, [this](){
-                ui->data_info_widget->setStatus(USBDataSource::Status::SET_BASELEVEL);
-                statusTextLabel->setText("Sensor Status: Setting R0");
-                statusImageLabel->setPixmap(QPixmap(":/icons/baseVector"));
-            });
-            connect(usbSource, &USBDataSource::baseLevelSet, mData, &MeasurementData::setBaseLevel);
-            connect(usbSource, &USBDataSource::vectorReceived, this, [this] (uint timestamp, MVector vector) {
-                mData->addMeasurement(timestamp, vector);
-            } );    // new measurement
-            connect(usbSource, &USBDataSource::vectorReceived, this, [this] (uint, MVector) {
-                if (ui->data_info_widget->statusSet != USBDataSource::Status::RECEIVING_DATA)
-                    ui->data_info_widget->setStatus(USBDataSource::Status::RECEIVING_DATA);
-                statusTextLabel->setText("Sensor Status: Receiving Data");
-                statusImageLabel->setPixmap(QPixmap(":/icons/recording"));
-            });
-            connect(usbSource, &USBDataSource::serialError, this, [this] () {
-                ui->data_info_widget->setStatus(USBDataSource::Status::CONNECTION_ERROR);
-                ui->actionStart->setEnabled(true);
-                ui->actionStop->setEnabled(false);
-                ui->actionReset->setEnabled(false);
-                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
-                statusTextLabel->setText("Sensor Status: Error");
-                statusImageLabel->setPixmap(QPixmap(":/icons/error"));
-            }); // error
-            connect(usbSource, &USBDataSource::serialTimeout, this, [this] () {
-                ui->data_info_widget->setStatus(USBDataSource::Status::CONNECTION_ERROR);
-                ui->actionStart->setEnabled(true);
-                ui->actionStop->setEnabled(false);
-                ui->actionReset->setEnabled(false);
-                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
-                statusTextLabel->setText("Sensor Status: Error");
-                statusImageLabel->setPixmap(QPixmap(":/icons/error"));
-            }); // timeout
-
-            ui->actionStart->setEnabled(true);
-            ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
-
-            ui->data_info_widget->setStatus(USBDataSource::Status::CONNECTED);
-            statusTextLabel->setText("Sensor Status: Connected");
-            statusImageLabel->setPixmap(QPixmap(":/icons/connected"));
+            dialog->setSourceType(DataSource::SourceType::USB);
+            dialog->setUSBSettings(usbSettings);
         }
+        else
+            Q_ASSERT ("Unknown source selected!" && false);
     }
 
-    else
+    if (dialog->exec())
     {
-        usbSource->changeSettings();
-        ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
+        DataSource::SourceType sourceType = dialog->getSourceType();
+        QString identifier = dialog->getIdentifier();
+        QString sensorId =dialog->getSensorId();
+
+        // source was set before
+        if (source != nullptr)
+        {
+            // if new source type or identifier:
+            if (identifier != source->identifier() || sourceType != source->sourceType())
+            {
+                // measurement running:
+                // -> ask if measurement should be stopped
+                if (source->status() == DataSource::Status::RECEIVING_DATA)
+                {
+                    QMessageBox::StandardButton answer = QMessageBox::question(this, "Stop Measurement", "You selected a new connection while a measurement is running.\nDo you want to stop the measurement in order to use the new connection?");
+
+                    if (answer != QMessageBox::StandardButton::Yes)
+                        return; // keep current data source
+
+                    source->stop();
+                }
+                // delete old source
+                delete source;
+                source = nullptr;
+            }
+            // only sensor Id was changed
+            else if (sensorId != mData->getSensorId())
+            {
+                mData->setSensorId(sensorId);
+            }
+        }
+
+        // source not set before or just deleted:
+        // -> init new source
+        // usb source:
+        if (source == nullptr)
+        {
+            if (sourceType == DataSource::SourceType::USB)
+            {
+                USBDataSource::Settings settings;
+                settings.portName = identifier;
+
+                source = new USBDataSource(settings);
+            }
+
+            // make connections
+            makeSourceConnections();
+
+            // update ui
+            sensorConnected(sensorId);
+        }
     }
 }
 
@@ -426,13 +438,15 @@ void MainWindow::on_actionSettings_triggered()
 
 void MainWindow::on_actionStart_triggered()
 {
-    Q_ASSERT("Error: No connection was specified!" && usbSource!=nullptr);
+    Q_ASSERT("Error: No connection was specified!" && source!=nullptr);
+    Q_ASSERT("Error: Cannot start non-active connection!" && ((source->status() == DataSource::Status::CONNECTED) || (source->status() == DataSource::Status::CONNECTION_ERROR)));
 
-    if (usbSource->getSerial()->isOpen())
+    // reconnect
+    if (source->status() == DataSource::Status::CONNECTION_ERROR)
     {
-        usbSource->closeSerialPort();
-        qWarning() << "Error: Trying to open connection which is already open!";
-     }
+        qDebug() << "Reconnecting Sensor \"" << source->identifier() << "\"";
+        source->reconnect();
+    }
 
     if (mData->changed())
     {
@@ -441,49 +455,36 @@ void MainWindow::on_actionStart_triggered()
         if (answer == QMessageBox::StandardButton::Yes)
             mData->saveData(this);
     }
-    mData->clear();
-    ui->lGraph->clearGraph();
-    ui->absLGraph->clearGraph();
 
-    // open serial port
-    usbSource->openSerialPort();
+    // clear data, init with sensor id, set dataChanged to false
+    QString sensorId = mData->getSensorId();
+    clearData();
+    mData->setSensorId(sensorId);
+    mData->setDataNotChanged();
 
-    // diasable start action, enable stop & reset action
-    ui->actionStart->setEnabled(false);
-    ui->actionStop->setEnabled(true);
-    ui->actionReset->setEnabled(true);
+    source->start();
 
     qDebug() << "New measurement started!";
 }
 
 void MainWindow::on_actionStop_triggered()
 {
-    if (usbSource == nullptr || !usbSource->getSerial()->isOpen())
-    {
-        qWarning() << "Error: Trying to close non-open connection";
-        return;
-    }
-    usbSource->closeSerialPort();
-    usbSource->reset();
+    Q_ASSERT("Error: No connection was specified!" && source!=nullptr);
+    Q_ASSERT("Error: Cannot stop non-active connection!" && source->status() == DataSource::Status::RECEIVING_DATA);
+    if (source->sourceType() == DataSource::SourceType::USB)
+        Q_ASSERT("Error: Connection is not open!" && static_cast<USBDataSource*>(source)->getSerial()->isOpen());
 
-    ui->actionStart->setEnabled(true);
-    ui->actionStop->setEnabled(false);
-    ui->actionReset->setEnabled(false);
-
-    ui->data_info_widget->setStatus(USBDataSource::Status::CONNECTED);
-    statusTextLabel->setText("Sensor Status: Connected");
-    statusImageLabel->setPixmap(QPixmap(":/icons/connected"));
+    source->stop();
 }
 
 void MainWindow::on_actionReset_triggered()
 {
-    if (usbSource == nullptr || !usbSource->getSerial()->isOpen())
-    {
-        qWarning("Error: Trying to reset non-open connection");
-        return;
-    }
+    Q_ASSERT("Error: No connection was specified!" && source!=nullptr);
+    Q_ASSERT("Error: Cannot stop non-active connection!" && source->status() == DataSource::Status::RECEIVING_DATA);
+    if (source->sourceType() == DataSource::SourceType::USB)
+        Q_ASSERT("Error: Connection is not open!" && static_cast<USBDataSource*>(source)->getSerial()->isOpen());
 
-    usbSource->reset();
+    source->reset();
 }
 
 void MainWindow::on_actionClassify_selection_triggered()
@@ -583,4 +584,105 @@ void MainWindow::on_actionAbout_triggered()
     msgBox.setTextFormat(Qt::RichText);   //this is what makes the links clickable
     msgBox.setText(iconCredits);
     msgBox.exec();
+}
+
+void MainWindow::clearData()
+{
+    mData->clear();
+    ui->lGraph->clearGraph();
+    ui->absLGraph->clearGraph();
+}
+
+void MainWindow::sensorConnected(QString sensorId)
+{
+    // mData
+    mData->setSensorId(sensorId);
+
+    // info widget
+    ui->data_info_widget->setSensor(sensorId);
+    ui->data_info_widget->setStatus(DataSource::Status::CONNECTING);
+
+    // tool bar
+    ui->actionStart->setEnabled(false);
+    ui->actionStop->setEnabled(false);
+    ui->actionReset->setEnabled(false);
+    ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
+
+    // status bar
+    statusTextLabel->setText("Sensor Status: Connecting...");
+    statusImageLabel->setPixmap(QPixmap(":/icons/baseVector"));
+}
+
+void MainWindow::makeSourceConnections()
+{
+    connect(source, &DataSource::baseVectorSet, mData, &MeasurementData::setBaseLevel);
+    connect(source, &DataSource::vectorReceived, mData, [this] (uint timestamp, MVector vector) {
+        mData->addMeasurement(timestamp, vector);
+
+        if (ui->data_info_widget->statusSet != DataSource::Status::RECEIVING_DATA)
+        {
+            statusTextLabel->setText("Sensor Status: Receiving Data");
+            statusImageLabel->setPixmap(QPixmap(":/icons/recording"));
+        }
+    } );    // new measurement
+
+    connect(source, &DataSource::error, this, [this] (QString errorString) {
+        QMessageBox::critical(this, "Connection Error", errorString);
+    }); // error
+
+    connect(source, &DataSource::statusSet, ui->data_info_widget, &InfoWidget::setStatus);
+    connect(source, &DataSource::statusSet, this, [this](DataSource::Status status){
+        switch (status) {
+            case DataSource::Status::NOT_CONNECTED:
+                ui->actionStart->setEnabled(false);
+                ui->actionStop->setEnabled(false);
+                ui->actionReset->setEnabled(false);
+                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
+                statusTextLabel->setText("Sensor Status: Not Connected");
+                statusImageLabel->setPixmap(QPixmap(":/icons/disconnected"));
+                break;
+            case DataSource::Status::CONNECTING:
+                ui->actionStart->setEnabled(false);
+                ui->actionStop->setEnabled(false);
+                ui->actionReset->setEnabled(false);
+                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
+                statusTextLabel->setText("Sensor Status: Connecting...");
+                statusImageLabel->setPixmap(QPixmap(":/icons/baseVector"));
+                break;
+            case DataSource::Status::CONNECTED:
+                ui->actionStart->setEnabled(true);
+                ui->actionStop->setEnabled(false);
+                ui->actionReset->setEnabled(false);
+                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
+                statusTextLabel->setText("Sensor Status: Connected");
+                statusImageLabel->setPixmap(QPixmap(":/icons/connected"));
+                break;
+            case DataSource::Status::SET_BASEVECTOR:
+                ui->actionStart->setEnabled(false);
+                ui->actionStop->setEnabled(true);
+                ui->actionReset->setEnabled(false);
+                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
+                statusTextLabel->setText("Sensor Status: Setting Base Vector (R0)...");
+                statusImageLabel->setPixmap(QPixmap(":/icons/baseVector"));
+                break;
+            case DataSource::Status::RECEIVING_DATA:
+                ui->actionStart->setEnabled(false);
+                ui->actionStop->setEnabled(true);
+                ui->actionReset->setEnabled(true);
+                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
+                statusTextLabel->setText("Sensor Status: Receiving Data");
+                statusImageLabel->setPixmap(QPixmap(":/icons/recording"));
+                break;
+            case DataSource::Status::CONNECTION_ERROR:
+                ui->actionStart->setEnabled(true);
+                ui->actionStop->setEnabled(false);
+                ui->actionReset->setEnabled(false);
+                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
+                statusTextLabel->setText("Sensor Status: Error");
+                statusImageLabel->setPixmap(QPixmap(":/icons/error"));
+                break;
+            default:
+                Q_ASSERT("Unknown Sensor Status!" && false);
+        }
+    });
 }

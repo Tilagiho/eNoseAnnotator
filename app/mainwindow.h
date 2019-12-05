@@ -4,7 +4,7 @@
 #include <QtCore>
 #include <QMainWindow>
 #include "measurementdata.h"
-#include "usbdatasource.h"
+#include "datasource.h"
 #include "mvector.h"
 #include <QCloseEvent>
 #include <QLabel>
@@ -57,11 +57,20 @@ private:
     QLabel *statusImageLabel;
 
     MeasurementData *mData = nullptr;
-    USBDataSource *usbSource = nullptr;
+    DataSource *source = nullptr;
 
     void closeEvent (QCloseEvent *event);
 
     void createStatusBar();
+
+    void clearData();
+
+    void makeSourceConnections();
+
+    void sensorConnected(QString sensorId);
+    void stopMeas();
+    void startMeas();
+    void resetMeas();
 };
 
 #endif // MAINWINDOW_H

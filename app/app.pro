@@ -36,6 +36,7 @@ SOURCES += \
     classifierwidget.cpp \
     classinputdialog.cpp \
     classselector.cpp \
+    datasource.cpp \
     functionalisationdialog.cpp \
     generalsettings.cpp \
     infowidget.cpp \
@@ -47,8 +48,9 @@ SOURCES += \
     qcustomplot.cpp \
     sensorcolor.cpp \
     setsensorfailuresdialog.cpp \
+    sourcedialog.cpp \
     usbdatasource.cpp \
-    usbsettingsdialog.cpp
+    usbsettingswidget.cpp
 
 HEADERS += \
     aclass.h \
@@ -58,6 +60,7 @@ HEADERS += \
     classifierwidget.h \
     classinputdialog.h \
     classselector.h \
+    datasource.h \
     functionalisationdialog.h \
     generalsettings.h \
     infowidget.h \
@@ -68,8 +71,9 @@ HEADERS += \
     qcustomplot.h \
     sensorcolor.h \
     setsensorfailuresdialog.h \
+    sourcedialog.h \
     usbdatasource.h \
-    usbsettingsdialog.h
+    usbsettingswidget.h
 
 FORMS += \
     addattributedialog.ui \
@@ -83,7 +87,8 @@ FORMS += \
     linegraphwidget.ui \
     mainwindow.ui \
     setsensorfailuresdialog.ui \
-    usbsettingsdialog.ui
+    sourcedialog.ui \
+    usbsettingswidget.ui
 
 # Default rules for deployment.
 # qnx: target.path = /tmp/$${TARGET}/bin

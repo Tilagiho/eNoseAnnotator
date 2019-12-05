@@ -1,46 +1,42 @@
 #include "usbdatasource.h"
-#include "usbsettingsdialog.h"
+#include "QtCore"
 
-
-#include <QMessageBox>
-#include <QDebug>
-#include <QDateTime>
-
-USBDataSource::USBDataSource(QObject *parent, USBSettingsDialog::Settings usbSettings) : QObject(parent)
+USBDataSource::USBDataSource(USBDataSource::Settings settings):
+    settings(settings)
 {
-    Q_ASSERT("Parent has to be specified!" && parent != nullptr);
+    Q_ASSERT("Invalid settings. Serial port name has to be specified!" && settings.portName != "");
 
     serial = new QSerialPort();
 
-    // no usb settings specified
-    if (usbSettings.portName == "default")
-        {
-        settings = new USBSettingsDialog(static_cast<QWidget*>(this->parent()));
-        if (settings->exec())
-        {
-            makeConnections();
-
-            timer.setSingleShot(true);
-            timer.start(5000);
-        }
-    } else  // usb settings specified
-    {
-        settings = new USBSettingsDialog(static_cast<QWidget*>(this->parent()));
-        if (!settings->setSettings(usbSettings))
-        {
-            QString errorString = "Serial port " + usbSettings.portName + " does not exist.";
-            QMessageBox::warning(static_cast<QWidget*>(this->parent()), "USB error", errorString);
-            return;
-        }
-
-        makeConnections();
-    }
+    makeConnections();
+    openSerialPort();
 }
-
 
 USBDataSource::~USBDataSource()
 {
+    closeConnections();
     closeSerialPort();
+    delete serial;
+}
+
+DataSource::Status USBDataSource::status()
+{
+    if (connectionStatus != Status::NOT_CONNECTED)
+    {
+        // check if serial connection is still open
+        if (!serial->isOpen())
+        {
+            closeSerialPort();
+            setStatus (Status::CONNECTION_ERROR);
+        }
+    }
+
+    return connectionStatus;
+}
+
+USBDataSource::SourceType USBDataSource::sourceType()
+{
+    return DataSource::SourceType::USB;
 }
 
 void USBDataSource::makeConnections()
@@ -50,9 +46,11 @@ void USBDataSource::makeConnections()
     connect(&timer, &QTimer::timeout, this, &USBDataSource::handleTimeout);
 }
 
-bool USBDataSource::getPaused() const
+void USBDataSource::closeConnections()
 {
-    return paused;
+    disconnect(serial, &QSerialPort::readyRead, this, &USBDataSource::handleReadyRead);
+    disconnect(serial, &QSerialPort::errorOccurred, this, &USBDataSource::handleError);
+    disconnect(&timer, &QTimer::timeout, this, &USBDataSource::handleTimeout);
 }
 
 QSerialPort *USBDataSource::getSerial() const
@@ -60,47 +58,46 @@ QSerialPort *USBDataSource::getSerial() const
     return serial;
 }
 
-void USBDataSource::changeSettings()
-{
-    closeSerialPort();
-
-    USBSettingsDialog::Settings s = settings->getSettings();
-    delete  settings;
-
-    settings = new USBSettingsDialog(static_cast<QWidget*>(this->parent()));
-    settings->setSettings(s);
-
-    settings->exec();
-}
-
 void USBDataSource::openSerialPort()
 {
-    Q_ASSERT (settings != nullptr);
-
-    USBSettingsDialog::Settings s = settings->getSettings();
-
-    emit newMeasurement(s.sensorId);
-
-    serial->setPortName(s.portName);
-    serial->setBaudRate(dBaudRate);
-    serial->setDataBits(dDataBits);
-    serial->setParity(dParity);
-    serial->setStopBits(dStopBits);
-    serial->setFlowControl(dFlowControl);
+    serial->setPortName(settings.portName);
+    serial->setBaudRate(settings.baudRate);
+    serial->setDataBits(settings.dataBits);
+    serial->setParity(settings.parity);
+    serial->setStopBits(settings.stopBits);
+    serial->setFlowControl(settings.flowControl);
 
     // open connection
     if (serial->open(QIODevice::ReadOnly))
     {
         serial->clear();
-        status = Status::RECEIVING_DATA;
+        setStatus (DataSource::Status::CONNECTING);
 
+        // don't emit data until measurement is started
+        emitData = false;
+
+        // set timer for timeout errors
         timer.setSingleShot(true);
         timer.start(5000);
     } else
     {
-        QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error: Cannot open USB connection", serial->errorString());
-        status = Status::CONNECTION_ERROR;
+        emit error("Cannot open USB connection on port " + settings.portName);
+        setStatus (Status::CONNECTION_ERROR);
     }
+}
+
+void USBDataSource::reconnect()
+{
+    if (serial != nullptr)
+    {
+        closeSerialPort();
+        delete serial;
+    }
+
+    serial = new QSerialPort{};
+
+    makeConnections();
+    openSerialPort();
 }
 
 void USBDataSource::closeSerialPort()
@@ -110,7 +107,7 @@ void USBDataSource::closeSerialPort()
         serial->clear();
         serial->close();
 
-        status = Status::CONNECTED;
+        setStatus (Status::NOT_CONNECTED);
 
         timer.stop();
     }
@@ -118,39 +115,38 @@ void USBDataSource::closeSerialPort()
 
 void USBDataSource::handleReadyRead()
 {
-    // reset timer
-    timer.start(5000);
-
     // process lines
     while (serial->canReadLine())
         processLine(serial->readLine());
-
 }
 
 void USBDataSource::handleError(QSerialPort::SerialPortError serialPortError)
 {
-    if (serialPortError == QSerialPort::ReadError) {
-        QString errorString("An I/O error occurred while reading the data from port " + serial->portName() + ",  error: " + serial->errorString());
-        QMessageBox::warning(static_cast<QWidget*>(this->parent()), "USB Error", errorString);
+    // ignore signals other than read errors
+    if (serialPortError != QSerialPort::SerialPortError::ReadError)
+        return;
 
-        closeSerialPort();
+    closeSerialPort();
 
-        status = Status::CONNECTION_ERROR;
-        emit serialError();
-    }
+    setStatus (Status::CONNECTION_ERROR);
+    emit error("An I/O error occurred while reading the data from USB port " + serial->portName() + ",  error: " + serial->errorString());
 }
 
 void USBDataSource::handleTimeout()
 {
     closeSerialPort();
-    QMessageBox::warning(static_cast<QWidget*>(parent()), "USB timeout", "The usb connection has timed out. Try replugging the sensor and connect again.");
-    status = Status::CONNECTION_ERROR;
-    emit serialError();
+    setStatus (Status::CONNECTION_ERROR);
+    emit error("USB connection timed out without receiving data.\nCheck the connection settings, replug the sensor and try restarting the measurement.");
 }
 
 void USBDataSource::processLine(const QByteArray &data)
 {
-    if (paused)
+    if (connectionStatus == DataSource::Status::CONNECTING)
+        setStatus(DataSource::Status::CONNECTED);
+    // reset timer
+    timer.start(5000);
+
+    if (!emitData)
         return;
 
     QString line(data);
@@ -173,7 +169,9 @@ void USBDataSource::processLine(const QByteArray &data)
         int count = valueList[0].toInt();
 
         if (startCount == 0 || count == 1)    // first count
-        {            
+        {
+            setStatus (Status::SET_BASEVECTOR);
+
             startCount = count;
 
             // reset base level:
@@ -183,17 +181,15 @@ void USBDataSource::processLine(const QByteArray &data)
                 vector[i] = valueList[i+1].toDouble();
 
             baselevelVectorMap[timestamp] = vector;
-
-            emit beginSetBaseLevel();
         }
-        else if (count < startCount + nBaseLevel -1) // prepare baselevel
+        else if (count < startCount + nBaseVectors -1) // prepare baselevel
         {
             MVector vector;
             for (uint i=0; i<MVector::size; i++)
                 vector[i] = valueList[i+1].toDouble();
 
             baselevelVectorMap[timestamp] = vector;
-        } else if (count == startCount + nBaseLevel -1) // set baselevel
+        } else if (count == startCount + nBaseVectors -1) // set baselevel
         {
             MVector vector;
             for (uint i=0; i<MVector::size; i++)
@@ -207,18 +203,18 @@ void USBDataSource::processLine(const QByteArray &data)
                 baselevelVector = baselevelVector + baselevelVectorMap[ts] / baselevelVectorMap.size();
 
             // set base vector
-            emit baseLevelSet(baselevelVectorMap.firstKey(), baselevelVector);
+            emit baseVectorSet(baselevelVectorMap.firstKey(), baselevelVector);
 
             // add data
-            for (uint ts : baselevelVectorMap.keys())
-                emit vectorReceived(ts, baselevelVectorMap[ts]);
+//            for (uint ts : baselevelVectorMap.keys())
+//                emit vectorReceived(ts, baselevelVectorMap[ts]);
 
             baselevelVectorMap.clear();
         }
         else // get vector & emit
         {
-            if (status != Status::RECEIVING_DATA)
-                status = Status::RECEIVING_DATA;
+            if (connectionStatus != Status::RECEIVING_DATA)
+                setStatus (Status::RECEIVING_DATA);
 
             MVector vector;
             for (uint i=0; i<MVector::size; i++)
@@ -230,12 +226,33 @@ void USBDataSource::processLine(const QByteArray &data)
     }
 }
 
-void USBDataSource::setPaused(bool value)
+void USBDataSource::start()
 {
-    paused = value;
+    Q_ASSERT("Usb connection was already started!" && connectionStatus != Status::RECEIVING_DATA);
+    Q_ASSERT("Usb connection is not connected!" && connectionStatus != Status::NOT_CONNECTED);
+
+    startCount = 0;
+
+    emitData = true;
+}
+
+void USBDataSource::stop()
+{
+    Q_ASSERT("Trying to stop connection that is not receiving data!" && connectionStatus == Status::RECEIVING_DATA);
+
+    emitData = false;
+    setStatus (Status::CONNECTED);
 }
 
 void USBDataSource::reset()
 {
+    Q_ASSERT("Trying to reset base vector without receiving data!" && connectionStatus == Status::RECEIVING_DATA);
+
     startCount = 0;
+    setStatus (Status::SET_BASEVECTOR);
+}
+
+QString USBDataSource::identifier()
+{
+    return settings.portName;
 }
