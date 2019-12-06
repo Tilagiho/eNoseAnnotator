@@ -1,23 +1,18 @@
 // TODO
 // important
 
-- test: extra thread for serial communication necessary?
-- stop measurement based on gradient, ui symbols for status
-
-- add absolute mode to lineGraph
-    -> Delete x-label, Edit y-label
-    -> add absolute values in kOhm
-- clean up saving/ loading
-    -> introduce a well defined save/load module ?
-
 // optional
 - move multiMode to vector
-- sync relative and absolute graphs
 - free zoom
 - pick LineGraphWidget colors based on BarGraphWidget::Mode
+- stop measurement based on gradient, ui symbols for status
+- selected/ deselect graph visibility
+- save status: mData emits signal that updates ui when dataChanged
+- action to continue measurements
+
 
 // measurements
 - zero-vectors in save file?
 - continuous marking -> only part is selected
-- resetting connection: measurement is started
+
 
