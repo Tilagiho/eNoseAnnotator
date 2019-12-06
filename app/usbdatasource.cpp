@@ -134,9 +134,12 @@ void USBDataSource::handleError(QSerialPort::SerialPortError serialPortError)
 
 void USBDataSource::handleTimeout()
 {
+    if (connectionStatus == Status::CONNECTION_ERROR)
+        return; // ignore if already in error state
+
     closeSerialPort();
     setStatus (Status::CONNECTION_ERROR);
-    emit error("USB connection timed out without receiving data.\nCheck the connection settings, replug the sensor and try restarting the measurement.");
+    emit error("USB connection timed out without receiving data.\nCheck the connection settings and replug the sensor. Try to reconnect by starting a new measurement.");
 }
 
 void USBDataSource::processLine(const QByteArray &data)

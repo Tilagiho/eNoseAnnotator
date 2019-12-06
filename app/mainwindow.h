@@ -68,9 +68,8 @@ private:
     void makeSourceConnections();
 
     void sensorConnected(QString sensorId);
-    void stopMeas();
-    void startMeas();
-    void resetMeas();
+
+    void setTitle(bool);
 };
 
 #endif // MAINWINDOW_H

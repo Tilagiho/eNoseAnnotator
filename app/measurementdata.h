@@ -156,7 +156,7 @@ public:
      */
     bool changed() const;
 
-    void setDataNotChanged();
+    void setDataChanged(bool changed);
 
     /*
      * returns baselevel at timestamp
@@ -225,6 +225,8 @@ signals:
 
     // emitted when replotStatus in LinegraphWidgets should be set
     void setReplotStatus(bool status);
+
+    void dataChangedSet(bool);
 
 private:
     QMap<uint, MVector> data;  // map containing vectors of measurements with timestamps as keys

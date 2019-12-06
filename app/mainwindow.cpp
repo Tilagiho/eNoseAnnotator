@@ -100,6 +100,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::setReplotStatus, ui->lGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
     connect(mData, &MeasurementData::setReplotStatus, ui->absLGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
 
+    // measurement data changed
+    connect(mData, &MeasurementData::dataChangedSet, this, [this](bool dataChanged){
+        setTitle(dataChanged);
+    });
 
     // sensor failures detected
     connect(ui->absLGraph, &LineGraphWidget::sensorFailure, this, [this](int channel){
@@ -220,6 +224,36 @@ MainWindow::~MainWindow()
     delete mData;
 }
 
+void MainWindow::setTitle(bool dataChanged)
+{
+    QString filename = mData->getSaveFilename();
+
+    QString title;
+    QString titleExtension;
+
+    if (filename != "")
+    {
+        QDir dataDir{"./data"};
+        QFileInfo fileInfo(filename);
+        QString extension;
+        if (fileInfo.absolutePath().startsWith(dataDir.absolutePath()))
+            titleExtension = " - " + dataDir.relativeFilePath(filename);
+        else
+            titleExtension = " - .../" + fileInfo.fileName();
+    }
+
+   if (dataChanged)
+   {
+        ui->actionSave->setEnabled(true);
+        title = "eNoseAnnotator*";
+   } else
+   {
+       ui->actionSave->setEnabled(false);
+       title = "eNoseAnnotator";
+   }
+   this->setWindowTitle(title + titleExtension);
+}
+
 void MainWindow::on_actionSave_Data_triggered()
 {
     mData->saveData(this);
@@ -233,6 +267,8 @@ void MainWindow::on_actionsave_selection_triggered()
 void MainWindow::on_actionLoad_triggered()
 {
     mData->loadData(this);
+    setTitle(false);
+
 }
 
 void MainWindow::on_lSplitter_splitterMoved(int, int)
@@ -460,7 +496,7 @@ void MainWindow::on_actionStart_triggered()
     QString sensorId = mData->getSensorId();
     clearData();
     mData->setSensorId(sensorId);
-    mData->setDataNotChanged();
+    mData->setDataChanged(false);
 
     source->start();
 
@@ -570,9 +606,10 @@ void MainWindow::createStatusBar()
 void MainWindow::on_actionSave_triggered()
 {
     QString filename = mData->getSaveFilename();
-    Q_ASSERT("No saveFilename is set in MeasurementData!" && filename != "");
-
-    mData->saveData(this, filename);
+    if (filename == "")
+        mData->saveData(this);
+    else
+        mData->saveData(this, filename);
 }
 
 void MainWindow::on_actionAbout_triggered()

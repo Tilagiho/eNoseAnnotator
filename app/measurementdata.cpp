@@ -51,7 +51,7 @@ void MeasurementData::clear()
     setSensorId("");
 
 
-    dataChanged = false;
+    setDataChanged(false);
 }
 
 void MeasurementData::clearSelection()
@@ -92,7 +92,7 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
     // add data, update dataChanged
     data[timestamp] = vector;
     if (!dataChanged)
-        dataChanged = true;
+        setDataChanged(true);
 
     // save absolute vectors
     if (saveRawInput)
@@ -153,7 +153,7 @@ void MeasurementData::setComment(QString new_comment)
     if (dataComment != new_comment)
     {
         dataComment = new_comment;
-        dataChanged = true;
+        setDataChanged(true);
         emit commentSet(dataComment);
     }
 }
@@ -163,7 +163,7 @@ void MeasurementData::setFailures(std::array<bool, 64> failures)
     if (failures != sensorFailures)
     {
         sensorFailures = failures;
-        dataChanged = true;
+        setDataChanged(true);
         emit sensorFailuresSet(failures);
     }
 }
@@ -191,7 +191,7 @@ void MeasurementData::setSensorId(QString newSensorId)
 
         // changing sensor id of empty measurement data should not trigger dataChanged
         if (!data.isEmpty())
-            dataChanged = true;
+            setDataChanged(true);
 
         emit sensorIdSet(sensorId);
     }
@@ -204,7 +204,7 @@ void MeasurementData::setBaseLevel(uint timestamp, MVector baseLevel)
     if (baseLevelMap.isEmpty() || baseLevelMap.last() != baseLevel)
     {
         baseLevelMap.insert(timestamp, baseLevel);
-        dataChanged = true;
+        setDataChanged(true);
         qDebug() << "New baselevel at " << timestamp << ":\n" << baseLevelMap[timestamp].toString();
     }
 }
@@ -234,7 +234,7 @@ void MeasurementData::setFunctionalities(const std::array<int, MVector::size> &v
     if (value != functionalisation)
     {
         functionalisation = value;
-        dataChanged = true;
+        setDataChanged(true);
     }
 }
 
@@ -243,9 +243,13 @@ bool MeasurementData::changed() const
     return dataChanged;
 }
 
-void MeasurementData::setDataNotChanged()
+void MeasurementData::setDataChanged(bool newValue)
 {
-    dataChanged = false;
+    if (newValue != dataChanged)
+    {
+        dataChanged = newValue;
+        emit dataChangedSet(newValue);
+    }
 }
 
 MVector MeasurementData::getBaseLevel(uint timestamp)
@@ -289,7 +293,7 @@ void MeasurementData::setSensorFailures(const std::array<bool, 64> &value)
     if (value != sensorFailures)
     {
         sensorFailures = value;
-        dataChanged = true;
+        setDataChanged(true);
         emit sensorFailuresSet(value);
     }
 }
@@ -425,7 +429,7 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
 
         iter++;
     }
-    dataChanged = false;
+    setDataChanged(false);
     return true;
 }
 
@@ -531,7 +535,7 @@ bool MeasurementData::loadData(QWidget* widget)
             return false;
         }
 
-        dataChanged = false;
+        setDataChanged(false);
 
         // set filename
         saveFilename = fileName;
@@ -939,7 +943,7 @@ void MeasurementData::setUserDefinedClassOfSelection(QString className, QString 
         selectedData[timestamp].userDefinedClass = aClass(className, classBrief);
     }
 
-    dataChanged = true;
+    setDataChanged(true);
     emit labelsUpdated(selectedData);
 }
 
@@ -953,7 +957,7 @@ void MeasurementData::setDetectedClassOfSelection(QString className, QString cla
         selectedData[timestamp].detectedClass = aClass(className, classBrief);
     }
 
-    dataChanged = true;
+    setDataChanged(true);
     emit labelsUpdated(selectedData);
 }
 
@@ -962,7 +966,7 @@ void MeasurementData::addClass(aClass newClass)
     Q_ASSERT("Trying to add class that already exists!" && !classList.contains(newClass));
 
     classList.append(newClass);
-    dataChanged = true;
+    setDataChanged(true);
 }
 
 void MeasurementData::removeClass(aClass oldClass)
@@ -994,7 +998,7 @@ void MeasurementData::removeClass(aClass oldClass)
             updatedVectors[timestamp] = data[timestamp];
     }
 
-    dataChanged = true;
+    setDataChanged(true);
     emit labelsUpdated(updatedVectors);
 }
 
@@ -1028,7 +1032,7 @@ void MeasurementData::changeClass(aClass oldClass, aClass newClass)
             updatedVectors[timestamp] = data[timestamp];
     }
 
-    dataChanged = true;
+    setDataChanged(true);
     emit labelsUpdated(updatedVectors);
 }
 
