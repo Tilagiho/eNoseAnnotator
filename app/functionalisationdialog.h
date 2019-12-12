@@ -29,11 +29,15 @@ private slots:
 
     void on_pushButton_2_clicked();
 
+    void on_pushButton_3_clicked();
+
 private:
     Ui::FunctionalisationDialog *ui;
 
     // stores spinboxes
     std::array<QSpinBox*, 64> spArray;
+
+    void loadPresets();
 };
 
 #endif // FUNCTIONALISATIONDIALOG_H

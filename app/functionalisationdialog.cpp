@@ -1,5 +1,7 @@
 #include "functionalisationdialog.h"
 #include "ui_functionalisationdialog.h"
+#include "QInputDialog"
+#include <QMessageBox>
 
 FunctionalisationDialog::FunctionalisationDialog(QWidget *parent) :
     QDialog(parent),
@@ -75,6 +77,9 @@ FunctionalisationDialog::FunctionalisationDialog(QWidget *parent) :
     spArray[61] = ui->sp62;
     spArray[62] = ui->sp63;
     spArray[63] = ui->sp64;
+
+    // presets
+    loadPresets();
 }
 
 FunctionalisationDialog::~FunctionalisationDialog()
@@ -98,6 +103,21 @@ std::array<int, 64> FunctionalisationDialog::getFunctionalities()
     return funcs;
 }
 
+void FunctionalisationDialog::loadPresets()
+{
+    QDir directory("./presets");
+    QStringList presets = directory.entryList(QStringList() << "*.preset",QDir::Files);
+
+    for (QString presetFileName : presets)
+    {
+        auto list = presetFileName.split(".");
+        list.removeLast();
+        QString preset = list.join(".");
+
+        ui->comboBox->addItem(preset);
+    }
+}
+
 void FunctionalisationDialog::on_comboBox_currentTextChanged(const QString &arg1)
 {
     if (arg1 == "")
@@ -109,21 +129,38 @@ void FunctionalisationDialog::on_comboBox_currentTextChanged(const QString &arg1
 void FunctionalisationDialog::on_pushButton_clicked()
 {
     QString preset = ui->comboBox->currentText();
+    QString presetFileName = preset + ".preset";
 
-    if (preset == "4 Funcs à 10 channels, 1 Each Wing")
+    QFile file("./presets/" + presetFileName);
+    if (!file.open(QIODevice::ReadOnly))
     {
-        for (int i=0; i<spArray.size(); i++)
+        QMessageBox::information(this, "Unable to load preset " + presetFileName,
+            file.errorString());
+    } else
+    {
+        QTextStream in(&file);
+
+        QString line;
+        std::array<int, 64> presetArray;
+        bool readOk = true;
+        for (int i = 0; i<spArray.size(); i++)
         {
-            if (i <= 4 || i >= 59)
-                spArray[i]->setValue(1);
-            else if (i >= 11 && i <= 20)
-                spArray[i]->setValue(2);
-            else if (i >= 27 && i <= 36)
-                spArray[i]->setValue(3);
-            else if (i >= 43 && i <= 52)
-                spArray[i]->setValue(4);
-            else
-                spArray[i]->setValue(0);
+            // load line & convert to integer
+            readOk = in.readLineInto(&line);
+            if (readOk)
+                presetArray[i] = line.toInt(&readOk);
+            if (!readOk)
+            {
+                QMessageBox::information(this, "Unable to load preset " + presetFileName,
+                    file.errorString());
+                break;
+            }
+        }
+
+        if (readOk)
+        {
+            for (int i = 0; i<spArray.size(); i++)
+                spArray[i]->setValue(presetArray[i]);
         }
     }
 }
@@ -132,4 +169,37 @@ void FunctionalisationDialog::on_pushButton_2_clicked()
 {
     for (int i=0; i<spArray.size(); i++)
         spArray[i]->setValue(0);
+}
+
+void FunctionalisationDialog::on_pushButton_3_clicked()
+{
+    // create preset folder
+    if(!QDir ("./presets").exists())
+        QDir().mkdir("./presets");
+
+    // get preset name
+    QString input = QInputDialog::getText(this, "Save Preset", "Preset Name: ");
+
+    if (input == "")
+    {
+        QMessageBox::critical(this, "Unable to save preset " + input, "Invalid preset name! ");
+        return;
+    }
+
+    QString presetFileName = input + ".preset";
+
+    QFile file("./presets/" + presetFileName);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        QMessageBox::critical(this, "Unable to save preset " + presetFileName,
+            file.errorString());
+    } else
+    {
+        QTextStream out(&file);
+
+        for (int i = 0; i<spArray.size(); i++)
+            out << QString::number(spArray[i]->value()) << "\n";
+    }
+    // update preset combo box
+    ui->comboBox->addItem(input);
 }
