@@ -21,7 +21,7 @@ after_build:
   - mkdir "eNoseAnnotator-continuous-Windows/eNoseAnnotator-Windows/"
   - mkdir "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/data/" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/export/" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
   - cp -r app/release/* "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/"
-  - cp misc/presets/*.preset "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
+  - cp -r misc/presets/*.preset "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
 
 artifacts:
   - path: eNoseAnnotator-continuous-Windows
