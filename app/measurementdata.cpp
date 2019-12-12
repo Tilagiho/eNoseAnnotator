@@ -338,6 +338,9 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
     QString path = (saveFilename != "") ? saveFilename : "./data";
     QString fileName = QFileDialog::getSaveFileName(widget, QString("Save data"), path, "Data files (*.csv)");
 
+    if (fileName.split(".").last() != "csv")
+        fileName += ".csv";
+
     if (fileName.isEmpty())
     {
         return false;
