@@ -97,3 +97,39 @@ std::array<int, 64> FunctionalisationDialog::getFunctionalities()
 
     return funcs;
 }
+
+void FunctionalisationDialog::on_comboBox_currentTextChanged(const QString &arg1)
+{
+    if (arg1 == "")
+        ui->pushButton->setEnabled(false);
+    else
+        ui->pushButton->setEnabled(true);
+}
+
+void FunctionalisationDialog::on_pushButton_clicked()
+{
+    QString preset = ui->comboBox->currentText();
+
+    if (preset == "4 Funcs à 10 channels, 1 Each Wing")
+    {
+        for (int i=0; i<spArray.size(); i++)
+        {
+            if (i <= 4 || i >= 59)
+                spArray[i]->setValue(1);
+            else if (i >= 11 && i <= 20)
+                spArray[i]->setValue(2);
+            else if (i >= 27 && i <= 36)
+                spArray[i]->setValue(3);
+            else if (i >= 43 && i <= 52)
+                spArray[i]->setValue(4);
+            else
+                spArray[i]->setValue(0);
+        }
+    }
+}
+
+void FunctionalisationDialog::on_pushButton_2_clicked()
+{
+    for (int i=0; i<spArray.size(); i++)
+        spArray[i]->setValue(0);
+}
