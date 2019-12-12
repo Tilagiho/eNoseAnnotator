@@ -23,6 +23,7 @@ matrix:
       - mkdir eNoseAnnotator-continuous-linux
       - mkdir eNoseAnnotator-continuous-linux/data eNoseAnnotator-continuous-linux/export eNoseAnnotator-continuous-linux/presets 
       - cp eNoseAnnotator*.AppImage* eNoseAnnotator-continuous-linux/
+      - cp eNoseAnnotator/misc/presets/* eNoseAnnotator-continuous-linux/presets
       - zip -r eNoseAnnotator-continuous-linux.zip eNoseAnnotator-continuous-linux/*
     
     after_success:
