@@ -18,13 +18,9 @@ public:
     explicit GeneralSettings(QWidget *parent = nullptr);
     ~GeneralSettings();
 
-
-
     double getMaxVal() const;
     void setMaxVal(double value);
 
-    bool getSaveRawInput() const;
-    void setSaveRawInput(bool value);
 
     double getMinVal() const;
     void setMinVal(double value);
@@ -32,11 +28,7 @@ public:
     bool getUseLimits() const;
     void setUseLimits(bool value);
 
-    bool getShowAbsGraph() const;
-    void setShowAbsGraph(bool value);
 
-    BarGraphWidget::Mode getBarGraphMode() const;
-    void setBarGraphMode(const BarGraphWidget::Mode &value);
 
 private slots:
     void on_buttonBox_accepted();
@@ -46,10 +38,7 @@ private:
     Ui::GeneralSettings *ui;
     double maxVal;
     double minVal;
-    bool saveRawInput = false;
     bool useLimits = true;
-    bool showAbsGraph = false;
-    BarGraphWidget::Mode barGraphMode = BarGraphWidget::Mode::showFunc;
 };
 
 #endif // GENERALSETTINGS_H

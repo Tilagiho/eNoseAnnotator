@@ -395,13 +395,10 @@ void MainWindow::on_actionSettings_triggered()
     dialog.setMinVal(absLineGraph->getMinVal());   // min value for absolute values
     dialog.setUseLimits(absLineGraph->getUseLimits());
 
-    dialog.setSaveRawInput(mData->getSaveRawInput());
 
     if (dialog.exec())
     {
         // get new settings
-        // --- save raw output? ---
-        mData->setSaveRawInput(dialog.getSaveRawInput());
 
         // --- limits ---
         // get limits
