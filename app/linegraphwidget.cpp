@@ -368,7 +368,6 @@ void LineGraphWidget::setIsAbsolute(bool value)
 
     if (isAbsolute)
     {
-        ui->chart->xAxis->setLabel("");
         ui->chart->yAxis->setLabel("R  [kOhm]");
     }
 }
