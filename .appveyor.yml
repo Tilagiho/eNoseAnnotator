@@ -18,19 +18,19 @@ after_build:
   - cd ..
   - echo %appveyor_build_version%
   - mkdir eNoseAnnotator-Windows
-  - mkdir "eNoseAnnotator-Windows/eNoseAnnotator-Windows/"
-  - mkdir "eNoseAnnotator-Windows/eNoseAnnotator-Windows/data/" "eNoseAnnotator-Windows/eNoseAnnotator-Windows/export/" "eNoseAnnotator-Windows/eNoseAnnotator-Windows/presets/"
-  - cp -r app/release/* "eNoseAnnotator-Windows/eNoseAnnotator-Windows/"
-  - cp misc/presets/*.preset "eNoseAnnotator-Windows/eNoseAnnotator-Windows/presets/"
+  - mkdir "eNoseAnnotator-continuous-Windows/eNoseAnnotator-Windows/"
+  - mkdir "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/data/" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/export/" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
+  - cp -r app/release/* "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/"
+  - cp misc/presets/*.preset "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
 
 artifacts:
-  - path: eNoseAnnotator-Windows
+  - path: eNoseAnnotator-continuous-Windows
     type: zip
 
 deploy:
   - provider: GitHub
     name: production
-    artifact: eNoseAnnotator-Windows.zip
+    artifact: eNoseAnnotator-continuous-Windows.zip
     draft: false
     prerelease: true
     force_update: true
