@@ -13,7 +13,7 @@
   <property name="minimumSize">
    <size>
     <width>272</width>
-    <height>392</height>
+    <height>150</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -41,14 +41,21 @@
       <enum>Qt::Vertical</enum>
      </property>
      <widget class="QGroupBox" name="groupBox">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>100</height>
+       </size>
+      </property>
       <property name="font">
        <font>
+        <pointsize>10</pointsize>
         <weight>75</weight>
         <bold>true</bold>
        </font>
       </property>
       <property name="title">
-       <string>Classifier</string>
+       <string>Classifier Info</string>
       </property>
       <widget class="QLabel" name="label">
        <property name="geometry">
@@ -61,6 +68,7 @@
        </property>
        <property name="font">
         <font>
+         <pointsize>10</pointsize>
          <weight>50</weight>
          <bold>false</bold>
         </font>

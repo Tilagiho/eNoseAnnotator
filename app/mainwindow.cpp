@@ -14,8 +14,9 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
     this->setWindowIcon(QIcon(":/icons/icon"));
+
+    createGraphWidgets();
 
     // init statusbar
     statusTextLabel = new QLabel(statusBar());
@@ -26,10 +27,6 @@ MainWindow::MainWindow(QWidget *parent)
     statusImageLabel->setMaximumSize(16,16);
     statusBar()->addPermanentWidget(statusTextLabel);
     statusBar()->addPermanentWidget(statusImageLabel);
-
-    // hide absolute graph
-    ui->absLGraph->hide();
-    ui->absLGraph->setIsAbsolute(true);
 
     // prepare menubar
     ui->actionStart->setEnabled(false);
@@ -50,32 +47,35 @@ MainWindow::MainWindow(QWidget *parent)
     // this->setStyleSheet("QSplitter::handle{background: black;}"); // make splitter visible
 
     // relative graph: ignore limits (minVal, maxVal)
-    ui->lGraph->setUseLimits(false);
+    relLineGraph->setUseLimits(false);
 
     // connections:
     // connect lGraph & absLGraph
     // xAxis
-    connect(ui->lGraph, &LineGraphWidget::xRangeChanged, ui->absLGraph, &LineGraphWidget::setXRange);
-    connect(ui->absLGraph, &LineGraphWidget::xRangeChanged, ui->lGraph, &LineGraphWidget::setXRange);
+    connect(relLineGraph, &LineGraphWidget::xRangeChanged, absLineGraph, &LineGraphWidget::setXRange);
+    connect(absLineGraph, &LineGraphWidget::xRangeChanged, relLineGraph, &LineGraphWidget::setXRange);
     // selection
-    connect(ui->lGraph, &LineGraphWidget::dataSelectionChanged, ui->absLGraph, &LineGraphWidget::setSelection);
-    connect(ui->lGraph, &LineGraphWidget::selectionCleared, ui->absLGraph, &LineGraphWidget::clearSelection);
-    connect(ui->absLGraph, &LineGraphWidget::dataSelectionChanged, ui->lGraph, &LineGraphWidget::setSelection);
-    connect(ui->absLGraph, &LineGraphWidget::selectionCleared, this, [this](){
+    connect(relLineGraph, &LineGraphWidget::dataSelectionChanged, absLineGraph, &LineGraphWidget::setSelection);
+    connect(relLineGraph, &LineGraphWidget::selectionCleared, absLineGraph, &LineGraphWidget::clearSelection);
+    connect(absLineGraph, &LineGraphWidget::dataSelectionChanged, relLineGraph, &LineGraphWidget::setSelection);
+    connect(absLineGraph, &LineGraphWidget::selectionCleared, this, [this](){
         // illegal data selection: force selectionCleared signal
-        ui->lGraph->setSelection(QCPDataSelection(QCPDataRange(2,1)));
+        relLineGraph->setSelection(QCPDataSelection(QCPDataRange(2,1)));
     });
 
     // selection flow
-    connect(ui->lGraph, &LineGraphWidget::selectionChanged, mData, &MeasurementData::setSelection); // change selection in mData
+    connect(relLineGraph, &LineGraphWidget::selectionChanged, mData, &MeasurementData::setSelection); // change selection in mData
 
-    connect(ui->lGraph, &LineGraphWidget::selectionCleared, mData, &MeasurementData::clearSelection); // clear selection in mData
-    connect(ui->lGraph, &LineGraphWidget::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars);  // clear vector in bGraph
-    connect(mData, &MeasurementData::selectionVectorChanged, ui->bGraph, &BarGraphWidget::setBars);   // plot vector in bGraph
-    connect(mData, &MeasurementData::selectionCleared, ui->bGraph, &BarGraphWidget::clearBars); // clear vector in bGraph
-    connect(mData, &MeasurementData::lgClearSelection, ui->lGraph, &LineGraphWidget::clearSelection);
+    connect(relLineGraph, &LineGraphWidget::selectionCleared, mData, &MeasurementData::clearSelection); // clear selection in mData
+    connect(relLineGraph, &LineGraphWidget::selectionCleared, vectorBarGraph, &BarGraphWidget::clearBars);  // clear vector in vectorBarGraph
+    connect(relLineGraph, &LineGraphWidget::selectionCleared, funcBarGraph, &BarGraphWidget::clearBars);  // clear vector in funcBarGraph
+    connect(mData, &MeasurementData::selectionVectorChanged, vectorBarGraph, &BarGraphWidget::setBars);   // plot vector in vectorBarGraph
+    connect(mData, &MeasurementData::selectionVectorChanged, funcBarGraph, &BarGraphWidget::setBars);   // plot vector in funcBarGraph
+    connect(mData, &MeasurementData::selectionCleared, vectorBarGraph, &BarGraphWidget::clearBars); // clear vector in vectorBarGraph
+    connect(mData, &MeasurementData::selectionCleared, funcBarGraph, &BarGraphWidget::clearBars); // clear vector in funcBarGraph
+    connect(mData, &MeasurementData::lgClearSelection, relLineGraph, &LineGraphWidget::clearSelection);
 
-    connect(mData, &MeasurementData::labelsUpdated, ui->lGraph, &LineGraphWidget::labelSelection); // draw selection and classes
+    connect(mData, &MeasurementData::labelsUpdated, relLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
 
     connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::array<bool, MVector::size>){
         ui->actionClassify_selection->setEnabled(true);
@@ -88,17 +88,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     // reset graphs
     connect(mData, &MeasurementData::dataReset, this, [this]{
-        ui->lGraph->clearGraph();
-        ui->absLGraph->clearGraph();
-        ui->bGraph->clearBars();
+        relLineGraph->clearGraph();
+        absLineGraph->clearGraph();
+        vectorBarGraph->clearBars();
+        funcBarGraph->clearBars();
     }); // clear all graphs when data is reset
 
     // new data
-    connect(mData, &MeasurementData::dataAdded, ui->lGraph, &LineGraphWidget::addMeasurement);    // add new data to lGraph                        // add new data to lGraph
-    connect(mData, &MeasurementData::absoluteDataAdded, ui->absLGraph, &LineGraphWidget::addMeasurement); // add new absolute measruement
-    connect(mData, &MeasurementData::dataSet, ui->lGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
-    connect(mData, &MeasurementData::setReplotStatus, ui->lGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
-    connect(mData, &MeasurementData::setReplotStatus, ui->absLGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
+    connect(mData, &MeasurementData::dataAdded, relLineGraph, &LineGraphWidget::addMeasurement);    // add new data to lGraph                        // add new data to lGraph
+    connect(mData, &MeasurementData::absoluteDataAdded, absLineGraph, &LineGraphWidget::addMeasurement); // add new absolute measruement
+    connect(mData, &MeasurementData::dataSet, relLineGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
+    connect(mData, &MeasurementData::setReplotStatus, relLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
+    connect(mData, &MeasurementData::setReplotStatus, absLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
 
     // measurement data changed
     connect(mData, &MeasurementData::dataChangedSet, this, [this](bool dataChanged){
@@ -106,7 +107,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     // sensor failures detected
-    connect(ui->absLGraph, &LineGraphWidget::sensorFailure, this, [this](int channel){
+    connect(absLineGraph, &LineGraphWidget::sensorFailure, this, [this](int channel){
 
 
         auto failures = mData->getSensorFailures();
@@ -115,38 +116,39 @@ MainWindow::MainWindow(QWidget *parent)
             qDebug() << "sensor failure detected in channel " << QString::number(channel);
             failures[channel] = true;
             mData->setFailures(failures);
-            ui->data_info_widget->setFailures(failures);
+            measInfoWidget->setFailures(failures);
         }
     }); // absGraph -> mData
-    connect(mData, &MeasurementData::sensorFailuresSet, ui->lGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
-    connect(mData, &MeasurementData::sensorFailuresSet, ui->absLGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
-    connect(ui->lGraph, &LineGraphWidget::requestRedraw, this, [this]{
+    connect(mData, &MeasurementData::sensorFailuresSet, relLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
+    connect(mData, &MeasurementData::sensorFailuresSet, absLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
+    connect(relLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
         // re-add data to graph
-        ui->lGraph->setData(mData->getRelativeData());
+        relLineGraph->setData(mData->getRelativeData());
     });
-    connect(ui->absLGraph, &LineGraphWidget::requestRedraw, this, [this]{
+    connect(absLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
         // re-add data to graph
-        ui->absLGraph->setData(mData->getAbsoluteData());
+        absLineGraph->setData(mData->getAbsoluteData());
     });
     connect(mData, &MeasurementData::sensorFailuresSet, this, [this]{
         MVector selectionVector = mData->getSelectionVector();
 
-        ui->bGraph->setBars(selectionVector, mData->getSensorFailures(), mData->getFunctionalities());
+        vectorBarGraph->setBars(selectionVector, mData->getSensorFailures(), mData->getFunctionalities());
+        funcBarGraph->setBars(selectionVector, mData->getSensorFailures(), mData->getFunctionalities());
     }); // reset bars when sensorFailures changed
 
     // measurement info
     // info -> mData
-    connect(ui->data_info_widget, &InfoWidget::mCommentChanged, mData, &MeasurementData::setComment);    // comment changed in infoWidget: change comment in mData
-    connect(ui->data_info_widget, SIGNAL(failuresChanged(std::array<bool, 64>)), mData, SLOT(setFailures(std::array<bool, 64>)));   // failures changed in infoWidget: change failures in mData
+    connect(measInfoWidget, &InfoWidget::mCommentChanged, mData, &MeasurementData::setComment);    // comment changed in infoWidget: change comment in mData
+    connect(measInfoWidget, SIGNAL(failuresChanged(std::array<bool, 64>)), mData, SLOT(setFailures(std::array<bool, 64>)));   // failures changed in infoWidget: change failures in mData
 
     // mData -> info
-    connect(mData, &MeasurementData::sensorIdSet, ui->data_info_widget, &InfoWidget::setSensor);            // mData: sensorId changed -> InfoWidget: show new sensorId
-    connect(mData, &MeasurementData::startTimestempSet, ui->data_info_widget, &InfoWidget::setTimestamp);   // mData: timestamp changed -> InfoWidget: show new timestamp
-    connect(mData, &MeasurementData::commentSet, ui->data_info_widget, &InfoWidget::setMComment);            // mData: comment changed -> InfoWidget: show new comment
-    connect(mData, &MeasurementData::sensorFailuresSet, ui->data_info_widget, &InfoWidget::setFailures);    // mData: failures changed -> InfoWidget: show new failures
+    connect(mData, &MeasurementData::sensorIdSet, measInfoWidget, &InfoWidget::setSensor);            // mData: sensorId changed -> InfoWidget: show new sensorId
+    connect(mData, &MeasurementData::startTimestempSet, measInfoWidget, &InfoWidget::setTimestamp);   // mData: timestamp changed -> InfoWidget: show new timestamp
+    connect(mData, &MeasurementData::commentSet, measInfoWidget, &InfoWidget::setMComment);            // mData: comment changed -> InfoWidget: show new comment
+    connect(mData, &MeasurementData::sensorFailuresSet, measInfoWidget, &InfoWidget::setFailures);    // mData: failures changed -> InfoWidget: show new failures
 
     // set functionalities dialog
-    connect(ui->data_info_widget, &InfoWidget::setFunctionalities, this, [this](){
+    connect(measInfoWidget, &InfoWidget::setFunctionalities, this, [this](){
         FunctionalisationDialog dialog;
 
         dialog.setFunctionalities(mData->getFunctionalities());
@@ -158,7 +160,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     // image saves
-    connect(ui->lGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
+    connect(relLineGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
         // create export folder
         if(!QDir ("./export").exists())
             QDir().mkdir("./export");
@@ -178,11 +180,11 @@ MainWindow::MainWindow(QWidget *parent)
             else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
                 filename += ".jpg";
 
-            ui->lGraph->saveImage(filename);
+            relLineGraph->saveImage(filename);
         }
     });
 
-    connect(ui->bGraph, &BarGraphWidget::imageSaveRequested, this, [this](){
+    connect(vectorBarGraph, &BarGraphWidget::imageSaveRequested, this, [this](){
         // create export folder
         if(!QDir ("./export").exists())
             QDir().mkdir("./export");
@@ -212,7 +214,41 @@ MainWindow::MainWindow(QWidget *parent)
                 mData->saveSelection(this, dataFilename);
             }
 
-            ui->bGraph->saveImage(filename);
+            vectorBarGraph->saveImage(filename);
+        }
+    });
+
+    connect(funcBarGraph, &BarGraphWidget::imageSaveRequested, this, [this](){
+        // create export folder
+        if(!QDir ("./export").exists())
+            QDir().mkdir("./export");
+
+        // save file dialog
+        QString selectedExtension;
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
+
+        // save image
+        if (filename != "")
+        {
+            // add extension if none was set
+            QStringList splitList = filename.split(".");
+            if (splitList.size() < 2)
+                filename += ".jpg";
+            // unknown file extension
+            else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
+                filename += ".jpg";
+
+            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the selection data that created the bar graph alongside the image?");
+
+            if (answer == QMessageBox::StandardButton::Yes)
+            {
+                // dataFilemame = filename - image extension + ".csv"
+                QStringList list = filename.split(".");
+                QString dataFilename = list.mid(0, list.length()-1).join(".") + ".csv";
+                mData->saveSelection(this, dataFilename);
+            }
+
+            funcBarGraph->saveImage(filename);
         }
     });
 }
@@ -269,16 +305,6 @@ void MainWindow::on_actionLoad_triggered()
     mData->loadData(this);
     setTitle(false);
 
-}
-
-void MainWindow::on_lSplitter_splitterMoved(int, int)
-{
-    ui->rSplitter->setSizes(ui->lSplitter->sizes());
-}
-
-void MainWindow::on_rSplitter_splitterMoved(int, int)
-{
-    ui->lSplitter->setSizes(ui->rSplitter->sizes());
 }
 
 void MainWindow::on_actionSet_USB_Connection_triggered()
@@ -365,13 +391,11 @@ void MainWindow::on_actionSettings_triggered()
     GeneralSettings dialog;
 
     // set current settings
-    dialog.setMaxVal(ui->absLGraph->getMaxVal());   // max value for absolute values
-    dialog.setMinVal(ui->absLGraph->getMinVal());   // min value for absolute values
-    dialog.setUseLimits(ui->absLGraph->getUseLimits());
-    dialog.setShowAbsGraph(!ui->absLGraph->isHidden());
+    dialog.setMaxVal(absLineGraph->getMaxVal());   // max value for absolute values
+    dialog.setMinVal(absLineGraph->getMinVal());   // min value for absolute values
+    dialog.setUseLimits(absLineGraph->getUseLimits());
 
     dialog.setSaveRawInput(mData->getSaveRawInput());
-    dialog.setBarGraphMode(ui->bGraph->getMode());
 
     if (dialog.exec())
     {
@@ -383,12 +407,12 @@ void MainWindow::on_actionSettings_triggered()
         // get limits
         int newMaxVal = dialog.getMaxVal();
         int newMinVal = dialog.getMinVal();
-        int oldMaxVal = ui->absLGraph->getMaxVal();
-        int oldMinVal = ui->absLGraph->getMinVal();
+        int oldMaxVal = absLineGraph->getMaxVal();
+        int oldMinVal = absLineGraph->getMinVal();
 
         // get useLimits
         bool newUseLimits = dialog.getUseLimits();
-        bool oldUseLimits = ui->absLGraph->getUseLimits();
+        bool oldUseLimits = absLineGraph->getUseLimits();
 
         // recalc sensor failure flags if limits or useLimits changed
         bool limitsChanged = (newMaxVal != oldMaxVal) || (newMaxVal != oldMinVal);
@@ -453,22 +477,11 @@ void MainWindow::on_actionSettings_triggered()
             }
 
             // set new values
-            ui->absLGraph->setMaxVal(newMaxVal);
-            ui->absLGraph->setMinVal(newMinVal);
+            absLineGraph->setMaxVal(newMaxVal);
+            absLineGraph->setMinVal(newMinVal);
             mData->setSensorFailures(sensorFailureFlags);
-            ui->absLGraph->setUseLimits(newUseLimits);
+            absLineGraph->setUseLimits(newUseLimits);
         }
-
-
-        // --- show/ hide abs graph ---
-        if (dialog.getShowAbsGraph() && ui->absLGraph->isHidden())
-            ui->absLGraph->show();
-        else if (!dialog.getShowAbsGraph() && !ui->absLGraph->isHidden())
-            ui->absLGraph->hide();
-
-        // -- BarGraphWidget::Mode --
-        ui->bGraph->setMode(dialog.getBarGraphMode());
-
     }
 }
 
@@ -626,8 +639,8 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::clearData()
 {
     mData->clear();
-    ui->lGraph->clearGraph();
-    ui->absLGraph->clearGraph();
+    relLineGraph->clearGraph();
+    absLineGraph->clearGraph();
 }
 
 void MainWindow::sensorConnected(QString sensorId)
@@ -636,8 +649,8 @@ void MainWindow::sensorConnected(QString sensorId)
     mData->setSensorId(sensorId);
 
     // info widget
-    ui->data_info_widget->setSensor(sensorId);
-    ui->data_info_widget->setStatus(DataSource::Status::CONNECTING);
+    measInfoWidget->setSensor(sensorId);
+    measInfoWidget->setStatus(DataSource::Status::CONNECTING);
 
     // tool bar
     ui->actionStart->setEnabled(false);
@@ -656,7 +669,7 @@ void MainWindow::makeSourceConnections()
     connect(source, &DataSource::vectorReceived, mData, [this] (uint timestamp, MVector vector) {
         mData->addMeasurement(timestamp, vector);
 
-        if (ui->data_info_widget->statusSet != DataSource::Status::RECEIVING_DATA)
+        if (measInfoWidget->statusSet != DataSource::Status::RECEIVING_DATA)
         {
             statusTextLabel->setText("Sensor Status: Receiving Data");
             statusImageLabel->setPixmap(QPixmap(":/icons/recording"));
@@ -667,7 +680,7 @@ void MainWindow::makeSourceConnections()
         QMessageBox::critical(this, "Connection Error", errorString);
     }); // error
 
-    connect(source, &DataSource::statusSet, ui->data_info_widget, &InfoWidget::setStatus);
+    connect(source, &DataSource::statusSet, measInfoWidget, &InfoWidget::setStatus);
     connect(source, &DataSource::statusSet, this, [this](DataSource::Status status){
         switch (status) {
             case DataSource::Status::NOT_CONNECTED:
@@ -722,4 +735,77 @@ void MainWindow::makeSourceConnections()
                 Q_ASSERT("Unknown Sensor Status!" && false);
         }
     });
+}
+
+void MainWindow::createGraphWidgets()
+{
+    setDockNestingEnabled(true);
+
+    // create graph widgets & their docks
+    // relative line graph
+    QDockWidget *rlgdock = ui->dock1;
+    relLineGraph = new LineGraphWidget;
+    rlgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    rlgdock->setWidget(relLineGraph);
+    addDockWidget(Qt::LeftDockWidgetArea, rlgdock);
+    leftDocks << rlgdock;
+    ui->menuView->addAction(rlgdock->toggleViewAction());
+
+    // absolute line graph
+    QDockWidget *algdock = new QDockWidget(tr("Absolute Line Graph"), this);
+    absLineGraph = new LineGraphWidget;
+    absLineGraph->setIsAbsolute(true);
+    algdock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    algdock->setWidget(absLineGraph);
+    addDockWidget(Qt::LeftDockWidgetArea, algdock);
+    leftDocks << algdock;
+    ui->menuView->addAction(algdock->toggleViewAction());
+
+    // vector bar graph
+    QDockWidget *vbgdock = ui->dock2;
+    vectorBarGraph = new BarGraphWidget;
+    vectorBarGraph->setMode(BarGraphWidget::Mode::showAll);
+    vbgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    vbgdock->setWidget(vectorBarGraph);
+    addDockWidget(Qt::LeftDockWidgetArea, vbgdock);
+    leftDocks << vbgdock;
+    ui->menuView->addAction(vbgdock->toggleViewAction());
+
+
+    // functionalisation bar graph
+    QDockWidget *fbgdock = new QDockWidget(tr("Functionalisation Bar Graph"), this);
+    funcBarGraph = new BarGraphWidget;
+    funcBarGraph->setMode(BarGraphWidget::Mode::showFunc);
+    fbgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    fbgdock->setWidget(funcBarGraph);
+    addDockWidget(Qt::LeftDockWidgetArea, fbgdock);
+    leftDocks << fbgdock;
+    ui->menuView->addAction(fbgdock->toggleViewAction());
+
+    // create tabs
+    tabifyDockWidget(algdock, rlgdock);
+    tabifyDockWidget(fbgdock, vbgdock);
+
+    // right widgets
+    measInfoWidget = static_cast<InfoWidget*>(ui->infoWidget);
+    classifierWidget = static_cast<ClassifierWidget*>(ui->classifierInfoWidget);
+
+    int dockWidth = 0.7 * window()->size().width();
+    for (auto dock : leftDocks)
+        dock->resize(dockWidth, dock->size().height());
+
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    auto resizedDock = static_cast<QDockWidget*>(obj);
+
+  if (event->type() == QEvent::Resize && leftDocks.contains(resizedDock))
+  {
+        auto resizeEvent = static_cast<QResizeEvent*>(event);
+        int newWidth = window()->size().width() - resizeEvent->size().width() - 5;
+//        measInfoWidget->resize(newWidth, measInfoWidget->size().width());
+//        classifierWidget->resize(newWidth, classifierWidget->size().width());
+  }
+  return QWidget::eventFilter(obj, event);
 }

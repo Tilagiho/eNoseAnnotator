@@ -3,11 +3,16 @@
 
 #include <QtCore>
 #include <QMainWindow>
+#include <QCloseEvent>
+#include <QLabel>
+
 #include "measurementdata.h"
 #include "datasource.h"
 #include "mvector.h"
-#include <QCloseEvent>
-#include <QLabel>
+#include "linegraphwidget.h"
+#include "bargraphwidget.h"
+#include "infowidget.h"
+#include "classifierwidget.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -27,10 +32,6 @@ private slots:
     void on_actionsave_selection_triggered();
 
     void on_actionLoad_triggered();
-
-    void on_lSplitter_splitterMoved(int pos, int index);
-
-    void on_rSplitter_splitterMoved(int pos, int index);
 
     void on_actionSet_USB_Connection_triggered();
 
@@ -53,6 +54,15 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    LineGraphWidget* absLineGraph;
+    LineGraphWidget* relLineGraph;
+    BarGraphWidget* vectorBarGraph;
+    BarGraphWidget* funcBarGraph;
+    InfoWidget* measInfoWidget;
+    ClassifierWidget* classifierWidget;
+    QList<QDockWidget*> leftDocks;
+    QList<QDockWidget*> rightDocks;
+
     QLabel *statusTextLabel;
     QLabel *statusImageLabel;
 
@@ -60,6 +70,8 @@ private:
     DataSource *source = nullptr;
 
     void closeEvent (QCloseEvent *event);
+
+    void createGraphWidgets();
 
     void createStatusBar();
 
@@ -70,6 +82,9 @@ private:
     void sensorConnected(QString sensorId);
 
     void setTitle(bool);
+
+protected:
+  bool eventFilter(QObject *obj, QEvent *event);
 };
 
 #endif // MAINWINDOW_H
