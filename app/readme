@@ -7,7 +7,6 @@
 - pick LineGraphWidget colors based on BarGraphWidget::Mode
 - stop measurement based on gradient, ui symbols for status
 - selected/ deselect graph visibility
-- save status: mData emits signal that updates ui when dataChanged
 - action to continue measurements
 
 

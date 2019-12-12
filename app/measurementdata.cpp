@@ -12,7 +12,9 @@ MeasurementData::MeasurementData(QObject *parent) : QObject(parent)
     // zero init info
     setComment("");
     setSensorId("");
-    setFailures("0000000000000000000000000000000000000000000000000000000000000000");
+    for (int i=0; i<MVector::size; i++)
+        sensorFailures[i] = false;
+
     for (int i=0; i<functionalisation.size(); i++)
         functionalisation[i] = 0;
 }
