@@ -18,8 +18,9 @@ after_build:
   - cd ..
   - echo %appveyor_build_version%
   - mkdir eNoseAnnotator-Windows
-  - mkdir "eNoseAnnotator-Windows/eNoseAnnotator/"
-  - cp -r app/release/* "eNoseAnnotator-Windows/eNoseAnnotator/"
+  - mkdir "eNoseAnnotator-Windows/eNoseAnnotator-Windows/"
+  - mkdir "eNoseAnnotator-Windows/eNoseAnnotator-Windows/data/" "eNoseAnnotator-Windows/eNoseAnnotator-Windows/export/" "eNoseAnnotator-Windows/eNoseAnnotator-Windows/presets/"
+  - cp -r app/release/* "eNoseAnnotator-Windows/eNoseAnnotator-Windows/"
 
 artifacts:
   - path: eNoseAnnotator-Windows
