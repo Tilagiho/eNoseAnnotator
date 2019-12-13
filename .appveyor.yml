@@ -27,7 +27,8 @@ after_build:
   - cd presets
   - dir
   - cd ../../..
-  - cp -r misc/presets/* "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
+  - cp -r "misc/*" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
+  - cp -r "misc/presets/*" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
 
 artifacts:
   - path: eNoseAnnotator-continuous-Windows
