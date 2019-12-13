@@ -17,11 +17,11 @@ after_build:
   - rm release/*.cpp
   - cd ..
   - echo %appveyor_build_version%
-  - mkdir eNoseAnnotator-Windows
+  - mkdir eNoseAnnotator-continuous-Windows
   - mkdir "eNoseAnnotator-continuous-Windows/eNoseAnnotator-Windows/"
   - mkdir "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/data/" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/export/" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
   - cp -r app/release/* "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/"
-  - xcopy /i /e "misc/presets/" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
+  - cp -r misc/presets "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/"
 
 artifacts:
   - path: eNoseAnnotator-continuous-Windows
