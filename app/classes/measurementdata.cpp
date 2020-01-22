@@ -1,4 +1,5 @@
 #include "measurementdata.h"
+
 #include <QDateTime>
 #include <QVector>
 #include <QtMath>

@@ -4,7 +4,6 @@
 #include <QtCore>
 #include <QColor>
 
-
 class SensorColor
 {
 public:

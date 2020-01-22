@@ -3,7 +3,8 @@
 
 #include <QtCore>
 #include <QDialog>
-#include "aclass.h"
+
+#include "../classes/aclass.h"
 
 namespace Ui {
 class ClassSelector;

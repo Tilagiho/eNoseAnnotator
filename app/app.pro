@@ -29,66 +29,68 @@ linux-g++ {
 
 
 SOURCES += \
-    aclass.cpp \
-    addattributedialog.cpp \
-    attributeeditor.cpp \
-    bargraphwidget.cpp \
-    classifierwidget.cpp \
-    classinputdialog.cpp \
-    classselector.cpp \
-    datasource.cpp \
-    functionalisationdialog.cpp \
-    generalsettings.cpp \
-    infowidget.cpp \
-    linegraphwidget.cpp \
-    main.cpp \
-    mainwindow.cpp \
-    measurementdata.cpp \
-    mvector.cpp \
+    classes/aclass.cpp \
+    classes/datasource.cpp \
+    classes/measurementdata.cpp \
+    classes/mvector.cpp \
+    classes/sensorcolor.cpp \
+    classes/usbdatasource.cpp \
     qcustomplot.cpp \
-    sensorcolor.cpp \
-    setsensorfailuresdialog.cpp \
-    sourcedialog.cpp \
-    usbdatasource.cpp \
-    usbsettingswidget.cpp
+    main.cpp \
+    widgets/addattributedialog.cpp \
+    widgets/attributeeditor.cpp \
+    widgets/bargraphwidget.cpp \
+    widgets/classifierwidget.cpp \
+    widgets/classinputdialog.cpp \
+    widgets/classselector.cpp \
+    widgets/functionalisationdialog.cpp \
+    widgets/generalsettings.cpp \
+    widgets/infowidget.cpp \
+    widgets/linegraphwidget.cpp \
+    widgets/mainwindow.cpp \
+    widgets/setsensorfailuresdialog.cpp \
+    widgets/sourcedialog.cpp \
+    widgets/usbsettingswidget.cpp
+
 
 HEADERS += \
-    aclass.h \
-    addattributedialog.h \
-    attributeeditor.h \
-    bargraphwidget.h \
-    classifierwidget.h \
-    classinputdialog.h \
-    classselector.h \
-    datasource.h \
-    functionalisationdialog.h \
-    generalsettings.h \
-    infowidget.h \
-    linegraphwidget.h \
-    mainwindow.h \
-    measurementdata.h \
-    mvector.h \
+    classes/aclass.h \
+    classes/datasource.h \
+    classes/measurementdata.h \
+    classes/mvector.h \
+    classes/sensorcolor.h \
+    classes/usbdatasource.h \
     qcustomplot.h \
-    sensorcolor.h \
-    setsensorfailuresdialog.h \
-    sourcedialog.h \
-    usbdatasource.h \
-    usbsettingswidget.h
+    widgets/addattributedialog.h \
+    widgets/attributeeditor.h \
+    widgets/bargraphwidget.h \
+    widgets/classifierwidget.h \
+    widgets/classinputdialog.h \
+    widgets/classselector.h \
+    widgets/functionalisationdialog.h \
+    widgets/generalsettings.h \
+    widgets/infowidget.h \
+    widgets/linegraphwidget.h \
+    widgets/mainwindow.h \
+    widgets/setsensorfailuresdialog.h \
+    widgets/sourcedialog.h \
+    widgets/usbsettingswidget.h
+
 
 FORMS += \
-    addattributedialog.ui \
-    attributeeditor.ui \
-    bargraphwidget.ui \
-    classifierwidget.ui \
-    classselector.ui \
-    functionalisationdialog.ui \
-    generalsettings.ui \
-    infowidget.ui \
-    linegraphwidget.ui \
-    mainwindow.ui \
-    setsensorfailuresdialog.ui \
-    sourcedialog.ui \
-    usbsettingswidget.ui
+    widgets/addattributedialog.ui \
+    widgets/attributeeditor.ui \
+    widgets/bargraphwidget.ui \
+    widgets/classifierwidget.ui \
+    widgets/classselector.ui \
+    widgets/functionalisationdialog.ui \
+    widgets/generalsettings.ui \
+    widgets/infowidget.ui \
+    widgets/linegraphwidget.ui \
+    widgets/mainwindow.ui \
+    widgets/setsensorfailuresdialog.ui \
+    widgets/sourcedialog.ui \
+    widgets/usbsettingswidget.ui
 
 # Default rules for deployment.
 # qnx: target.path = /tmp/$${TARGET}/bin

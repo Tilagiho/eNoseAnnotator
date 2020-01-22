@@ -3,6 +3,7 @@
 
 #include <QtCore>
 #include <QMessageBox>
+
 #include "addattributedialog.h"
 
 AttributeEditor::AttributeEditor(QWidget *parent) :

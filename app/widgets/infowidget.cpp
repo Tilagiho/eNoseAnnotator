@@ -2,8 +2,9 @@
 #include "ui_infowidget.h"
 
 #include <QDateTime>
+
 #include "setsensorfailuresdialog.h"
-#include "measurementdata.h"
+#include "../classes/measurementdata.h"
 
 InfoWidget::InfoWidget(QWidget *parent) :
     QWidget(parent),

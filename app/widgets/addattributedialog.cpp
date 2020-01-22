@@ -1,7 +1,7 @@
 #include "addattributedialog.h"
 #include "ui_addattributedialog.h"
-#include <QMessageBox>
 
+#include <QMessageBox>
 #include <QPushButton>
 #include <QRegExpValidator>
 

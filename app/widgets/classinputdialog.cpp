@@ -2,7 +2,6 @@
 
 #include <QtCore>
 #include <QRegExpValidator>
-
 #include <QLabel>
 #include <QLineEdit>
 #include <QDialogButtonBox>

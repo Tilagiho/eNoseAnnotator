@@ -2,10 +2,10 @@
 #define BARGRAPHWIDGET_H
 
 #include <QtCore>
-#include "mvector.h"
-
-#include "qcustomplot.h"
 #include <QWidget>
+
+#include "../classes/mvector.h"
+#include "../qcustomplot.h"
 
 
 namespace Ui {

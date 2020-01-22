@@ -1,12 +1,13 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "../classes/datasource.h"
+#include "../classes/usbdatasource.h"
+
 #include "functionalisationdialog.h"
 #include "generalsettings.h"
 #include "classselector.h"
 #include "linegraphwidget.h"
-#include "datasource.h"
-#include "usbdatasource.h"
 #include "sourcedialog.h"
 
 MainWindow::MainWindow(QWidget *parent)

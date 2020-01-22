@@ -3,7 +3,7 @@
 
 #include <QtCore>
 #include <QDialog>
-#include "mvector.h"
+#include "../classes/mvector.h"
 
 namespace Ui {
 class addAttributeDialog;

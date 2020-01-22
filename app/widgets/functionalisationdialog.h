@@ -2,9 +2,10 @@
 #define FUNCTIONALISATIONDIALOG_H
 
 #include <QtCore>
-#include "mvector.h"
 #include <QDialog>
 #include <QSpinBox>
+
+#include "../classes/mvector.h"
 
 namespace Ui {
 class FunctionalisationDialog;

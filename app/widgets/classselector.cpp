@@ -1,10 +1,11 @@
 #include "classselector.h"
 #include "ui_classselector.h"
 
-#include "classinputdialog.h"
 #include <QMessageBox>
 #include <QtCore>
 #include <QInputDialog>
+
+#include "classinputdialog.h"
 
 ClassSelector::ClassSelector(QWidget *parent) :
     QDialog(parent),

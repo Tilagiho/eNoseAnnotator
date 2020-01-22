@@ -2,9 +2,10 @@
 #define LINEGRAPH_H
 
 #include <QtCore>
-#include "qcustomplot.h"
 #include <QWidget>
-#include"mvector.h"
+
+#include "../qcustomplot.h"
+#include "../classes/mvector.h"
 
 namespace Ui {
 class LineGraphWidget;

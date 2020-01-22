@@ -1,6 +1,7 @@
 #include "setsensorfailuresdialog.h"
 #include "ui_setsensorfailuresdialog.h"
-#include "measurementdata.h"
+
+#include "../classes/measurementdata.h"
 
 SetSensorFailuresDialog::SetSensorFailuresDialog(QWidget *parent, QString failureString) :
     QDialog(parent),

@@ -1,4 +1,5 @@
 #include "sensorcolor.h"
+
 #include <math.h>
 
 SensorColor::SensorColor() {}

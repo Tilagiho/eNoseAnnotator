@@ -4,7 +4,7 @@
 #include <QtCore>
 #include <QWidget>
 
-#include "mvector.h"
+#include "../classes/mvector.h"
 
 namespace Ui {
 class ClassifierWidget;

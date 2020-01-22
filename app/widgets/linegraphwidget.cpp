@@ -1,9 +1,9 @@
 #include "linegraphwidget.h"
 #include "ui_linegraphwidget.h"
-#include "sensorcolor.h"
 
 #include <math.h>
 
+#include "../classes/sensorcolor.h"
 
 LineGraphWidget::LineGraphWidget(QWidget *parent, uint startTime) :
     QWidget(parent),

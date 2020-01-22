@@ -1,5 +1,6 @@
 #include "usbdatasource.h"
-#include "QtCore"
+
+#include <QtCore>
 
 USBDataSource::USBDataSource(USBDataSource::Settings settings):
     settings(settings)

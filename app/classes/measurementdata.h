@@ -2,12 +2,10 @@
 #define MEASUREMENTDATA_H
 
 #include <QtCore>
-#include "mvector.h"
-
-#include <QtCore>
 #include <QObject>
 #include <QMap>
 
+#include "mvector.h"
 
 class MeasurementData : public QObject
 {

@@ -4,8 +4,8 @@
 #include <QtCore>
 #include <QWidget>
 
-#include "mvector.h"
-#include "datasource.h"
+#include "../classes/mvector.h"
+#include "../classes/datasource.h"
 
 namespace Ui {
 class InfoWidget;

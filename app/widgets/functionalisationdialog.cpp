@@ -1,5 +1,6 @@
 #include "functionalisationdialog.h"
 #include "ui_functionalisationdialog.h"
+
 #include "QInputDialog"
 #include <QMessageBox>
 

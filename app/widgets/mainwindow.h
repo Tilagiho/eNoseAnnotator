@@ -6,9 +6,9 @@
 #include <QCloseEvent>
 #include <QLabel>
 
-#include "measurementdata.h"
-#include "datasource.h"
-#include "mvector.h"
+#include "../classes/measurementdata.h"
+#include "../classes/datasource.h"
+#include "../classes/mvector.h"
 #include "linegraphwidget.h"
 #include "bargraphwidget.h"
 #include "infowidget.h"

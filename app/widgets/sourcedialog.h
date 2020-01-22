@@ -2,8 +2,8 @@
 #define SETSOURCEDIALOG_H
 
 #include <QDialog>
-#include "datasource.h"
-#include "usbdatasource.h"
+#include "../classes/datasource.h"
+#include "../classes/usbdatasource.h"
 #include "usbsettingswidget.h"
 
 namespace Ui {

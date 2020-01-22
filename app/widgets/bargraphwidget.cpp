@@ -1,6 +1,7 @@
 #include "bargraphwidget.h"
 #include "ui_bargraphwidget.h"
-#include "sensorcolor.h"
+
+#include "../classes/sensorcolor.h"
 
 BarGraphWidget::BarGraphWidget(QWidget *parent) :
     QWidget(parent),
