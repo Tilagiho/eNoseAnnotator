@@ -129,34 +129,6 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
     if (!dataChanged)
         setDataChanged(true);
 
-    // save absolute vectors
-    if (saveRawInput)
-    {
-        uint startTs = data.firstKey();
-
-        QFile f("raw_input_" + QDateTime::fromTime_t(startTs).toString("dMMyyyy-h:mm:ss") + ".csv");
-        if (f.open(QIODevice::WriteOnly | QIODevice::Append)) {
-            QTextStream stream(&f);
-
-            // write header
-            if (startTs == timestamp)
-            {
-                QStringList headerList;
-                headerList << "timestamp";
-
-                for (int i=0; i<MVector::size; i++)
-                    headerList << "channel" + QString::number(i+1);
-
-                headerList << "user defined class" << "detected class";
-
-                stream << headerList.join(";") << "\n";
-            }
-
-            stream << QDateTime::fromTime_t(data.firstKey()).toString("d.MM.yyyy-h:mm:ss") << ";" << vector.toString() << "\n";
-            f.close();
-        }
-    }
-
     emit dataAdded(deviationVector, timestamp, true);
     emit absoluteDataAdded(vector, timestamp, true);
 }
@@ -262,16 +234,6 @@ void MeasurementData::setBaseLevel(uint timestamp, MVector baseLevel)
 QList<aClass> MeasurementData::getClassList() const
 {
     return classList;
-}
-
-bool MeasurementData::getSaveRawInput() const
-{
-    return saveRawInput;
-}
-
-void MeasurementData::setSaveRawInput(bool value)
-{
-    saveRawInput = value;
 }
 
 std::array<int, MVector::size> MeasurementData::getFunctionalities() const

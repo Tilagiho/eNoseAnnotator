@@ -235,7 +235,6 @@ private:
     QString dataComment = "";
     QString sensorId = "";
     std::array<bool, 64> sensorFailures;
-    bool saveRawInput = false;      // if true: save absolute values in "raw_input_" + timestamp
     QList<aClass> classList;
 
     QString version = "1.0";
