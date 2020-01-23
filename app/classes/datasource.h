@@ -5,7 +5,7 @@
 
 class DataSource : public QObject
 {
-//    Q_OBJECT
+    Q_OBJECT
 public:
     /*!
      * used to obtain status of connection to source
