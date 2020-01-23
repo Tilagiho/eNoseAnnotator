@@ -183,7 +183,7 @@ void MeasurementData::setFailures(std::array<bool, 64> failures)
 
 /*!
  * \brief MeasurementData::setFailures sets sensor failures from a QString.
- * \param failureString is ecpected to be a numeric string of length MVector::size.
+ * \param failureString is expected to be a numeric string of length MVector::size.
  */
 void MeasurementData::setFailures(QString failureString)
 {
@@ -216,8 +216,6 @@ void MeasurementData::setSensorId(QString newSensorId)
 
 /*!
  * \brief MeasurementData::setBaseLevel adds \a baseLevel to the base level vector map. All vectors added after \a timestamp will be normed to \a baseLevel if converted into a relative vector.
- * \param timestamp
- * \param baseLevel
  */
 void MeasurementData::setBaseLevel(uint timestamp, MVector baseLevel)
 {
@@ -250,11 +248,21 @@ void MeasurementData::setFunctionalities(const std::array<int, MVector::size> &v
     }
 }
 
+/*!
+ * \brief MeasurementData::changed returns change status of MeasurementData.
+ * Is \c true if any data was changed since loading or saving the measurement
+ *
+ */
 bool MeasurementData::changed() const
 {
     return dataChanged;
 }
 
+/*!
+ * \brief MeasurementData::setDataChanged should be used when changing dataChanged in order to keep the GUI updated.
+ * \param newValue
+ * emits dataChangedSet if MeasurementData::dataChanged is changed.
+ */
 void MeasurementData::setDataChanged(bool newValue)
 {
     if (newValue != dataChanged)
@@ -264,6 +272,10 @@ void MeasurementData::setDataChanged(bool newValue)
     }
 }
 
+/*!
+ * \brief MeasurementData::getBaseLevel returns the last base level MVector set before \a timestamp.
+ * \param timestamp
+ */
 MVector MeasurementData::getBaseLevel(uint timestamp)
 {
     if (baseLevelMap.isEmpty())
@@ -315,6 +327,10 @@ QString MeasurementData::getSensorId() const
     return sensorId;
 }
 
+/*!
+ * \brief MeasurementData::getFailureString returns a QString of length MVector::size consisting of '0' & '1'.
+ * \return
+ */
 QString MeasurementData::getFailureString()
 {
     QString failureString("");
@@ -333,16 +349,26 @@ bool MeasurementData::contains(uint timestamp)
     return data.contains(timestamp);
 }
 
+/*!
+ * \brief MeasurementData::saveData saves all vectors added & meta info.
+ * The save path & filename is determined by a QFileDialog::getSaveFileName
+ */
 bool MeasurementData::saveData(QWidget *widget)
 {
     return saveData(widget, data);
 }
 
+/*!
+ * \brief MeasurementData::saveData saves all vectors added & meta info in \a filename
+ */
 bool MeasurementData::saveData(QWidget *widget, QString filename)
 {
     return  saveData(widget, filename, data);
 }
 
+/*!
+ * \brief MeasurementData::saveData saves all vectors in \a map & meta info.
+ */
 bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
 {
     QString path = (saveFilename != "") ? saveFilename : "./data";
@@ -361,6 +387,9 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
     return saveData(widget, fileName, map);
 }
 
+/*!
+ * \brief MeasurementData::saveData saves all vectors in \a map & meta info in \a filename.
+ */
 bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVector> map)
 {
     QFile file(filename);
@@ -448,18 +477,28 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
     return true;
 }
 
+/*!
+ * \brief MeasurementData::saveSelection saves current selection. Uses QFileDialog::saveFileDialog to determine save filename.
+
+ */
 bool MeasurementData::saveSelection(QWidget *widget)
 {
     Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
     return saveData(widget, selectedData);
 }
 
+/*!
+ * \brief MeasurementData::saveSelection  saves current selection in \a filename.
+ */
 bool MeasurementData::saveSelection(QWidget *widget, QString filename)
 {
     Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
     return saveData(widget, filename, selectedData);
 }
 
+/*!
+ * \brief MeasurementData::loadData loads file determined by QFileDialog::getOpenFileName.
+ */
 bool MeasurementData::loadData(QWidget* widget)
 {
     bool dataSaved = true;
@@ -561,6 +600,9 @@ bool MeasurementData::loadData(QWidget* widget)
     }
 }
 
+/*!
+ * \brief MeasurementData::getMetaData is a helper function for extracting meta data from save files.
+ */
 bool MeasurementData::getMetaData(QString line)
 {
     bool  readOk = true;
@@ -639,6 +681,9 @@ bool MeasurementData::getMetaData(QString line)
     return readOk;
 }
 
+/*!
+ * \brief MeasurementData::getData is a helper function for extracting vectors from save files.
+ */
 bool MeasurementData::getData(QString line)
 {
     uint timestamp;

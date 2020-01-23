@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- measurementdata.cpp -->
+  <title>MeasurementData Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>MeasurementData</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">MeasurementData Class</h1>
+<!-- $$$MeasurementData-brief -->
+<p>Container for all data concerning the current measurement. Contains all vectors of the current measurement, its meta info &amp; the current selection. Provides functionality for loading &amp; saving measurements &amp; selections. <a href="#details">More...</a></p>
+<!-- @@@MeasurementData -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;MeasurementData&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="measurementdata-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#absoluteDataAdded">absoluteDataAdded</a></b>(MVector <i>vector</i>, uint <i>timestamp</i>, bool <i>yRescale</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#absoluteDataSet">absoluteDataSet</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#addClass">addClass</a></b>(aClass <i>newClass</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#changeClass">changeClass</a></b>(aClass <i>oldClass</i>, aClass <i>newClass</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#commentSet">commentSet</a></b>(int <i>comment</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#dataAdded">dataAdded</a></b>(MVector <i>vector</i>, uint <i>timestamp</i>, bool <i>yRescale</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#dataChangedSet">dataChangedSet</a></b>(<i>bool</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#dataReset">dataReset</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#dataSet">dataSet</a></b>(<i>int</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#labelsUpdated">labelsUpdated</a></b>(int <i>updatedVectors</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#lgClearSelection">lgClearSelection</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#removeClass">removeClass</a></b>(aClass <i>oldClass</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#selectionCleared">selectionCleared</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#selectionMapChanged">selectionMapChanged</a></b>(int <i>selectionMap</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#sensorFailuresSet">sensorFailuresSet</a></b>(<i>std::array&lt;bool, 64&gt;</i> = 64)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#sensorIdSet">sensorIdSet</a></b>(int <i>sensorId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#setBaseLevel">setBaseLevel</a></b>(uint <i>timestamp</i>, MVector <i>baseLevel</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#setComment">setComment</a></b>(int <i>comment</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#setFailures">setFailures</a></b>(<i>std::array&lt;bool, 64&gt;</i> = 64)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#setFailures-1">setFailures</a></b>(int <i>failureString</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#setReplotStatus">setReplotStatus</a></b>(bool <i>status</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#setSensorId">setSensorId</a></b>(int <i>sensorId</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#startTimestempSet">startTimestempSet</a></b>(uint <i>timestamp</i>)</td></tr>
+</table></div>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="measurementdata.html#Avar"></a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$MeasurementData-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Container for all data concerning the current measurement. Contains all vectors of the current measurement, its meta info &amp; the current selection. Provides functionality for loading &amp; saving measurements &amp; selections.</p>
+</div>
+<!-- @@@MeasurementData -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$absoluteDataAdded[overload1]$$$absoluteDataAddedMVectoruintbool -->
+<h3 class="fn" id="absoluteDataAdded"><a name="absoluteDataAdded"></a><span class="type">void</span> MeasurementData::<span class="name">absoluteDataAdded</span>(<span class="type"><a href="mvector.html">MVector</a></span> <i>vector</i>, <span class="type">uint</span> <i>timestamp</i>, <span class="type">bool</span> <i>yRescale</i>)</h3>
+<!-- @@@absoluteDataAdded -->
+<!-- $$$absoluteDataSet[overload1]$$$absoluteDataSetint -->
+<h3 class="fn" id="absoluteDataSet"><a name="absoluteDataSet"></a><span class="type">void</span> MeasurementData::<span class="name">absoluteDataSet</span>(<i>int</i>)</h3>
+<!-- @@@absoluteDataSet -->
+<!-- $$$addClass[overload1]$$$addClassaClass -->
+<h3 class="fn" id="addClass"><a name="addClass"></a><span class="type">void</span> MeasurementData::<span class="name">addClass</span>(<span class="type">aClass</span> <i>newClass</i>)</h3>
+<!-- @@@addClass -->
+<!-- $$$changeClass[overload1]$$$changeClassaClassaClass -->
+<h3 class="fn" id="changeClass"><a name="changeClass"></a><span class="type">void</span> MeasurementData::<span class="name">changeClass</span>(<span class="type">aClass</span> <i>oldClass</i>, <span class="type">aClass</span> <i>newClass</i>)</h3>
+<!-- @@@changeClass -->
+<!-- $$$commentSet[overload1]$$$commentSetint -->
+<h3 class="fn" id="commentSet"><a name="commentSet"></a><span class="type">void</span> MeasurementData::<span class="name">commentSet</span>(<span class="type">int</span> <i>comment</i>)</h3>
+<!-- @@@commentSet -->
+<!-- $$$dataAdded[overload1]$$$dataAddedMVectoruintbool -->
+<h3 class="fn" id="dataAdded"><a name="dataAdded"></a><span class="type">void</span> MeasurementData::<span class="name">dataAdded</span>(<span class="type"><a href="mvector.html">MVector</a></span> <i>vector</i>, <span class="type">uint</span> <i>timestamp</i>, <span class="type">bool</span> <i>yRescale</i>)</h3>
+<!-- @@@dataAdded -->
+<!-- $$$dataChangedSet[overload1]$$$dataChangedSetbool -->
+<h3 class="fn" id="dataChangedSet"><a name="dataChangedSet"></a><span class="type">void</span> MeasurementData::<span class="name">dataChangedSet</span>(<i>bool</i>)</h3>
+<!-- @@@dataChangedSet -->
+<!-- $$$dataReset[overload1]$$$dataReset -->
+<h3 class="fn" id="dataReset"><a name="dataReset"></a><span class="type">void</span> MeasurementData::<span class="name">dataReset</span>()</h3>
+<!-- @@@dataReset -->
+<!-- $$$dataSet[overload1]$$$dataSetint -->
+<h3 class="fn" id="dataSet"><a name="dataSet"></a><span class="type">void</span> MeasurementData::<span class="name">dataSet</span>(<i>int</i>)</h3>
+<!-- @@@dataSet -->
+<!-- $$$labelsUpdated[overload1]$$$labelsUpdatedint -->
+<h3 class="fn" id="labelsUpdated"><a name="labelsUpdated"></a><span class="type">void</span> MeasurementData::<span class="name">labelsUpdated</span>(<span class="type">int</span> <i>updatedVectors</i>)</h3>
+<!-- @@@labelsUpdated -->
+<!-- $$$lgClearSelection[overload1]$$$lgClearSelection -->
+<h3 class="fn" id="lgClearSelection"><a name="lgClearSelection"></a><span class="type">void</span> MeasurementData::<span class="name">lgClearSelection</span>()</h3>
+<!-- @@@lgClearSelection -->
+<!-- $$$removeClass[overload1]$$$removeClassaClass -->
+<h3 class="fn" id="removeClass"><a name="removeClass"></a><span class="type">void</span> MeasurementData::<span class="name">removeClass</span>(<span class="type">aClass</span> <i>oldClass</i>)</h3>
+<!-- @@@removeClass -->
+<!-- $$$selectionCleared[overload1]$$$selectionCleared -->
+<h3 class="fn" id="selectionCleared"><a name="selectionCleared"></a><span class="type">void</span> MeasurementData::<span class="name">selectionCleared</span>()</h3>
+<!-- @@@selectionCleared -->
+<!-- $$$selectionMapChanged[overload1]$$$selectionMapChangedint -->
+<h3 class="fn" id="selectionMapChanged"><a name="selectionMapChanged"></a><span class="type">void</span> MeasurementData::<span class="name">selectionMapChanged</span>(<span class="type">int</span> <i>selectionMap</i>)</h3>
+<!-- @@@selectionMapChanged -->
+<!-- $$$sensorFailuresSet[overload1]$$$sensorFailuresSetstd::array<bool,64> -->
+<h3 class="fn" id="sensorFailuresSet"><a name="sensorFailuresSet"></a><span class="type">void</span> MeasurementData::<span class="name">sensorFailuresSet</span>(<i>std::array&lt;bool, 64&gt;</i> = 64)</h3>
+<!-- @@@sensorFailuresSet -->
+<!-- $$$sensorIdSet[overload1]$$$sensorIdSetint -->
+<h3 class="fn" id="sensorIdSet"><a name="sensorIdSet"></a><span class="type">void</span> MeasurementData::<span class="name">sensorIdSet</span>(<span class="type">int</span> <i>sensorId</i>)</h3>
+<!-- @@@sensorIdSet -->
+<!-- $$$setBaseLevel[overload1]$$$setBaseLeveluintMVector -->
+<h3 class="fn" id="setBaseLevel"><a name="setBaseLevel"></a><span class="type">void</span> MeasurementData::<span class="name">setBaseLevel</span>(<span class="type">uint</span> <i>timestamp</i>, <span class="type"><a href="mvector.html">MVector</a></span> <i>baseLevel</i>)</h3>
+<p>MeasurementData::setBaseLevel adds <i>baseLevel</i> to the base level vector map. All vectors added after <i>timestamp</i> will be normed to <i>baseLevel</i> if converted into a relative vector. <b class="redFont"><code>\param</code></b> timestamp <b class="redFont"><code>\param</code></b> baseLevel</p>
+<!-- @@@setBaseLevel -->
+<!-- $$$setComment[overload1]$$$setCommentint -->
+<h3 class="fn" id="setComment"><a name="setComment"></a><span class="type">void</span> MeasurementData::<span class="name">setComment</span>(<span class="type">int</span> <i>comment</i>)</h3>
+<!-- @@@setComment -->
+<!-- $$$setFailures[overload1]$$$setFailuresstd::array<bool,64> -->
+<h3 class="fn" id="setFailures"><a name="setFailures"></a><span class="type">void</span> MeasurementData::<span class="name">setFailures</span>(<i>std::array&lt;bool, 64&gt;</i> = 64)</h3>
+<!-- @@@setFailures -->
+<!-- $$$setFailures$$$setFailuresint -->
+<h3 class="fn" id="setFailures-1"><a name="setFailures-1"></a><span class="type">void</span> MeasurementData::<span class="name">setFailures</span>(<span class="type">int</span> <i>failureString</i>)</h3>
+<p><a href="measurementdata.html#setFailures">MeasurementData::setFailures</a> sets sensor failures from a QString. <b class="redFont"><code>\param</code></b> failureString is ecpected to be a numeric string of length <a href="mvector.html#size-var">MVector::size</a>.</p>
+<!-- @@@setFailures -->
+<!-- $$$setReplotStatus[overload1]$$$setReplotStatusbool -->
+<h3 class="fn" id="setReplotStatus"><a name="setReplotStatus"></a><span class="type">void</span> MeasurementData::<span class="name">setReplotStatus</span>(<span class="type">bool</span> <i>status</i>)</h3>
+<!-- @@@setReplotStatus -->
+<!-- $$$setSensorId[overload1]$$$setSensorIdint -->
+<h3 class="fn" id="setSensorId"><a name="setSensorId"></a><span class="type">void</span> MeasurementData::<span class="name">setSensorId</span>(<span class="type">int</span> <i>sensorId</i>)</h3>
+<!-- @@@setSensorId -->
+<!-- $$$startTimestempSet[overload1]$$$startTimestempSetuint -->
+<h3 class="fn" id="startTimestempSet"><a name="startTimestempSet"></a><span class="type">void</span> MeasurementData::<span class="name">startTimestempSet</span>(<span class="type">uint</span> <i>timestamp</i>)</h3>
+<!-- @@@startTimestempSet -->
+</div>
+</body>
+</html>

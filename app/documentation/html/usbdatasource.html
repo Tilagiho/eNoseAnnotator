@@ -45,6 +45,7 @@
 <tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#handleTimeout">handleTimeout</a></b>()</td></tr>
 <tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#identifier">identifier</a></b>()</td></tr>
 <tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#processLine">processLine</a></b>(const int &amp;<i>data</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#status">status</a></b>()</td></tr>
 </table></div>
 <a name="reimplemented-public-functions"></a>
 <h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
@@ -52,11 +53,10 @@
 <tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#reconnect">reconnect</a></b>()</td></tr>
 <tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#reset">reset</a></b>()</td></tr>
 <tr><td class="memItemLeft rightAlign topAlign"> virtual DataSource::SourceType </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#sourceType">sourceType</a></b>()</td></tr>
-<tr><td class="memItemLeft rightAlign topAlign"> virtual DataSource::Status </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#status">status</a></b>()</td></tr>
 <tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#stop">stop</a></b>()</td></tr>
 </table></div>
 <ul>
-<li class="fn">9 public functions inherited from <a href="datasource.html#public-functions">DataSource</a></li>
+<li class="fn">2 public functions inherited from <a href="datasource.html#public-functions">DataSource</a></li>
 </ul>
 <a name="public-variables"></a>
 <h2 id="public-variables">Public Variables</h2>
@@ -105,7 +105,6 @@
 <!-- @@@processLine -->
 <!-- $$$reconnect[overload1]$$$reconnect -->
 <h3 class="fn" id="reconnect"><a name="reconnect"></a><code>[virtual] </code><span class="type">void</span> USBDataSource::<span class="name">reconnect</span>()</h3>
-<p>Reimplemented from <a href="datasource.html#reconnect">DataSource::reconnect</a>().</p>
 <p>USBDataSource::reconnect tries to reconnect the QSerialPort</p>
 <!-- @@@reconnect -->
 <!-- $$$reset[overload1]$$$reset -->
@@ -114,10 +113,10 @@
 <p>USBDataSource::reset triggers a reset of the base vector</p>
 <!-- @@@reset -->
 <!-- $$$sourceType[overload1]$$$sourceType -->
-<h3 class="fn" id="sourceType"><a name="sourceType"></a><code>[virtual] </code><span class="type"><a href="datasource.html#SourceType-enum">DataSource::SourceType</a></span> USBDataSource::<span class="name">sourceType</span>()</h3>
+<h3 class="fn" id="sourceType"><a name="sourceType"></a><code>[virtual] </code><span class="type">DataSource::SourceType</span> USBDataSource::<span class="name">sourceType</span>()</h3>
 <!-- @@@sourceType -->
 <!-- $$$status[overload1]$$$status -->
-<h3 class="fn" id="status"><a name="status"></a><code>[virtual] </code><span class="type"><a href="datasource.html#Status-enum">DataSource::Status</a></span> USBDataSource::<span class="name">status</span>()</h3>
+<h3 class="fn" id="status"><a name="status"></a><span class="type">int</span> USBDataSource::<span class="name">status</span>()</h3>
 <!-- @@@status -->
 <!-- $$$stop[overload1]$$$stop -->
 <h3 class="fn" id="stop"><a name="stop"></a><code>[virtual] </code><span class="type">void</span> USBDataSource::<span class="name">stop</span>()</h3>
