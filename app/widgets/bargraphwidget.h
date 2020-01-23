@@ -5,7 +5,7 @@
 #include <QWidget>
 
 #include "../classes/mvector.h"
-#include "../qcustomplot.h"
+#include "../qcustomplot/qcustomplot.h"
 
 
 namespace Ui {

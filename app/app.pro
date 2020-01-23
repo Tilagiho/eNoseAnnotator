@@ -35,8 +35,8 @@ SOURCES += \
     classes/mvector.cpp \
     classes/sensorcolor.cpp \
     classes/usbdatasource.cpp \
-    qcustomplot.cpp \
     main.cpp \
+    qcustomplot/qcustomplot.cpp \
     widgets/addattributedialog.cpp \
     widgets/attributeeditor.cpp \
     widgets/bargraphwidget.cpp \
@@ -60,7 +60,7 @@ HEADERS += \
     classes/mvector.h \
     classes/sensorcolor.h \
     classes/usbdatasource.h \
-    qcustomplot.h \
+    qcustomplot/qcustomplot.h \
     widgets/addattributedialog.h \
     widgets/attributeeditor.h \
     widgets/bargraphwidget.h \

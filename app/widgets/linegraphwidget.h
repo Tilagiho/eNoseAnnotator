@@ -4,8 +4,8 @@
 #include <QtCore>
 #include <QWidget>
 
-#include "../qcustomplot.h"
 #include "../classes/mvector.h"
+#include "../qcustomplot/qcustomplot.h"
 
 namespace Ui {
 class LineGraphWidget;
