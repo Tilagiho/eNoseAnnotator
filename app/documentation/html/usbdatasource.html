@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- usbdatasource.cpp -->
+  <title>USBDataSource Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>USBDataSource</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-types">Public Types</a></li>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#reimplemented-public-functions">Reimplemented Public Functions</a></li>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">USBDataSource Class</h1>
+<!-- $$$USBDataSource-brief -->
+<p>implements the <a href="datasource.html">DataSource</a> interface for USB connections. <a href="#details">More...</a></p>
+<!-- @@@USBDataSource -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;USBDataSource&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="datasource.html">DataSource</a></td></tr></table></div><ul>
+<li><a href="usbdatasource-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-types"></a>
+<h2 id="public-types">Public Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> class </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource-settings.html">Settings</a></b></td></tr>
+</table></div>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#USBDataSource">USBDataSource</a></b>(USBDataSource::Settings <i>settings</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#dtor.USBDataSource">~USBDataSource</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int *</td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#getSerial">getSerial</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#handleError">handleError</a></b>(int <i>serialPortError</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#handleReadyRead">handleReadyRead</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#handleTimeout">handleTimeout</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#identifier">identifier</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#processLine">processLine</a></b>(const int &amp;<i>data</i>)</td></tr>
+</table></div>
+<a name="reimplemented-public-functions"></a>
+<h2 id="reimplemented-public-functions">Reimplemented Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#reconnect">reconnect</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#reset">reset</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual DataSource::SourceType </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#sourceType">sourceType</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual DataSource::Status </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#status">status</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#stop">stop</a></b>()</td></tr>
+</table></div>
+<ul>
+<li class="fn">9 public functions inherited from <a href="datasource.html#public-functions">DataSource</a></li>
+</ul>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="usbdatasource.html#Avar"></a></b></td></tr>
+</table></div>
+<h3>Additional Inherited Members</h3>
+<ul>
+<li class="fn">1 protected function inherited from <a href="datasource.html#protected-functions">DataSource</a></li>
+</ul>
+<a name="details"></a>
+<!-- $$$USBDataSource-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>implements the <a href="datasource.html">DataSource</a> interface for USB connections.</p>
+</div>
+<!-- @@@USBDataSource -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$USBDataSource[overload1]$$$USBDataSourceUSBDataSource::Settings -->
+<h3 class="fn" id="USBDataSource"><a name="USBDataSource"></a>USBDataSource::<span class="name">USBDataSource</span>(<span class="type"><a href="usbdatasource-settings.html">USBDataSource::Settings</a></span> <i>settings</i>)</h3>
+<p>Default constructs an instance of USBDataSource.</p><!-- @@@USBDataSource -->
+<!-- $$$~USBDataSource[overload1]$$$~USBDataSource -->
+<h3 class="fn" id="dtor.USBDataSource"><a name="dtor.USBDataSource"></a>USBDataSource::<span class="name">~USBDataSource</span>()</h3>
+<p>Destroys the instance of USBDataSource.</p><!-- @@@~USBDataSource -->
+<!-- $$$getSerial[overload1]$$$getSerial -->
+<h3 class="fn" id="getSerial"><a name="getSerial"></a><span class="type">int</span> *USBDataSource::<span class="name">getSerial</span>() const</h3>
+<!-- @@@getSerial -->
+<!-- $$$handleError[overload1]$$$handleErrorint -->
+<h3 class="fn" id="handleError"><a name="handleError"></a><span class="type">void</span> USBDataSource::<span class="name">handleError</span>(<span class="type">int</span> <i>serialPortError</i>)</h3>
+<!-- @@@handleError -->
+<!-- $$$handleReadyRead[overload1]$$$handleReadyRead -->
+<h3 class="fn" id="handleReadyRead"><a name="handleReadyRead"></a><span class="type">void</span> USBDataSource::<span class="name">handleReadyRead</span>()</h3>
+<p>triggered every time a vector is received from the eNose sensor</p>
+<!-- @@@handleReadyRead -->
+<!-- $$$handleTimeout[overload1]$$$handleTimeout -->
+<h3 class="fn" id="handleTimeout"><a name="handleTimeout"></a><span class="type">void</span> USBDataSource::<span class="name">handleTimeout</span>()</h3>
+<!-- @@@handleTimeout -->
+<!-- $$$identifier[overload1]$$$identifier -->
+<h3 class="fn" id="identifier"><a name="identifier"></a><span class="type">int</span> USBDataSource::<span class="name">identifier</span>()</h3>
+<p>USBDataSource::identifier returns the port name of the current QSerialPort</p>
+<!-- @@@identifier -->
+<!-- $$$processLine[overload1]$$$processLineconstint& -->
+<h3 class="fn" id="processLine"><a name="processLine"></a><span class="type">void</span> USBDataSource::<span class="name">processLine</span>(const <span class="type">int</span> &amp;<i>data</i>)</h3>
+<p>USBDataSource::processLine extracts a <a href="mvector.html">MVector</a> from the message received.\n if no measurement running: do nothing\n if reset was triggered: use extracted <a href="mvector.html">MVector</a> to calculate base vector. Emits base vector if no further vectors needed. \n if measurement is running: emit extracted <a href="mvector.html">MVector</a></p>
+<!-- @@@processLine -->
+<!-- $$$reconnect[overload1]$$$reconnect -->
+<h3 class="fn" id="reconnect"><a name="reconnect"></a><code>[virtual] </code><span class="type">void</span> USBDataSource::<span class="name">reconnect</span>()</h3>
+<p>Reimplemented from <a href="datasource.html#reconnect">DataSource::reconnect</a>().</p>
+<p>USBDataSource::reconnect tries to reconnect the QSerialPort</p>
+<!-- @@@reconnect -->
+<!-- $$$reset[overload1]$$$reset -->
+<h3 class="fn" id="reset"><a name="reset"></a><code>[virtual] </code><span class="type">void</span> USBDataSource::<span class="name">reset</span>()</h3>
+<p>Reimplemented from <a href="datasource.html#reset">DataSource::reset</a>().</p>
+<p>USBDataSource::reset triggers a reset of the base vector</p>
+<!-- @@@reset -->
+<!-- $$$sourceType[overload1]$$$sourceType -->
+<h3 class="fn" id="sourceType"><a name="sourceType"></a><code>[virtual] </code><span class="type"><a href="datasource.html#SourceType-enum">DataSource::SourceType</a></span> USBDataSource::<span class="name">sourceType</span>()</h3>
+<!-- @@@sourceType -->
+<!-- $$$status[overload1]$$$status -->
+<h3 class="fn" id="status"><a name="status"></a><code>[virtual] </code><span class="type"><a href="datasource.html#Status-enum">DataSource::Status</a></span> USBDataSource::<span class="name">status</span>()</h3>
+<!-- @@@status -->
+<!-- $$$stop[overload1]$$$stop -->
+<h3 class="fn" id="stop"><a name="stop"></a><code>[virtual] </code><span class="type">void</span> USBDataSource::<span class="name">stop</span>()</h3>
+<p>Reimplemented from <a href="datasource.html#stop">DataSource::stop</a>().</p>
+<p>triggers the end of vector emition</p>
+<!-- @@@stop -->
+</div>
+</body>
+</html>

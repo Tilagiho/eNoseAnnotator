@@ -1,3 +1,7 @@
+include($QT_INSTALL_DOCS/global/compat.qdocconf)
+include($QT_INSTALL_DOCS/global/fileextensions.qdocconf)
+include($QT_INSTALL_DOCS/global/qt-cpp-defines.qdocconf)
+
 project = eNoseAnnotator
 description = Tool to capture, visualise, classify and store data from the eNose sensor.
 

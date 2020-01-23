@@ -34,7 +34,7 @@
 <tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#MVector">MVector</a></b>()</td></tr>
 <tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#dtor.MVector">~MVector</a></b>()</td></tr>
 <tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#getAbsoluteVector">getAbsoluteVector</a></b>(MVector <i>baseVector</i>)</td></tr>
-<tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#toRelativeVector">toRelativeVector</a></b>(MVector <i>baseVector</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#getRelativeVector">getRelativeVector</a></b>(MVector <i>baseVector</i>)</td></tr>
 <tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#toString">toString</a></b>()</td></tr>
 <tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#operator-not-eq">operator!=</a></b>(const MVector &amp;<i>other</i>) const</td></tr>
 <tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#operator-2a">operator*</a></b>(const double <i>denominator</i>)</td></tr>
@@ -75,16 +75,18 @@
 <p>Destroys the instance of MVector.</p><!-- @@@~MVector -->
 <!-- $$$getAbsoluteVector[overload1]$$$getAbsoluteVectorMVector -->
 <h3 class="fn" id="getAbsoluteVector"><a name="getAbsoluteVector"></a><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">getAbsoluteVector</span>(<span class="type"><a href="mvector.html#MVector">MVector</a></span> <i>baseVector</i>)</h3>
+<p>returns an absolute <a href="mvector.html">MVector</a> based on this, which is relative to baseVector. baseVector is expected to be absolute.</p>
 <!-- @@@getAbsoluteVector -->
-<!-- $$$toRelativeVector[overload1]$$$toRelativeVectorMVector -->
-<h3 class="fn" id="toRelativeVector"><a name="toRelativeVector"></a><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">toRelativeVector</span>(<span class="type"><a href="mvector.html#MVector">MVector</a></span> <i>baseVector</i>)</h3>
-<!-- @@@toRelativeVector -->
+<!-- $$$getRelativeVector[overload1]$$$getRelativeVectorMVector -->
+<h3 class="fn" id="getRelativeVector"><a name="getRelativeVector"></a><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">getRelativeVector</span>(<span class="type"><a href="mvector.html#MVector">MVector</a></span> <i>baseVector</i>)</h3>
+<p>returns a <a href="mvector.html">MVector</a> based on this relative to baseVector. baseVector is expected to be absolute.</p>
+<!-- @@@getRelativeVector -->
 <!-- $$$toString[overload1]$$$toString -->
 <h3 class="fn" id="toString"><a name="toString"></a><span class="type">int</span> MVector::<span class="name">toString</span>()</h3>
 <!-- @@@toString -->
 <!-- $$$zeroes[overload1]$$$zeroes -->
 <h3 class="fn" id="zeroes"><a name="zeroes"></a><code>[static] </code><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">zeroes</span>()</h3>
-<p>MVector::zeroes retuns a <a href="mvector.html">MVector</a> with zero in each component. <b class="redFont"><code>\return</code></b></p>
+<p>returns a <a href="mvector.html">MVector</a> with zero in each component.</p>
 <!-- @@@zeroes -->
 <!-- $$$operator!=[overload1]$$$operator!=constMVector& -->
 <h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> MVector::<span class="name">operator!=</span>(const <span class="type"><a href="mvector.html#MVector">MVector</a></span> &amp;<i>other</i>) const</h3>

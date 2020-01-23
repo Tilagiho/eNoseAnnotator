@@ -100,7 +100,7 @@ double &MVector::operator[](int index)
 }
 
 /*!
- * \brief MVector::zeroes retuns a MVector with zero in each component.
+ returns a MVector with zero in each component.
  */
 MVector MVector::zeroes()
 {
@@ -108,8 +108,8 @@ MVector MVector::zeroes()
 }
 
 /*!
- * \brief MVector::getRelativeVector returns a MVector based on this relative to baseVector.
- * baseVector is expected to be absolute.
+   returns a MVector based on this relative to baseVector.
+   baseVector is expected to be absolute.
  */
 MVector MVector::getRelativeVector(MVector baseVector)
 {
@@ -126,8 +126,8 @@ MVector MVector::getRelativeVector(MVector baseVector)
 }
 
 /*!
- * \brief MVector::getAbsoluteVector returns an absolute MVector based on this, which is relative to baseVector.
- * baseVector is expected to be absolute.
+   returns an absolute MVector based on this, which is relative to baseVector.
+   baseVector is expected to be absolute.
  */
 MVector MVector::getAbsoluteVector(MVector baseVector)
 {

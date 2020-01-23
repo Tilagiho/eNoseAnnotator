@@ -2,6 +2,10 @@
 
 #include <QtCore>
 
+/*!
+ * \class USBDataSource
+ * \brief implements the DataSource interface for USB connections.
+ */
 USBDataSource::USBDataSource(USBDataSource::Settings settings):
     settings(settings)
 {
@@ -40,6 +44,9 @@ USBDataSource::SourceType USBDataSource::sourceType()
     return DataSource::SourceType::USB;
 }
 
+/*!
+ * connect USBDataSource slots to QSerialPort signals
+ */
 void USBDataSource::makeConnections()
 {
     connect(serial, &QSerialPort::readyRead, this, &USBDataSource::handleReadyRead);
@@ -47,6 +54,9 @@ void USBDataSource::makeConnections()
     connect(&timer, &QTimer::timeout, this, &USBDataSource::handleTimeout);
 }
 
+/*!
+ * disconnect USBDataSource slots from QSerialPort signals
+ */
 void USBDataSource::closeConnections()
 {
     disconnect(serial, &QSerialPort::readyRead, this, &USBDataSource::handleReadyRead);
@@ -87,6 +97,9 @@ void USBDataSource::openSerialPort()
     }
 }
 
+/*!
+ * \brief USBDataSource::reconnect tries to reconnect the QSerialPort
+ */
 void USBDataSource::reconnect()
 {
     if (serial != nullptr)
@@ -114,6 +127,9 @@ void USBDataSource::closeSerialPort()
     }
 }
 
+/*!
+ * triggered every time a vector is received from the eNose sensor
+ */
 void USBDataSource::handleReadyRead()
 {
     // process lines
@@ -143,6 +159,12 @@ void USBDataSource::handleTimeout()
     emit error("USB connection timed out without receiving data.\nCheck the connection settings and replug the sensor. Try to reconnect by starting a new measurement.");
 }
 
+/*!
+ * \brief USBDataSource::processLine extracts a MVector from the message received.\n
+ * if no measurement running: do nothing\n
+ * if reset was triggered: use extracted MVector to calculate base vector. Emits base vector if no further vectors needed. \n
+ * if measurement is running: emit extracted MVector
+ */
 void USBDataSource::processLine(const QByteArray &data)
 {
     if (connectionStatus == DataSource::Status::CONNECTING)
@@ -230,6 +252,9 @@ void USBDataSource::processLine(const QByteArray &data)
     }
 }
 
+/*!
+ * triggered to start emition of measurements
+ */
 void USBDataSource::start()
 {
     Q_ASSERT("Usb connection was already started!" && connectionStatus != Status::RECEIVING_DATA);
@@ -240,6 +265,9 @@ void USBDataSource::start()
     emitData = true;
 }
 
+/*!
+ * triggers the end of vector emition
+ */
 void USBDataSource::stop()
 {
     Q_ASSERT("Trying to stop connection that is not receiving data!" && connectionStatus == Status::RECEIVING_DATA);
@@ -248,6 +276,9 @@ void USBDataSource::stop()
     setStatus (Status::CONNECTED);
 }
 
+/*!
+ * \brief USBDataSource::reset triggers a reset of the base vector
+ */
 void USBDataSource::reset()
 {
     Q_ASSERT("Trying to reset base vector without receiving data!" && connectionStatus == Status::RECEIVING_DATA);
@@ -256,6 +287,9 @@ void USBDataSource::reset()
     setStatus (Status::SET_BASEVECTOR);
 }
 
+/*!
+ * \brief USBDataSource::identifier returns the port name of the current QSerialPort
+ */
 QString USBDataSource::identifier()
 {
     return settings.portName;

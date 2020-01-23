@@ -8,6 +8,14 @@
 #include <QMessageBox>
 #include <QDebug>
 
+/*!
+ * \class MeasurementData
+ * \brief Container for all data concerning the current measurement.
+ * Contains all vectors of the current measurement, its meta info & the current selection.
+ * Provides functionality for loading & saving measurements & selections.
+ *
+ */
+
 MeasurementData::MeasurementData(QObject *parent) : QObject(parent)
 {
     // zero init info
@@ -20,6 +28,10 @@ MeasurementData::MeasurementData(QObject *parent) : QObject(parent)
         functionalisation[i] = 0;
 }
 
+/*!
+ * \brief MeasurementData::getRelativeData returns a map of the vectors contained in the MeasurementData converted into relative vectors
+ * \return
+ */
 const QMap<uint, MVector> MeasurementData::getRelativeData()
 {
     QMap<uint, MVector> relativeData;
@@ -30,16 +42,27 @@ const QMap<uint, MVector> MeasurementData::getRelativeData()
     return relativeData;
 }
 
+/*!
+ * \brief MeasurementData::getAbsoluteData returns a map of the vectors contained in the MeasurementData as absolute vectors
+ * \return
+ */
 const QMap<uint, MVector> MeasurementData::getAbsoluteData()
 {
     return data;
 }
 
+/*!
+ * \brief MeasurementData::getSelectionMap returns map of the vectors in the current selection
+ * \return
+ */
 const QMap<uint, MVector> MeasurementData::getSelectionMap()
 {
     return selectedData;
 }
 
+/*!
+ * \brief MeasurementData::clear deletes all data from MeasurementData
+ */
 void MeasurementData::clear()
 {
     baseLevelMap.clear();
@@ -57,12 +80,21 @@ void MeasurementData::clear()
     setDataChanged(false);
 }
 
+/*!
+ * \brief MeasurementData::clearSelection deletes the current selection
+ */
 void MeasurementData::clearSelection()
 {
     selectedData.clear();
     emit selectionCleared();
 }
 
+/*!
+ * \brief MeasurementData::addMeasurement adds \a vector at \a timestamp
+ * if the vector map was preciously empty, set  \a vector as start timestamp of the measurement
+ * \param timestamp
+ * \param vector
+ */
 void MeasurementData::addMeasurement(uint timestamp, MVector vector)
 {
     //  double usage of timestamps:
@@ -129,6 +161,12 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
     emit absoluteDataAdded(vector, timestamp, true);
 }
 
+/*!
+ * \brief MeasurementData::addMeasurement adds \a vector at \a timestamp
+ * \param timestamp
+ * \param vector
+ * \param baseLevel
+ */
 void MeasurementData::addMeasurement(uint timestamp, MVector vector, MVector baseLevel)
 {
     // if new baseLevel: add to baseLevelMap
@@ -171,9 +209,13 @@ void MeasurementData::setFailures(std::array<bool, 64> failures)
     }
 }
 
+/*!
+ * \brief MeasurementData::setFailures sets sensor failures from a QString.
+ * \param failureString is ecpected to be a numeric string of length MVector::size.
+ */
 void MeasurementData::setFailures(QString failureString)
 {
-    Q_ASSERT(failureString.length()==64);
+    Q_ASSERT(failureString.length()==MVector::size);
 
     std::array<bool, 64> failures;
 
@@ -200,6 +242,11 @@ void MeasurementData::setSensorId(QString newSensorId)
     }
 }
 
+/*!
+ * \brief MeasurementData::setBaseLevel adds \a baseLevel to the base level vector map. All vectors added after \a timestamp will be normed to \a baseLevel if converted into a relative vector.
+ * \param timestamp
+ * \param baseLevel
+ */
 void MeasurementData::setBaseLevel(uint timestamp, MVector baseLevel)
 {
     Q_ASSERT (!baseLevelMap.contains(timestamp));

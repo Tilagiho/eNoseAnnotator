@@ -5,3 +5,17 @@
 
     eNoseAnnotator is based on Qt5. QCustomPlot is used for the visualisation.
 */
+
+/*!
+    \group classes
+
+    \title C++ classes for data handling
+    These classes are used to handle the sensor data, meta data, annotations etc.
+* /
+
+/*!
+    \group widgets
+
+    \title Qt Widgets for the GUI
+    These classes are the Qt widgets implemented for the GUI.
+* /
