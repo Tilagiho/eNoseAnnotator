@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPAxis Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPAxis</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPAxis Class</h1>
+<!-- $$$QCPAxis-brief -->
+<p>Manages a single axis inside a <a href="qcustomplot.html">QCustomPlot</a>. <a href="#details">More...</a></p>
+<!-- @@@QCPAxis -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPAxis&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcplayerable.html">QCPLayerable</a></td></tr></table></div><ul>
+<li><a href="qcpaxis-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#calculateMargin">calculateMargin</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#getBasePen">getBasePen</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#getLabelColor">getLabelColor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#getLabelFont">getLabelFont</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#getSubTickPen">getSubTickPen</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#getTickLabelColor">getTickLabelColor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#getTickLabelFont">getTickLabelFont</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#getTickPen">getTickPen</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mouseMoveEvent">mouseMoveEvent</a></b>(int *<i>event</i>, const int &amp;<i>startPos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mousePressEvent">mousePressEvent</a></b>(int *<i>event</i>, const int &amp;<i>details</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(int *<i>event</i>, const int &amp;<i>startPos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#selectEvent">selectEvent</a></b>(int *<i>event</i>, bool <i>additive</i>, const int &amp;<i>details</i>, bool *<i>selectionStateChanged</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#setupTickVectors">setupTickVectors</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#wheelEvent">wheelEvent</a></b>(int *<i>event</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#applyDefaultAntialiasingHint">applyDefaultAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#deselectEvent">deselectEvent</a></b>(bool *<i>selectionStateChanged</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCP::Interaction </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#selectionCategory">selectionCategory</a></b>() const</td></tr>
+</table></div>
+<ul>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mAADragBackup-var">mAADragBackup</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPAxisPainterPrivate *</td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mAxisPainter-var">mAxisPainter</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPAxisRect *</td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mAxisRect-var">mAxisRect</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mAxisType-var">mAxisType</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mBasePen-var">mBasePen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mCachedMargin-var">mCachedMargin</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mCachedMarginValid-var">mCachedMarginValid</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mDragStartRange-var">mDragStartRange</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mDragging-var">mDragging</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPGrid *</td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mGrid-var">mGrid</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mLabel-var">mLabel</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mLabelColor-var">mLabelColor</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mLabelFont-var">mLabelFont</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mNotAADragBackup-var">mNotAADragBackup</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mNumberBeautifulPowers-var">mNumberBeautifulPowers</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mNumberFormatChar-var">mNumberFormatChar</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mNumberPrecision-var">mNumberPrecision</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mOrientation-var">mOrientation</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mPadding-var">mPadding</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mRange-var">mRange</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mRangeReversed-var">mRangeReversed</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mScaleType-var">mScaleType</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSelectableParts-var">mSelectableParts</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSelectedBasePen-var">mSelectedBasePen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSelectedLabelColor-var">mSelectedLabelColor</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSelectedLabelFont-var">mSelectedLabelFont</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSelectedParts-var">mSelectedParts</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSelectedSubTickPen-var">mSelectedSubTickPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSelectedTickLabelColor-var">mSelectedTickLabelColor</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSelectedTickLabelFont-var">mSelectedTickLabelFont</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSelectedTickPen-var">mSelectedTickPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSubTickPen-var">mSubTickPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSubTickVector-var">mSubTickVector</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mSubTicks-var">mSubTicks</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mTickLabelColor-var">mTickLabelColor</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mTickLabelFont-var">mTickLabelFont</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mTickLabels-var">mTickLabels</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mTickPen-var">mTickPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mTickVector-var">mTickVector</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mTickVectorLabels-var">mTickVectorLabels</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mTicker-var">mTicker</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpaxis.html#mTicks-var">mTicks</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPAxis-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Manages a single axis inside a <a href="qcustomplot.html">QCustomPlot</a>.</p>
+<p>Usually doesn't need to be instantiated externally. Access %<a href="qcustomplot.html">QCustomPlot</a>'s default four axes via QCustomPlot::xAxis (bottom), QCustomPlot::yAxis (left), QCustomPlot::xAxis2 (top) and QCustomPlot::yAxis2 (right).</p>
+<p>Axes are always part of an axis rect, see QCPAxisRect.</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>&lt;center&gt;Naming convention of axis parts&lt;/center&gt; <b class="redFont"><code>\n</code></b></p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>&lt;center&gt;Overview of the spacings and paddings that define the geometry of an axis. The dashed gray line on the left represents the <a href="qcustomplot.html">QCustomPlot</a> widget border.&lt;/center&gt;</p>
+<p>Each axis holds an instance of <a href="qcpaxisticker.html">QCPAxisTicker</a> which is used to generate the tick coordinates and tick labels. You can access the currently installed <b class="redFont"><code>\ref</code></b> ticker or set a new one (possibly one of the specialized subclasses, or your own subclass) via <b class="redFont"><code>\ref</code></b> setTicker. For details, see the documentation of <a href="qcpaxisticker.html">QCPAxisTicker</a>.</p>
+</div>
+<!-- @@@QCPAxis -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$applyDefaultAntialiasingHint[overload1]$$$applyDefaultAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyDefaultAntialiasingHint"><a name="applyDefaultAntialiasingHint"></a><code>[virtual protected] </code><span class="type">void</span> QCPAxis::<span class="name">applyDefaultAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyDefaultAntialiasingHint -->
+<!-- $$$calculateMargin[overload1]$$$calculateMargin -->
+<h3 class="fn" id="calculateMargin"><a name="calculateMargin"></a><code>[virtual protected] </code><span class="type">int</span> QCPAxis::<span class="name">calculateMargin</span>()</h3>
+<!-- @@@calculateMargin -->
+<!-- $$$deselectEvent[overload1]$$$deselectEventbool* -->
+<h3 class="fn" id="deselectEvent"><a name="deselectEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPAxis::<span class="name">deselectEvent</span>(<span class="type">bool</span> *<i>selectionStateChanged</i>)</h3>
+<!-- @@@deselectEvent -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCPAxis::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$getBasePen[overload1]$$$getBasePen -->
+<h3 class="fn" id="getBasePen"><a name="getBasePen"></a><code>[protected] </code><span class="type">int</span> QCPAxis::<span class="name">getBasePen</span>() const</h3>
+<!-- @@@getBasePen -->
+<!-- $$$getLabelColor[overload1]$$$getLabelColor -->
+<h3 class="fn" id="getLabelColor"><a name="getLabelColor"></a><code>[protected] </code><span class="type">int</span> QCPAxis::<span class="name">getLabelColor</span>() const</h3>
+<!-- @@@getLabelColor -->
+<!-- $$$getLabelFont[overload1]$$$getLabelFont -->
+<h3 class="fn" id="getLabelFont"><a name="getLabelFont"></a><code>[protected] </code><span class="type">int</span> QCPAxis::<span class="name">getLabelFont</span>() const</h3>
+<!-- @@@getLabelFont -->
+<!-- $$$getSubTickPen[overload1]$$$getSubTickPen -->
+<h3 class="fn" id="getSubTickPen"><a name="getSubTickPen"></a><code>[protected] </code><span class="type">int</span> QCPAxis::<span class="name">getSubTickPen</span>() const</h3>
+<!-- @@@getSubTickPen -->
+<!-- $$$getTickLabelColor[overload1]$$$getTickLabelColor -->
+<h3 class="fn" id="getTickLabelColor"><a name="getTickLabelColor"></a><code>[protected] </code><span class="type">int</span> QCPAxis::<span class="name">getTickLabelColor</span>() const</h3>
+<!-- @@@getTickLabelColor -->
+<!-- $$$getTickLabelFont[overload1]$$$getTickLabelFont -->
+<h3 class="fn" id="getTickLabelFont"><a name="getTickLabelFont"></a><code>[protected] </code><span class="type">int</span> QCPAxis::<span class="name">getTickLabelFont</span>() const</h3>
+<!-- @@@getTickLabelFont -->
+<!-- $$$getTickPen[overload1]$$$getTickPen -->
+<h3 class="fn" id="getTickPen"><a name="getTickPen"></a><code>[protected] </code><span class="type">int</span> QCPAxis::<span class="name">getTickPen</span>() const</h3>
+<!-- @@@getTickPen -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventint*constint& -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPAxis::<span class="name">mouseMoveEvent</span>(<span class="type">int</span> *<i>event</i>, const <span class="type">int</span> &amp;<i>startPos</i>)</h3>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventint*constint& -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPAxis::<span class="name">mousePressEvent</span>(<span class="type">int</span> *<i>event</i>, const <span class="type">int</span> &amp;<i>details</i>)</h3>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventint*constint& -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPAxis::<span class="name">mouseReleaseEvent</span>(<span class="type">int</span> *<i>event</i>, const <span class="type">int</span> &amp;<i>startPos</i>)</h3>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$selectEvent[overload1]$$$selectEventint*boolconstint&bool* -->
+<h3 class="fn" id="selectEvent"><a name="selectEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPAxis::<span class="name">selectEvent</span>(<span class="type">int</span> *<i>event</i>, <span class="type">bool</span> <i>additive</i>, const <span class="type">int</span> &amp;<i>details</i>, <span class="type">bool</span> *<i>selectionStateChanged</i>)</h3>
+<!-- @@@selectEvent -->
+<!-- $$$selectionCategory[overload1]$$$selectionCategory -->
+<h3 class="fn" id="selectionCategory"><a name="selectionCategory"></a><code>[virtual protected] </code><span class="type"><a href="qcp-sub-enoseannotator.html#Interaction-enum">QCP::Interaction</a></span> QCPAxis::<span class="name">selectionCategory</span>() const</h3>
+<!-- @@@selectionCategory -->
+<!-- $$$setupTickVectors[overload1]$$$setupTickVectors -->
+<h3 class="fn" id="setupTickVectors"><a name="setupTickVectors"></a><code>[protected] </code><span class="type">void</span> QCPAxis::<span class="name">setupTickVectors</span>()</h3>
+<!-- @@@setupTickVectors -->
+<!-- $$$wheelEvent[overload1]$$$wheelEventint* -->
+<h3 class="fn" id="wheelEvent"><a name="wheelEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPAxis::<span class="name">wheelEvent</span>(<span class="type">int</span> *<i>event</i>)</h3>
+<!-- @@@wheelEvent -->
+</div>
+</body>
+</html>

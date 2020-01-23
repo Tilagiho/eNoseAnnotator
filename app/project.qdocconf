@@ -1,0 +1,19 @@
+project = eNoseAnnotator
+description = Tool to capture, visualise, classify and store data from the eNose sensor.
+
+sourcedirs = .\
+    widgets \
+    classes \
+    documentation/source
+
+headerdirs = .\
+    widgets \
+    classes
+
+sources.fileextensions = "*.cpp *.qdoc *.mm *.qml"
+headers.fileextensions = "*.h *.ch *.h++ *.hh *.hpp *.hxx"
+
+outputdir = documentation/html
+outputformats = HTML
+
+indexes = /opt/Qt/Docs/Qt-5.12.5/qtdoc/qtdoc.index

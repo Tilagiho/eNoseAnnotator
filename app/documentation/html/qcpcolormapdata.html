@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPColorMapData Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPColorMapData</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPColorMapData Class</h1>
+<!-- $$$QCPColorMapData-brief -->
+<p>Holds the two-dimensional data of a <a href="qcpcolormap.html">QCPColorMap</a> plottable. <a href="#details">More...</a></p>
+<!-- @@@QCPColorMapData -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPColorMapData&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcpcolormapdata-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#QCPColorMapData">QCPColorMapData</a></b>(int <i>keySize</i>, int <i>valueSize</i>, const QCPRange &amp;<i>keyRange</i>, const QCPRange &amp;<i>valueRange</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#QCPColorMapData-1">QCPColorMapData</a></b>(const QCPColorMapData &amp;<i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#dtor.QCPColorMapData">~QCPColorMapData</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> unsigned char </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#alpha">alpha</a></b>(int <i>keyIndex</i>, int <i>valueIndex</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#cell">cell</a></b>(int <i>keyIndex</i>, int <i>valueIndex</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#cellToCoord">cellToCoord</a></b>(int <i>keyIndex</i>, int <i>valueIndex</i>, double *<i>key</i>, double *<i>value</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#clearAlpha">clearAlpha</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#coordToCell">coordToCell</a></b>(double <i>key</i>, double <i>value</i>, int *<i>keyIndex</i>, int *<i>valueIndex</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#data">data</a></b>(double <i>key</i>, double <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#dataBounds">dataBounds</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#fill">fill</a></b>(double <i>z</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#fillAlpha">fillAlpha</a></b>(unsigned char <i>alpha</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#isEmpty">isEmpty</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#keyRange">keyRange</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#keySize">keySize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#recalculateDataBounds">recalculateDataBounds</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#setAlpha">setAlpha</a></b>(int <i>keyIndex</i>, int <i>valueIndex</i>, unsigned char <i>alpha</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#setCell">setCell</a></b>(int <i>keyIndex</i>, int <i>valueIndex</i>, double <i>z</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#setData">setData</a></b>(double <i>key</i>, double <i>value</i>, double <i>z</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#setKeyRange">setKeyRange</a></b>(const QCPRange &amp;<i>keyRange</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#setKeySize">setKeySize</a></b>(int <i>keySize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#setRange">setRange</a></b>(const QCPRange &amp;<i>keyRange</i>, const QCPRange &amp;<i>valueRange</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#setSize">setSize</a></b>(int <i>keySize</i>, int <i>valueSize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#setValueRange">setValueRange</a></b>(const QCPRange &amp;<i>valueRange</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#setValueSize">setValueSize</a></b>(int <i>valueSize</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#valueRange">valueRange</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#valueSize">valueSize</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPColorMapData &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#operator-eq">operator=</a></b>(const QCPColorMapData &amp;<i>other</i>)</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#createAlpha">createAlpha</a></b>(bool <i>initializeOpaque</i> = true)</td></tr>
+</table></div>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> unsigned char *</td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#mAlpha-var">mAlpha</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double *</td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#mData-var">mData</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#mDataBounds-var">mDataBounds</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#mDataModified-var">mDataModified</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#mIsEmpty-var">mIsEmpty</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#mKeyRange-var">mKeyRange</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#mKeySize-var">mKeySize</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#mValueRange-var">mValueRange</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcolormapdata.html#mValueSize-var">mValueSize</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPColorMapData-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Holds the two-dimensional data of a <a href="qcpcolormap.html">QCPColorMap</a> plottable.</p>
+<p>This class is a data storage for <b class="redFont"><code>\ref</code></b> <a href="qcpcolormap.html">QCPColorMap</a>. It holds a two-dimensional array, which <b class="redFont"><code>\ref</code></b> <a href="qcpcolormap.html">QCPColorMap</a> then displays as a 2D image in the plot, where the array values are represented by a color, depending on the value.</p>
+<p>The size of the array can be controlled via <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#setSize">setSize</a> (or <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#setKeySize">setKeySize</a>, <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#setValueSize">setValueSize</a>). Which plot coordinates these cells correspond to can be configured with <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#setRange">setRange</a> (or <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#setKeyRange">setKeyRange</a>, <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#setValueRange">setValueRange</a>).</p>
+<p>The data cells can be accessed in two ways: They can be directly addressed by an integer index with <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#setCell">setCell</a>. This is the fastest method. Alternatively, they can be addressed by their plot coordinate with <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#setData">setData</a>. plot coordinate to cell index transformations and vice versa are provided by the functions <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#coordToCell">coordToCell</a> and <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#cellToCoord">cellToCoord</a>.</p>
+<p>A <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html">QCPColorMapData</a> also holds an on-demand two-dimensional array of alpha values which (if allocated) has the same size as the data map. It can be accessed via <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#setAlpha">setAlpha</a>, <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#fillAlpha">fillAlpha</a> and <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#clearAlpha">clearAlpha</a>. The memory for the alpha map is only allocated if needed, i.e&#x2e; on the first call of <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#setAlpha">setAlpha</a>. <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#clearAlpha">clearAlpha</a> restores full opacity and frees the alpha map.</p>
+<p>This class also buffers the minimum and maximum values that are in the data set, to provide QCPColorMap::rescaleDataRange with the necessary information quickly. Setting a cell to a value that is greater than the current maximum increases this maximum to the new value. However, setting the cell that currently holds the maximum value to a smaller value doesn't decrease the maximum again, because finding the true new maximum would require going through the entire data array, which might be time consuming. The same holds for the data minimum. This functionality is given by <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#recalculateDataBounds">recalculateDataBounds</a>, such that you can decide when it is sensible to find the true current minimum and maximum. The method QCPColorMap::rescaleDataRange offers a convenience parameter <i>recalculateDataBounds</i> which may be set to true to automatically call <b class="redFont"><code>\ref</code></b> <a href="qcpcolormapdata.html#recalculateDataBounds">recalculateDataBounds</a> internally.</p>
+</div>
+<!-- @@@QCPColorMapData -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCPColorMapData[overload1]$$$QCPColorMapDataintintconstQCPRange&constQCPRange& -->
+<h3 class="fn" id="QCPColorMapData"><a name="QCPColorMapData"></a>QCPColorMapData::<span class="name">QCPColorMapData</span>(<span class="type">int</span> <i>keySize</i>, <span class="type">int</span> <i>valueSize</i>, const <span class="type"><a href="qcprange.html">QCPRange</a></span> &amp;<i>keyRange</i>, const <span class="type"><a href="qcprange.html">QCPRange</a></span> &amp;<i>valueRange</i>)</h3>
+<p>Default constructs an instance of QCPColorMapData.</p><!-- @@@QCPColorMapData -->
+<!-- $$$QCPColorMapData$$$QCPColorMapDataconstQCPColorMapData& -->
+<h3 class="fn" id="QCPColorMapData-1"><a name="QCPColorMapData-1"></a>QCPColorMapData::<span class="name">QCPColorMapData</span>(const <span class="type"><a href="qcpcolormapdata.html#QCPColorMapData">QCPColorMapData</a></span> &amp;<i>other</i>)</h3>
+<p>Default constructs an instance of QCPColorMapData.</p><!-- @@@QCPColorMapData -->
+<!-- $$$~QCPColorMapData[overload1]$$$~QCPColorMapData -->
+<h3 class="fn" id="dtor.QCPColorMapData"><a name="dtor.QCPColorMapData"></a>QCPColorMapData::<span class="name">~QCPColorMapData</span>()</h3>
+<p>Destroys the instance of QCPColorMapData.</p><!-- @@@~QCPColorMapData -->
+<!-- $$$alpha[overload1]$$$alphaintint -->
+<h3 class="fn" id="alpha"><a name="alpha"></a><span class="type">unsigned</span> <span class="type">char</span> QCPColorMapData::<span class="name">alpha</span>(<span class="type">int</span> <i>keyIndex</i>, <span class="type">int</span> <i>valueIndex</i>)</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#setAlpha">setAlpha</a>().</p>
+<!-- @@@alpha -->
+<!-- $$$cell[overload1]$$$cellintint -->
+<h3 class="fn" id="cell"><a name="cell"></a><span class="type">double</span> QCPColorMapData::<span class="name">cell</span>(<span class="type">int</span> <i>keyIndex</i>, <span class="type">int</span> <i>valueIndex</i>)</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#setCell">setCell</a>().</p>
+<!-- @@@cell -->
+<!-- $$$cellToCoord[overload1]$$$cellToCoordintintdouble*double* -->
+<h3 class="fn" id="cellToCoord"><a name="cellToCoord"></a><span class="type">void</span> QCPColorMapData::<span class="name">cellToCoord</span>(<span class="type">int</span> <i>keyIndex</i>, <span class="type">int</span> <i>valueIndex</i>, <span class="type">double</span> *<i>key</i>, <span class="type">double</span> *<i>value</i>) const</h3>
+<!-- @@@cellToCoord -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QCPColorMapData::<span class="name">clear</span>()</h3>
+<!-- @@@clear -->
+<!-- $$$clearAlpha[overload1]$$$clearAlpha -->
+<h3 class="fn" id="clearAlpha"><a name="clearAlpha"></a><span class="type">void</span> QCPColorMapData::<span class="name">clearAlpha</span>()</h3>
+<!-- @@@clearAlpha -->
+<!-- $$$coordToCell[overload1]$$$coordToCelldoubledoubleint*int* -->
+<h3 class="fn" id="coordToCell"><a name="coordToCell"></a><span class="type">void</span> QCPColorMapData::<span class="name">coordToCell</span>(<span class="type">double</span> <i>key</i>, <span class="type">double</span> <i>value</i>, <span class="type">int</span> *<i>keyIndex</i>, <span class="type">int</span> *<i>valueIndex</i>) const</h3>
+<!-- @@@coordToCell -->
+<!-- $$$createAlpha[overload1]$$$createAlphabool -->
+<h3 class="fn" id="createAlpha"><a name="createAlpha"></a><code>[protected] </code><span class="type">bool</span> QCPColorMapData::<span class="name">createAlpha</span>(<span class="type">bool</span> <i>initializeOpaque</i> = true)</h3>
+<!-- @@@createAlpha -->
+<!-- $$$data[overload1]$$$datadoubledouble -->
+<h3 class="fn" id="data"><a name="data"></a><span class="type">double</span> QCPColorMapData::<span class="name">data</span>(<span class="type">double</span> <i>key</i>, <span class="type">double</span> <i>value</i>)</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#setData">setData</a>().</p>
+<!-- @@@data -->
+<!-- $$$dataBounds[overload1]$$$dataBounds -->
+<h3 class="fn" id="dataBounds"><a name="dataBounds"></a><span class="type"><a href="qcprange.html">QCPRange</a></span> QCPColorMapData::<span class="name">dataBounds</span>() const</h3>
+<!-- @@@dataBounds -->
+<!-- $$$fill[overload1]$$$filldouble -->
+<h3 class="fn" id="fill"><a name="fill"></a><span class="type">void</span> QCPColorMapData::<span class="name">fill</span>(<span class="type">double</span> <i>z</i>)</h3>
+<!-- @@@fill -->
+<!-- $$$fillAlpha[overload1]$$$fillAlphaunsignedchar -->
+<h3 class="fn" id="fillAlpha"><a name="fillAlpha"></a><span class="type">void</span> QCPColorMapData::<span class="name">fillAlpha</span>(<span class="type">unsigned</span> <span class="type">char</span> <i>alpha</i>)</h3>
+<!-- @@@fillAlpha -->
+<!-- $$$isEmpty[overload1]$$$isEmpty -->
+<h3 class="fn" id="isEmpty"><a name="isEmpty"></a><span class="type">bool</span> QCPColorMapData::<span class="name">isEmpty</span>() const</h3>
+<!-- @@@isEmpty -->
+<!-- $$$keyRange[overload1]$$$keyRange -->
+<h3 class="fn" id="keyRange"><a name="keyRange"></a><span class="type"><a href="qcprange.html">QCPRange</a></span> QCPColorMapData::<span class="name">keyRange</span>() const</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#setKeyRange">setKeyRange</a>().</p>
+<!-- @@@keyRange -->
+<!-- $$$keySize[overload1]$$$keySize -->
+<h3 class="fn" id="keySize"><a name="keySize"></a><span class="type">int</span> QCPColorMapData::<span class="name">keySize</span>() const</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#setKeySize">setKeySize</a>().</p>
+<!-- @@@keySize -->
+<!-- $$$recalculateDataBounds[overload1]$$$recalculateDataBounds -->
+<h3 class="fn" id="recalculateDataBounds"><a name="recalculateDataBounds"></a><span class="type">void</span> QCPColorMapData::<span class="name">recalculateDataBounds</span>()</h3>
+<!-- @@@recalculateDataBounds -->
+<!-- $$$setAlpha[overload1]$$$setAlphaintintunsignedchar -->
+<h3 class="fn" id="setAlpha"><a name="setAlpha"></a><span class="type">void</span> QCPColorMapData::<span class="name">setAlpha</span>(<span class="type">int</span> <i>keyIndex</i>, <span class="type">int</span> <i>valueIndex</i>, <span class="type">unsigned</span> <span class="type">char</span> <i>alpha</i>)</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#alpha">alpha</a>().</p>
+<!-- @@@setAlpha -->
+<!-- $$$setCell[overload1]$$$setCellintintdouble -->
+<h3 class="fn" id="setCell"><a name="setCell"></a><span class="type">void</span> QCPColorMapData::<span class="name">setCell</span>(<span class="type">int</span> <i>keyIndex</i>, <span class="type">int</span> <i>valueIndex</i>, <span class="type">double</span> <i>z</i>)</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#cell">cell</a>().</p>
+<!-- @@@setCell -->
+<!-- $$$setData[overload1]$$$setDatadoubledoubledouble -->
+<h3 class="fn" id="setData"><a name="setData"></a><span class="type">void</span> QCPColorMapData::<span class="name">setData</span>(<span class="type">double</span> <i>key</i>, <span class="type">double</span> <i>value</i>, <span class="type">double</span> <i>z</i>)</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#data">data</a>().</p>
+<!-- @@@setData -->
+<!-- $$$setKeyRange[overload1]$$$setKeyRangeconstQCPRange& -->
+<h3 class="fn" id="setKeyRange"><a name="setKeyRange"></a><span class="type">void</span> QCPColorMapData::<span class="name">setKeyRange</span>(const <span class="type"><a href="qcprange.html">QCPRange</a></span> &amp;<i>keyRange</i>)</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#keyRange">keyRange</a>().</p>
+<!-- @@@setKeyRange -->
+<!-- $$$setKeySize[overload1]$$$setKeySizeint -->
+<h3 class="fn" id="setKeySize"><a name="setKeySize"></a><span class="type">void</span> QCPColorMapData::<span class="name">setKeySize</span>(<span class="type">int</span> <i>keySize</i>)</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#keySize">keySize</a>().</p>
+<!-- @@@setKeySize -->
+<!-- $$$setRange[overload1]$$$setRangeconstQCPRange&constQCPRange& -->
+<h3 class="fn" id="setRange"><a name="setRange"></a><span class="type">void</span> QCPColorMapData::<span class="name">setRange</span>(const <span class="type"><a href="qcprange.html">QCPRange</a></span> &amp;<i>keyRange</i>, const <span class="type"><a href="qcprange.html">QCPRange</a></span> &amp;<i>valueRange</i>)</h3>
+<!-- @@@setRange -->
+<!-- $$$setSize[overload1]$$$setSizeintint -->
+<h3 class="fn" id="setSize"><a name="setSize"></a><span class="type">void</span> QCPColorMapData::<span class="name">setSize</span>(<span class="type">int</span> <i>keySize</i>, <span class="type">int</span> <i>valueSize</i>)</h3>
+<!-- @@@setSize -->
+<!-- $$$setValueRange[overload1]$$$setValueRangeconstQCPRange& -->
+<h3 class="fn" id="setValueRange"><a name="setValueRange"></a><span class="type">void</span> QCPColorMapData::<span class="name">setValueRange</span>(const <span class="type"><a href="qcprange.html">QCPRange</a></span> &amp;<i>valueRange</i>)</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#valueRange">valueRange</a>().</p>
+<!-- @@@setValueRange -->
+<!-- $$$setValueSize[overload1]$$$setValueSizeint -->
+<h3 class="fn" id="setValueSize"><a name="setValueSize"></a><span class="type">void</span> QCPColorMapData::<span class="name">setValueSize</span>(<span class="type">int</span> <i>valueSize</i>)</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#valueSize">valueSize</a>().</p>
+<!-- @@@setValueSize -->
+<!-- $$$valueRange[overload1]$$$valueRange -->
+<h3 class="fn" id="valueRange"><a name="valueRange"></a><span class="type"><a href="qcprange.html">QCPRange</a></span> QCPColorMapData::<span class="name">valueRange</span>() const</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#setValueRange">setValueRange</a>().</p>
+<!-- @@@valueRange -->
+<!-- $$$valueSize[overload1]$$$valueSize -->
+<h3 class="fn" id="valueSize"><a name="valueSize"></a><span class="type">int</span> QCPColorMapData::<span class="name">valueSize</span>() const</h3>
+<p><b>See also </b><a href="qcpcolormapdata.html#setValueSize">setValueSize</a>().</p>
+<!-- @@@valueSize -->
+<!-- $$$operator=[overload1]$$$operator=constQCPColorMapData& -->
+<h3 class="fn" id="operator-eq"><a name="operator-eq"></a><span class="type"><a href="qcpcolormapdata.html#QCPColorMapData">QCPColorMapData</a></span> &amp;QCPColorMapData::<span class="name">operator=</span>(const <span class="type"><a href="qcpcolormapdata.html#QCPColorMapData">QCPColorMapData</a></span> &amp;<i>other</i>)</h3>
+<p>Copy-assignment operator.</p><!-- @@@operator= -->
+</div>
+</body>
+</html>

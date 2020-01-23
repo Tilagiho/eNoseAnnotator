@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPAbstractPlottable Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPAbstractPlottable</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPAbstractPlottable Class</h1>
+<!-- $$$QCPAbstractPlottable-brief -->
+<p>The abstract base class for all data representing objects in a plot. <a href="#details">More...</a></p>
+<!-- @@@QCPAbstractPlottable -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPAbstractPlottable&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcplayerable.html">QCPLayerable</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qcpcolormap.html">QCPColorMap</a> and <a href="qcperrorbars.html">QCPErrorBars</a></p>
+</td></tr></table></div><ul>
+<li><a href="qcpabstractplottable-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#applyFillAntialiasingHint">applyFillAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#applyScattersAntialiasingHint">applyScattersAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#clipRect">clipRect</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#drawLegendIcon">drawLegendIcon</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>rect</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#selectEvent">selectEvent</a></b>(int *<i>event</i>, bool <i>additive</i>, const int &amp;<i>details</i>, bool *<i>selectionStateChanged</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#applyDefaultAntialiasingHint">applyDefaultAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#deselectEvent">deselectEvent</a></b>(bool *<i>selectionStateChanged</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#draw">draw</a></b>(QCPPainter *<i>painter</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCP::Interaction </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#selectionCategory">selectionCategory</a></b>() const</td></tr>
+</table></div>
+<ul>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#mAntialiasedFill-var">mAntialiasedFill</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#mAntialiasedScatters-var">mAntialiasedScatters</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#mBrush-var">mBrush</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#mKeyAxis-var">mKeyAxis</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#mName-var">mName</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#mPen-var">mPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCP::SelectionType </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#mSelectable-var">mSelectable</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPDataSelection </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#mSelection-var">mSelection</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int *</td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#mSelectionDecorator-var">mSelectionDecorator</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractplottable.html#mValueAxis-var">mValueAxis</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPAbstractPlottable-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The abstract base class for all data representing objects in a plot.</p>
+<p>It defines a very basic interface like name, pen, brush, visibility etc. Since this class is abstract, it can't be instantiated. Use one of the subclasses or create a subclass yourself to create new ways of displaying data (see &quot;Creating own plottables&quot; below). Plottables that display one-dimensional data (i.e&#x2e; data points have a single key dimension and one or multiple values at each key) are based off of the template subclass <b class="redFont"><code>\ref</code></b> QCPAbstractPlottable1D, see details there.</p>
+<p>All further specifics are in the subclasses, for example:</p>
+<p>A normal graph with possibly a line and/or scatter points <b class="redFont"><code>\ref</code></b> <a href="qcpgraph.html">QCPGraph</a> (typically created with <b class="redFont"><code>\ref</code></b> QCustomPlot::addGraph)</p>
+<p>A parametric curve: <b class="redFont"><code>\ref</code></b> <a href="qcpcurve.html">QCPCurve</a></p>
+<p>A bar chart: <b class="redFont"><code>\ref</code></b> <a href="qcpbars.html">QCPBars</a></p>
+<p>A statistical box plot: <b class="redFont"><code>\ref</code></b> <a href="qcpstatisticalbox.html">QCPStatisticalBox</a></p>
+<p>A color encoded two-dimensional map: <b class="redFont"><code>\ref</code></b> <a href="qcpcolormap.html">QCPColorMap</a></p>
+<p>An OHLC/Candlestick chart: <b class="redFont"><code>\ref</code></b> <a href="qcpfinancial.html">QCPFinancial</a></p>
+<p><b class="redFont"><code>\section</code></b>plottables-subclassing Creating own plottables</p>
+<p>Subclassing directly from <a href="qcpabstractplottable.html">QCPAbstractPlottable</a> is only recommended if you wish to display two-dimensional data like <b class="redFont"><code>\ref</code></b> <a href="qcpcolormap.html">QCPColorMap</a>, i.e&#x2e; two logical key dimensions and one (or more) data dimensions. If you want to display data with only one logical key dimension, you should rather derive from <b class="redFont"><code>\ref</code></b> QCPAbstractPlottable1D.</p>
+<p>If subclassing <a href="qcpabstractplottable.html">QCPAbstractPlottable</a> directly, these are the pure virtual functions you must implement:</p>
+<p><b class="redFont"><code>\ref</code></b>selectTest</p>
+<p><b class="redFont"><code>\ref</code></b>draw</p>
+<p><b class="redFont"><code>\ref</code></b><a href="qcpabstractplottable.html#drawLegendIcon">drawLegendIcon</a></p>
+<p><b class="redFont"><code>\ref</code></b>getKeyRange</p>
+<p><b class="redFont"><code>\ref</code></b>getValueRange</p>
+<p>See the documentation of those functions for what they need to do.</p>
+<p>For drawing your plot, you can use the <b class="redFont"><code>\ref</code></b> coordsToPixels functions to translate a point in plot coordinates to pixel coordinates. This function is quite convenient, because it takes the orientation of the key and value axes into account for you (x and y are swapped when the key axis is vertical and the value axis horizontal). If you are worried about performance (i.e&#x2e; you need to translate many points in a loop like <a href="qcpgraph.html">QCPGraph</a>), you can directly use <b class="redFont"><code>\ref</code></b> QCPAxis::coordToPixel. However, you must then take care about the orientation of the axis yourself.</p>
+<p>Here are some important members you inherit from <a href="qcpabstractplottable.html">QCPAbstractPlottable</a>: &lt;table&gt; &lt;tr&gt; &lt;td&gt;<a href="qcustomplot.html">QCustomPlot</a> *<b>mParentPlot&lt;/td&gt;</b> &lt;td&gt;A pointer to the parent <a href="qcustomplot.html">QCustomPlot</a> instance. The parent plot is inferred from the axes that are passed in the constructor.&lt;/td&gt; &lt;/tr&gt;&lt;tr&gt; &lt;td&gt;QString <b>mName&lt;/td&gt;</b> &lt;td&gt;The name of the plottable.&lt;/td&gt; &lt;/tr&gt;&lt;tr&gt; &lt;td&gt;QPen <b>mPen&lt;/td&gt;</b> &lt;td&gt;The generic pen of the plottable. You should use this pen for the most prominent data representing lines in the plottable (e.g <a href="qcpgraph.html">QCPGraph</a> uses this pen for its graph lines and scatters)&lt;/td&gt; &lt;/tr&gt;&lt;tr&gt; &lt;td&gt;QBrush <b>mBrush&lt;/td&gt;</b> &lt;td&gt;The generic brush of the plottable. You should use this brush for the most prominent fillable structures in the plottable (e.g&#x2e; <a href="qcpgraph.html">QCPGraph</a> uses this brush to control filling under the graph)&lt;/td&gt; &lt;/tr&gt;&lt;tr&gt; &lt;td&gt;QPointer&lt;<b class="redFont"><code>\ref</code></b> <a href="qcpaxis.html">QCPAxis</a>&gt; <b>mKeyAxis</b>, <b>mValueAxis&lt;/td&gt;</b> &lt;td&gt;The key and value axes this plottable is attached to. Call their QCPAxis::coordToPixel functions to translate coordinates to pixels in either the key or value dimension. Make sure to check whether the pointer is null before using it. If one of the axes is null, don't draw the plottable.&lt;/td&gt; &lt;/tr&gt;&lt;tr&gt; &lt;td&gt;<b class="redFont"><code>\ref</code></b> QCPSelectionDecorator <b>mSelectionDecorator&lt;/td&gt;</b> &lt;td&gt;The currently set selection decorator which specifies how selected data of the plottable shall be drawn and decorated. When drawing your data, you must consult this decorator for the appropriate pen/brush before drawing unselected/selected data segments. Finally, you should call its <b class="redFont"><code>\ref</code></b> QCPSelectionDecorator::drawDecoration method at the end of your <b class="redFont"><code>\ref</code></b> draw implementation.&lt;/td&gt; &lt;/tr&gt;&lt;tr&gt; &lt;td&gt;<b class="redFont"><code>\ref</code></b> <a href="qcp-sub-enoseannotator.html#SelectionType-enum">QCP::SelectionType</a> <b>mSelectable&lt;/td&gt;</b> &lt;td&gt;In which composition, if at all, this plottable's data may be selected. Enforcing this setting on the data selection is done by <a href="qcpabstractplottable.html">QCPAbstractPlottable</a> automatically.&lt;/td&gt; &lt;/tr&gt;&lt;tr&gt; &lt;td&gt;<b class="redFont"><code>\ref</code></b> <a href="qcpdataselection.html">QCPDataSelection</a> <b>mSelection&lt;/td&gt;</b> &lt;td&gt;Holds the current selection state of the plottable's data, i.e&#x2e; the selected data ranges (<b class="redFont"><code>\ref</code></b> <a href="qcpdatarange.html">QCPDataRange</a>).&lt;/td&gt; &lt;/tr&gt; &lt;/table&gt;</p>
+</div>
+<!-- @@@QCPAbstractPlottable -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$applyDefaultAntialiasingHint[overload1]$$$applyDefaultAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyDefaultAntialiasingHint"><a name="applyDefaultAntialiasingHint"></a><code>[virtual protected] </code><span class="type">void</span> QCPAbstractPlottable::<span class="name">applyDefaultAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyDefaultAntialiasingHint -->
+<!-- $$$applyFillAntialiasingHint[overload1]$$$applyFillAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyFillAntialiasingHint"><a name="applyFillAntialiasingHint"></a><code>[protected] </code><span class="type">void</span> QCPAbstractPlottable::<span class="name">applyFillAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyFillAntialiasingHint -->
+<!-- $$$applyScattersAntialiasingHint[overload1]$$$applyScattersAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyScattersAntialiasingHint"><a name="applyScattersAntialiasingHint"></a><code>[protected] </code><span class="type">void</span> QCPAbstractPlottable::<span class="name">applyScattersAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyScattersAntialiasingHint -->
+<!-- $$$clipRect[overload1]$$$clipRect -->
+<h3 class="fn" id="clipRect"><a name="clipRect"></a><code>[protected] </code><span class="type">int</span> QCPAbstractPlottable::<span class="name">clipRect</span>() const</h3>
+<!-- @@@clipRect -->
+<!-- $$$deselectEvent[overload1]$$$deselectEventbool* -->
+<h3 class="fn" id="deselectEvent"><a name="deselectEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPAbstractPlottable::<span class="name">deselectEvent</span>(<span class="type">bool</span> *<i>selectionStateChanged</i>)</h3>
+<!-- @@@deselectEvent -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[pure virtual protected] </code><span class="type">void</span> QCPAbstractPlottable::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$drawLegendIcon[overload1]$$$drawLegendIconQCPPainter*constint& -->
+<h3 class="fn" id="drawLegendIcon"><a name="drawLegendIcon"></a><code>[pure virtual protected] </code><span class="type">void</span> QCPAbstractPlottable::<span class="name">drawLegendIcon</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>rect</i>) const</h3>
+<!-- @@@drawLegendIcon -->
+<!-- $$$selectEvent[overload1]$$$selectEventint*boolconstint&bool* -->
+<h3 class="fn" id="selectEvent"><a name="selectEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPAbstractPlottable::<span class="name">selectEvent</span>(<span class="type">int</span> *<i>event</i>, <span class="type">bool</span> <i>additive</i>, const <span class="type">int</span> &amp;<i>details</i>, <span class="type">bool</span> *<i>selectionStateChanged</i>)</h3>
+<!-- @@@selectEvent -->
+<!-- $$$selectionCategory[overload1]$$$selectionCategory -->
+<h3 class="fn" id="selectionCategory"><a name="selectionCategory"></a><code>[virtual protected] </code><span class="type"><a href="qcp-sub-enoseannotator.html#Interaction-enum">QCP::Interaction</a></span> QCPAbstractPlottable::<span class="name">selectionCategory</span>() const</h3>
+<!-- @@@selectionCategory -->
+</div>
+</body>
+</html>

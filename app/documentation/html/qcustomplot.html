@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCustomPlot Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCustomPlot</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCustomPlot Class</h1>
+<!-- $$$QCustomPlot-brief -->
+<p>The central class of the library. This is the QWidget which displays the plot and interacts with the user. <a href="#details">More...</a></p>
+<!-- @@@QCustomPlot -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCustomPlot&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcustomplot-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#axisRemoved">axisRemoved</a></b>(QCPAxis *<i>axis</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int *</td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#createPaintBuffer">createPaintBuffer</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#drawBackground">drawBackground</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#freeOpenGl">freeOpenGl</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#hasInvalidatedPaintBuffers">hasInvalidatedPaintBuffers</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPLayerable *</td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#layerableAt">layerableAt</a></b>(const int &amp;<i>pos</i>, bool <i>onlySelectable</i>, int *<i>selectionDetails</i> = 0) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#layerableListAt">layerableListAt</a></b>(<i>const int &amp;</i>, <i>bool</i>, <i>int *</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#legendRemoved">legendRemoved</a></b>(QCPLegend *<i>legend</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#minimumSizeHint">minimumSizeHint</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a></b>(int *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mouseMoveEvent">mouseMoveEvent</a></b>(int *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mousePressEvent">mousePressEvent</a></b>(int *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(int *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#paintEvent">paintEvent</a></b>(int *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#registerGraph">registerGraph</a></b>(QCPGraph *<i>graph</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#registerItem">registerItem</a></b>(QCPAbstractItem *<i>item</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#registerPlottable">registerPlottable</a></b>(QCPAbstractPlottable *<i>plottable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#resizeEvent">resizeEvent</a></b>(int *<i>event</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#setupOpenGl">setupOpenGl</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#setupPaintBuffers">setupPaintBuffers</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#sizeHint">sizeHint</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#updateLayerIndices">updateLayerIndices</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#updateLayout">updateLayout</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#wheelEvent">wheelEvent</a></b>(int *<i>event</i>)</td></tr>
+</table></div>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mAntialiasedElements-var">mAntialiasedElements</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mAutoAddPlottableToLegend-var">mAutoAddPlottableToLegend</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mBackgroundBrush-var">mBackgroundBrush</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mBackgroundPixmap-var">mBackgroundPixmap</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mBackgroundScaled-var">mBackgroundScaled</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mBackgroundScaledMode-var">mBackgroundScaledMode</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mBufferDevicePixelRatio-var">mBufferDevicePixelRatio</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPLayer *</td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mCurrentLayer-var">mCurrentLayer</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mGraphs-var">mGraphs</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mInteractions-var">mInteractions</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mItems-var">mItems</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mLayers-var">mLayers</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mMouseEventLayerable-var">mMouseEventLayerable</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mMouseEventLayerableDetails-var">mMouseEventLayerableDetails</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mMouseHasMoved-var">mMouseHasMoved</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mMousePressPos-var">mMousePressPos</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mMouseSignalLayerable-var">mMouseSignalLayerable</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mMouseSignalLayerableDetails-var">mMouseSignalLayerableDetails</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mMultiSelectModifier-var">mMultiSelectModifier</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mNoAntialiasingOnDrag-var">mNoAntialiasingOnDrag</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mNotAntialiasedElements-var">mNotAntialiasedElements</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mOpenGl-var">mOpenGl</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mOpenGlAntialiasedElementsBackup-var">mOpenGlAntialiasedElementsBackup</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mOpenGlCacheLabelsBackup-var">mOpenGlCacheLabelsBackup</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mOpenGlMultisamples-var">mOpenGlMultisamples</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPLayoutGrid *</td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mPlotLayout-var">mPlotLayout</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mPlottables-var">mPlottables</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mPlottingHints-var">mPlottingHints</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mReplotQueued-var">mReplotQueued</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mReplotting-var">mReplotting</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mScaledBackgroundPixmap-var">mScaledBackgroundPixmap</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPSelectionRect *</td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mSelectionRect-var">mSelectionRect</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCP::SelectionRectMode </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mSelectionRectMode-var">mSelectionRectMode</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mSelectionTolerance-var">mSelectionTolerance</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcustomplot.html#mViewport-var">mViewport</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCustomPlot-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The central class of the library. This is the QWidget which displays the plot and interacts with the user.</p>
+<p>For tutorials on how to use <a href="qcustomplot.html">QCustomPlot</a>, see the website<b class="redFont"><code>\n</code></b> http://www.qcustomplot.com/</p>
+</div>
+<!-- @@@QCustomPlot -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$axisRemoved[overload1]$$$axisRemovedQCPAxis* -->
+<h3 class="fn" id="axisRemoved"><a name="axisRemoved"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">axisRemoved</span>(<span class="type"><a href="qcpaxis.html">QCPAxis</a></span> *<i>axis</i>)</h3>
+<!-- @@@axisRemoved -->
+<!-- $$$createPaintBuffer[overload1]$$$createPaintBuffer -->
+<h3 class="fn" id="createPaintBuffer"><a name="createPaintBuffer"></a><code>[protected] </code><span class="type">int</span> *QCustomPlot::<span class="name">createPaintBuffer</span>()</h3>
+<!-- @@@createPaintBuffer -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$drawBackground[overload1]$$$drawBackgroundQCPPainter* -->
+<h3 class="fn" id="drawBackground"><a name="drawBackground"></a><code>[protected] </code><span class="type">void</span> QCustomPlot::<span class="name">drawBackground</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@drawBackground -->
+<!-- $$$freeOpenGl[overload1]$$$freeOpenGl -->
+<h3 class="fn" id="freeOpenGl"><a name="freeOpenGl"></a><code>[protected] </code><span class="type">void</span> QCustomPlot::<span class="name">freeOpenGl</span>()</h3>
+<!-- @@@freeOpenGl -->
+<!-- $$$hasInvalidatedPaintBuffers[overload1]$$$hasInvalidatedPaintBuffers -->
+<h3 class="fn" id="hasInvalidatedPaintBuffers"><a name="hasInvalidatedPaintBuffers"></a><code>[protected] </code><span class="type">bool</span> QCustomPlot::<span class="name">hasInvalidatedPaintBuffers</span>()</h3>
+<!-- @@@hasInvalidatedPaintBuffers -->
+<!-- $$$layerableAt[overload1]$$$layerableAtconstint&boolint* -->
+<h3 class="fn" id="layerableAt"><a name="layerableAt"></a><code>[protected] </code><span class="type"><a href="qcplayerable.html">QCPLayerable</a></span> *QCustomPlot::<span class="name">layerableAt</span>(const <span class="type">int</span> &amp;<i>pos</i>, <span class="type">bool</span> <i>onlySelectable</i>, <span class="type">int</span> *<i>selectionDetails</i> = 0) const</h3>
+<!-- @@@layerableAt -->
+<!-- $$$layerableListAt[overload1]$$$layerableListAtconstint&boolint* -->
+<h3 class="fn" id="layerableListAt"><a name="layerableListAt"></a><code>[protected] </code><span class="type">int</span> QCustomPlot::<span class="name">layerableListAt</span>(<i>const int &amp;</i>, <i>bool</i>, <i>int *</i>) const</h3>
+<!-- @@@layerableListAt -->
+<!-- $$$legendRemoved[overload1]$$$legendRemovedQCPLegend* -->
+<h3 class="fn" id="legendRemoved"><a name="legendRemoved"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">legendRemoved</span>(<span class="type"><a href="qcplegend.html">QCPLegend</a></span> *<i>legend</i>)</h3>
+<!-- @@@legendRemoved -->
+<!-- $$$minimumSizeHint[overload1]$$$minimumSizeHint -->
+<h3 class="fn" id="minimumSizeHint"><a name="minimumSizeHint"></a><code>[protected] </code><span class="type">int</span> QCustomPlot::<span class="name">minimumSizeHint</span>() const</h3>
+<!-- @@@minimumSizeHint -->
+<!-- $$$mouseDoubleClickEvent[overload1]$$$mouseDoubleClickEventint* -->
+<h3 class="fn" id="mouseDoubleClickEvent"><a name="mouseDoubleClickEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">mouseDoubleClickEvent</span>(<span class="type">int</span> *<i>event</i>)</h3>
+<!-- @@@mouseDoubleClickEvent -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventint* -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">mouseMoveEvent</span>(<span class="type">int</span> *<i>event</i>)</h3>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventint* -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">mousePressEvent</span>(<span class="type">int</span> *<i>event</i>)</h3>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventint* -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">mouseReleaseEvent</span>(<span class="type">int</span> *<i>event</i>)</h3>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$paintEvent[overload1]$$$paintEventint* -->
+<h3 class="fn" id="paintEvent"><a name="paintEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">paintEvent</span>(<span class="type">int</span> *<i>event</i>)</h3>
+<!-- @@@paintEvent -->
+<!-- $$$registerGraph[overload1]$$$registerGraphQCPGraph* -->
+<h3 class="fn" id="registerGraph"><a name="registerGraph"></a><code>[protected] </code><span class="type">bool</span> QCustomPlot::<span class="name">registerGraph</span>(<span class="type"><a href="qcpgraph.html">QCPGraph</a></span> *<i>graph</i>)</h3>
+<!-- @@@registerGraph -->
+<!-- $$$registerItem[overload1]$$$registerItemQCPAbstractItem* -->
+<h3 class="fn" id="registerItem"><a name="registerItem"></a><code>[protected] </code><span class="type">bool</span> QCustomPlot::<span class="name">registerItem</span>(<span class="type"><a href="qcpabstractitem.html">QCPAbstractItem</a></span> *<i>item</i>)</h3>
+<!-- @@@registerItem -->
+<!-- $$$registerPlottable[overload1]$$$registerPlottableQCPAbstractPlottable* -->
+<h3 class="fn" id="registerPlottable"><a name="registerPlottable"></a><code>[protected] </code><span class="type">bool</span> QCustomPlot::<span class="name">registerPlottable</span>(<span class="type"><a href="qcpabstractplottable.html">QCPAbstractPlottable</a></span> *<i>plottable</i>)</h3>
+<!-- @@@registerPlottable -->
+<!-- $$$resizeEvent[overload1]$$$resizeEventint* -->
+<h3 class="fn" id="resizeEvent"><a name="resizeEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">resizeEvent</span>(<span class="type">int</span> *<i>event</i>)</h3>
+<!-- @@@resizeEvent -->
+<!-- $$$setupOpenGl[overload1]$$$setupOpenGl -->
+<h3 class="fn" id="setupOpenGl"><a name="setupOpenGl"></a><code>[protected] </code><span class="type">bool</span> QCustomPlot::<span class="name">setupOpenGl</span>()</h3>
+<!-- @@@setupOpenGl -->
+<!-- $$$setupPaintBuffers[overload1]$$$setupPaintBuffers -->
+<h3 class="fn" id="setupPaintBuffers"><a name="setupPaintBuffers"></a><code>[protected] </code><span class="type">void</span> QCustomPlot::<span class="name">setupPaintBuffers</span>()</h3>
+<!-- @@@setupPaintBuffers -->
+<!-- $$$sizeHint[overload1]$$$sizeHint -->
+<h3 class="fn" id="sizeHint"><a name="sizeHint"></a><code>[protected] </code><span class="type">int</span> QCustomPlot::<span class="name">sizeHint</span>() const</h3>
+<!-- @@@sizeHint -->
+<!-- $$$updateLayerIndices[overload1]$$$updateLayerIndices -->
+<h3 class="fn" id="updateLayerIndices"><a name="updateLayerIndices"></a><code>[protected] </code><span class="type">void</span> QCustomPlot::<span class="name">updateLayerIndices</span>() const</h3>
+<!-- @@@updateLayerIndices -->
+<!-- $$$updateLayout[overload1]$$$updateLayout -->
+<h3 class="fn" id="updateLayout"><a name="updateLayout"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">updateLayout</span>()</h3>
+<!-- @@@updateLayout -->
+<!-- $$$wheelEvent[overload1]$$$wheelEventint* -->
+<h3 class="fn" id="wheelEvent"><a name="wheelEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCustomPlot::<span class="name">wheelEvent</span>(<span class="type">int</span> *<i>event</i>)</h3>
+<!-- @@@wheelEvent -->
+</div>
+</body>
+</html>

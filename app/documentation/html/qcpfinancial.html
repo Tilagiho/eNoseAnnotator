@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPFinancial Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPFinancial</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPFinancial Class</h1>
+<!-- $$$QCPFinancial-brief -->
+<p>A plottable representing a financial stock chart. <a href="#details">More...</a></p>
+<!-- @@@QCPFinancial -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPFinancial&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcpfinancial-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#candlestickSelectTest">candlestickSelectTest</a></b>(const int &amp;<i>pos</i>, const int &amp;<i>begin</i>, const int &amp;<i>end</i>, int &amp;<i>closestDataPoint</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#drawCandlestickPlot">drawCandlestickPlot</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>begin</i>, const int &amp;<i>end</i>, bool <i>isSelected</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#drawLegendIcon">drawLegendIcon</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>rect</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#drawOhlcPlot">drawOhlcPlot</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>begin</i>, const int &amp;<i>end</i>, bool <i>isSelected</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#getPixelWidth">getPixelWidth</a></b>(double <i>key</i>, double <i>keyPixel</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#getVisibleDataBounds">getVisibleDataBounds</a></b>(int &amp;<i>begin</i>, int &amp;<i>end</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#ohlcSelectTest">ohlcSelectTest</a></b>(const int &amp;<i>pos</i>, const int &amp;<i>begin</i>, const int &amp;<i>end</i>, int &amp;<i>closestDataPoint</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#selectionHitBox">selectionHitBox</a></b>(<i>int</i>) const</td></tr>
+</table></div>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#mBrushNegative-var">mBrushNegative</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#mBrushPositive-var">mBrushPositive</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#mChartStyle-var">mChartStyle</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#mPenNegative-var">mPenNegative</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#mPenPositive-var">mPenPositive</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#mTwoColored-var">mTwoColored</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#mWidth-var">mWidth</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpfinancial.html#mWidthType-var">mWidthType</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPFinancial-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A plottable representing a financial stock chart</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>This plottable represents time series data binned to certain intervals, mainly used for stock charts. The two common representations OHLC (Open-High-Low-Close) bars and Candlesticks can be set via <b class="redFont"><code>\ref</code></b> setChartStyle.</p>
+<p>The data is passed via <b class="redFont"><code>\ref</code></b> setData as a set of open/high/low/close values at certain keys (typically times). This means the data must be already binned appropriately. If data is only available as a series of values (e.g&#x2e; <i>price</i> against <i>time</i>), you can use the static convenience function <b class="redFont"><code>\ref</code></b> timeSeriesToOhlc to generate binned OHLC-data which can then be passed to <b class="redFont"><code>\ref</code></b> setData.</p>
+<p>The width of the OHLC bars/candlesticks can be controlled with <b class="redFont"><code>\ref</code></b> setWidth and <b class="redFont"><code>\ref</code></b> setWidthType. A typical choice is to set the width type to <b class="redFont"><code>\ref</code></b> wtPlotCoords (the default) and the width to (or slightly less than) one time bin interval width.</p>
+<p><b class="redFont"><code>\section</code></b>qcpfinancial-appearance Changing the appearance</p>
+<p>Charts can be either single- or two-colored (<b class="redFont"><code>\ref</code></b> setTwoColored). If set to be single-colored, lines are drawn with the plottable's pen (<b class="redFont"><code>\ref</code></b> setPen) and fills with the brush (<b class="redFont"><code>\ref</code></b> setBrush).</p>
+<p>If set to two-colored, positive changes of the value during an interval (<i>close</i> &gt;= <i>open</i>) are represented with a different pen and brush than negative changes (<i>close</i> &lt; <i>open</i>). These can be configured with <b class="redFont"><code>\ref</code></b> setPenPositive, <b class="redFont"><code>\ref</code></b> setPenNegative, <b class="redFont"><code>\ref</code></b> setBrushPositive, and <b class="redFont"><code>\ref</code></b> setBrushNegative. In two-colored mode, the normal plottable pen/brush is ignored. Upon selection however, the normal selected pen/brush (provided by the <b class="redFont"><code>\ref</code></b> selectionDecorator) is used, irrespective of whether the chart is single- or two-colored.</p>
+<p><b class="redFont"><code>\section</code></b>qcpfinancial-usage Usage</p>
+<p>Like all data representing objects in <a href="qcustomplot.html">QCustomPlot</a>, the <a href="qcpfinancial.html">QCPFinancial</a> is a plottable (<a href="qcpabstractplottable.html">QCPAbstractPlottable</a>). So the plottable-interface of <a href="qcustomplot.html">QCustomPlot</a> applies (QCustomPlot::plottable, QCustomPlot::removePlottable, etc.)</p>
+<p>Usually, you first create an instance:</p>
+<pre class="cpp"></pre>
+<p>which registers it with the <a href="qcustomplot.html">QCustomPlot</a> instance of the passed axes. Note that this <a href="qcustomplot.html">QCustomPlot</a> instance takes ownership of the plottable, so do not delete it manually but use QCustomPlot::removePlottable() instead. The newly created plottable can be modified, e.g&#x2e;:</p>
+<pre class="cpp"></pre>
+<p>Here we have used the static helper method <b class="redFont"><code>\ref</code></b> timeSeriesToOhlc, to turn a time-price data series into a 24-hour binned open-high-low-close data series as <a href="qcpfinancial.html">QCPFinancial</a> uses.</p>
+</div>
+<!-- @@@QCPFinancial -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$candlestickSelectTest[overload1]$$$candlestickSelectTestconstint&constint&constint&int& -->
+<h3 class="fn" id="candlestickSelectTest"><a name="candlestickSelectTest"></a><code>[protected] </code><span class="type">double</span> QCPFinancial::<span class="name">candlestickSelectTest</span>(const <span class="type">int</span> &amp;<i>pos</i>, const <span class="type">int</span> &amp;<i>begin</i>, const <span class="type">int</span> &amp;<i>end</i>, <span class="type">int</span> &amp;<i>closestDataPoint</i>) const</h3>
+<!-- @@@candlestickSelectTest -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCPFinancial::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$drawCandlestickPlot[overload1]$$$drawCandlestickPlotQCPPainter*constint&constint&bool -->
+<h3 class="fn" id="drawCandlestickPlot"><a name="drawCandlestickPlot"></a><code>[protected] </code><span class="type">void</span> QCPFinancial::<span class="name">drawCandlestickPlot</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>begin</i>, const <span class="type">int</span> &amp;<i>end</i>, <span class="type">bool</span> <i>isSelected</i>)</h3>
+<!-- @@@drawCandlestickPlot -->
+<!-- $$$drawLegendIcon[overload1]$$$drawLegendIconQCPPainter*constint& -->
+<h3 class="fn" id="drawLegendIcon"><a name="drawLegendIcon"></a><code>[virtual protected] </code><span class="type">void</span> QCPFinancial::<span class="name">drawLegendIcon</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>rect</i>) const</h3>
+<!-- @@@drawLegendIcon -->
+<!-- $$$drawOhlcPlot[overload1]$$$drawOhlcPlotQCPPainter*constint&constint&bool -->
+<h3 class="fn" id="drawOhlcPlot"><a name="drawOhlcPlot"></a><code>[protected] </code><span class="type">void</span> QCPFinancial::<span class="name">drawOhlcPlot</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>begin</i>, const <span class="type">int</span> &amp;<i>end</i>, <span class="type">bool</span> <i>isSelected</i>)</h3>
+<!-- @@@drawOhlcPlot -->
+<!-- $$$getPixelWidth[overload1]$$$getPixelWidthdoubledouble -->
+<h3 class="fn" id="getPixelWidth"><a name="getPixelWidth"></a><code>[protected] </code><span class="type">double</span> QCPFinancial::<span class="name">getPixelWidth</span>(<span class="type">double</span> <i>key</i>, <span class="type">double</span> <i>keyPixel</i>) const</h3>
+<!-- @@@getPixelWidth -->
+<!-- $$$getVisibleDataBounds[overload1]$$$getVisibleDataBoundsint&int& -->
+<h3 class="fn" id="getVisibleDataBounds"><a name="getVisibleDataBounds"></a><code>[protected] </code><span class="type">void</span> QCPFinancial::<span class="name">getVisibleDataBounds</span>(<span class="type">int</span> &amp;<i>begin</i>, <span class="type">int</span> &amp;<i>end</i>) const</h3>
+<!-- @@@getVisibleDataBounds -->
+<!-- $$$ohlcSelectTest[overload1]$$$ohlcSelectTestconstint&constint&constint&int& -->
+<h3 class="fn" id="ohlcSelectTest"><a name="ohlcSelectTest"></a><code>[protected] </code><span class="type">double</span> QCPFinancial::<span class="name">ohlcSelectTest</span>(const <span class="type">int</span> &amp;<i>pos</i>, const <span class="type">int</span> &amp;<i>begin</i>, const <span class="type">int</span> &amp;<i>end</i>, <span class="type">int</span> &amp;<i>closestDataPoint</i>) const</h3>
+<!-- @@@ohlcSelectTest -->
+<!-- $$$selectionHitBox[overload1]$$$selectionHitBoxint -->
+<h3 class="fn" id="selectionHitBox"><a name="selectionHitBox"></a><code>[protected] </code><span class="type">int</span> QCPFinancial::<span class="name">selectionHitBox</span>(<i>int</i>) const</h3>
+<!-- @@@selectionHitBox -->
+</div>
+</body>
+</html>

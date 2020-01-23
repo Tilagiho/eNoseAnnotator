@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPAbstractLegendItem Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPAbstractLegendItem</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPAbstractLegendItem Class</h1>
+<!-- $$$QCPAbstractLegendItem-brief -->
+<p>The abstract base class for all entries in a <a href="qcplegend.html">QCPLegend</a>. <a href="#details">More...</a></p>
+<!-- @@@QCPAbstractLegendItem -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPAbstractLegendItem&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcplayoutelement.html">QCPLayoutElement</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qcpplottablelegenditem.html">QCPPlottableLegendItem</a></p>
+</td></tr></table></div><ul>
+<li><a href="qcpabstractlegenditem-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#clipRect">clipRect</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#selectEvent">selectEvent</a></b>(int *<i>event</i>, bool <i>additive</i>, const int &amp;<i>details</i>, bool *<i>selectionStateChanged</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#applyDefaultAntialiasingHint">applyDefaultAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#deselectEvent">deselectEvent</a></b>(bool *<i>selectionStateChanged</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#draw">draw</a></b>(QCPPainter *<i>painter</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCP::Interaction </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#selectionCategory">selectionCategory</a></b>() const</td></tr>
+</table></div>
+<ul>
+<li class="fn">2 protected functions inherited from <a href="qcplayoutelement.html#protected-functions">QCPLayoutElement</a></li>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#mFont-var">mFont</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPLegend *</td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#mParentLegend-var">mParentLegend</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#mSelectable-var">mSelectable</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#mSelected-var">mSelected</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#mSelectedFont-var">mSelectedFont</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#mSelectedTextColor-var">mSelectedTextColor</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpabstractlegenditem.html#mTextColor-var">mTextColor</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPAbstractLegendItem-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The abstract base class for all entries in a <a href="qcplegend.html">QCPLegend</a>.</p>
+<p>It defines a very basic interface for entries in a <a href="qcplegend.html">QCPLegend</a>. For representing plottables in the legend, the subclass <b class="redFont"><code>\ref</code></b> <a href="qcpplottablelegenditem.html">QCPPlottableLegendItem</a> is more suitable.</p>
+<p>Only derive directly from this class when you need absolute freedom (e.g&#x2e; a custom legend entry that's not even associated with a plottable).</p>
+<p>You must implement the following pure virtual functions:</p>
+<p><b class="redFont"><code>\ref</code></b>draw (from <a href="qcplayerable.html">QCPLayerable</a>)</p>
+<p>You inherit the following members you may use: &lt;table&gt; &lt;tr&gt; &lt;td&gt;<a href="qcplegend.html">QCPLegend</a> *<b>mParentLegend&lt;/td&gt;</b> &lt;td&gt;A pointer to the parent <a href="qcplegend.html">QCPLegend</a>.&lt;/td&gt; &lt;/tr&gt;&lt;tr&gt; &lt;td&gt;QFont <b>mFont&lt;/td&gt;</b> &lt;td&gt;The generic font of the item. You should use this font for all or at least the most prominent text of the item.&lt;/td&gt; &lt;/tr&gt; &lt;/table&gt;</p>
+</div>
+<!-- @@@QCPAbstractLegendItem -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$applyDefaultAntialiasingHint[overload1]$$$applyDefaultAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyDefaultAntialiasingHint"><a name="applyDefaultAntialiasingHint"></a><code>[virtual protected] </code><span class="type">void</span> QCPAbstractLegendItem::<span class="name">applyDefaultAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyDefaultAntialiasingHint -->
+<!-- $$$clipRect[overload1]$$$clipRect -->
+<h3 class="fn" id="clipRect"><a name="clipRect"></a><code>[protected] </code><span class="type">int</span> QCPAbstractLegendItem::<span class="name">clipRect</span>() const</h3>
+<!-- @@@clipRect -->
+<!-- $$$deselectEvent[overload1]$$$deselectEventbool* -->
+<h3 class="fn" id="deselectEvent"><a name="deselectEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPAbstractLegendItem::<span class="name">deselectEvent</span>(<span class="type">bool</span> *<i>selectionStateChanged</i>)</h3>
+<!-- @@@deselectEvent -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[pure virtual protected] </code><span class="type">void</span> QCPAbstractLegendItem::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$selectEvent[overload1]$$$selectEventint*boolconstint&bool* -->
+<h3 class="fn" id="selectEvent"><a name="selectEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPAbstractLegendItem::<span class="name">selectEvent</span>(<span class="type">int</span> *<i>event</i>, <span class="type">bool</span> <i>additive</i>, const <span class="type">int</span> &amp;<i>details</i>, <span class="type">bool</span> *<i>selectionStateChanged</i>)</h3>
+<!-- @@@selectEvent -->
+<!-- $$$selectionCategory[overload1]$$$selectionCategory -->
+<h3 class="fn" id="selectionCategory"><a name="selectionCategory"></a><code>[virtual protected] </code><span class="type"><a href="qcp-sub-enoseannotator.html#Interaction-enum">QCP::Interaction</a></span> QCPAbstractLegendItem::<span class="name">selectionCategory</span>() const</h3>
+<!-- @@@selectionCategory -->
+</div>
+</body>
+</html>

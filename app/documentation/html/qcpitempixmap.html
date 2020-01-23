@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPItemPixmap Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPItemPixmap</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-types">Protected Types</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPItemPixmap Class</h1>
+<!-- $$$QCPItemPixmap-brief -->
+<p>An arbitrary pixmap. <a href="#details">More...</a></p>
+<!-- @@@QCPItemPixmap -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPItemPixmap&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcpabstractitem.html">QCPAbstractItem</a></td></tr></table></div><ul>
+<li><a href="qcpitempixmap-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-types"></a>
+<h2 id="protected-types">Protected Types</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> enum </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#AnchorIndex-enum">AnchorIndex</a></b> { aiTop, aiTopRight, aiRight, aiBottom, aiBottomLeft, aiLeft }</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#anchorPixelPosition">anchorPixelPosition</a></b>(<i>int</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#getFinalRect">getFinalRect</a></b>(<i>bool *</i>, <i>bool *</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#mainPen">mainPen</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#updateScaledPixmap">updateScaledPixmap</a></b>(int <i>finalRect</i> = ..., bool <i>flipHorz</i> = false, bool <i>flipVert</i> = false)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+</table></div>
+<ul>
+<li class="fn">10 protected functions inherited from <a href="qcpabstractitem.html#protected-functions">QCPAbstractItem</a></li>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#mAspectRatioMode-var">mAspectRatioMode</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#mPen-var">mPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#mPixmap-var">mPixmap</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#mScaled-var">mScaled</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#mScaledPixmap-var">mScaledPixmap</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#mScaledPixmapInvalidated-var">mScaledPixmapInvalidated</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#mSelectedPen-var">mSelectedPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitempixmap.html#mTransformationMode-var">mTransformationMode</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPItemPixmap-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>An arbitrary pixmap</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>It has two positions, <i>topLeft</i> and <i>bottomRight</i>, which define the rectangle the pixmap will be drawn in. Depending on the scale setting (<b class="redFont"><code>\ref</code></b> setScaled), the pixmap will be either scaled to fit the rectangle or be drawn aligned to the topLeft position.</p>
+<p>If scaling is enabled and <i>topLeft</i> is further to the bottom/right than <i>bottomRight</i> (as shown on the right side of the example image), the pixmap will be flipped in the respective orientations.</p>
+</div>
+<!-- @@@QCPItemPixmap -->
+<div class="types">
+<h2>Member Type Documentation</h2>
+<!-- $$$AnchorIndex$$$aiTop$$$aiTopRight$$$aiRight$$$aiBottom$$$aiBottomLeft$$$aiLeft -->
+<h3 class="fn" id="AnchorIndex-enum"><a name="AnchorIndex-enum"></a>enum QCPItemPixmap::<span class="name">AnchorIndex</span></h3>
+<!-- @@@AnchorIndex -->
+</div>
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$anchorPixelPosition[overload1]$$$anchorPixelPositionint -->
+<h3 class="fn" id="anchorPixelPosition"><a name="anchorPixelPosition"></a><code>[protected] </code><span class="type">int</span> QCPItemPixmap::<span class="name">anchorPixelPosition</span>(<i>int</i>) const</h3>
+<!-- @@@anchorPixelPosition -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCPItemPixmap::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$getFinalRect[overload1]$$$getFinalRectbool*bool* -->
+<h3 class="fn" id="getFinalRect"><a name="getFinalRect"></a><code>[protected] </code><span class="type">int</span> QCPItemPixmap::<span class="name">getFinalRect</span>(<i>bool *</i>, <i>bool *</i>) const</h3>
+<!-- @@@getFinalRect -->
+<!-- $$$mainPen[overload1]$$$mainPen -->
+<h3 class="fn" id="mainPen"><a name="mainPen"></a><code>[protected] </code><span class="type">int</span> QCPItemPixmap::<span class="name">mainPen</span>() const</h3>
+<!-- @@@mainPen -->
+<!-- $$$updateScaledPixmap[overload1]$$$updateScaledPixmapintboolbool -->
+<h3 class="fn" id="updateScaledPixmap"><a name="updateScaledPixmap"></a><code>[protected] </code><span class="type">void</span> QCPItemPixmap::<span class="name">updateScaledPixmap</span>(<span class="type">int</span> <i>finalRect</i> = ..., <span class="type">bool</span> <i>flipHorz</i> = false, <span class="type">bool</span> <i>flipVert</i> = false)</h3>
+<!-- @@@updateScaledPixmap -->
+</div>
+</body>
+</html>

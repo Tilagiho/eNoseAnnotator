@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPItemTracer Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPItemTracer</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPItemTracer Class</h1>
+<!-- $$$QCPItemTracer-brief -->
+<p>Item that sticks to <a href="qcpgraph.html">QCPGraph</a> data points. <a href="#details">More...</a></p>
+<!-- @@@QCPItemTracer -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPItemTracer&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcpabstractitem.html">QCPAbstractItem</a></td></tr></table></div><ul>
+<li><a href="qcpitemtracer-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mainBrush">mainBrush</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mainPen">mainPen</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+</table></div>
+<ul>
+<li class="fn">10 protected functions inherited from <a href="qcpabstractitem.html#protected-functions">QCPAbstractItem</a></li>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mBrush-var">mBrush</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPGraph *</td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mGraph-var">mGraph</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mGraphKey-var">mGraphKey</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mInterpolating-var">mInterpolating</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mPen-var">mPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mSelectedBrush-var">mSelectedBrush</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mSelectedPen-var">mSelectedPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mSize-var">mSize</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemtracer.html#mStyle-var">mStyle</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPItemTracer-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Item that sticks to <a href="qcpgraph.html">QCPGraph</a> data points</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>The tracer can be connected with a <a href="qcpgraph.html">QCPGraph</a> via <b class="redFont"><code>\ref</code></b> setGraph. Then it will automatically adopt the coordinate axes of the graph and update its <i>position</i> to be on the graph's data. This means the key stays controllable via <b class="redFont"><code>\ref</code></b> setGraphKey, but the value will follow the graph data. If a <a href="qcpgraph.html">QCPGraph</a> is connected, note that setting the coordinates of the tracer item directly via <i>position</i> will have no effect because they will be overriden in the next redraw (this is when the coordinate update happens).</p>
+<p>If the specified key in <b class="redFont"><code>\ref</code></b> setGraphKey is outside the key bounds of the graph, the tracer will stay at the corresponding end of the graph.</p>
+<p>With <b class="redFont"><code>\ref</code></b> setInterpolating you may specify whether the tracer may only stay exactly on data points or whether it interpolates data points linearly, if given a key that lies between two data points of the graph.</p>
+<p>The tracer has different visual styles, see <b class="redFont"><code>\ref</code></b> setStyle. It is also possible to make the tracer have no own visual appearance (set the style to <b class="redFont"><code>\ref</code></b> tsNone), and just connect other item positions to the tracer <i>position</i> (used as an anchor) via <b class="redFont"><code>\ref</code></b> QCPItemPosition::setParentAnchor.</p>
+<p><b>Note: </b>The tracer position is only automatically updated upon redraws. So when the data of the graph changes and immediately afterwards (without a redraw) the position coordinates of the tracer are retrieved, they will not reflect the updated data of the graph. In this case <b class="redFont"><code>\ref</code></b> updatePosition must be called manually, prior to reading the tracer coordinates.</p></div>
+<!-- @@@QCPItemTracer -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCPItemTracer::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$mainBrush[overload1]$$$mainBrush -->
+<h3 class="fn" id="mainBrush"><a name="mainBrush"></a><code>[protected] </code><span class="type">int</span> QCPItemTracer::<span class="name">mainBrush</span>() const</h3>
+<!-- @@@mainBrush -->
+<!-- $$$mainPen[overload1]$$$mainPen -->
+<h3 class="fn" id="mainPen"><a name="mainPen"></a><code>[protected] </code><span class="type">int</span> QCPItemTracer::<span class="name">mainPen</span>() const</h3>
+<!-- @@@mainPen -->
+</div>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPScatterStyle Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPScatterStyle</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPScatterStyle Class</h1>
+<!-- $$$QCPScatterStyle-brief -->
+<p>Represents the visual appearance of scatter points. <a href="#details">More...</a></p>
+<!-- @@@QCPScatterStyle -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPScatterStyle&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcpscatterstyle-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpscatterstyle.html#mBrush-var">mBrush</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpscatterstyle.html#mCustomPath-var">mCustomPath</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpscatterstyle.html#mPen-var">mPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpscatterstyle.html#mPenDefined-var">mPenDefined</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpscatterstyle.html#mPixmap-var">mPixmap</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpscatterstyle.html#mShape-var">mShape</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpscatterstyle.html#mSize-var">mSize</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPScatterStyle-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Represents the visual appearance of scatter points</p>
+<p>This class holds information about shape, color and size of scatter points. In plottables like <a href="qcpgraph.html">QCPGraph</a> it is used to store how scatter points shall be drawn. For example, <b class="redFont"><code>\ref</code></b> QCPGraph::setScatterStyle takes a <a href="qcpscatterstyle.html">QCPScatterStyle</a> instance.</p>
+<p>A scatter style consists of a shape (<b class="redFont"><code>\ref</code></b> setShape), a line color (<b class="redFont"><code>\ref</code></b> setPen) and possibly a fill (<b class="redFont"><code>\ref</code></b> setBrush), if the shape provides a fillable area. Further, the size of the shape can be controlled with <b class="redFont"><code>\ref</code></b> setSize.</p>
+<p><b class="redFont"><code>\section</code></b><a href="qcpscatterstyle.html">QCPScatterStyle</a>-defining Specifying a scatter style</p>
+<p>You can set all these configurations either by calling the respective functions on an instance:</p>
+<pre class="cpp"></pre>
+<p>Or you can use one of the various constructors that take different parameter combinations, making it easy to specify a scatter style in a single call, like so:</p>
+<pre class="cpp"></pre>
+<p><b class="redFont"><code>\section</code></b><a href="qcpscatterstyle.html">QCPScatterStyle</a>-undefinedpen Leaving the color/pen up to the plottable</p>
+<p>There are two constructors which leave the pen undefined: <b class="redFont"><code>\ref</code></b> QCPScatterStyle() and <b class="redFont"><code>\ref</code></b> <a href="qcpscatterstyle.html">QCPScatterStyle</a>(ScatterShape shape, double size). If those constructors are used, a call to <b class="redFont"><code>\ref</code></b> isPenDefined will return false. It leads to scatter points that inherit the pen from the plottable that uses the scatter style. Thus, if such a scatter style is passed to <a href="qcpgraph.html">QCPGraph</a>, the line color of the graph (<b class="redFont"><code>\ref</code></b> QCPGraph::setPen) will be used by the scatter points. This makes it very convenient to set up typical scatter settings:</p>
+<pre class="cpp"></pre>
+<p>Notice that it wasn't even necessary to explicitly call a <a href="qcpscatterstyle.html">QCPScatterStyle</a> constructor. This works because <a href="qcpscatterstyle.html">QCPScatterStyle</a> provides a constructor that can transform a <b class="redFont"><code>\ref</code></b> ScatterShape directly into a <a href="qcpscatterstyle.html">QCPScatterStyle</a> instance (that's the <b class="redFont"><code>\ref</code></b> <a href="qcpscatterstyle.html">QCPScatterStyle</a>(ScatterShape shape, double size) constructor with a default for <i>size</i>). In those cases, C++ allows directly supplying a <b class="redFont"><code>\ref</code></b> ScatterShape, where actually a <a href="qcpscatterstyle.html">QCPScatterStyle</a> is expected.</p>
+<p><b class="redFont"><code>\section</code></b><a href="qcpscatterstyle.html">QCPScatterStyle</a>-custompath-and-pixmap Custom shapes and pixmaps</p>
+<p><a href="qcpscatterstyle.html">QCPScatterStyle</a> supports drawing custom shapes and arbitrary pixmaps as scatter points.</p>
+<p>For custom shapes, you can provide a QPainterPath with the desired shape to the <b class="redFont"><code>\ref</code></b> setCustomPath function or call the constructor that takes a painter path. The scatter shape will automatically be set to <b class="redFont"><code>\ref</code></b> ssCustom.</p>
+<p>For pixmaps, you call <b class="redFont"><code>\ref</code></b> setPixmap with the desired QPixmap. Alternatively you can use the constructor that takes a QPixmap. The scatter shape will automatically be set to <b class="redFont"><code>\ref</code></b> ssPixmap. Note that <b class="redFont"><code>\ref</code></b> setSize does not influence the appearance of the pixmap.</p>
+</div>
+<!-- @@@QCPScatterStyle -->
+</body>
+</html>

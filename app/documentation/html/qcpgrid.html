@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPGrid Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPGrid</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPGrid Class</h1>
+<!-- $$$QCPGrid-brief -->
+<p>Responsible for drawing the grid of a <a href="qcpaxis.html">QCPAxis</a>. <a href="#details">More...</a></p>
+<!-- @@@QCPGrid -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPGrid&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcplayerable.html">QCPLayerable</a></td></tr></table></div><ul>
+<li><a href="qcpgrid-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#drawGridLines">drawGridLines</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#drawSubGridLines">drawSubGridLines</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#applyDefaultAntialiasingHint">applyDefaultAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+</table></div>
+<ul>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#mAntialiasedSubGrid-var">mAntialiasedSubGrid</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#mAntialiasedZeroLine-var">mAntialiasedZeroLine</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPAxis *</td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#mParentAxis-var">mParentAxis</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#mPen-var">mPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#mSubGridPen-var">mSubGridPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#mSubGridVisible-var">mSubGridVisible</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgrid.html#mZeroLinePen-var">mZeroLinePen</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPGrid-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Responsible for drawing the grid of a <a href="qcpaxis.html">QCPAxis</a>.</p>
+<p>This class is tightly bound to <a href="qcpaxis.html">QCPAxis</a>. Every axis owns a grid instance and uses it to draw the grid lines, sub grid lines and zero-line. You can interact with the grid of an axis via <b class="redFont"><code>\ref</code></b> QCPAxis::grid. Normally, you don't need to create an instance of <a href="qcpgrid.html">QCPGrid</a> yourself.</p>
+<p>The axis and grid drawing was split into two classes to allow them to be placed on different layers (both <a href="qcpaxis.html">QCPAxis</a> and <a href="qcpgrid.html">QCPGrid</a> inherit from <a href="qcplayerable.html">QCPLayerable</a>). Thus it is possible to have the grid in the background and the axes in the foreground, and any plottables/items in between. This described situation is the default setup, see the <a href="qcplayer.html">QCPLayer</a> documentation.</p>
+</div>
+<!-- @@@QCPGrid -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$applyDefaultAntialiasingHint[overload1]$$$applyDefaultAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyDefaultAntialiasingHint"><a name="applyDefaultAntialiasingHint"></a><code>[virtual protected] </code><span class="type">void</span> QCPGrid::<span class="name">applyDefaultAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyDefaultAntialiasingHint -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCPGrid::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$drawGridLines[overload1]$$$drawGridLinesQCPPainter* -->
+<h3 class="fn" id="drawGridLines"><a name="drawGridLines"></a><code>[protected] </code><span class="type">void</span> QCPGrid::<span class="name">drawGridLines</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@drawGridLines -->
+<!-- $$$drawSubGridLines[overload1]$$$drawSubGridLinesQCPPainter* -->
+<h3 class="fn" id="drawSubGridLines"><a name="drawSubGridLines"></a><code>[protected] </code><span class="type">void</span> QCPGrid::<span class="name">drawSubGridLines</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@drawSubGridLines -->
+</div>
+</body>
+</html>

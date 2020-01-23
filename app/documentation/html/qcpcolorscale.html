@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPColorScale Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPColorScale</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPColorScale Class</h1>
+<!-- $$$QCPColorScale-brief -->
+<p>A color scale for use with color coding data such as <a href="qcpcolormap.html">QCPColorMap</a>. <a href="#details">More...</a></p>
+<!-- @@@QCPColorScale -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPColorScale&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcplayoutelement.html">QCPLayoutElement</a></td></tr></table></div><ul>
+<li><a href="qcpcolorscale-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#mouseMoveEvent">mouseMoveEvent</a></b>(int *<i>event</i>, const int &amp;<i>startPos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#mousePressEvent">mousePressEvent</a></b>(int *<i>event</i>, const int &amp;<i>details</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(int *<i>event</i>, const int &amp;<i>startPos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#wheelEvent">wheelEvent</a></b>(int *<i>event</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#applyDefaultAntialiasingHint">applyDefaultAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+</table></div>
+<ul>
+<li class="fn">2 protected functions inherited from <a href="qcplayoutelement.html#protected-functions">QCPLayoutElement</a></li>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#mAxisRect-var">mAxisRect</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#mBarWidth-var">mBarWidth</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#mColorAxis-var">mColorAxis</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#mDataRange-var">mDataRange</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#mDataScaleType-var">mDataScaleType</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPColorGradient </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#mGradient-var">mGradient</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcolorscale.html#mType-var">mType</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPColorScale-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A color scale for use with color coding data such as <a href="qcpcolormap.html">QCPColorMap</a></p>
+<p>This layout element can be placed on the plot to correlate a color gradient with data values. It is usually used in combination with one or multiple <b class="redFont"><code>\ref</code></b> <a href="qcpcolormap.html">QCPColorMap</a> &quot;QCPColorMaps&quot;.</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>The color scale can be either horizontal or vertical, as shown in the image above. The orientation and the side where the numbers appear is controlled with <b class="redFont"><code>\ref</code></b> setType.</p>
+<p>Use <b class="redFont"><code>\ref</code></b> QCPColorMap::setColorScale to connect a color map with a color scale. Once they are connected, they share their gradient, data range and data scale type (<b class="redFont"><code>\ref</code></b> setGradient, <b class="redFont"><code>\ref</code></b> setDataRange, <b class="redFont"><code>\ref</code></b> setDataScaleType). Multiple color maps may be associated with a single color scale, to make them all synchronize these properties.</p>
+<p>To have finer control over the number display and axis behaviour, you can directly access the <b class="redFont"><code>\ref</code></b> axis. See the documentation of <a href="qcpaxis.html">QCPAxis</a> for details about configuring axes. For example, if you want to change the number of automatically generated ticks, call</p>
+<pre class="cpp"></pre>
+<p>Placing a color scale next to the main axis rect works like with any other layout element:</p>
+<pre class="cpp"></pre>
+<p>In this case we have placed it to the right of the default axis rect, so it wasn't necessary to call <b class="redFont"><code>\ref</code></b> setType, since <b class="redFont"><code>\ref</code></b> QCPAxis::atRight is already the default. The text next to the color scale can be set with <b class="redFont"><code>\ref</code></b> setLabel.</p>
+<p>For optimum appearance (like in the image above), it may be desirable to line up the axis rect and the borders of the color scale. Use a <b class="redFont"><code>\ref</code></b> <a href="qcpmargingroup.html">QCPMarginGroup</a> to achieve this:</p>
+<pre class="cpp"></pre>
+<p>Color scales are initialized with a non-zero minimum top and bottom margin (<b class="redFont"><code>\ref</code></b> setMinimumMargins), because vertical color scales are most common and the minimum top/bottom margin makes sure it keeps some distance to the top/bottom widget border. So if you change to a horizontal color scale by setting <b class="redFont"><code>\ref</code></b> setType to <b class="redFont"><code>\ref</code></b> QCPAxis::atBottom or <b class="redFont"><code>\ref</code></b> QCPAxis::atTop, you might want to also change the minimum margins accordingly, e.g&#x2e; &lt;tt&gt;setMinimumMargins(QMargins(6, 0, 6, 0))&lt;/tt&gt;.</p>
+</div>
+<!-- @@@QCPColorScale -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$applyDefaultAntialiasingHint[overload1]$$$applyDefaultAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyDefaultAntialiasingHint"><a name="applyDefaultAntialiasingHint"></a><code>[virtual protected] </code><span class="type">void</span> QCPColorScale::<span class="name">applyDefaultAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyDefaultAntialiasingHint -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventint*constint& -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPColorScale::<span class="name">mouseMoveEvent</span>(<span class="type">int</span> *<i>event</i>, const <span class="type">int</span> &amp;<i>startPos</i>)</h3>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventint*constint& -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPColorScale::<span class="name">mousePressEvent</span>(<span class="type">int</span> *<i>event</i>, const <span class="type">int</span> &amp;<i>details</i>)</h3>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventint*constint& -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPColorScale::<span class="name">mouseReleaseEvent</span>(<span class="type">int</span> *<i>event</i>, const <span class="type">int</span> &amp;<i>startPos</i>)</h3>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$wheelEvent[overload1]$$$wheelEventint* -->
+<h3 class="fn" id="wheelEvent"><a name="wheelEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPColorScale::<span class="name">wheelEvent</span>(<span class="type">int</span> *<i>event</i>)</h3>
+<!-- @@@wheelEvent -->
+</div>
+</body>
+</html>

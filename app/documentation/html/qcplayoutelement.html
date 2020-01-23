@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPLayoutElement Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPLayoutElement</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPLayoutElement Class</h1>
+<!-- $$$QCPLayoutElement-brief -->
+<p>The abstract base class for all objects that form <b class="redFont"><code>\ref</code></b> thelayoutsystem &quot;the layout system&quot;. <a href="#details">More...</a></p>
+<!-- @@@QCPLayoutElement -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPLayoutElement&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcplayerable.html">QCPLayerable</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qcpabstractlegenditem.html">QCPAbstractLegendItem</a>, <a href="qcpcolorscale.html">QCPColorScale</a>, and <a href="qcplayout.html">QCPLayout</a></p>
+</td></tr></table></div><ul>
+<li><a href="qcplayoutelement-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#applyDefaultAntialiasingHint">applyDefaultAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+</table></div>
+<ul>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#mAutoMargins-var">mAutoMargins</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#mMarginGroups-var">mMarginGroups</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#mMargins-var">mMargins</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#mMaximumSize-var">mMaximumSize</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#mMinimumMargins-var">mMinimumMargins</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#mMinimumSize-var">mMinimumSize</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#mOuterRect-var">mOuterRect</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPLayout *</td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#mParentLayout-var">mParentLayout</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#mRect-var">mRect</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutelement.html#mSizeConstraintRect-var">mSizeConstraintRect</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPLayoutElement-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The abstract base class for all objects that form <b class="redFont"><code>\ref</code></b> thelayoutsystem &quot;the layout system&quot;.</p>
+<p>This is an abstract base class. As such, it can't be instantiated directly, rather use one of its subclasses.</p>
+<p>A Layout element is a rectangular object which can be placed in layouts. It has an outer rect (QCPLayoutElement::outerRect) and an inner rect (<b class="redFont"><code>\ref</code></b> QCPLayoutElement::rect). The difference between outer and inner rect is called its margin. The margin can either be set to automatic or manual (<b class="redFont"><code>\ref</code></b> setAutoMargins) on a per-side basis. If a side is set to manual, that margin can be set explicitly with <b class="redFont"><code>\ref</code></b> setMargins and will stay fixed at that value. If it's set to automatic, the layout element subclass will control the value itself (via <b class="redFont"><code>\ref</code></b> calculateAutoMargin).</p>
+<p>Layout elements can be placed in layouts (base class <a href="qcplayout.html">QCPLayout</a>) like <a href="qcplayoutgrid.html">QCPLayoutGrid</a>. The top level layout is reachable via <b class="redFont"><code>\ref</code></b> QCustomPlot::plotLayout, and is a <b class="redFont"><code>\ref</code></b> <a href="qcplayoutgrid.html">QCPLayoutGrid</a>. Since <b class="redFont"><code>\ref</code></b> <a href="qcplayout.html">QCPLayout</a> itself derives from <b class="redFont"><code>\ref</code></b> <a href="qcplayoutelement.html">QCPLayoutElement</a>, layouts can be nested.</p>
+<p>Thus in <a href="qcustomplot.html">QCustomPlot</a> one can divide layout elements into two categories: The ones that are invisible by themselves, because they don't draw anything. Their only purpose is to manage the position and size of other layout elements. This category of layout elements usually use <a href="qcplayout.html">QCPLayout</a> as base class. Then there is the category of layout elements which actually draw something. For example, QCPAxisRect, <a href="qcplegend.html">QCPLegend</a> and QCPTextElement are of this category. This does not necessarily mean that the latter category can't have child layout elements. <a href="qcplegend.html">QCPLegend</a> for instance, actually derives from <a href="qcplayoutgrid.html">QCPLayoutGrid</a> and the individual legend items are child layout elements in the grid layout.</p>
+</div>
+<!-- @@@QCPLayoutElement -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$applyDefaultAntialiasingHint[overload1]$$$applyDefaultAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyDefaultAntialiasingHint"><a name="applyDefaultAntialiasingHint"></a><code>[virtual protected] </code><span class="type">void</span> QCPLayoutElement::<span class="name">applyDefaultAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyDefaultAntialiasingHint -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCPLayoutElement::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+</div>
+</body>
+</html>

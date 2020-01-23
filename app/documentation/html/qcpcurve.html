@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPCurve Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPCurve</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPCurve Class</h1>
+<!-- $$$QCPCurve-brief -->
+<p>A plottable representing a parametric curve in a plot. <a href="#details">More...</a></p>
+<!-- @@@QCPCurve -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPCurve&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcpcurve-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#drawCurveLine">drawCurveLine</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>lines</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#drawLegendIcon">drawLegendIcon</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>rect</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#drawScatterPlot">drawScatterPlot</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>points</i>, const QCPScatterStyle &amp;<i>style</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#getCurveLines">getCurveLines</a></b>(int *<i>lines</i>, const QCPDataRange &amp;<i>dataRange</i>, double <i>penWidth</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#getOptimizedCornerPoints">getOptimizedCornerPoints</a></b>(<i>int</i>, <i>int</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#getOptimizedPoint">getOptimizedPoint</a></b>(<i>int</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#getRegion">getRegion</a></b>(double <i>key</i>, double <i>value</i>, double <i>keyMin</i>, double <i>valueMax</i>, double <i>keyMax</i>, double <i>valueMin</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#getScatters">getScatters</a></b>(int *<i>scatters</i>, const QCPDataRange &amp;<i>dataRange</i>, double <i>scatterWidth</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#getTraverse">getTraverse</a></b>(double <i>prevKey</i>, double <i>prevValue</i>, double <i>key</i>, double <i>value</i>, double <i>keyMin</i>, double <i>valueMax</i>, double <i>keyMax</i>, double <i>valueMin</i>, int &amp;<i>crossA</i>, int &amp;<i>crossB</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#getTraverseCornerPoints">getTraverseCornerPoints</a></b>(int <i>prevRegion</i>, int <i>currentRegion</i>, double <i>keyMin</i>, double <i>valueMax</i>, double <i>keyMax</i>, double <i>valueMin</i>, int &amp;<i>beforeTraverse</i>, int &amp;<i>afterTraverse</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#mayTraverse">mayTraverse</a></b>(int <i>prevRegion</i>, int <i>currentRegion</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#pointDistance">pointDistance</a></b>(const int &amp;<i>pixelPoint</i>, int &amp;<i>closestData</i>) const</td></tr>
+</table></div>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#mLineStyle-var">mLineStyle</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#mScatterSkip-var">mScatterSkip</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPScatterStyle </td><td class="memItemRight bottomAlign"><b><a href="qcpcurve.html#mScatterStyle-var">mScatterStyle</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPCurve-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A plottable representing a parametric curve in a plot.</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>Unlike <a href="qcpgraph.html">QCPGraph</a>, plottables of this type may have multiple points with the same key coordinate, so their visual representation can have <i>loops</i>. This is realized by introducing a third coordinate <i>t</i>, which defines the order of the points described by the other two coordinates <i>x</i> and <i>y</i>.</p>
+<p>To plot data, assign it with the <b class="redFont"><code>\ref</code></b> setData or <b class="redFont"><code>\ref</code></b> addData functions. Alternatively, you can also access and modify the curve's data via the <b class="redFont"><code>\ref</code></b> data method, which returns a pointer to the internal <b class="redFont"><code>\ref</code></b> QCPCurveDataContainer.</p>
+<p>Gaps in the curve can be created by adding data points with NaN as key and value (&lt;tt&gt;qQNaN()&lt;/tt&gt; or &lt;tt&gt;std::numeric_limits&lt;double&gt;::quiet_NaN()&lt;/tt&gt;) in between the two data points that shall be separated.</p>
+<p><b class="redFont"><code>\section</code></b>qcpcurve-appearance Changing the appearance</p>
+<p>The appearance of the curve is determined by the pen and the brush (<b class="redFont"><code>\ref</code></b> setPen, <b class="redFont"><code>\ref</code></b> setBrush).</p>
+<p><b class="redFont"><code>\section</code></b>qcpcurve-usage Usage</p>
+<p>Like all data representing objects in <a href="qcustomplot.html">QCustomPlot</a>, the <a href="qcpcurve.html">QCPCurve</a> is a plottable (<a href="qcpabstractplottable.html">QCPAbstractPlottable</a>). So the plottable-interface of <a href="qcustomplot.html">QCustomPlot</a> applies (QCustomPlot::plottable, QCustomPlot::removePlottable, etc.)</p>
+<p>Usually, you first create an instance:</p>
+<pre class="cpp"></pre>
+<p>which registers it with the <a href="qcustomplot.html">QCustomPlot</a> instance of the passed axes. Note that this <a href="qcustomplot.html">QCustomPlot</a> instance takes ownership of the plottable, so do not delete it manually but use QCustomPlot::removePlottable() instead. The newly created plottable can be modified, e.g&#x2e;:</p>
+<pre class="cpp"></pre>
+</div>
+<!-- @@@QCPCurve -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCPCurve::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$drawCurveLine[overload1]$$$drawCurveLineQCPPainter*constint& -->
+<h3 class="fn" id="drawCurveLine"><a name="drawCurveLine"></a><code>[virtual protected] </code><span class="type">void</span> QCPCurve::<span class="name">drawCurveLine</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>lines</i>) const</h3>
+<!-- @@@drawCurveLine -->
+<!-- $$$drawLegendIcon[overload1]$$$drawLegendIconQCPPainter*constint& -->
+<h3 class="fn" id="drawLegendIcon"><a name="drawLegendIcon"></a><code>[virtual protected] </code><span class="type">void</span> QCPCurve::<span class="name">drawLegendIcon</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>rect</i>) const</h3>
+<!-- @@@drawLegendIcon -->
+<!-- $$$drawScatterPlot[overload1]$$$drawScatterPlotQCPPainter*constint&constQCPScatterStyle& -->
+<h3 class="fn" id="drawScatterPlot"><a name="drawScatterPlot"></a><code>[virtual protected] </code><span class="type">void</span> QCPCurve::<span class="name">drawScatterPlot</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>points</i>, const <span class="type"><a href="qcpscatterstyle.html">QCPScatterStyle</a></span> &amp;<i>style</i>) const</h3>
+<!-- @@@drawScatterPlot -->
+<!-- $$$getCurveLines[overload1]$$$getCurveLinesint*constQCPDataRange&double -->
+<h3 class="fn" id="getCurveLines"><a name="getCurveLines"></a><code>[protected] </code><span class="type">void</span> QCPCurve::<span class="name">getCurveLines</span>(<span class="type">int</span> *<i>lines</i>, const <span class="type"><a href="qcpdatarange.html">QCPDataRange</a></span> &amp;<i>dataRange</i>, <span class="type">double</span> <i>penWidth</i>) const</h3>
+<!-- @@@getCurveLines -->
+<!-- $$$getOptimizedCornerPoints[overload1]$$$getOptimizedCornerPointsintintdoubledoubledoubledoubledoubledoubledoubledouble -->
+<h3 class="fn" id="getOptimizedCornerPoints"><a name="getOptimizedCornerPoints"></a><code>[protected] </code><span class="type">int</span> QCPCurve::<span class="name">getOptimizedCornerPoints</span>(<i>int</i>, <i>int</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>) const</h3>
+<!-- @@@getOptimizedCornerPoints -->
+<!-- $$$getOptimizedPoint[overload1]$$$getOptimizedPointintdoubledoubledoubledoubledoubledoubledoubledouble -->
+<h3 class="fn" id="getOptimizedPoint"><a name="getOptimizedPoint"></a><code>[protected] </code><span class="type">int</span> QCPCurve::<span class="name">getOptimizedPoint</span>(<i>int</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>, <i>double</i>) const</h3>
+<!-- @@@getOptimizedPoint -->
+<!-- $$$getRegion[overload1]$$$getRegiondoubledoubledoubledoubledoubledouble -->
+<h3 class="fn" id="getRegion"><a name="getRegion"></a><code>[protected] </code><span class="type">int</span> QCPCurve::<span class="name">getRegion</span>(<span class="type">double</span> <i>key</i>, <span class="type">double</span> <i>value</i>, <span class="type">double</span> <i>keyMin</i>, <span class="type">double</span> <i>valueMax</i>, <span class="type">double</span> <i>keyMax</i>, <span class="type">double</span> <i>valueMin</i>) const</h3>
+<!-- @@@getRegion -->
+<!-- $$$getScatters[overload1]$$$getScattersint*constQCPDataRange&double -->
+<h3 class="fn" id="getScatters"><a name="getScatters"></a><code>[protected] </code><span class="type">void</span> QCPCurve::<span class="name">getScatters</span>(<span class="type">int</span> *<i>scatters</i>, const <span class="type"><a href="qcpdatarange.html">QCPDataRange</a></span> &amp;<i>dataRange</i>, <span class="type">double</span> <i>scatterWidth</i>) const</h3>
+<!-- @@@getScatters -->
+<!-- $$$getTraverse[overload1]$$$getTraversedoubledoubledoubledoubledoubledoubledoubledoubleint&int& -->
+<h3 class="fn" id="getTraverse"><a name="getTraverse"></a><code>[protected] </code><span class="type">bool</span> QCPCurve::<span class="name">getTraverse</span>(<span class="type">double</span> <i>prevKey</i>, <span class="type">double</span> <i>prevValue</i>, <span class="type">double</span> <i>key</i>, <span class="type">double</span> <i>value</i>, <span class="type">double</span> <i>keyMin</i>, <span class="type">double</span> <i>valueMax</i>, <span class="type">double</span> <i>keyMax</i>, <span class="type">double</span> <i>valueMin</i>, <span class="type">int</span> &amp;<i>crossA</i>, <span class="type">int</span> &amp;<i>crossB</i>) const</h3>
+<!-- @@@getTraverse -->
+<!-- $$$getTraverseCornerPoints[overload1]$$$getTraverseCornerPointsintintdoubledoubledoubledoubleint&int& -->
+<h3 class="fn" id="getTraverseCornerPoints"><a name="getTraverseCornerPoints"></a><code>[protected] </code><span class="type">void</span> QCPCurve::<span class="name">getTraverseCornerPoints</span>(<span class="type">int</span> <i>prevRegion</i>, <span class="type">int</span> <i>currentRegion</i>, <span class="type">double</span> <i>keyMin</i>, <span class="type">double</span> <i>valueMax</i>, <span class="type">double</span> <i>keyMax</i>, <span class="type">double</span> <i>valueMin</i>, <span class="type">int</span> &amp;<i>beforeTraverse</i>, <span class="type">int</span> &amp;<i>afterTraverse</i>) const</h3>
+<!-- @@@getTraverseCornerPoints -->
+<!-- $$$mayTraverse[overload1]$$$mayTraverseintint -->
+<h3 class="fn" id="mayTraverse"><a name="mayTraverse"></a><code>[protected] </code><span class="type">bool</span> QCPCurve::<span class="name">mayTraverse</span>(<span class="type">int</span> <i>prevRegion</i>, <span class="type">int</span> <i>currentRegion</i>) const</h3>
+<!-- @@@mayTraverse -->
+<!-- $$$pointDistance[overload1]$$$pointDistanceconstint&int& -->
+<h3 class="fn" id="pointDistance"><a name="pointDistance"></a><code>[protected] </code><span class="type">double</span> QCPCurve::<span class="name">pointDistance</span>(const <span class="type">int</span> &amp;<i>pixelPoint</i>, <span class="type">int</span> &amp;<i>closestData</i>) const</h3>
+<!-- @@@pointDistance -->
+</div>
+</body>
+</html>

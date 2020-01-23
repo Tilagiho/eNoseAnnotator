@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPPainter Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPPainter</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPPainter Class</h1>
+<!-- $$$QCPPainter-brief -->
+<p>QPainter subclass used internally. <a href="#details">More...</a></p>
+<!-- @@@QCPPainter -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPPainter&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcppainter-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcppainter.html#mAntialiasingStack-var">mAntialiasingStack</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcppainter.html#mIsAntialiasing-var">mIsAntialiasing</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcppainter.html#mModes-var">mModes</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPPainter-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>QPainter subclass used internally</p>
+<p>This QPainter subclass is used to provide some extended functionality e.g&#x2e; for tweaking position consistency between antialiased and non-antialiased painting. Further it provides workarounds for QPainter quirks.</p>
+<p><b>Warning:</b> This class intentionally hides non-virtual functions of QPainter, e.g&#x2e; setPen, save and restore. So while it is possible to pass a <a href="qcppainter.html">QCPPainter</a> instance to a function that expects a QPainter pointer, some of the workarounds and tweaks will be unavailable to the function (because it will call the base class implementations of the functions actually hidden by <a href="qcppainter.html">QCPPainter</a>).</p>
+</div>
+<!-- @@@QCPPainter -->
+</body>
+</html>

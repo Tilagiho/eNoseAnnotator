@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPLayoutGrid Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPLayoutGrid</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPLayoutGrid Class</h1>
+<!-- $$$QCPLayoutGrid-brief -->
+<p>A layout that arranges child elements in a grid. <a href="#details">More...</a></p>
+<!-- @@@QCPLayoutGrid -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPLayoutGrid&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcplayout.html">QCPLayout</a></td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qcplegend.html">QCPLegend</a></p>
+</td></tr></table></div><ul>
+<li><a href="qcplayoutgrid-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutgrid.html#getMaximumRowColSizes">getMaximumRowColSizes</a></b>(int *<i>maxColWidths</i>, int *<i>maxRowHeights</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutgrid.html#getMinimumRowColSizes">getMinimumRowColSizes</a></b>(int *<i>minColWidths</i>, int *<i>minRowHeights</i>) const</td></tr>
+</table></div>
+<ul>
+<li class="fn">2 protected functions inherited from <a href="qcplayout.html#protected-functions">QCPLayout</a></li>
+<li class="fn">2 protected functions inherited from <a href="qcplayoutelement.html#protected-functions">QCPLayoutElement</a></li>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutgrid.html#mColumnSpacing-var">mColumnSpacing</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutgrid.html#mColumnStretchFactors-var">mColumnStretchFactors</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutgrid.html#mFillOrder-var">mFillOrder</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutgrid.html#mRowSpacing-var">mRowSpacing</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutgrid.html#mRowStretchFactors-var">mRowStretchFactors</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayoutgrid.html#mWrap-var">mWrap</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPLayoutGrid-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A layout that arranges child elements in a grid</p>
+<p>Elements are laid out in a grid with configurable stretch factors (<b class="redFont"><code>\ref</code></b> setColumnStretchFactor, <b class="redFont"><code>\ref</code></b> setRowStretchFactor) and spacing (<b class="redFont"><code>\ref</code></b> setColumnSpacing, <b class="redFont"><code>\ref</code></b> setRowSpacing).</p>
+<p>Elements can be added to cells via <b class="redFont"><code>\ref</code></b> addElement. The grid is expanded if the specified row or column doesn't exist yet. Whether a cell contains a valid layout element can be checked with <b class="redFont"><code>\ref</code></b> hasElement, that element can be retrieved with <b class="redFont"><code>\ref</code></b> element. If rows and columns that only have empty cells shall be removed, call <b class="redFont"><code>\ref</code></b> simplify. Removal of elements is either done by just adding the element to a different layout or by using the <a href="qcplayout.html">QCPLayout</a> interface <b class="redFont"><code>\ref</code></b> take or <b class="redFont"><code>\ref</code></b> remove.</p>
+<p>If you use <b class="redFont"><code>\ref</code></b> addElement(<a href="qcplayoutelement.html">QCPLayoutElement</a>*) without explicit parameters for <i>row</i> and <i>column</i>, the grid layout will choose the position according to the current <b class="redFont"><code>\ref</code></b> setFillOrder and the wrapping (<b class="redFont"><code>\ref</code></b> setWrap).</p>
+<p>Row and column insertion can be performed with <b class="redFont"><code>\ref</code></b> insertRow and <b class="redFont"><code>\ref</code></b> insertColumn.</p>
+</div>
+<!-- @@@QCPLayoutGrid -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$getMaximumRowColSizes[overload1]$$$getMaximumRowColSizesint*int* -->
+<h3 class="fn" id="getMaximumRowColSizes"><a name="getMaximumRowColSizes"></a><code>[protected] </code><span class="type">void</span> QCPLayoutGrid::<span class="name">getMaximumRowColSizes</span>(<span class="type">int</span> *<i>maxColWidths</i>, <span class="type">int</span> *<i>maxRowHeights</i>) const</h3>
+<!-- @@@getMaximumRowColSizes -->
+<!-- $$$getMinimumRowColSizes[overload1]$$$getMinimumRowColSizesint*int* -->
+<h3 class="fn" id="getMinimumRowColSizes"><a name="getMinimumRowColSizes"></a><code>[protected] </code><span class="type">void</span> QCPLayoutGrid::<span class="name">getMinimumRowColSizes</span>(<span class="type">int</span> *<i>minColWidths</i>, <span class="type">int</span> *<i>minRowHeights</i>) const</h3>
+<!-- @@@getMinimumRowColSizes -->
+</div>
+</body>
+</html>

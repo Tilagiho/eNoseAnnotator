@@ -25,7 +25,7 @@ const QMap<uint, MVector> MeasurementData::getRelativeData()
     QMap<uint, MVector> relativeData;
 
     for (uint timestamp : data.keys())
-        relativeData[timestamp] = data[timestamp].toRelativeVector(getBaseLevel(timestamp));
+        relativeData[timestamp] = data[timestamp].getRelativeVector(getBaseLevel(timestamp));
 
     return relativeData;
 }
@@ -90,7 +90,7 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
     MVector deviationVector;
     MVector baseLevelVector = getBaseLevel(timestamp);
 
-    deviationVector = vector.toRelativeVector(baseLevelVector);
+    deviationVector = vector.getRelativeVector(baseLevelVector);
 
     // add data, update dataChanged
     data[timestamp] = vector;
@@ -887,7 +887,7 @@ const MVector MeasurementData::getSelectionVector(MultiMode mode)
             continue;
 
         // get relative selection vector
-        MVector vector = selectedData[timestamp].toRelativeVector(getBaseLevel(timestamp));
+        MVector vector = selectedData[timestamp].getRelativeVector(getBaseLevel(timestamp));
 
         // calculate average
         if (mode == MultiMode::Average)

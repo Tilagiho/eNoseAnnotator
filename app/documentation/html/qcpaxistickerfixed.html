@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPAxisTickerFixed Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPAxisTickerFixed</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPAxisTickerFixed Class</h1>
+<!-- $$$QCPAxisTickerFixed-brief -->
+<p>Specialized axis ticker with a fixed tick step. <a href="#details">More...</a></p>
+<!-- @@@QCPAxisTickerFixed -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPAxisTickerFixed&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcpaxisticker.html">QCPAxisTicker</a></td></tr></table></div><ul>
+<li><a href="qcpaxistickerfixed-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual double </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerfixed.html#getTickStep">getTickStep</a></b>(const QCPRange &amp;<i>range</i>)</td></tr>
+</table></div>
+<ul>
+<li class="fn">10 protected functions inherited from <a href="qcpaxisticker.html#protected-functions">QCPAxisTicker</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerfixed.html#mScaleStrategy-var">mScaleStrategy</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerfixed.html#mTickStep-var">mTickStep</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPAxisTickerFixed-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Specialized axis ticker with a fixed tick step</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>This <a href="qcpaxisticker.html">QCPAxisTicker</a> subclass generates ticks with a fixed tick step set with <b class="redFont"><code>\ref</code></b> setTickStep. It is also possible to allow integer multiples and integer powers of the specified tick step with <b class="redFont"><code>\ref</code></b> setScaleStrategy.</p>
+<p>A typical application of this ticker is to make an axis only display integers, by setting the tick step of the ticker to 1.0 and the scale strategy to <b class="redFont"><code>\ref</code></b> ssMultiples.</p>
+<p>Another case is when a certain number has a special meaning and axis ticks should only appear at multiples of that value. In this case you might also want to consider <b class="redFont"><code>\ref</code></b> <a href="qcpaxistickerpi.html">QCPAxisTickerPi</a> because despite the name it is not limited to only pi symbols/values.</p>
+<p>The ticker can be created and assigned to an axis like this:</p>
+<pre class="cpp"></pre>
+</div>
+<!-- @@@QCPAxisTickerFixed -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$getTickStep[overload1]$$$getTickStepconstQCPRange& -->
+<h3 class="fn" id="getTickStep"><a name="getTickStep"></a><code>[virtual protected] </code><span class="type">double</span> QCPAxisTickerFixed::<span class="name">getTickStep</span>(const <span class="type"><a href="qcprange.html">QCPRange</a></span> &amp;<i>range</i>)</h3>
+<!-- @@@getTickStep -->
+</div>
+</body>
+</html>

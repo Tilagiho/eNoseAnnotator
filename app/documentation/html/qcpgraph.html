@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPGraph Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPGraph</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPGraph Class</h1>
+<!-- $$$QCPGraph-brief -->
+<p>A plottable representing a graph in a plot. <a href="#details">More...</a></p>
+<!-- @@@QCPGraph -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPGraph&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcpgraph-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#dataToImpulseLines">dataToImpulseLines</a></b>(<i>const int &amp;</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#dataToLines">dataToLines</a></b>(<i>const int &amp;</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#dataToStepCenterLines">dataToStepCenterLines</a></b>(<i>const int &amp;</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#dataToStepLeftLines">dataToStepLeftLines</a></b>(<i>const int &amp;</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#dataToStepRightLines">dataToStepRightLines</a></b>(<i>const int &amp;</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#drawFill">drawFill</a></b>(QCPPainter *<i>painter</i>, int *<i>lines</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#drawImpulsePlot">drawImpulsePlot</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>lines</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#drawLegendIcon">drawLegendIcon</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>rect</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#drawLinePlot">drawLinePlot</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>lines</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#drawScatterPlot">drawScatterPlot</a></b>(QCPPainter *<i>painter</i>, const int &amp;<i>scatters</i>, const QCPScatterStyle &amp;<i>style</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#findIndexAboveX">findIndexAboveX</a></b>(const int *<i>data</i>, double <i>x</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#findIndexAboveY">findIndexAboveY</a></b>(const int *<i>data</i>, double <i>y</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#findIndexBelowX">findIndexBelowX</a></b>(const int *<i>data</i>, double <i>x</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#findIndexBelowY">findIndexBelowY</a></b>(const int *<i>data</i>, double <i>y</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#getChannelFillPolygon">getChannelFillPolygon</a></b>(<i>const int *</i>, <i>QCPDataRange</i>, <i>const int *</i>, <i>QCPDataRange</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#getFillBasePoint">getFillBasePoint</a></b>(<i>int</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> const int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#getFillPolygon">getFillPolygon</a></b>(<i>const int *</i>, <i>QCPDataRange</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#getLines">getLines</a></b>(int *<i>lines</i>, const QCPDataRange &amp;<i>dataRange</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#getNonNanSegments">getNonNanSegments</a></b>(<i>const int *</i>, <i>int</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#getOptimizedLineData">getOptimizedLineData</a></b>(int *<i>lineData</i>, const int &amp;<i>begin</i>, const int &amp;<i>end</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#getOptimizedScatterData">getOptimizedScatterData</a></b>(int *<i>scatterData</i>, int <i>begin</i>, int <i>end</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#getScatters">getScatters</a></b>(int *<i>scatters</i>, const QCPDataRange &amp;<i>dataRange</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#getVisibleDataBounds">getVisibleDataBounds</a></b>(int &amp;<i>begin</i>, int &amp;<i>end</i>, const QCPDataRange &amp;<i>rangeRestriction</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#pointDistance">pointDistance</a></b>(const int &amp;<i>pixelPoint</i>, int &amp;<i>closestData</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#segmentsIntersect">segmentsIntersect</a></b>(double <i>aLower</i>, double <i>aUpper</i>, double <i>bLower</i>, double <i>bUpper</i>, int &amp;<i>bPrecedence</i>) const</td></tr>
+</table></div>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#mAdaptiveSampling-var">mAdaptiveSampling</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#mChannelFillGraph-var">mChannelFillGraph</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#mLineStyle-var">mLineStyle</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#mScatterSkip-var">mScatterSkip</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPScatterStyle </td><td class="memItemRight bottomAlign"><b><a href="qcpgraph.html#mScatterStyle-var">mScatterStyle</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPGraph-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A plottable representing a graph in a plot.</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>Usually you create new graphs by calling QCustomPlot::addGraph. The resulting instance can be accessed via QCustomPlot::graph.</p>
+<p>To plot data, assign it with the <b class="redFont"><code>\ref</code></b> setData or <b class="redFont"><code>\ref</code></b> addData functions. Alternatively, you can also access and modify the data via the <b class="redFont"><code>\ref</code></b> data method, which returns a pointer to the internal <b class="redFont"><code>\ref</code></b> QCPGraphDataContainer.</p>
+<p>Graphs are used to display single-valued data. Single-valued means that there should only be one data point per unique key coordinate. In other words, the graph can't have <i>loops</i>. If you do want to plot non-single-valued curves, rather use the <a href="qcpcurve.html">QCPCurve</a> plottable.</p>
+<p>Gaps in the graph line can be created by adding data points with NaN as value (&lt;tt&gt;qQNaN()&lt;/tt&gt; or &lt;tt&gt;std::numeric_limits&lt;double&gt;::quiet_NaN()&lt;/tt&gt;) in between the two data points that shall be separated.</p>
+<p><b class="redFont"><code>\section</code></b>qcpgraph-appearance Changing the appearance</p>
+<p>The appearance of the graph is mainly determined by the line style, scatter style, brush and pen of the graph (<b class="redFont"><code>\ref</code></b> setLineStyle, <b class="redFont"><code>\ref</code></b> setScatterStyle, <b class="redFont"><code>\ref</code></b> setBrush, <b class="redFont"><code>\ref</code></b> setPen).</p>
+<p><b class="redFont"><code>\subsection</code></b>filling Filling under or between graphs</p>
+<p><a href="qcpgraph.html">QCPGraph</a> knows two types of fills: Normal graph fills towards the zero-value-line parallel to the key axis of the graph, and fills between two graphs, called channel fills. To enable a fill, just set a brush with <b class="redFont"><code>\ref</code></b> setBrush which is neither Qt::NoBrush nor fully transparent.</p>
+<p>By default, a normal fill towards the zero-value-line will be drawn. To set up a channel fill between this graph and another one, call <b class="redFont"><code>\ref</code></b> setChannelFillGraph with the other graph as parameter.</p>
+<p><b class="redFont"><code>\see</code></b>QCustomPlot::addGraph, QCustomPlot::graph</p>
+</div>
+<!-- @@@QCPGraph -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$dataToImpulseLines[overload1]$$$dataToImpulseLinesconstint& -->
+<h3 class="fn" id="dataToImpulseLines"><a name="dataToImpulseLines"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">dataToImpulseLines</span>(<i>const int &amp;</i>) const</h3>
+<!-- @@@dataToImpulseLines -->
+<!-- $$$dataToLines[overload1]$$$dataToLinesconstint& -->
+<h3 class="fn" id="dataToLines"><a name="dataToLines"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">dataToLines</span>(<i>const int &amp;</i>) const</h3>
+<!-- @@@dataToLines -->
+<!-- $$$dataToStepCenterLines[overload1]$$$dataToStepCenterLinesconstint& -->
+<h3 class="fn" id="dataToStepCenterLines"><a name="dataToStepCenterLines"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">dataToStepCenterLines</span>(<i>const int &amp;</i>) const</h3>
+<!-- @@@dataToStepCenterLines -->
+<!-- $$$dataToStepLeftLines[overload1]$$$dataToStepLeftLinesconstint& -->
+<h3 class="fn" id="dataToStepLeftLines"><a name="dataToStepLeftLines"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">dataToStepLeftLines</span>(<i>const int &amp;</i>) const</h3>
+<!-- @@@dataToStepLeftLines -->
+<!-- $$$dataToStepRightLines[overload1]$$$dataToStepRightLinesconstint& -->
+<h3 class="fn" id="dataToStepRightLines"><a name="dataToStepRightLines"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">dataToStepRightLines</span>(<i>const int &amp;</i>) const</h3>
+<!-- @@@dataToStepRightLines -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCPGraph::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$drawFill[overload1]$$$drawFillQCPPainter*int* -->
+<h3 class="fn" id="drawFill"><a name="drawFill"></a><code>[virtual protected] </code><span class="type">void</span> QCPGraph::<span class="name">drawFill</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, <span class="type">int</span> *<i>lines</i>) const</h3>
+<!-- @@@drawFill -->
+<!-- $$$drawImpulsePlot[overload1]$$$drawImpulsePlotQCPPainter*constint& -->
+<h3 class="fn" id="drawImpulsePlot"><a name="drawImpulsePlot"></a><code>[virtual protected] </code><span class="type">void</span> QCPGraph::<span class="name">drawImpulsePlot</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>lines</i>) const</h3>
+<!-- @@@drawImpulsePlot -->
+<!-- $$$drawLegendIcon[overload1]$$$drawLegendIconQCPPainter*constint& -->
+<h3 class="fn" id="drawLegendIcon"><a name="drawLegendIcon"></a><code>[virtual protected] </code><span class="type">void</span> QCPGraph::<span class="name">drawLegendIcon</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>rect</i>) const</h3>
+<!-- @@@drawLegendIcon -->
+<!-- $$$drawLinePlot[overload1]$$$drawLinePlotQCPPainter*constint& -->
+<h3 class="fn" id="drawLinePlot"><a name="drawLinePlot"></a><code>[virtual protected] </code><span class="type">void</span> QCPGraph::<span class="name">drawLinePlot</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>lines</i>) const</h3>
+<!-- @@@drawLinePlot -->
+<!-- $$$drawScatterPlot[overload1]$$$drawScatterPlotQCPPainter*constint&constQCPScatterStyle& -->
+<h3 class="fn" id="drawScatterPlot"><a name="drawScatterPlot"></a><code>[virtual protected] </code><span class="type">void</span> QCPGraph::<span class="name">drawScatterPlot</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, const <span class="type">int</span> &amp;<i>scatters</i>, const <span class="type"><a href="qcpscatterstyle.html">QCPScatterStyle</a></span> &amp;<i>style</i>) const</h3>
+<!-- @@@drawScatterPlot -->
+<!-- $$$findIndexAboveX[overload1]$$$findIndexAboveXconstint*double -->
+<h3 class="fn" id="findIndexAboveX"><a name="findIndexAboveX"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">findIndexAboveX</span>(const <span class="type">int</span> *<i>data</i>, <span class="type">double</span> <i>x</i>) const</h3>
+<!-- @@@findIndexAboveX -->
+<!-- $$$findIndexAboveY[overload1]$$$findIndexAboveYconstint*double -->
+<h3 class="fn" id="findIndexAboveY"><a name="findIndexAboveY"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">findIndexAboveY</span>(const <span class="type">int</span> *<i>data</i>, <span class="type">double</span> <i>y</i>) const</h3>
+<!-- @@@findIndexAboveY -->
+<!-- $$$findIndexBelowX[overload1]$$$findIndexBelowXconstint*double -->
+<h3 class="fn" id="findIndexBelowX"><a name="findIndexBelowX"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">findIndexBelowX</span>(const <span class="type">int</span> *<i>data</i>, <span class="type">double</span> <i>x</i>) const</h3>
+<!-- @@@findIndexBelowX -->
+<!-- $$$findIndexBelowY[overload1]$$$findIndexBelowYconstint*double -->
+<h3 class="fn" id="findIndexBelowY"><a name="findIndexBelowY"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">findIndexBelowY</span>(const <span class="type">int</span> *<i>data</i>, <span class="type">double</span> <i>y</i>) const</h3>
+<!-- @@@findIndexBelowY -->
+<!-- $$$getChannelFillPolygon[overload1]$$$getChannelFillPolygonconstint*QCPDataRangeconstint*QCPDataRange -->
+<h3 class="fn" id="getChannelFillPolygon"><a name="getChannelFillPolygon"></a><code>[protected] </code>const <span class="type">int</span> QCPGraph::<span class="name">getChannelFillPolygon</span>(<i>const int *</i>, <i>QCPDataRange</i>, <i>const int *</i>, <i>QCPDataRange</i>) const</h3>
+<!-- @@@getChannelFillPolygon -->
+<!-- $$$getFillBasePoint[overload1]$$$getFillBasePointint -->
+<h3 class="fn" id="getFillBasePoint"><a name="getFillBasePoint"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">getFillBasePoint</span>(<i>int</i>) const</h3>
+<!-- @@@getFillBasePoint -->
+<!-- $$$getFillPolygon[overload1]$$$getFillPolygonconstint*QCPDataRange -->
+<h3 class="fn" id="getFillPolygon"><a name="getFillPolygon"></a><code>[protected] </code>const <span class="type">int</span> QCPGraph::<span class="name">getFillPolygon</span>(<i>const int *</i>, <i>QCPDataRange</i>) const</h3>
+<!-- @@@getFillPolygon -->
+<!-- $$$getLines[overload1]$$$getLinesint*constQCPDataRange& -->
+<h3 class="fn" id="getLines"><a name="getLines"></a><code>[protected] </code><span class="type">void</span> QCPGraph::<span class="name">getLines</span>(<span class="type">int</span> *<i>lines</i>, const <span class="type"><a href="qcpdatarange.html">QCPDataRange</a></span> &amp;<i>dataRange</i>) const</h3>
+<!-- @@@getLines -->
+<!-- $$$getNonNanSegments[overload1]$$$getNonNanSegmentsconstint*int -->
+<h3 class="fn" id="getNonNanSegments"><a name="getNonNanSegments"></a><code>[protected] </code><span class="type">int</span> QCPGraph::<span class="name">getNonNanSegments</span>(<i>const int *</i>, <i>int</i>) const</h3>
+<!-- @@@getNonNanSegments -->
+<!-- $$$getOptimizedLineData[overload1]$$$getOptimizedLineDataint*constint&constint& -->
+<h3 class="fn" id="getOptimizedLineData"><a name="getOptimizedLineData"></a><code>[virtual protected] </code><span class="type">void</span> QCPGraph::<span class="name">getOptimizedLineData</span>(<span class="type">int</span> *<i>lineData</i>, const <span class="type">int</span> &amp;<i>begin</i>, const <span class="type">int</span> &amp;<i>end</i>) const</h3>
+<!-- @@@getOptimizedLineData -->
+<!-- $$$getOptimizedScatterData[overload1]$$$getOptimizedScatterDataint*intint -->
+<h3 class="fn" id="getOptimizedScatterData"><a name="getOptimizedScatterData"></a><code>[virtual protected] </code><span class="type">void</span> QCPGraph::<span class="name">getOptimizedScatterData</span>(<span class="type">int</span> *<i>scatterData</i>, <span class="type">int</span> <i>begin</i>, <span class="type">int</span> <i>end</i>) const</h3>
+<!-- @@@getOptimizedScatterData -->
+<!-- $$$getScatters[overload1]$$$getScattersint*constQCPDataRange& -->
+<h3 class="fn" id="getScatters"><a name="getScatters"></a><code>[protected] </code><span class="type">void</span> QCPGraph::<span class="name">getScatters</span>(<span class="type">int</span> *<i>scatters</i>, const <span class="type"><a href="qcpdatarange.html">QCPDataRange</a></span> &amp;<i>dataRange</i>) const</h3>
+<!-- @@@getScatters -->
+<!-- $$$getVisibleDataBounds[overload1]$$$getVisibleDataBoundsint&int&constQCPDataRange& -->
+<h3 class="fn" id="getVisibleDataBounds"><a name="getVisibleDataBounds"></a><code>[protected] </code><span class="type">void</span> QCPGraph::<span class="name">getVisibleDataBounds</span>(<span class="type">int</span> &amp;<i>begin</i>, <span class="type">int</span> &amp;<i>end</i>, const <span class="type"><a href="qcpdatarange.html">QCPDataRange</a></span> &amp;<i>rangeRestriction</i>) const</h3>
+<!-- @@@getVisibleDataBounds -->
+<!-- $$$pointDistance[overload1]$$$pointDistanceconstint&int& -->
+<h3 class="fn" id="pointDistance"><a name="pointDistance"></a><code>[protected] </code><span class="type">double</span> QCPGraph::<span class="name">pointDistance</span>(const <span class="type">int</span> &amp;<i>pixelPoint</i>, <span class="type">int</span> &amp;<i>closestData</i>) const</h3>
+<!-- @@@pointDistance -->
+<!-- $$$segmentsIntersect[overload1]$$$segmentsIntersectdoubledoubledoubledoubleint& -->
+<h3 class="fn" id="segmentsIntersect"><a name="segmentsIntersect"></a><code>[protected] </code><span class="type">bool</span> QCPGraph::<span class="name">segmentsIntersect</span>(<span class="type">double</span> <i>aLower</i>, <span class="type">double</span> <i>aUpper</i>, <span class="type">double</span> <i>bLower</i>, <span class="type">double</span> <i>bUpper</i>, <span class="type">int</span> &amp;<i>bPrecedence</i>) const</h3>
+<!-- @@@segmentsIntersect -->
+</div>
+</body>
+</html>

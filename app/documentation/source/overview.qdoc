@@ -1,0 +1,7 @@
+/*!
+    \page eNoseAnnotator.html overview
+    \title eNoseAnnotator - Documentation
+    \brief Overview over the documentation
+
+    eNoseAnnotator is based on Qt5. QCustomPlot is used for the visualisation.
+*/

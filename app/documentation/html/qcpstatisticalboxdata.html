@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPStatisticalBoxData Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPStatisticalBoxData</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPStatisticalBoxData Class</h1>
+<!-- $$$QCPStatisticalBoxData-brief -->
+<p>Holds the data of one single data point for <a href="qcpstatisticalbox.html">QCPStatisticalBox</a>. <a href="#details">More...</a></p>
+<!-- @@@QCPStatisticalBoxData -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPStatisticalBoxData&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcpstatisticalboxdata-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#QCPStatisticalBoxData">QCPStatisticalBoxData</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#QCPStatisticalBoxData-1">QCPStatisticalBoxData</a></b>(double <i>key</i>, double <i>minimum</i>, double <i>lowerQuartile</i>, double <i>median</i>, double <i>upperQuartile</i>, double <i>maximum</i>, const int &amp;<i>outliers</i> = ...)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#mainKey">mainKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#mainValue">mainValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#sortKey">sortKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#valueRange">valueRange</a></b>() const</td></tr>
+</table></div>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#key-var">key</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#lowerQuartile-var">lowerQuartile</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#maximum-var">maximum</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#median-var">median</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#minimum-var">minimum</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#outliers-var">outliers</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#upperQuartile-var">upperQuartile</a></b></td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QCPStatisticalBoxData </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#fromSortKey">fromSortKey</a></b>(double <i>sortKey</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpstatisticalboxdata.html#sortKeyIsMainKey">sortKeyIsMainKey</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPStatisticalBoxData-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Holds the data of one single data point for <a href="qcpstatisticalbox.html">QCPStatisticalBox</a>.</p>
+<p>The stored data is:</p>
+<p><i>key</i>: coordinate on the key axis of this data point (this is the <i>mainKey</i> and the <i>sortKey</i>)</p>
+<p><i>minimum</i>: the position of the lower whisker, typically the minimum measurement of the sample that's not considered an outlier.</p>
+<p><i>lowerQuartile</i>: the lower end of the box. The lower and the upper quartiles are the two statistical quartiles around the median of the sample, they should contain 50% of the sample data.</p>
+<p><i>median</i>: the value of the median mark inside the quartile box. The median separates the sample data in half (50% of the sample data is below/above the median). (This is the <i>mainValue</i>)</p>
+<p><i>upperQuartile</i>: the upper end of the box. The lower and the upper quartiles are the two statistical quartiles around the median of the sample, they should contain 50% of the sample data.</p>
+<p><i>maximum</i>: the position of the upper whisker, typically the maximum measurement of the sample that's not considered an outlier.</p>
+<p><i>outliers</i>: a QVector of outlier values that will be drawn as scatter points at the <i>key</i> coordinate of this data point (see <b class="redFont"><code>\ref</code></b> QCPStatisticalBox::setOutlierStyle)</p>
+<p>The container for storing multiple data points is <b class="redFont"><code>\ref</code></b> QCPStatisticalBoxDataContainer. It is a typedef for <b class="redFont"><code>\ref</code></b> QCPDataContainer with <b class="redFont"><code>\ref</code></b> <a href="qcpstatisticalboxdata.html">QCPStatisticalBoxData</a> as the DataType template parameter. See the documentation there for an explanation regarding the data type's generic methods.</p>
+<p><b class="redFont"><code>\see</code></b>QCPStatisticalBoxDataContainer</p>
+</div>
+<!-- @@@QCPStatisticalBoxData -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCPStatisticalBoxData[overload1]$$$QCPStatisticalBoxData -->
+<h3 class="fn" id="QCPStatisticalBoxData"><a name="QCPStatisticalBoxData"></a>QCPStatisticalBoxData::<span class="name">QCPStatisticalBoxData</span>()</h3>
+<p>Default constructs an instance of QCPStatisticalBoxData.</p><!-- @@@QCPStatisticalBoxData -->
+<!-- $$$QCPStatisticalBoxData$$$QCPStatisticalBoxDatadoubledoubledoubledoubledoubledoubleconstint& -->
+<h3 class="fn" id="QCPStatisticalBoxData-1"><a name="QCPStatisticalBoxData-1"></a>QCPStatisticalBoxData::<span class="name">QCPStatisticalBoxData</span>(<span class="type">double</span> <i>key</i>, <span class="type">double</span> <i>minimum</i>, <span class="type">double</span> <i>lowerQuartile</i>, <span class="type">double</span> <i>median</i>, <span class="type">double</span> <i>upperQuartile</i>, <span class="type">double</span> <i>maximum</i>, const <span class="type">int</span> &amp;<i>outliers</i> = ...)</h3>
+<p>Default constructs an instance of QCPStatisticalBoxData.</p><!-- @@@QCPStatisticalBoxData -->
+<!-- $$$fromSortKey[overload1]$$$fromSortKeydouble -->
+<h3 class="fn" id="fromSortKey"><a name="fromSortKey"></a><code>[static] </code><span class="type"><a href="qcpstatisticalboxdata.html#QCPStatisticalBoxData">QCPStatisticalBoxData</a></span> QCPStatisticalBoxData::<span class="name">fromSortKey</span>(<span class="type">double</span> <i>sortKey</i>)</h3>
+<!-- @@@fromSortKey -->
+<!-- $$$mainKey[overload1]$$$mainKey -->
+<h3 class="fn" id="mainKey"><a name="mainKey"></a><span class="type">double</span> QCPStatisticalBoxData::<span class="name">mainKey</span>() const</h3>
+<!-- @@@mainKey -->
+<!-- $$$mainValue[overload1]$$$mainValue -->
+<h3 class="fn" id="mainValue"><a name="mainValue"></a><span class="type">double</span> QCPStatisticalBoxData::<span class="name">mainValue</span>() const</h3>
+<!-- @@@mainValue -->
+<!-- $$$sortKey[overload1]$$$sortKey -->
+<h3 class="fn" id="sortKey"><a name="sortKey"></a><span class="type">double</span> QCPStatisticalBoxData::<span class="name">sortKey</span>() const</h3>
+<!-- @@@sortKey -->
+<!-- $$$sortKeyIsMainKey[overload1]$$$sortKeyIsMainKey -->
+<h3 class="fn" id="sortKeyIsMainKey"><a name="sortKeyIsMainKey"></a><code>[static] </code><span class="type">bool</span> QCPStatisticalBoxData::<span class="name">sortKeyIsMainKey</span>()</h3>
+<!-- @@@sortKeyIsMainKey -->
+<!-- $$$valueRange[overload1]$$$valueRange -->
+<h3 class="fn" id="valueRange"><a name="valueRange"></a><span class="type"><a href="qcprange.html">QCPRange</a></span> QCPStatisticalBoxData::<span class="name">valueRange</span>() const</h3>
+<!-- @@@valueRange -->
+</div>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPPlottableLegendItem Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPPlottableLegendItem</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPPlottableLegendItem Class</h1>
+<!-- $$$QCPPlottableLegendItem-brief -->
+<p>A legend item representing a plottable with an icon and the plottable name. <a href="#details">More...</a></p>
+<!-- @@@QCPPlottableLegendItem -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPPlottableLegendItem&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcpabstractlegenditem.html">QCPAbstractLegendItem</a></td></tr></table></div><ul>
+<li><a href="qcpplottablelegenditem-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpplottablelegenditem.html#getFont">getFont</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpplottablelegenditem.html#getIconBorderPen">getIconBorderPen</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpplottablelegenditem.html#getTextColor">getTextColor</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpplottablelegenditem.html#minimumOuterSizeHint">minimumOuterSizeHint</a></b>() const</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpplottablelegenditem.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+</table></div>
+<ul>
+<li class="fn">6 protected functions inherited from <a href="qcpabstractlegenditem.html#protected-functions">QCPAbstractLegendItem</a></li>
+<li class="fn">2 protected functions inherited from <a href="qcplayoutelement.html#protected-functions">QCPLayoutElement</a></li>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QCPAbstractPlottable *</td><td class="memItemRight bottomAlign"><b><a href="qcpplottablelegenditem.html#mPlottable-var">mPlottable</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPPlottableLegendItem-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A legend item representing a plottable with an icon and the plottable name.</p>
+<p>This is the standard legend item for plottables. It displays an icon of the plottable next to the plottable name. The icon is drawn by the respective plottable itself (<b class="redFont"><code>\ref</code></b> <a href="qcpabstractplottable.html#drawLegendIcon">QCPAbstractPlottable::drawLegendIcon</a>), and tries to give an intuitive symbol for the plottable. For example, the <a href="qcpgraph.html">QCPGraph</a> draws a centered horizontal line and/or a single scatter point in the middle.</p>
+<p>Legend items of this type are always associated with one plottable (retrievable via the plottable() function and settable with the constructor). You may change the font of the plottable name with <b class="redFont"><code>\ref</code></b> setFont. Icon padding and border pen is taken from the parent <a href="qcplegend.html">QCPLegend</a>, see <b class="redFont"><code>\ref</code></b> QCPLegend::setIconBorderPen and <b class="redFont"><code>\ref</code></b> QCPLegend::setIconTextPadding.</p>
+<p>The function <b class="redFont"><code>\ref</code></b> QCPAbstractPlottable::addToLegend/<b class="redFont"><code>\ref</code></b> QCPAbstractPlottable::removeFromLegend creates/removes legend items of this type.</p>
+<p>Since <a href="qcplegend.html">QCPLegend</a> is based on <a href="qcplayoutgrid.html">QCPLayoutGrid</a>, a legend item itself is just a subclass of <a href="qcplayoutelement.html">QCPLayoutElement</a>. While it could be added to a legend (or any other layout) via the normal layout interface, <a href="qcplegend.html">QCPLegend</a> has specialized functions for handling legend items conveniently, see the documentation of <b class="redFont"><code>\ref</code></b> <a href="qcplegend.html">QCPLegend</a>.</p>
+</div>
+<!-- @@@QCPPlottableLegendItem -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCPPlottableLegendItem::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$getFont[overload1]$$$getFont -->
+<h3 class="fn" id="getFont"><a name="getFont"></a><code>[protected] </code><span class="type">int</span> QCPPlottableLegendItem::<span class="name">getFont</span>() const</h3>
+<!-- @@@getFont -->
+<!-- $$$getIconBorderPen[overload1]$$$getIconBorderPen -->
+<h3 class="fn" id="getIconBorderPen"><a name="getIconBorderPen"></a><code>[protected] </code><span class="type">int</span> QCPPlottableLegendItem::<span class="name">getIconBorderPen</span>() const</h3>
+<!-- @@@getIconBorderPen -->
+<!-- $$$getTextColor[overload1]$$$getTextColor -->
+<h3 class="fn" id="getTextColor"><a name="getTextColor"></a><code>[protected] </code><span class="type">int</span> QCPPlottableLegendItem::<span class="name">getTextColor</span>() const</h3>
+<!-- @@@getTextColor -->
+<!-- $$$minimumOuterSizeHint[overload1]$$$minimumOuterSizeHint -->
+<h3 class="fn" id="minimumOuterSizeHint"><a name="minimumOuterSizeHint"></a><code>[protected] </code><span class="type">int</span> QCPPlottableLegendItem::<span class="name">minimumOuterSizeHint</span>() const</h3>
+<!-- @@@minimumOuterSizeHint -->
+</div>
+</body>
+</html>

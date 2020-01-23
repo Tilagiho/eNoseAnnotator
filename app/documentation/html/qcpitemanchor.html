@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPItemAnchor Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPItemAnchor</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPItemAnchor Class</h1>
+<!-- $$$QCPItemAnchor-brief -->
+<p>An anchor of an item to which positions can be attached to. <a href="#details">More...</a></p>
+<!-- @@@QCPItemAnchor -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPItemAnchor&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qcpitemposition.html">QCPItemPosition</a></p>
+</td></tr></table></div><ul>
+<li><a href="qcpitemanchor-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#addChildX">addChildX</a></b>(QCPItemPosition *<i>pos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#addChildY">addChildY</a></b>(QCPItemPosition *<i>pos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#removeChildX">removeChildX</a></b>(QCPItemPosition *<i>pos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#removeChildY">removeChildY</a></b>(QCPItemPosition *<i>pos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCPItemPosition *</td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#toQCPItemPosition">toQCPItemPosition</a></b>()</td></tr>
+</table></div>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#mAnchorId-var">mAnchorId</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#mChildrenX-var">mChildrenX</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#mChildrenY-var">mChildrenY</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#mName-var">mName</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPAbstractItem *</td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#mParentItem-var">mParentItem</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCustomPlot *</td><td class="memItemRight bottomAlign"><b><a href="qcpitemanchor.html#mParentPlot-var">mParentPlot</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPItemAnchor-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>An anchor of an item to which positions can be attached to.</p>
+<p>An item (<a href="qcpabstractitem.html">QCPAbstractItem</a>) may have one or more anchors. Unlike <a href="qcpitemposition.html">QCPItemPosition</a>, an anchor doesn't control anything on its item, but provides a way to tie other items via their positions to the anchor.</p>
+<p>For example, a <a href="qcpitemrect.html">QCPItemRect</a> is defined by its positions <i>topLeft</i> and <i>bottomRight</i>. Additionally it has various anchors like <i>top</i>, <i>topRight</i> or <i>bottomLeft</i> etc. So you can attach the <i>start</i> (which is a <a href="qcpitemposition.html">QCPItemPosition</a>) of a <a href="qcpitemline.html">QCPItemLine</a> to one of the anchors by calling QCPItemPosition::setParentAnchor on <i>start</i>, passing the wanted anchor of the <a href="qcpitemrect.html">QCPItemRect</a>. This way the start of the line will now always follow the respective anchor location on the rect item.</p>
+<p>Note that <a href="qcpitemposition.html">QCPItemPosition</a> derives from <a href="qcpitemanchor.html">QCPItemAnchor</a>, so every position can also serve as an anchor to other positions.</p>
+<p>To learn how to provide anchors in your own item subclasses, see the subclassing section of the <a href="qcpabstractitem.html">QCPAbstractItem</a> documentation.</p>
+</div>
+<!-- @@@QCPItemAnchor -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$addChildX[overload1]$$$addChildXQCPItemPosition* -->
+<h3 class="fn" id="addChildX"><a name="addChildX"></a><code>[protected] </code><span class="type">void</span> QCPItemAnchor::<span class="name">addChildX</span>(<span class="type"><a href="qcpitemposition.html">QCPItemPosition</a></span> *<i>pos</i>)</h3>
+<!-- @@@addChildX -->
+<!-- $$$addChildY[overload1]$$$addChildYQCPItemPosition* -->
+<h3 class="fn" id="addChildY"><a name="addChildY"></a><code>[protected] </code><span class="type">void</span> QCPItemAnchor::<span class="name">addChildY</span>(<span class="type"><a href="qcpitemposition.html">QCPItemPosition</a></span> *<i>pos</i>)</h3>
+<!-- @@@addChildY -->
+<!-- $$$removeChildX[overload1]$$$removeChildXQCPItemPosition* -->
+<h3 class="fn" id="removeChildX"><a name="removeChildX"></a><code>[protected] </code><span class="type">void</span> QCPItemAnchor::<span class="name">removeChildX</span>(<span class="type"><a href="qcpitemposition.html">QCPItemPosition</a></span> *<i>pos</i>)</h3>
+<!-- @@@removeChildX -->
+<!-- $$$removeChildY[overload1]$$$removeChildYQCPItemPosition* -->
+<h3 class="fn" id="removeChildY"><a name="removeChildY"></a><code>[protected] </code><span class="type">void</span> QCPItemAnchor::<span class="name">removeChildY</span>(<span class="type"><a href="qcpitemposition.html">QCPItemPosition</a></span> *<i>pos</i>)</h3>
+<!-- @@@removeChildY -->
+<!-- $$$toQCPItemPosition[overload1]$$$toQCPItemPosition -->
+<h3 class="fn" id="toQCPItemPosition"><a name="toQCPItemPosition"></a><code>[virtual protected] </code><span class="type"><a href="qcpitemposition.html">QCPItemPosition</a></span> *QCPItemAnchor::<span class="name">toQCPItemPosition</span>()</h3>
+<!-- @@@toQCPItemPosition -->
+</div>
+</body>
+</html>

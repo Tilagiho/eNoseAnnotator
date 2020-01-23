@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPAxisTickerLog Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPAxisTickerLog</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPAxisTickerLog Class</h1>
+<!-- $$$QCPAxisTickerLog-brief -->
+<p>Specialized axis ticker suited for logarithmic axes. <a href="#details">More...</a></p>
+<!-- @@@QCPAxisTickerLog -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPAxisTickerLog&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcpaxisticker.html">QCPAxisTicker</a></td></tr></table></div><ul>
+<li><a href="qcpaxistickerlog-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#QCPAxisTickerLog">QCPAxisTickerLog</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#logBase">logBase</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#setLogBase">setLogBase</a></b>(double <i>base</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#setSubTickCount">setSubTickCount</a></b>(int <i>subTicks</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#subTickCount">subTickCount</a></b>() const</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#createTickVector">createTickVector</a></b>(<i>double</i>, <i>const QCPRange &amp;</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#getSubTickCount">getSubTickCount</a></b>(double <i>tickStep</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual double </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#getTickStep">getTickStep</a></b>(const QCPRange &amp;<i>range</i>)</td></tr>
+</table></div>
+<ul>
+<li class="fn">10 protected functions inherited from <a href="qcpaxisticker.html#protected-functions">QCPAxisTicker</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#mLogBase-var">mLogBase</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#mLogBaseLnInv-var">mLogBaseLnInv</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickerlog.html#mSubTickCount-var">mSubTickCount</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPAxisTickerLog-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Specialized axis ticker suited for logarithmic axes</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>This <a href="qcpaxisticker.html">QCPAxisTicker</a> subclass generates ticks with unequal tick intervals suited for logarithmic axis scales. The ticks are placed at powers of the specified log base (<b class="redFont"><code>\ref</code></b> <a href="qcpaxistickerlog.html#setLogBase">setLogBase</a>).</p>
+<p>Especially in the case of a log base equal to 10 (the default), it might be desirable to have tick labels in the form of powers of ten without mantissa display. To achieve this, set the number precision (<b class="redFont"><code>\ref</code></b> QCPAxis::setNumberPrecision) to zero and the number format (<b class="redFont"><code>\ref</code></b> QCPAxis::setNumberFormat) to scientific (exponential) display with beautifully typeset decimal powers, so a format string of &lt;tt&gt;&quot;eb&quot;&lt;/tt&gt;. This will result in the following axis tick labels:</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>The ticker can be created and assigned to an axis like this:</p>
+<pre class="cpp"></pre>
+</div>
+<!-- @@@QCPAxisTickerLog -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCPAxisTickerLog[overload1]$$$QCPAxisTickerLog -->
+<h3 class="fn" id="QCPAxisTickerLog"><a name="QCPAxisTickerLog"></a>QCPAxisTickerLog::<span class="name">QCPAxisTickerLog</span>()</h3>
+<p>Default constructs an instance of QCPAxisTickerLog.</p><!-- @@@QCPAxisTickerLog -->
+<!-- $$$createTickVector[overload1]$$$createTickVectordoubleconstQCPRange& -->
+<h3 class="fn" id="createTickVector"><a name="createTickVector"></a><code>[protected] </code><span class="type">int</span> QCPAxisTickerLog::<span class="name">createTickVector</span>(<i>double</i>, <i>const QCPRange &amp;</i>)</h3>
+<!-- @@@createTickVector -->
+<!-- $$$getSubTickCount[overload1]$$$getSubTickCountdouble -->
+<h3 class="fn" id="getSubTickCount"><a name="getSubTickCount"></a><code>[virtual protected] </code><span class="type">int</span> QCPAxisTickerLog::<span class="name">getSubTickCount</span>(<span class="type">double</span> <i>tickStep</i>)</h3>
+<!-- @@@getSubTickCount -->
+<!-- $$$getTickStep[overload1]$$$getTickStepconstQCPRange& -->
+<h3 class="fn" id="getTickStep"><a name="getTickStep"></a><code>[virtual protected] </code><span class="type">double</span> QCPAxisTickerLog::<span class="name">getTickStep</span>(const <span class="type"><a href="qcprange.html">QCPRange</a></span> &amp;<i>range</i>)</h3>
+<!-- @@@getTickStep -->
+<!-- $$$logBase[overload1]$$$logBase -->
+<h3 class="fn" id="logBase"><a name="logBase"></a><span class="type">double</span> QCPAxisTickerLog::<span class="name">logBase</span>() const</h3>
+<p><b>See also </b><a href="qcpaxistickerlog.html#setLogBase">setLogBase</a>().</p>
+<!-- @@@logBase -->
+<!-- $$$setLogBase[overload1]$$$setLogBasedouble -->
+<h3 class="fn" id="setLogBase"><a name="setLogBase"></a><span class="type">void</span> QCPAxisTickerLog::<span class="name">setLogBase</span>(<span class="type">double</span> <i>base</i>)</h3>
+<p><b>See also </b><a href="qcpaxistickerlog.html#logBase">logBase</a>().</p>
+<!-- @@@setLogBase -->
+<!-- $$$setSubTickCount[overload1]$$$setSubTickCountint -->
+<h3 class="fn" id="setSubTickCount"><a name="setSubTickCount"></a><span class="type">void</span> QCPAxisTickerLog::<span class="name">setSubTickCount</span>(<span class="type">int</span> <i>subTicks</i>)</h3>
+<p><b>See also </b><a href="qcpaxistickerlog.html#subTickCount">subTickCount</a>().</p>
+<!-- @@@setSubTickCount -->
+<!-- $$$subTickCount[overload1]$$$subTickCount -->
+<h3 class="fn" id="subTickCount"><a name="subTickCount"></a><span class="type">int</span> QCPAxisTickerLog::<span class="name">subTickCount</span>() const</h3>
+<p><b>See also </b><a href="qcpaxistickerlog.html#setSubTickCount">setSubTickCount</a>().</p>
+<!-- @@@subTickCount -->
+</div>
+</body>
+</html>

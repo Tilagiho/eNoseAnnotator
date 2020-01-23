@@ -57,7 +57,7 @@ public:
      * returns the deviation vector (/ %) of this relative to baseVector
      * WARNING: only use this function with an absolute vector
      */
-    MVector toRelativeVector(MVector baseVector);
+    MVector getRelativeVector(MVector baseVector);
 
     /*
      * returns the absolute vector (/ Ohm) of this based on baseVector

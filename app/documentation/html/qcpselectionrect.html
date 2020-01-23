@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPSelectionRect Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPSelectionRect</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPSelectionRect Class</h1>
+<!-- $$$QCPSelectionRect-brief -->
+<p>Provides rect/rubber-band data selection and range zoom interaction. <a href="#details">More...</a></p>
+<!-- @@@QCPSelectionRect -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPSelectionRect&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcplayerable.html">QCPLayerable</a></td></tr></table></div><ul>
+<li><a href="qcpselectionrect-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcpselectionrect.html#applyDefaultAntialiasingHint">applyDefaultAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+</table></div>
+<ul>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpselectionrect.html#mActive-var">mActive</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpselectionrect.html#mBrush-var">mBrush</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpselectionrect.html#mPen-var">mPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpselectionrect.html#mRect-var">mRect</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPSelectionRect-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Provides rect/rubber-band data selection and range zoom interaction</p>
+<p><a href="qcpselectionrect.html">QCPSelectionRect</a> is used by <a href="qcustomplot.html">QCustomPlot</a> when the <b class="redFont"><code>\ref</code></b> QCustomPlot::setSelectionRectMode is not <b class="redFont"><code>\ref</code></b> <a href="qcp-sub-enoseannotator.html#SelectionRectMode-enum">QCP::srmNone</a>. When the user drags the mouse across the plot, the current selection rect instance (<b class="redFont"><code>\ref</code></b> QCustomPlot::setSelectionRect) is forwarded these events and makes sure an according rect shape is drawn. At the begin, during, and after completion of the interaction, it emits the corresponding signals <b class="redFont"><code>\ref</code></b> started, <b class="redFont"><code>\ref</code></b> changed, <b class="redFont"><code>\ref</code></b> canceled, and <b class="redFont"><code>\ref</code></b> accepted.</p>
+<p>The <a href="qcustomplot.html">QCustomPlot</a> instance connects own slots to the current selection rect instance, in order to react to an accepted selection rect interaction accordingly.</p>
+<p><b class="redFont"><code>\ref</code></b>isActive can be used to check whether the selection rect is currently active. An ongoing selection interaction can be cancelled programmatically via calling <b class="redFont"><code>\ref</code></b> cancel at any time.</p>
+<p>The appearance of the selection rect can be controlled via <b class="redFont"><code>\ref</code></b> setPen and <b class="redFont"><code>\ref</code></b> setBrush.</p>
+<p>If you wish to provide custom behaviour, e.g&#x2e; a different visual representation of the selection rect (<b class="redFont"><code>\ref</code></b> <a href="qcplayerable.html#draw">QCPSelectionRect::draw</a>), you can subclass <a href="qcpselectionrect.html">QCPSelectionRect</a> and pass an instance of your subclass to <b class="redFont"><code>\ref</code></b> QCustomPlot::setSelectionRect.</p>
+</div>
+<!-- @@@QCPSelectionRect -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$applyDefaultAntialiasingHint[overload1]$$$applyDefaultAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyDefaultAntialiasingHint"><a name="applyDefaultAntialiasingHint"></a><code>[virtual protected] </code><span class="type">void</span> QCPSelectionRect::<span class="name">applyDefaultAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyDefaultAntialiasingHint -->
+</div>
+</body>
+</html>

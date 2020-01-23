@@ -2,6 +2,13 @@
 
 #include <QtCore>
 
+/*!
+  \class MVector
+  \brief The MVector class represents one measurement vector of the eNose sensor.
+  \ingroup classes
+  The size measurement values received every two seconds from the eNose sensor can be stored in MVectors.
+  MVector can contain absolute resistance values, but also deviations relative to a base resistance (R0).
+*/
 MVector::MVector()
 {
     // init array
@@ -92,12 +99,19 @@ double &MVector::operator[](int index)
     return array[index];
 }
 
+/*!
+ * \brief MVector::zeroes retuns a MVector with zero in each component.
+ */
 MVector MVector::zeroes()
 {
     return MVector();
 }
 
-MVector MVector::toRelativeVector(MVector baseVector)
+/*!
+ * \brief MVector::getRelativeVector returns a MVector based on this relative to baseVector.
+ * baseVector is expected to be absolute.
+ */
+MVector MVector::getRelativeVector(MVector baseVector)
 {
     // cp vector data
     MVector deviationVector = *this;
@@ -111,6 +125,10 @@ MVector MVector::toRelativeVector(MVector baseVector)
     return deviationVector;
 }
 
+/*!
+ * \brief MVector::getAbsoluteVector returns an absolute MVector based on this, which is relative to baseVector.
+ * baseVector is expected to be absolute.
+ */
 MVector MVector::getAbsoluteVector(MVector baseVector)
 {
     // cp vector data

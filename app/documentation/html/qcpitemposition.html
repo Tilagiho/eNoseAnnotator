@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPItemPosition Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPItemPosition</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPItemPosition Class</h1>
+<!-- $$$QCPItemPosition-brief -->
+<p>Manages the position of an item. <a href="#details">More...</a></p>
+<!-- @@@QCPItemPosition -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPItemPosition&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcpitemanchor.html">QCPItemAnchor</a></td></tr></table></div><ul>
+<li><a href="qcpitemposition-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCPItemPosition *</td><td class="memItemRight bottomAlign"><b><a href="qcpitemposition.html#toQCPItemPosition">toQCPItemPosition</a></b>()</td></tr>
+</table></div>
+<ul>
+<li class="fn">5 protected functions inherited from <a href="qcpitemanchor.html#protected-functions">QCPItemAnchor</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemposition.html#mAxisRect-var">mAxisRect</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpitemposition.html#mKey-var">mKey</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemposition.html#mKeyAxis-var">mKeyAxis</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPItemAnchor *</td><td class="memItemRight bottomAlign"><b><a href="qcpitemposition.html#mParentAnchorX-var">mParentAnchorX</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPItemAnchor *</td><td class="memItemRight bottomAlign"><b><a href="qcpitemposition.html#mParentAnchorY-var">mParentAnchorY</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemposition.html#mPositionTypeX-var">mPositionTypeX</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemposition.html#mPositionTypeY-var">mPositionTypeY</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpitemposition.html#mValue-var">mValue</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpitemposition.html#mValueAxis-var">mValueAxis</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPItemPosition-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Manages the position of an item.</p>
+<p>Every item has at least one public <a href="qcpitemposition.html">QCPItemPosition</a> member pointer which provides ways to position the item on the <a href="qcustomplot.html">QCustomPlot</a> surface. Some items have multiple positions, for example <a href="qcpitemrect.html">QCPItemRect</a> has two: <i>topLeft</i> and <i>bottomRight</i>.</p>
+<p><a href="qcpitemposition.html">QCPItemPosition</a> has a type (<b class="redFont"><code>\ref</code></b> PositionType) that can be set with <b class="redFont"><code>\ref</code></b> setType. This type defines how coordinates passed to <b class="redFont"><code>\ref</code></b> setCoords are to be interpreted, e.g&#x2e; as absolute pixel coordinates, as plot coordinates of certain axes, etc. For more advanced plots it is also possible to assign different types per X/Y coordinate of the position (see <b class="redFont"><code>\ref</code></b> setTypeX, <b class="redFont"><code>\ref</code></b> setTypeY). This way an item could be positioned at a fixed pixel distance from the top in the Y direction, while following a plot coordinate in the X direction.</p>
+<p>A <a href="qcpitemposition.html">QCPItemPosition</a> may have a parent <a href="qcpitemanchor.html">QCPItemAnchor</a>, see <b class="redFont"><code>\ref</code></b> setParentAnchor. This way you can tie multiple items together. If the <a href="qcpitemposition.html">QCPItemPosition</a> has a parent, its coordinates (<b class="redFont"><code>\ref</code></b> setCoords) are considered to be absolute pixels in the reference frame of the parent anchor, where (0, 0) means directly ontop of the parent anchor. For example, You could attach the <i>start</i> position of a <a href="qcpitemline.html">QCPItemLine</a> to the <i>bottom</i> anchor of a <a href="qcpitemtext.html">QCPItemText</a> to make the starting point of the line always be centered under the text label, no matter where the text is moved to. For more advanced plots, it is possible to assign different parent anchors per X/Y coordinate of the position, see <b class="redFont"><code>\ref</code></b> setParentAnchorX, <b class="redFont"><code>\ref</code></b> setParentAnchorY. This way an item could follow another item in the X direction but stay at a fixed position in the Y direction. Or even follow item A in X, and item B in Y.</p>
+<p>Note that every <a href="qcpitemposition.html">QCPItemPosition</a> inherits from <a href="qcpitemanchor.html">QCPItemAnchor</a> and thus can itself be used as parent anchor for other positions.</p>
+<p>To set the apparent pixel position on the <a href="qcustomplot.html">QCustomPlot</a> surface directly, use <b class="redFont"><code>\ref</code></b> setPixelPosition. This works no matter what type this <a href="qcpitemposition.html">QCPItemPosition</a> is or what parent-child situation it is in, as <b class="redFont"><code>\ref</code></b> setPixelPosition transforms the coordinates appropriately, to make the position appear at the specified pixel values.</p>
+</div>
+<!-- @@@QCPItemPosition -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$toQCPItemPosition[overload1]$$$toQCPItemPosition -->
+<h3 class="fn" id="toQCPItemPosition"><a name="toQCPItemPosition"></a><code>[virtual protected] </code><span class="type"><a href="qcpitemposition.html">QCPItemPosition</a></span> *QCPItemPosition::<span class="name">toQCPItemPosition</span>()</h3>
+<!-- @@@toQCPItemPosition -->
+</div>
+</body>
+</html>

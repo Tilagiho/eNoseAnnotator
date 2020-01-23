@@ -98,8 +98,10 @@ FORMS += \
 # !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
+    documentation/source/overview.qdoc \
     icon.png \
-    readme
+    readme \
+    project.qdocconf
 
 RESOURCES += \
     eNoseAnnotator.qrc

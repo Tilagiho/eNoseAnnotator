@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPAxisTickerText Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPAxisTickerText</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPAxisTickerText Class</h1>
+<!-- $$$QCPAxisTickerText-brief -->
+<p>Specialized axis ticker which allows arbitrary labels at specified coordinates. <a href="#details">More...</a></p>
+<!-- @@@QCPAxisTickerText -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPAxisTickerText&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcpaxisticker.html">QCPAxisTicker</a></td></tr></table></div><ul>
+<li><a href="qcpaxistickertext-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#QCPAxisTickerText">QCPAxisTickerText</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#addTick">addTick</a></b>(double <i>position</i>, const int &amp;<i>label</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#addTicks">addTicks</a></b>(const int &amp;<i>ticks</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#addTicks-1">addTicks</a></b>(const int &amp;<i>positions</i>, const int &amp;<i>labels</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#clear">clear</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#setSubTickCount">setSubTickCount</a></b>(int <i>subTicks</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#setTicks">setTicks</a></b>(const int &amp;<i>ticks</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#setTicks-1">setTicks</a></b>(const int &amp;<i>positions</i>, const int &amp;<i>labels</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#subTickCount">subTickCount</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int &amp;</td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#ticks">ticks</a></b>()</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#createTickVector">createTickVector</a></b>(<i>double</i>, <i>const QCPRange &amp;</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#getTickLabel">getTickLabel</a></b>(<i>double</i>, <i>const int &amp;</i>, <i>int</i>, <i>int</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#getSubTickCount">getSubTickCount</a></b>(double <i>tickStep</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual double </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#getTickStep">getTickStep</a></b>(const QCPRange &amp;<i>range</i>)</td></tr>
+</table></div>
+<ul>
+<li class="fn">10 protected functions inherited from <a href="qcpaxisticker.html#protected-functions">QCPAxisTicker</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#mSubTickCount-var">mSubTickCount</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcpaxistickertext.html#mTicks-var">mTicks</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPAxisTickerText-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Specialized axis ticker which allows arbitrary labels at specified coordinates</p>
+<p class="centerAlign"><font color="red">[Missing image html]</font></p><p>This <a href="qcpaxisticker.html">QCPAxisTicker</a> subclass generates ticks which can be directly specified by the user as coordinates and associated strings. They can be passed as a whole with <b class="redFont"><code>\ref</code></b> <a href="qcpaxistickertext.html#setTicks">setTicks</a> or one at a time with <b class="redFont"><code>\ref</code></b> <a href="qcpaxistickertext.html#addTick">addTick</a>. Alternatively you can directly access the internal storage via <b class="redFont"><code>\ref</code></b> ticks and modify the tick/label data there.</p>
+<p>This is useful for cases where the axis represents categories rather than numerical values.</p>
+<p>If you are updating the ticks of this ticker regularly and in a dynamic fasion (e.g&#x2e; dependent on the axis range), it is a sign that you should probably create an own ticker by subclassing <a href="qcpaxisticker.html">QCPAxisTicker</a>, instead of using this one.</p>
+<p>The ticker can be created and assigned to an axis like this:</p>
+<pre class="cpp"></pre>
+</div>
+<!-- @@@QCPAxisTickerText -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCPAxisTickerText[overload1]$$$QCPAxisTickerText -->
+<h3 class="fn" id="QCPAxisTickerText"><a name="QCPAxisTickerText"></a>QCPAxisTickerText::<span class="name">QCPAxisTickerText</span>()</h3>
+<p>Default constructs an instance of QCPAxisTickerText.</p><!-- @@@QCPAxisTickerText -->
+<!-- $$$addTick[overload1]$$$addTickdoubleconstint& -->
+<h3 class="fn" id="addTick"><a name="addTick"></a><span class="type">void</span> QCPAxisTickerText::<span class="name">addTick</span>(<span class="type">double</span> <i>position</i>, const <span class="type">int</span> &amp;<i>label</i>)</h3>
+<!-- @@@addTick -->
+<!-- $$$addTicks[overload1]$$$addTicksconstint& -->
+<h3 class="fn" id="addTicks"><a name="addTicks"></a><span class="type">void</span> QCPAxisTickerText::<span class="name">addTicks</span>(const <span class="type">int</span> &amp;<i>ticks</i>)</h3>
+<!-- @@@addTicks -->
+<!-- $$$addTicks$$$addTicksconstint&constint& -->
+<h3 class="fn" id="addTicks-1"><a name="addTicks-1"></a><span class="type">void</span> QCPAxisTickerText::<span class="name">addTicks</span>(const <span class="type">int</span> &amp;<i>positions</i>, const <span class="type">int</span> &amp;<i>labels</i>)</h3>
+<!-- @@@addTicks -->
+<!-- $$$clear[overload1]$$$clear -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QCPAxisTickerText::<span class="name">clear</span>()</h3>
+<!-- @@@clear -->
+<!-- $$$createTickVector[overload1]$$$createTickVectordoubleconstQCPRange& -->
+<h3 class="fn" id="createTickVector"><a name="createTickVector"></a><code>[protected] </code><span class="type">int</span> QCPAxisTickerText::<span class="name">createTickVector</span>(<i>double</i>, <i>const QCPRange &amp;</i>)</h3>
+<!-- @@@createTickVector -->
+<!-- $$$getSubTickCount[overload1]$$$getSubTickCountdouble -->
+<h3 class="fn" id="getSubTickCount"><a name="getSubTickCount"></a><code>[virtual protected] </code><span class="type">int</span> QCPAxisTickerText::<span class="name">getSubTickCount</span>(<span class="type">double</span> <i>tickStep</i>)</h3>
+<!-- @@@getSubTickCount -->
+<!-- $$$getTickLabel[overload1]$$$getTickLabeldoubleconstint&intint -->
+<h3 class="fn" id="getTickLabel"><a name="getTickLabel"></a><code>[protected] </code><span class="type">int</span> QCPAxisTickerText::<span class="name">getTickLabel</span>(<i>double</i>, <i>const int &amp;</i>, <i>int</i>, <i>int</i>)</h3>
+<!-- @@@getTickLabel -->
+<!-- $$$getTickStep[overload1]$$$getTickStepconstQCPRange& -->
+<h3 class="fn" id="getTickStep"><a name="getTickStep"></a><code>[virtual protected] </code><span class="type">double</span> QCPAxisTickerText::<span class="name">getTickStep</span>(const <span class="type"><a href="qcprange.html">QCPRange</a></span> &amp;<i>range</i>)</h3>
+<!-- @@@getTickStep -->
+<!-- $$$setSubTickCount[overload1]$$$setSubTickCountint -->
+<h3 class="fn" id="setSubTickCount"><a name="setSubTickCount"></a><span class="type">void</span> QCPAxisTickerText::<span class="name">setSubTickCount</span>(<span class="type">int</span> <i>subTicks</i>)</h3>
+<p><b>See also </b><a href="qcpaxistickertext.html#subTickCount">subTickCount</a>().</p>
+<!-- @@@setSubTickCount -->
+<!-- $$$setTicks[overload1]$$$setTicksconstint& -->
+<h3 class="fn" id="setTicks"><a name="setTicks"></a><span class="type">void</span> QCPAxisTickerText::<span class="name">setTicks</span>(const <span class="type">int</span> &amp;<i>ticks</i>)</h3>
+<p><b>See also </b><a href="qcpaxistickertext.html#ticks">ticks</a>().</p>
+<!-- @@@setTicks -->
+<!-- $$$setTicks$$$setTicksconstint&constint& -->
+<h3 class="fn" id="setTicks-1"><a name="setTicks-1"></a><span class="type">void</span> QCPAxisTickerText::<span class="name">setTicks</span>(const <span class="type">int</span> &amp;<i>positions</i>, const <span class="type">int</span> &amp;<i>labels</i>)</h3>
+<!-- @@@setTicks -->
+<!-- $$$subTickCount[overload1]$$$subTickCount -->
+<h3 class="fn" id="subTickCount"><a name="subTickCount"></a><span class="type">int</span> QCPAxisTickerText::<span class="name">subTickCount</span>() const</h3>
+<p><b>See also </b><a href="qcpaxistickertext.html#setSubTickCount">setSubTickCount</a>().</p>
+<!-- @@@subTickCount -->
+<!-- $$$ticks[overload1]$$$ticks -->
+<h3 class="fn" id="ticks"><a name="ticks"></a><span class="type">int</span> &amp;QCPAxisTickerText::<span class="name">ticks</span>()</h3>
+<p><b>See also </b><a href="qcpaxistickertext.html#setTicks">setTicks</a>().</p>
+<!-- @@@ticks -->
+</div>
+</body>
+</html>

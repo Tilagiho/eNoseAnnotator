@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- mvector.cpp -->
+  <title>MVector Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>MVector</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">MVector Class</h1>
+<!-- $$$MVector-brief -->
+<p>The <a href="mvector.html">MVector</a> class represents one measurement vector of the eNose sensor. The size measurement values received every two seconds from the eNose sensor can be stored in MVectors. <a href="mvector.html">MVector</a> can contain absolute resistance values, but also deviations relative to a base resistance (R0). <a href="#details">More...</a></p>
+<!-- @@@MVector -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;MVector&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="mvector-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#MVector">MVector</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#dtor.MVector">~MVector</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#getAbsoluteVector">getAbsoluteVector</a></b>(MVector <i>baseVector</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#toRelativeVector">toRelativeVector</a></b>(MVector <i>baseVector</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#toString">toString</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#operator-not-eq">operator!=</a></b>(const MVector &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#operator-2a">operator*</a></b>(const double <i>denominator</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#operator-2a-1">operator*</a></b>(const int <i>denominator</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#operator-2b">operator+</a></b>(const MVector <i>other</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#operator-2f">operator/</a></b>(const double <i>denominator</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#operator-2f-1">operator/</a></b>(const int <i>denominator</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#operator-eq-eq">operator==</a></b>(const MVector &amp;<i>other</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double &amp;</td><td class="memItemRight bottomAlign"><b><a href="mvector.html#operator-5b-5d">operator[]</a></b>(int <i>index</i>)</td></tr>
+</table></div>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> std::array&lt;double, size&gt; </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#array-var">array</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> aClass </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#detectedClass-var">detectedClass</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> aClass </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#userDefinedClass-var">userDefinedClass</a></b></td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> const int </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#size-var">size</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> MVector </td><td class="memItemRight bottomAlign"><b><a href="mvector.html#zeroes">zeroes</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$MVector-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>The <a href="mvector.html">MVector</a> class represents one measurement vector of the eNose sensor. The size measurement values received every two seconds from the eNose sensor can be stored in MVectors. <a href="mvector.html">MVector</a> can contain absolute resistance values, but also deviations relative to a base resistance (R0).</p>
+</div>
+<!-- @@@MVector -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$MVector[overload1]$$$MVector -->
+<h3 class="fn" id="MVector"><a name="MVector"></a>MVector::<span class="name">MVector</span>()</h3>
+<p>Default constructs an instance of MVector.</p><!-- @@@MVector -->
+<!-- $$$~MVector[overload1]$$$~MVector -->
+<h3 class="fn" id="dtor.MVector"><a name="dtor.MVector"></a>MVector::<span class="name">~MVector</span>()</h3>
+<p>Destroys the instance of MVector.</p><!-- @@@~MVector -->
+<!-- $$$getAbsoluteVector[overload1]$$$getAbsoluteVectorMVector -->
+<h3 class="fn" id="getAbsoluteVector"><a name="getAbsoluteVector"></a><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">getAbsoluteVector</span>(<span class="type"><a href="mvector.html#MVector">MVector</a></span> <i>baseVector</i>)</h3>
+<!-- @@@getAbsoluteVector -->
+<!-- $$$toRelativeVector[overload1]$$$toRelativeVectorMVector -->
+<h3 class="fn" id="toRelativeVector"><a name="toRelativeVector"></a><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">toRelativeVector</span>(<span class="type"><a href="mvector.html#MVector">MVector</a></span> <i>baseVector</i>)</h3>
+<!-- @@@toRelativeVector -->
+<!-- $$$toString[overload1]$$$toString -->
+<h3 class="fn" id="toString"><a name="toString"></a><span class="type">int</span> MVector::<span class="name">toString</span>()</h3>
+<!-- @@@toString -->
+<!-- $$$zeroes[overload1]$$$zeroes -->
+<h3 class="fn" id="zeroes"><a name="zeroes"></a><code>[static] </code><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">zeroes</span>()</h3>
+<p>MVector::zeroes retuns a <a href="mvector.html">MVector</a> with zero in each component. <b class="redFont"><code>\return</code></b></p>
+<!-- @@@zeroes -->
+<!-- $$$operator!=[overload1]$$$operator!=constMVector& -->
+<h3 class="fn" id="operator-not-eq"><a name="operator-not-eq"></a><span class="type">bool</span> MVector::<span class="name">operator!=</span>(const <span class="type"><a href="mvector.html#MVector">MVector</a></span> &amp;<i>other</i>) const</h3>
+<!-- @@@operator!= -->
+<!-- $$$operator*[overload1]$$$operator*constdouble -->
+<h3 class="fn" id="operator-2a"><a name="operator-2a"></a><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">operator*</span>(const <span class="type">double</span> <i>denominator</i>)</h3>
+<!-- @@@operator* -->
+<!-- $$$operator*$$$operator*constint -->
+<h3 class="fn" id="operator-2a-1"><a name="operator-2a-1"></a><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">operator*</span>(const <span class="type">int</span> <i>denominator</i>)</h3>
+<!-- @@@operator* -->
+<!-- $$$operator+[overload1]$$$operator+constMVector -->
+<h3 class="fn" id="operator-2b"><a name="operator-2b"></a><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">operator+</span>(const <span class="type"><a href="mvector.html#MVector">MVector</a></span> <i>other</i>)</h3>
+<!-- @@@operator+ -->
+<!-- $$$operator/[overload1]$$$operator/constdouble -->
+<h3 class="fn" id="operator-2f"><a name="operator-2f"></a><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">operator/</span>(const <span class="type">double</span> <i>denominator</i>)</h3>
+<!-- @@@operator/ -->
+<!-- $$$operator/$$$operator/constint -->
+<h3 class="fn" id="operator-2f-1"><a name="operator-2f-1"></a><span class="type"><a href="mvector.html#MVector">MVector</a></span> MVector::<span class="name">operator/</span>(const <span class="type">int</span> <i>denominator</i>)</h3>
+<!-- @@@operator/ -->
+<!-- $$$operator==[overload1]$$$operator==constMVector& -->
+<h3 class="fn" id="operator-eq-eq"><a name="operator-eq-eq"></a><span class="type">bool</span> MVector::<span class="name">operator==</span>(const <span class="type"><a href="mvector.html#MVector">MVector</a></span> &amp;<i>other</i>) const</h3>
+<!-- @@@operator== -->
+<!-- $$$operator[][overload1]$$$operator[]int -->
+<h3 class="fn" id="operator-5b-5d"><a name="operator-5b-5d"></a><span class="type">double</span> &amp;MVector::<span class="name">operator[]</span>(<span class="type">int</span> <i>index</i>)</h3>
+<!-- @@@operator[] -->
+</div>
+</body>
+</html>

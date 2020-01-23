@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPLayerable Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPLayerable</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPLayerable Class</h1>
+<!-- $$$QCPLayerable-brief -->
+<p>Base class for all drawable objects. <a href="#details">More...</a></p>
+<!-- @@@QCPLayerable -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPLayerable&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherited By:</td><td class="memItemRight bottomAlign"> <p><a href="qcpabstractitem.html">QCPAbstractItem</a>, <a href="qcpabstractplottable.html">QCPAbstractPlottable</a>, <a href="qcpaxis.html">QCPAxis</a>, <a href="qcpgrid.html">QCPGrid</a>, <a href="qcplayoutelement.html">QCPLayoutElement</a>, and <a href="qcpselectionrect.html">QCPSelectionRect</a></p>
+</td></tr></table></div><ul>
+<li><a href="qcplayerable-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#applyAntialiasingHint">applyAntialiasingHint</a></b>(QCPPainter *<i>painter</i>, bool <i>localAntialiased</i>, QCP::AntialiasedElement <i>overrideElement</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#applyDefaultAntialiasingHint">applyDefaultAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#clipRect">clipRect</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#deselectEvent">deselectEvent</a></b>(bool *<i>selectionStateChanged</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#draw">draw</a></b>(QCPPainter *<i>painter</i>) = 0</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#initializeParentPlot">initializeParentPlot</a></b>(QCustomPlot *<i>parentPlot</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#mouseDoubleClickEvent">mouseDoubleClickEvent</a></b>(int *<i>event</i>, const int &amp;<i>details</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#mouseMoveEvent">mouseMoveEvent</a></b>(int *<i>event</i>, const int &amp;<i>startPos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#mousePressEvent">mousePressEvent</a></b>(int *<i>event</i>, const int &amp;<i>details</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#mouseReleaseEvent">mouseReleaseEvent</a></b>(int *<i>event</i>, const int &amp;<i>startPos</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#moveToLayer">moveToLayer</a></b>(QCPLayer *<i>layer</i>, bool <i>prepend</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#parentPlotInitialized">parentPlotInitialized</a></b>(QCustomPlot *<i>parentPlot</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#selectEvent">selectEvent</a></b>(int *<i>event</i>, bool <i>additive</i>, const int &amp;<i>details</i>, bool *<i>selectionStateChanged</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCP::Interaction </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#selectionCategory">selectionCategory</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#setParentLayerable">setParentLayerable</a></b>(QCPLayerable *<i>parentLayerable</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#wheelEvent">wheelEvent</a></b>(int *<i>event</i>)</td></tr>
+</table></div>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#mAntialiased-var">mAntialiased</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPLayer *</td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#mLayer-var">mLayer</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#mParentLayerable-var">mParentLayerable</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCustomPlot *</td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#mParentPlot-var">mParentPlot</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcplayerable.html#mVisible-var">mVisible</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPLayerable-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Base class for all drawable objects</p>
+<p>This is the abstract base class most visible objects derive from, e.g&#x2e; plottables, axes, grid etc.</p>
+<p>Every layerable is on a layer (<a href="qcplayer.html">QCPLayer</a>) which allows controlling the rendering order by stacking the layers accordingly.</p>
+<p>For details about the layering mechanism, see the <a href="qcplayer.html">QCPLayer</a> documentation.</p>
+</div>
+<!-- @@@QCPLayerable -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$applyAntialiasingHint[overload1]$$$applyAntialiasingHintQCPPainter*boolQCP::AntialiasedElement -->
+<h3 class="fn" id="applyAntialiasingHint"><a name="applyAntialiasingHint"></a><code>[protected] </code><span class="type">void</span> QCPLayerable::<span class="name">applyAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>, <span class="type">bool</span> <i>localAntialiased</i>, <span class="type"><a href="qcp-sub-enoseannotator.html#AntialiasedElement-enum">QCP::AntialiasedElement</a></span> <i>overrideElement</i>) const</h3>
+<!-- @@@applyAntialiasingHint -->
+<!-- $$$applyDefaultAntialiasingHint[overload1]$$$applyDefaultAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyDefaultAntialiasingHint"><a name="applyDefaultAntialiasingHint"></a><code>[pure virtual protected] </code><span class="type">void</span> QCPLayerable::<span class="name">applyDefaultAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyDefaultAntialiasingHint -->
+<!-- $$$clipRect[overload1]$$$clipRect -->
+<h3 class="fn" id="clipRect"><a name="clipRect"></a><code>[protected] </code><span class="type">int</span> QCPLayerable::<span class="name">clipRect</span>() const</h3>
+<!-- @@@clipRect -->
+<!-- $$$deselectEvent[overload1]$$$deselectEventbool* -->
+<h3 class="fn" id="deselectEvent"><a name="deselectEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPLayerable::<span class="name">deselectEvent</span>(<span class="type">bool</span> *<i>selectionStateChanged</i>)</h3>
+<!-- @@@deselectEvent -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[pure virtual protected] </code><span class="type">void</span> QCPLayerable::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$initializeParentPlot[overload1]$$$initializeParentPlotQCustomPlot* -->
+<h3 class="fn" id="initializeParentPlot"><a name="initializeParentPlot"></a><code>[protected] </code><span class="type">void</span> QCPLayerable::<span class="name">initializeParentPlot</span>(<span class="type"><a href="qcustomplot.html">QCustomPlot</a></span> *<i>parentPlot</i>)</h3>
+<!-- @@@initializeParentPlot -->
+<!-- $$$mouseDoubleClickEvent[overload1]$$$mouseDoubleClickEventint*constint& -->
+<h3 class="fn" id="mouseDoubleClickEvent"><a name="mouseDoubleClickEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPLayerable::<span class="name">mouseDoubleClickEvent</span>(<span class="type">int</span> *<i>event</i>, const <span class="type">int</span> &amp;<i>details</i>)</h3>
+<!-- @@@mouseDoubleClickEvent -->
+<!-- $$$mouseMoveEvent[overload1]$$$mouseMoveEventint*constint& -->
+<h3 class="fn" id="mouseMoveEvent"><a name="mouseMoveEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPLayerable::<span class="name">mouseMoveEvent</span>(<span class="type">int</span> *<i>event</i>, const <span class="type">int</span> &amp;<i>startPos</i>)</h3>
+<!-- @@@mouseMoveEvent -->
+<!-- $$$mousePressEvent[overload1]$$$mousePressEventint*constint& -->
+<h3 class="fn" id="mousePressEvent"><a name="mousePressEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPLayerable::<span class="name">mousePressEvent</span>(<span class="type">int</span> *<i>event</i>, const <span class="type">int</span> &amp;<i>details</i>)</h3>
+<!-- @@@mousePressEvent -->
+<!-- $$$mouseReleaseEvent[overload1]$$$mouseReleaseEventint*constint& -->
+<h3 class="fn" id="mouseReleaseEvent"><a name="mouseReleaseEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPLayerable::<span class="name">mouseReleaseEvent</span>(<span class="type">int</span> *<i>event</i>, const <span class="type">int</span> &amp;<i>startPos</i>)</h3>
+<!-- @@@mouseReleaseEvent -->
+<!-- $$$moveToLayer[overload1]$$$moveToLayerQCPLayer*bool -->
+<h3 class="fn" id="moveToLayer"><a name="moveToLayer"></a><code>[protected] </code><span class="type">bool</span> QCPLayerable::<span class="name">moveToLayer</span>(<span class="type"><a href="qcplayer.html">QCPLayer</a></span> *<i>layer</i>, <span class="type">bool</span> <i>prepend</i>)</h3>
+<!-- @@@moveToLayer -->
+<!-- $$$parentPlotInitialized[overload1]$$$parentPlotInitializedQCustomPlot* -->
+<h3 class="fn" id="parentPlotInitialized"><a name="parentPlotInitialized"></a><code>[virtual protected] </code><span class="type">void</span> QCPLayerable::<span class="name">parentPlotInitialized</span>(<span class="type"><a href="qcustomplot.html">QCustomPlot</a></span> *<i>parentPlot</i>)</h3>
+<!-- @@@parentPlotInitialized -->
+<!-- $$$selectEvent[overload1]$$$selectEventint*boolconstint&bool* -->
+<h3 class="fn" id="selectEvent"><a name="selectEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPLayerable::<span class="name">selectEvent</span>(<span class="type">int</span> *<i>event</i>, <span class="type">bool</span> <i>additive</i>, const <span class="type">int</span> &amp;<i>details</i>, <span class="type">bool</span> *<i>selectionStateChanged</i>)</h3>
+<!-- @@@selectEvent -->
+<!-- $$$selectionCategory[overload1]$$$selectionCategory -->
+<h3 class="fn" id="selectionCategory"><a name="selectionCategory"></a><code>[virtual protected] </code><span class="type"><a href="qcp-sub-enoseannotator.html#Interaction-enum">QCP::Interaction</a></span> QCPLayerable::<span class="name">selectionCategory</span>() const</h3>
+<!-- @@@selectionCategory -->
+<!-- $$$setParentLayerable[overload1]$$$setParentLayerableQCPLayerable* -->
+<h3 class="fn" id="setParentLayerable"><a name="setParentLayerable"></a><code>[protected] </code><span class="type">void</span> QCPLayerable::<span class="name">setParentLayerable</span>(<span class="type"><a href="qcplayerable.html">QCPLayerable</a></span> *<i>parentLayerable</i>)</h3>
+<!-- @@@setParentLayerable -->
+<!-- $$$wheelEvent[overload1]$$$wheelEventint* -->
+<h3 class="fn" id="wheelEvent"><a name="wheelEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPLayerable::<span class="name">wheelEvent</span>(<span class="type">int</span> *<i>event</i>)</h3>
+<!-- @@@wheelEvent -->
+</div>
+</body>
+</html>

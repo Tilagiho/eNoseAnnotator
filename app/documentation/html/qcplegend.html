@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPLegend Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPLegend</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#reimplemented-protected-functions">Reimplemented Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPLegend Class</h1>
+<!-- $$$QCPLegend-brief -->
+<p>Manages a legend inside a <a href="qcustomplot.html">QCustomPlot</a>. <a href="#details">More...</a></p>
+<!-- @@@QCPLegend -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPLegend&gt;</span>
+</td></tr><tr><td class="memItemLeft rightAlign topAlign"> Inherits:</td><td class="memItemRight bottomAlign"> <a href="qcplayoutgrid.html">QCPLayoutGrid</a></td></tr></table></div><ul>
+<li><a href="qcplegend-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#getBorderPen">getBorderPen</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#getBrush">getBrush</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#selectEvent">selectEvent</a></b>(int *<i>event</i>, bool <i>additive</i>, const int &amp;<i>details</i>, bool *<i>selectionStateChanged</i>)</td></tr>
+</table></div>
+<a name="reimplemented-protected-functions"></a>
+<h2 id="reimplemented-protected-functions">Reimplemented Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#applyDefaultAntialiasingHint">applyDefaultAntialiasingHint</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#deselectEvent">deselectEvent</a></b>(bool *<i>selectionStateChanged</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#draw">draw</a></b>(QCPPainter *<i>painter</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#parentPlotInitialized">parentPlotInitialized</a></b>(QCustomPlot *<i>parentPlot</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCP::Interaction </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#selectionCategory">selectionCategory</a></b>() const</td></tr>
+</table></div>
+<ul>
+<li class="fn">2 protected functions inherited from <a href="qcplayoutgrid.html#protected-functions">QCPLayoutGrid</a></li>
+<li class="fn">2 protected functions inherited from <a href="qcplayout.html#protected-functions">QCPLayout</a></li>
+<li class="fn">2 protected functions inherited from <a href="qcplayoutelement.html#protected-functions">QCPLayoutElement</a></li>
+<li class="fn">16 protected functions inherited from <a href="qcplayerable.html#protected-functions">QCPLayerable</a></li>
+</ul>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mBorderPen-var">mBorderPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mBrush-var">mBrush</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mFont-var">mFont</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mIconBorderPen-var">mIconBorderPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mIconSize-var">mIconSize</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mIconTextPadding-var">mIconTextPadding</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mSelectableParts-var">mSelectableParts</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mSelectedBorderPen-var">mSelectedBorderPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mSelectedBrush-var">mSelectedBrush</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mSelectedFont-var">mSelectedFont</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mSelectedIconBorderPen-var">mSelectedIconBorderPen</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mSelectedParts-var">mSelectedParts</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mSelectedTextColor-var">mSelectedTextColor</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcplegend.html#mTextColor-var">mTextColor</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPLegend-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Manages a legend inside a <a href="qcustomplot.html">QCustomPlot</a>.</p>
+<p>A legend is a small box somewhere in the plot which lists plottables with their name and icon.</p>
+<p>A legend is populated with legend items by calling <b class="redFont"><code>\ref</code></b> QCPAbstractPlottable::addToLegend on the plottable, for which a legend item shall be created. In the case of the main legend (<b class="redFont"><code>\ref</code></b> QCustomPlot::legend), simply adding plottables to the plot while <b class="redFont"><code>\ref</code></b> QCustomPlot::setAutoAddPlottableToLegend is set to true (the default) creates corresponding legend items. The legend item associated with a certain plottable can be removed with <b class="redFont"><code>\ref</code></b> QCPAbstractPlottable::removeFromLegend. However, <a href="qcplegend.html">QCPLegend</a> also offers an interface to add and manipulate legend items directly: <b class="redFont"><code>\ref</code></b> item, <b class="redFont"><code>\ref</code></b> itemWithPlottable, <b class="redFont"><code>\ref</code></b> itemCount, <b class="redFont"><code>\ref</code></b> addItem, <b class="redFont"><code>\ref</code></b> removeItem, etc.</p>
+<p>Since <b class="redFont"><code>\ref</code></b> <a href="qcplegend.html">QCPLegend</a> derives from <b class="redFont"><code>\ref</code></b> <a href="qcplayoutgrid.html">QCPLayoutGrid</a>, it can be placed in any position a <b class="redFont"><code>\ref</code></b> <a href="qcplayoutelement.html">QCPLayoutElement</a> may be positioned. The legend items are themselves <b class="redFont"><code>\ref</code></b> <a href="qcplayoutelement.html">QCPLayoutElement</a> &quot;QCPLayoutElements&quot; which are placed in the grid layout of the legend. <b class="redFont"><code>\ref</code></b> <a href="qcplegend.html">QCPLegend</a> only adds an interface specialized for handling child elements of type <b class="redFont"><code>\ref</code></b> <a href="qcpabstractlegenditem.html">QCPAbstractLegendItem</a>, as mentioned above. In principle, any other layout elements may also be added to a legend via the normal <b class="redFont"><code>\ref</code></b> <a href="qcplayoutgrid.html">QCPLayoutGrid</a> interface. See the special page about The Layout System for examples on how to add other elements to the legend and move it outside the axis rect.</p>
+<p>Use the methods <b class="redFont"><code>\ref</code></b> setFillOrder and <b class="redFont"><code>\ref</code></b> setWrap inherited from <b class="redFont"><code>\ref</code></b> <a href="qcplayoutgrid.html">QCPLayoutGrid</a> to control in which order (column first or row first) the legend is filled up when calling <b class="redFont"><code>\ref</code></b> addItem, and at which column or row wrapping occurs. The default fill order for legends is <b class="redFont"><code>\ref</code></b> foRowsFirst.</p>
+<p>By default, every <a href="qcustomplot.html">QCustomPlot</a> has one legend (<b class="redFont"><code>\ref</code></b> QCustomPlot::legend) which is placed in the inset layout of the main axis rect (<b class="redFont"><code>\ref</code></b> QCPAxisRect::insetLayout). To move the legend to another position inside the axis rect, use the methods of the <b class="redFont"><code>\ref</code></b> <a href="qcplayoutinset.html">QCPLayoutInset</a>. To move the legend outside of the axis rect, place it anywhere else with the <b class="redFont"><code>\ref</code></b> <a href="qcplayout.html">QCPLayout</a>/<b class="redFont"><code>\ref</code></b> <a href="qcplayoutelement.html">QCPLayoutElement</a> interface.</p>
+</div>
+<!-- @@@QCPLegend -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$applyDefaultAntialiasingHint[overload1]$$$applyDefaultAntialiasingHintQCPPainter* -->
+<h3 class="fn" id="applyDefaultAntialiasingHint"><a name="applyDefaultAntialiasingHint"></a><code>[virtual protected] </code><span class="type">void</span> QCPLegend::<span class="name">applyDefaultAntialiasingHint</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@applyDefaultAntialiasingHint -->
+<!-- $$$deselectEvent[overload1]$$$deselectEventbool* -->
+<h3 class="fn" id="deselectEvent"><a name="deselectEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPLegend::<span class="name">deselectEvent</span>(<span class="type">bool</span> *<i>selectionStateChanged</i>)</h3>
+<!-- @@@deselectEvent -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual protected] </code><span class="type">void</span> QCPLegend::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>)</h3>
+<!-- @@@draw -->
+<!-- $$$getBorderPen[overload1]$$$getBorderPen -->
+<h3 class="fn" id="getBorderPen"><a name="getBorderPen"></a><code>[protected] </code><span class="type">int</span> QCPLegend::<span class="name">getBorderPen</span>() const</h3>
+<!-- @@@getBorderPen -->
+<!-- $$$getBrush[overload1]$$$getBrush -->
+<h3 class="fn" id="getBrush"><a name="getBrush"></a><code>[protected] </code><span class="type">int</span> QCPLegend::<span class="name">getBrush</span>() const</h3>
+<!-- @@@getBrush -->
+<!-- $$$parentPlotInitialized[overload1]$$$parentPlotInitializedQCustomPlot* -->
+<h3 class="fn" id="parentPlotInitialized"><a name="parentPlotInitialized"></a><code>[virtual protected] </code><span class="type">void</span> QCPLegend::<span class="name">parentPlotInitialized</span>(<span class="type"><a href="qcustomplot.html">QCustomPlot</a></span> *<i>parentPlot</i>)</h3>
+<!-- @@@parentPlotInitialized -->
+<!-- $$$selectEvent[overload1]$$$selectEventint*boolconstint&bool* -->
+<h3 class="fn" id="selectEvent"><a name="selectEvent"></a><code>[virtual protected] </code><span class="type">void</span> QCPLegend::<span class="name">selectEvent</span>(<span class="type">int</span> *<i>event</i>, <span class="type">bool</span> <i>additive</i>, const <span class="type">int</span> &amp;<i>details</i>, <span class="type">bool</span> *<i>selectionStateChanged</i>)</h3>
+<!-- @@@selectEvent -->
+<!-- $$$selectionCategory[overload1]$$$selectionCategory -->
+<h3 class="fn" id="selectionCategory"><a name="selectionCategory"></a><code>[virtual protected] </code><span class="type"><a href="qcp-sub-enoseannotator.html#Interaction-enum">QCP::Interaction</a></span> QCPLegend::<span class="name">selectionCategory</span>() const</h3>
+<!-- @@@selectionCategory -->
+</div>
+</body>
+</html>

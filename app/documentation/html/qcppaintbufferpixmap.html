@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPPaintBufferPixmap Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPPaintBufferPixmap</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#protected-functions">Protected Functions</a></li>
+<li class="level1"><a href="#protected-variables">Protected Variables</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPPaintBufferPixmap Class</h1>
+<!-- $$$QCPPaintBufferPixmap-brief -->
+<p>A paint buffer based on QPixmap, using software raster rendering. <a href="#details">More...</a></p>
+<!-- @@@QCPPaintBufferPixmap -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPPaintBufferPixmap&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcppaintbufferpixmap-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcppaintbufferpixmap.html#QCPPaintBufferPixmap">QCPPaintBufferPixmap</a></b>(const int &amp;<i>size</i>, double <i>devicePixelRatio</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual </td><td class="memItemRight bottomAlign"><b><a href="qcppaintbufferpixmap.html#dtor.QCPPaintBufferPixmap">~QCPPaintBufferPixmap</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> void </td><td class="memItemRight bottomAlign"><b><a href="qcppaintbufferpixmap.html#clear">clear</a></b>(const int &amp;<i>color</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcppaintbufferpixmap.html#draw">draw</a></b>(QCPPainter *<i>painter</i>) const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> virtual QCPPainter *</td><td class="memItemRight bottomAlign"><b><a href="qcppaintbufferpixmap.html#startPainting">startPainting</a></b>()</td></tr>
+</table></div>
+<a name="protected-functions"></a>
+<h2 id="protected-functions">Protected Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> virtual void </td><td class="memItemRight bottomAlign"><b><a href="qcppaintbufferpixmap.html#reallocateBuffer">reallocateBuffer</a></b>()</td></tr>
+</table></div>
+<a name="protected-variables"></a>
+<h2 id="protected-variables">Protected Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> int </td><td class="memItemRight bottomAlign"><b><a href="qcppaintbufferpixmap.html#mBuffer-var">mBuffer</a></b></td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPPaintBufferPixmap-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>A paint buffer based on QPixmap, using software raster rendering</p>
+<p>This paint buffer is the default and fall-back paint buffer which uses software rendering and QPixmap as internal buffer. It is used if <b class="redFont"><code>\ref</code></b> QCustomPlot::setOpenGl is false.</p>
+</div>
+<!-- @@@QCPPaintBufferPixmap -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCPPaintBufferPixmap[overload1]$$$QCPPaintBufferPixmapconstint&double -->
+<h3 class="fn" id="QCPPaintBufferPixmap"><a name="QCPPaintBufferPixmap"></a>QCPPaintBufferPixmap::<span class="name">QCPPaintBufferPixmap</span>(const <span class="type">int</span> &amp;<i>size</i>, <span class="type">double</span> <i>devicePixelRatio</i>)</h3>
+<p>Default constructs an instance of QCPPaintBufferPixmap.</p><!-- @@@QCPPaintBufferPixmap -->
+<!-- $$$~QCPPaintBufferPixmap[overload1]$$$~QCPPaintBufferPixmap -->
+<h3 class="fn" id="dtor.QCPPaintBufferPixmap"><a name="dtor.QCPPaintBufferPixmap"></a><code>[virtual] </code>QCPPaintBufferPixmap::<span class="name">~QCPPaintBufferPixmap</span>()</h3>
+<p>Destroys the instance of QCPPaintBufferPixmap. The destructor is virtual.</p><!-- @@@~QCPPaintBufferPixmap -->
+<!-- $$$clear[overload1]$$$clearconstint& -->
+<h3 class="fn" id="clear"><a name="clear"></a><span class="type">void</span> QCPPaintBufferPixmap::<span class="name">clear</span>(const <span class="type">int</span> &amp;<i>color</i>)</h3>
+<!-- @@@clear -->
+<!-- $$$draw[overload1]$$$drawQCPPainter* -->
+<h3 class="fn" id="draw"><a name="draw"></a><code>[virtual] </code><span class="type">void</span> QCPPaintBufferPixmap::<span class="name">draw</span>(<span class="type"><a href="qcppainter.html">QCPPainter</a></span> *<i>painter</i>) const</h3>
+<!-- @@@draw -->
+<!-- $$$reallocateBuffer[overload1]$$$reallocateBuffer -->
+<h3 class="fn" id="reallocateBuffer"><a name="reallocateBuffer"></a><code>[virtual protected] </code><span class="type">void</span> QCPPaintBufferPixmap::<span class="name">reallocateBuffer</span>()</h3>
+<!-- @@@reallocateBuffer -->
+<!-- $$$startPainting[overload1]$$$startPainting -->
+<h3 class="fn" id="startPainting"><a name="startPainting"></a><code>[virtual] </code><span class="type"><a href="qcppainter.html">QCPPainter</a></span> *QCPPaintBufferPixmap::<span class="name">startPainting</span>()</h3>
+<!-- @@@startPainting -->
+</div>
+</body>
+</html>

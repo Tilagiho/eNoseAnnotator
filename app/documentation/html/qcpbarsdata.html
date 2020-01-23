@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- qcustomplot.cpp -->
+  <title>QCPBarsData Class | eNoseAnnotator</title>
+</head>
+<body>
+<li>QCPBarsData</li>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level1"><a href="#public-functions">Public Functions</a></li>
+<li class="level1"><a href="#public-variables">Public Variables</a></li>
+<li class="level1"><a href="#static-public-members">Static Public Members</a></li>
+<li class="level1"><a href="#details">Detailed Description</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">QCPBarsData Class</h1>
+<!-- $$$QCPBarsData-brief -->
+<p>Holds the data of one single data point (one bar) for <a href="qcpbars.html">QCPBars</a>. <a href="#details">More...</a></p>
+<!-- @@@QCPBarsData -->
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign"> <span class="preprocessor">#include &lt;QCPBarsData&gt;</span>
+</td></tr></table></div><ul>
+<li><a href="qcpbarsdata-members.html">List of all members, including inherited members</a></li>
+</ul>
+<a name="public-functions"></a>
+<h2 id="public-functions">Public Functions</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcpbarsdata.html#QCPBarsData">QCPBarsData</a></b>()</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> </td><td class="memItemRight bottomAlign"><b><a href="qcpbarsdata.html#QCPBarsData-1">QCPBarsData</a></b>(double <i>key</i>, double <i>value</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpbarsdata.html#mainKey">mainKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpbarsdata.html#mainValue">mainValue</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpbarsdata.html#sortKey">sortKey</a></b>() const</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> QCPRange </td><td class="memItemRight bottomAlign"><b><a href="qcpbarsdata.html#valueRange">valueRange</a></b>() const</td></tr>
+</table></div>
+<a name="public-variables"></a>
+<h2 id="public-variables">Public Variables</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpbarsdata.html#key-var">key</a></b></td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> double </td><td class="memItemRight bottomAlign"><b><a href="qcpbarsdata.html#value-var">value</a></b></td></tr>
+</table></div>
+<a name="static-public-members"></a>
+<h2 id="static-public-members">Static Public Members</h2>
+<div class="table"><table class="alignedsummary">
+<tr><td class="memItemLeft rightAlign topAlign"> QCPBarsData </td><td class="memItemRight bottomAlign"><b><a href="qcpbarsdata.html#fromSortKey">fromSortKey</a></b>(double <i>sortKey</i>)</td></tr>
+<tr><td class="memItemLeft rightAlign topAlign"> bool </td><td class="memItemRight bottomAlign"><b><a href="qcpbarsdata.html#sortKeyIsMainKey">sortKeyIsMainKey</a></b>()</td></tr>
+</table></div>
+<a name="details"></a>
+<!-- $$$QCPBarsData-description -->
+<div class="descr">
+<h2 id="details">Detailed Description</h2>
+<p>Holds the data of one single data point (one bar) for <a href="qcpbars.html">QCPBars</a>.</p>
+<p>The stored data is:</p>
+<p><i>key</i>: coordinate on the key axis of this bar (this is the <i>mainKey</i> and the <i>sortKey</i>)</p>
+<p><i>value</i>: height coordinate on the value axis of this bar (this is the <i>mainValue</i>)</p>
+<p>The container for storing multiple data points is <b class="redFont"><code>\ref</code></b> QCPBarsDataContainer. It is a typedef for <b class="redFont"><code>\ref</code></b> QCPDataContainer with <b class="redFont"><code>\ref</code></b> <a href="qcpbarsdata.html">QCPBarsData</a> as the DataType template parameter. See the documentation there for an explanation regarding the data type's generic methods.</p>
+<p><b class="redFont"><code>\see</code></b>QCPBarsDataContainer</p>
+</div>
+<!-- @@@QCPBarsData -->
+<div class="func">
+<h2>Member Function Documentation</h2>
+<!-- $$$QCPBarsData[overload1]$$$QCPBarsData -->
+<h3 class="fn" id="QCPBarsData"><a name="QCPBarsData"></a>QCPBarsData::<span class="name">QCPBarsData</span>()</h3>
+<p>Default constructs an instance of QCPBarsData.</p><!-- @@@QCPBarsData -->
+<!-- $$$QCPBarsData$$$QCPBarsDatadoubledouble -->
+<h3 class="fn" id="QCPBarsData-1"><a name="QCPBarsData-1"></a>QCPBarsData::<span class="name">QCPBarsData</span>(<span class="type">double</span> <i>key</i>, <span class="type">double</span> <i>value</i>)</h3>
+<p>Default constructs an instance of QCPBarsData.</p><!-- @@@QCPBarsData -->
+<!-- $$$fromSortKey[overload1]$$$fromSortKeydouble -->
+<h3 class="fn" id="fromSortKey"><a name="fromSortKey"></a><code>[static] </code><span class="type"><a href="qcpbarsdata.html#QCPBarsData">QCPBarsData</a></span> QCPBarsData::<span class="name">fromSortKey</span>(<span class="type">double</span> <i>sortKey</i>)</h3>
+<!-- @@@fromSortKey -->
+<!-- $$$mainKey[overload1]$$$mainKey -->
+<h3 class="fn" id="mainKey"><a name="mainKey"></a><span class="type">double</span> QCPBarsData::<span class="name">mainKey</span>() const</h3>
+<!-- @@@mainKey -->
+<!-- $$$mainValue[overload1]$$$mainValue -->
+<h3 class="fn" id="mainValue"><a name="mainValue"></a><span class="type">double</span> QCPBarsData::<span class="name">mainValue</span>() const</h3>
+<!-- @@@mainValue -->
+<!-- $$$sortKey[overload1]$$$sortKey -->
+<h3 class="fn" id="sortKey"><a name="sortKey"></a><span class="type">double</span> QCPBarsData::<span class="name">sortKey</span>() const</h3>
+<!-- @@@sortKey -->
+<!-- $$$sortKeyIsMainKey[overload1]$$$sortKeyIsMainKey -->
+<h3 class="fn" id="sortKeyIsMainKey"><a name="sortKeyIsMainKey"></a><code>[static] </code><span class="type">bool</span> QCPBarsData::<span class="name">sortKeyIsMainKey</span>()</h3>
+<!-- @@@sortKeyIsMainKey -->
+<!-- $$$valueRange[overload1]$$$valueRange -->
+<h3 class="fn" id="valueRange"><a name="valueRange"></a><span class="type"><a href="qcprange.html">QCPRange</a></span> QCPBarsData::<span class="name">valueRange</span>() const</h3>
+<!-- @@@valueRange -->
+</div>
+</body>
+</html>
