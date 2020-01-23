@@ -793,38 +793,6 @@ bool MeasurementData::getData(QString line)
     return readOk;
 }
 
-void MeasurementData::generateRandomWalk()
-{
-    clear();
-
-    uint now = QDateTime::currentDateTime().toTime_t();
-    int n = 100;
-
-    MVector baseLevel;
-    for (int i=0; i<n; i++)
-    {
-        MVector measurement;
-        for(int j=0; j<64; j++)
-        {
-            if (i == 0)
-                measurement.array[j] = 1500.0 + (300.0)*(rand()/(double)RAND_MAX-0.5);
-
-            else
-                measurement.array[j] = (1+data[now+i-1].array[j]/100.0) * baseLevel.array[j] + 100.0 * (rand()/(double)RAND_MAX-0.5) + j/64.0;
-        }
-
-        if (i == 0)
-        {
-            emit startTimestempSet(now);
-            baseLevel = measurement;
-            setBaseLevel(now-1, baseLevel);
-        }
-        addMeasurement(now+i, measurement);
-    }
-
-    setSensorId("Randomly generated data");
-}
-
 void MeasurementData::setSelection(int lower, int upper)
 {
     // clear selectedData

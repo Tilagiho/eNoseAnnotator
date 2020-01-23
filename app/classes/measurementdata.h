@@ -127,11 +127,6 @@ public:
      */
     bool loadData(QWidget* widget);
 
-    /*
-     *  generates a random walk dataset
-     */
-    void generateRandomWalk();
-
 //    /*
 //     * calculates average of vectors in range from iterator begin until, but not including, iterator end
 //     * if endTimestamp is set: additionally end if timestamp of current vector > endTimestamp
