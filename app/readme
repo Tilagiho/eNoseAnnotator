@@ -4,16 +4,28 @@
 // optional
 - move multiMode to vector
 - free zoom
-- pick LineGraphWidget colors based on BarGraphWidget::Mode
 - stop measurement based on gradient, ui symbols for status
 - selected/ deselect graph visibility
 - action to continue measurements
 
 
-// measurements
-- zero-vectors in save file?
-- continuous marking -> only part is selected
-
+// features
+- line graphs:
+    - line graphs for functionalisation averages
+    -> default: use functionalisation averages, option to see all channel values
+    - channel colors based on functionalisation colors
+    - tool: select graph of single channel/ functionalisation
+    -> see number + graph in forefront
+    - tool: show current x/y position of mouse when hovering over line graphs
+- TorchScript support
+- support two annotation types: multiple aclasses with and without values:
+    - classes:
+        - add annotation class
+    - line graph:
+        - draw multi-colored rectangles based on annotations
+        - tooltips with class names + values
 
 // bugs
 - connecting sensor after some time -> neative resistance values
+- zero-vectors in save file?
+- continuous marking -> only part is selected
