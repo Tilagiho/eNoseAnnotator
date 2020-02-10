@@ -5,6 +5,7 @@
 #include <array>
 
 #include "aclass.h"
+#include "annotation.h"
 
 
 class MVector
@@ -41,12 +42,12 @@ public:
      * class annotated by the user
      * -> can be used as base truth
      */
-    aClass userDefinedClass{"",""};
+    Annotation userAnnotation;
 
     /*
      * automatically detected class
      */
-    aClass detectedClass{"",""};
+    Annotation detectedAnnotation;
 
     /*
      * returns MVector with all elements being zero initialzed

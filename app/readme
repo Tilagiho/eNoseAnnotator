@@ -21,9 +21,6 @@
 - support two annotation types: multiple aclasses with and without values:
     - classes:
         - add annotation class
-    - line graph:
-        - draw multi-colored rectangles based on annotations
-        - tooltips with class names + values
 - reimplement color schemes:
     - better color palette
     - channel colors based on functionalisation

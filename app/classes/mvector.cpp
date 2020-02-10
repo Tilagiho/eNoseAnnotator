@@ -28,7 +28,7 @@ QString MVector::toString()
     for (int i=0; i<size; i++)
         stringList << QString::number(array[i]);
 
-    stringList << userDefinedClass.toString() << detectedClass.toString();
+    stringList << userAnnotation.toString() << detectedAnnotation.toString();
 
     return stringList.join(";");
 }

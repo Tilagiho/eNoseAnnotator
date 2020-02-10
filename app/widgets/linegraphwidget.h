@@ -100,11 +100,10 @@ private:
     std::array<bool, MVector::size> sensorFailureFlags;
     bool autoMoveGraph = true;
 
-    QMap<int, QCPItemText *> userDefinedClassLabels;
-    QMap<int, QCPItemText *> detectedClassLabels;
+    QMap<int, QPair<QString, QList<QCPItemRect *>>> userDefinedClassLabels;
+    QMap<int, QPair<QString, QList<QCPItemRect *>>> detectedClassLabels;
 
-    QMap<double, QCPItemText *> joinedUserDefinedClassLabels;
-    QMap<double, QCPItemText *> joinedDetectedClassLabels;
+    QCPItemText* coordText = nullptr;
 
     void setupGraph();
 
@@ -117,13 +116,14 @@ private:
 private slots:
     void replot(uint timestamp=0);
     void mousePressed(QMouseEvent*);
+    void mouseMoved	(QMouseEvent *  event);
     void dataSelected();
     void onXRangeChanged(QCPRange range);
 
     /*
      * draws label of user+detected class at top of graph
      */
-    void setLabel(int xpos, QString userDefinedBrief, QString detectedBrief);
+    void setLabel(int xpos, Annotation annotation, bool isUserAnnotation);
 
     /*
      *  goes through userDefinedLabels and detectedLabels in range of x-axis
@@ -136,7 +136,9 @@ private slots:
      * userDefinedLabel == true: for user defined labels
      * else: for detected labels
      */
-    double getLabelYCoord(bool userDefinedLabel);
+    QPair<double, double> getLabelYCoords(bool userDefinedLabel);
+
+    void adjustLabelBorders(int firstX, int secondX);
 };
 
 #endif // LINEGRAPH_H

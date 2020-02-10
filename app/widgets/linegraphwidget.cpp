@@ -3,8 +3,8 @@
 
 #include <math.h>
 
-#include "../classes/sensorcolor.h"
-
+#include "../classes/enosecolor.h"
+#include <QTime>
 LineGraphWidget::LineGraphWidget(QWidget *parent, uint startTime) :
     QWidget(parent),
     ui(new Ui::LineGraphWidget)
@@ -30,6 +30,8 @@ LineGraphWidget::LineGraphWidget(QWidget *parent, uint startTime) :
     connect(ui->chart, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePressed(QMouseEvent*)));
     // process data selection
     connect(ui->chart, SIGNAL(selectionChangedByUser()), this, SLOT(dataSelected()));
+    // show label information
+    connect(ui->chart, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent*)));
 
     // test: add measurement
     QVector<MVector> measurementVector;
@@ -59,7 +61,7 @@ void LineGraphWidget::setupGraph()
         ui->chart->addGraph();
 
         // style of plotted lines
-        QColor color = SensorColor::getSensorColor(i);
+        QColor color = ENoseColor::getSensorColor(i);
         ui->chart->graph(i)->setLineStyle(QCPGraph::lsLine);
         ui->chart->graph(i)->setPen(QPen(color));
         ui->chart->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 3));
@@ -67,7 +69,6 @@ void LineGraphWidget::setupGraph()
         // make graphs selectable
          ui->chart->graph(i)->setSelectable(QCP::stDataRange);
     }
-
 
     // configure bottom axis to show time:
     QSharedPointer<QCPAxisTickerTime> dateTicker(new QCPAxisTickerTime);
@@ -78,28 +79,10 @@ void LineGraphWidget::setupGraph()
     ui->chart->xAxis->setTickLabelFont(QFont(QFont().family(), 8));
     ui->chart->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
 
-    // set dark background gradient:
-//    QLinearGradient gradient(0, 0, 0, 400);
-//    gradient.setColorAt(0, QColor(90, 90, 90));
-//    gradient.setColorAt(0.38, QColor(105, 105, 105));
-//    gradient.setColorAt(1, QColor(70, 70, 70));
-//    ui->chart->setBackground(QBrush(gradient));
-
+    // set background
     ui->chart->setBackground(QBrush(QColor(255,250,240)));
 
     // set ticker colors
-//    ui->chart->xAxis->setTickLabelColor(Qt::white);
-//    ui->chart->xAxis->setLabelColor(Qt::white);
-//    ui->chart->xAxis->setBasePen(QPen(Qt::white));
-//    ui->chart->xAxis->setTickPen(QPen(Qt::white));
-//    ui->chart->xAxis->setSubTickPen(QPen(Qt::white));
-
-//    ui->chart->yAxis->setTickLabelColor(Qt::white);
-//    ui->chart->yAxis->setLabelColor(Qt::white);
-//    ui->chart->yAxis->setBasePen(QPen(Qt::white));
-//    ui->chart->yAxis->setTickPen(QPen(Qt::white));
-//    ui->chart->yAxis->setSubTickPen(QPen(Qt::white));
-
     ui->chart->xAxis->setTickLabelColor(Qt::black);
     ui->chart->xAxis->setLabelColor(Qt::black);
     ui->chart->xAxis->setBasePen(QPen(Qt::black));
@@ -132,9 +115,15 @@ void LineGraphWidget::setSensorFailureFlags(const std::array<bool, MVector::size
         for (int i=0; i<MVector::size; i++)
         {
             if (flags[i] && !sensorFailureFlags[i])
+            {
                 ui->chart->graph(i)->setVisible(false);
+                ui->chart->graph(i)->setSelectable(QCP::SelectionType::stNone);
+            }
             else if (!flags[i] && sensorFailureFlags[i])
+            {
                 ui->chart->graph(i)->setVisible(true);
+                ui->chart->graph(i)->setSelectable(QCP::SelectionType::stDataRange);
+            }
         }
     }
     sensorFailureFlags = flags;
@@ -274,6 +263,12 @@ void LineGraphWidget::mousePressed(QMouseEvent * event)
     // context menu
     else if (event->button() == Qt::RightButton)
     {
+        if (coordText != nullptr)
+        {
+            coordText->setText("");
+            ui->chart->replot(QCustomPlot::RefreshPriority::rpImmediateRefresh);
+        }
+
         QMenu *menu = new QMenu(this);
         menu->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -284,6 +279,117 @@ void LineGraphWidget::mousePressed(QMouseEvent * event)
         menu->popup(ui->chart->mapToGlobal(event->pos()));
     }
 }
+
+void LineGraphWidget::mouseMoved (QMouseEvent *  event)
+{
+    if (coordText == nullptr)
+    {
+        coordText = new QCPItemText(ui->chart);
+        coordText->setClipToAxisRect(false);
+        coordText->position->setType(QCPItemPosition::PositionType::ptViewportRatio);
+        coordText->position->setCoords(0.90,0.95);
+    }
+
+    double x = ui->chart->xAxis->pixelToCoord(event->pos().x());
+    double y = ui->chart->yAxis->pixelToCoord(event->pos().y());
+
+    // check if mouse is over label
+    auto item = ui->chart->itemAt(event->localPos());
+    if (item != 0)  // item found
+    {
+        // item is rectangle?
+        auto focusedRect = qobject_cast<QCPItemRect*>(item);
+        if (focusedRect != nullptr)
+        {
+            // find corresponding label string:
+            QString labelString;
+
+            // x-range of focused label
+            int x1 = std::ceil(focusedRect->topLeft->coords().x());
+            int x2 = std::floor(focusedRect->bottomRight->coords().x());
+
+            // find correct label & its label string
+            for (int xpos=x1; xpos<=x2; xpos++)
+            {
+                if (userDefinedClassLabels.contains(xpos))
+                {
+                    for (auto labelRect : userDefinedClassLabels[xpos].second)
+                        if (focusedRect == labelRect)
+                        {
+                            labelString = userDefinedClassLabels[xpos].first;
+                            break;
+                        }
+                }
+                if (labelString == "" && detectedClassLabels.contains(xpos))
+                {
+                    for (auto labelRect : detectedClassLabels[xpos].second)
+                        if (focusedRect == labelRect)
+                        {
+                            labelString = detectedClassLabels[xpos].first;
+                            break;
+                        }
+                }
+            }
+            if (labelString != "")
+            {
+                labelString = labelString.split(',').join('\n');
+                QToolTip::showText(event->globalPos(), labelString);
+            }
+        }
+    }
+
+    // check if mouse is over graph
+    auto plottable = ui->chart->plottableAt(event->localPos(), true);
+    if (plottable != 0)
+    {
+        // plottable is graph?
+        auto graph = qobject_cast<QCPGraph*>(plottable);
+        if (graph != nullptr)
+        {
+            // get channel number
+            int channel = -1;
+            for (int i=0; i<ui->chart->graphCount(); i++)
+            {
+                if (graph == ui->chart->graph(i))
+                {
+                    channel = i;
+                    break;
+                }
+            }
+            if (channel != -1)
+                QToolTip::showText(event->globalPos(), "ch" + QString::number(channel+1));
+        }
+    }
+
+    // mouse outside of graph:
+    // -> delete text of coordText
+    auto xRange = ui->chart->xAxis->range();
+    auto yRange = ui->chart->yAxis->range();
+    if (y < yRange.lower || y > yRange.upper || x < xRange.lower || x > xRange.upper)
+        coordText->setText("");
+    // mouse inside of graph:
+    // set coord text
+    else
+    {
+        // create time string
+        QString prefix = "";
+        if (x < 0)
+        {
+            prefix = "-";
+            x = -x;
+        }
+        int rawSecs = std::round(x);
+        int hours = (rawSecs % 86400) / 3600;
+        int mins = (rawSecs % 3600) / 60;
+        int secs = (rawSecs % 3600) % 60;
+        QTime time = QTime (hours, mins, secs);
+        QString timeString = time.toString("h:mm:ss");
+        // set coordinate text
+        coordText->setText(prefix + timeString + ", " + QString::number(y, 'f', 1));
+    }
+    ui->chart->replot();
+}
+
 
 void LineGraphWidget::dataSelected()
 {
@@ -342,21 +448,19 @@ void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
         MVector vector = selectionMap[timestamp];
         int xpos = timestamp-startTimestamp;
 
-        // class changed?
-        bool userClassChanged = false, detectedClassChanged = false;
+        // user class changed
+        if (userDefinedClassLabels.contains(xpos) && userDefinedClassLabels[xpos].first != vector.userAnnotation.toString())
+            setLabel(xpos, vector.userAnnotation, true);
+        // vector didn't have user class before
+        else if (!userDefinedClassLabels.contains(xpos) && !vector.userAnnotation.isEmpty())
+            setLabel(xpos, vector.userAnnotation, true);
 
-        if (userDefinedClassLabels.contains(xpos))  // user class changed
-            userClassChanged = userDefinedClassLabels[xpos]->text() != vector.userDefinedClass.getAbreviation();
-        else if (!vector.userDefinedClass.isEmpty())    // vector didn't have user class before
-            userClassChanged = true;
-
-        if (detectedClassLabels.contains(xpos)) // detected class changed
-            detectedClassChanged = detectedClassLabels[xpos]->text() != vector.detectedClass.getAbreviation();
-        else if (!vector.detectedClass.isEmpty())   // vector didn't have detected class before
-            detectedClassChanged = true;
-
-        if (userClassChanged || detectedClassChanged)
-            setLabel(xpos, vector.userDefinedClass.getAbreviation(), vector.detectedClass.getAbreviation());
+        // detected class changed
+        if (detectedClassLabels.contains(xpos) && detectedClassLabels[xpos].first != vector.detectedAnnotation.toString())
+            setLabel(xpos, vector.detectedAnnotation, false);
+        // vector didn't have user class before
+        else if (!detectedClassLabels.contains(xpos) && !vector.detectedAnnotation.isEmpty())
+            setLabel(xpos, vector.detectedAnnotation, false);
     }
 
     redrawLabels();
@@ -465,18 +569,15 @@ void LineGraphWidget::clearGraph(bool replot)
     }
     // clear labels
     for (auto label : userDefinedClassLabels)
-        ui->chart->removeItem(label);
+        for (auto rectangle : label.second)
+            ui->chart->removeItem(rectangle);
+
     for (auto label : detectedClassLabels)
-        ui->chart->removeItem(label);
-    for (auto label : joinedUserDefinedClassLabels)
-        ui->chart->removeItem(label);
-    for (auto label : joinedDetectedClassLabels)
-        ui->chart->removeItem(label);
+        for (auto rectangle : label.second)
+            ui->chart->removeItem(rectangle);
 
     userDefinedClassLabels.clear();
     detectedClassLabels.clear();
-    joinedUserDefinedClassLabels.clear();
-    joinedDetectedClassLabels.clear();
 
     if (replot)
         ui->chart->replot();
@@ -487,6 +588,10 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
     // set timestamp:
     if (ui->chart->graph(0)->data()->isEmpty())
         setStartTimestamp(timestamp);
+
+    // get time of last measurement
+    // is used later to determine distance to current measurement
+    int lastMeasKey = ui->chart->graph(0)->data()->end()->key;
 
     int xpos = timestamp-startTimestamp;
     for (int i=0; i<MVector::size; i++)
@@ -503,7 +608,18 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
             emit sensorFailure(i);
     }
 
-    qDebug() << timestamp << " : Added new Data";
+    // add annotation labels
+    if (!measurement.userAnnotation.isEmpty())
+        setLabel(xpos, measurement.userAnnotation, true);
+    if (!measurement.detectedAnnotation.isEmpty())
+        setLabel(xpos, measurement.detectedAnnotation, true);
+
+    // if last measurement was one second ago (normally 2 seconds):
+    // redraw x bounds of both labels, so they don't overlap
+    if (xpos - lastMeasKey == 1)
+        adjustLabelBorders(lastMeasKey, xpos);
+
+//    qDebug() << timestamp << " : Added new Data";
 
     if (rescale)
         replot(timestamp);
@@ -567,250 +683,189 @@ std::array<uint, 2> LineGraphWidget::getSelection()
     return selectionArray;
 }
 
-void LineGraphWidget::setLabel(int xpos, QString userDefinedBrief, QString detectedBrief)
+/*!
+ * \brief LineGraphWidget::setLabel creates labels from \a annotation in form of multiple QCPItemRect.
+ * \param xpos
+ * \param annotation
+ * \a isUserAnnotation is used to determine wether a user defined or detected label should be created.
+ * For class only annotations with n classes n QCPItemRect stacked on top of each other with uniform sizes are created.
+ * For numeric annotations the size of each ractangle is based on their value relative to the sum of all values.
+ *
+ */
+void LineGraphWidget::setLabel(int xpos, Annotation annotation, bool isUserAnnotation)
 {
-    auto xRange = ui->chart->xAxis->range();
-    auto yRange = ui->chart->yAxis->range();
+    // init labelMap dependent on isUserAnnotation
+    QMap<int, QPair<QString, QList<QCPItemRect *>>>* labelMap;
+    if (isUserAnnotation)
+        labelMap = &userDefinedClassLabels;
+    else
+        labelMap = &detectedClassLabels;
 
-    // user defined class name brief
-    if (userDefinedBrief != "")
+    // label xpos with annotation
+    if (!annotation.isEmpty())
     {
-        QCPItemText *userLabel;
+        QList<aClass> classList = annotation.getClasses();
 
-        if (userDefinedClassLabels.contains(xpos))
-            userLabel = userDefinedClassLabels[xpos];
-        else
+        // remove old label
+        if (labelMap->contains(xpos))
         {
-            userLabel = new QCPItemText(ui->chart);
-            userDefinedClassLabels[xpos] = userLabel;
+            for (auto rect : (*labelMap)[xpos].second)
+                ui->chart->removeItem(rect);
         }
 
-        userLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
-        userLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        userLabel->position->setCoords(xpos, getLabelYCoord(true)); // place position at center/top of axis rect
-        userLabel->setText(userDefinedBrief);
-        userLabel->setPen(QPen(Qt::black)); // show black border around text
+        // create new label
+        QList<QCPItemRect*> labels;
+        for (aClass aclass : classList)
+            labels << new QCPItemRect(ui->chart);
+        (*labelMap)[xpos] = QPair<QString, QList<QCPItemRect*>>(annotation.toString(), labels);
 
-        // set width
-        int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
-        double relativeClassWidth = 1 / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
-        int margin = qRound(relativeClassWidth * xAxisWidth / 2.0);
-        userLabel->setPadding(QMargins(margin,0,margin,0));
-    }
-    // userDefinedBrief == "" && label exists: label has to be removed
-    else if (userDefinedClassLabels.contains(xpos))
-    {
-        ui->chart->removeItem(userDefinedClassLabels[xpos]);
-        userDefinedClassLabels.remove(xpos);
-    }
 
-    // detected class name brief
-    if (detectedBrief != "")
-    {
-        QCPItemText *detectedLabel;
-
-        if (detectedClassLabels.contains(xpos))
-            detectedLabel = detectedClassLabels[xpos];
+        // get normation value for height of rectangles of the label
+        double valueSum = 0;
+        if (annotation.getType() == aClass::Type::CLASS_ONLY)
+            valueSum = static_cast<double>(classList.size());
+        else if (annotation.getType() == aClass::Type::NUMERIC)
+            for (auto aclass : classList)
+                valueSum += aclass.getValue();
         else
+            Q_ASSERT ("Unknown annotation class type!" && false);
+
+        // set properties of the rectangles forming the label
+        QPair<double, double> yCoords = getLabelYCoords(isUserAnnotation);  // (lower, upper) y-Coord for the label
+        double yDelta = qAbs(yCoords.second - yCoords.first); // delta between lower and uppr bound of the label
+        double lastY = yCoords.second; // stores the y-coord of the bottom of the last rectangle drawn
+
+        for (int i=0; i<classList.size(); i++)
         {
-            detectedLabel = new QCPItemText(ui->chart);
-            detectedClassLabels[xpos] = detectedLabel;
+            auto rectangle = labels[i];
+            auto aclass = classList[i];
+
+            // set rectangle coords
+            rectangle->topLeft->setType(QCPItemPosition::ptPlotCoords);
+            rectangle->topLeft->setCoords(QPointF(xpos-1, lastY));
+            rectangle->bottomRight->setType(QCPItemPosition::ptPlotCoords);
+
+            double value = (aclass.getType() == aClass::Type::NUMERIC) ? aclass.getValue() : 1.0;   // get value of aclass
+            double newY = lastY - yDelta * value / valueSum;    // newY: bottom of current rectangle, start of next rectangle
+            rectangle->bottomRight->setCoords(QPointF(xpos+1, newY));
+            lastY = newY;
+
+            // set rectangle appearance
+            QColor classColor = aClass::getColor(aclass);
+            rectangle->setPen(QPen(classColor)); // show black border around rectangle
+            rectangle->setBrush(QBrush(classColor));  // fill recatngle with the class color
+            rectangle->setSelectable(true);
         }
-
-        detectedLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
-        detectedLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        detectedLabel->position->setCoords(xpos, getLabelYCoord(false)); // place position at center/top of axis rect
-        detectedLabel->setText(detectedBrief);
-        detectedLabel->setPen(QPen(Qt::black)); // show black border around text
-
-        // set width
-        int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
-        double relativeClassWidth = 1 / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
-        int margin = qRound(relativeClassWidth * xAxisWidth / 2.0);
-        detectedLabel->setPadding(QMargins(margin,0,margin,0));
     }
-    // detectedBrief == "" && label exists: label has to be removed
-    else if (detectedClassLabels.contains(xpos))
+    // annotation is empty, but old label exists: delete old label
+    else if (labelMap->contains(xpos))
     {
-        ui->chart->removeItem(detectedClassLabels[xpos]);
-        detectedClassLabels.remove(xpos);
+        for (auto userLabel : (*labelMap)[xpos].second)
+            ui->chart->removeItem(userLabel);
+        labelMap->remove(xpos);
+    }
+}
+
+/*!
+ * \brief LineGraphWidget::adjustLabelBorders adjusts right border of label at firstX to firstX+0.5, left border of label at secondX to secondX+0.5
+ * \param firstX
+ * \param secondX
+ */
+void LineGraphWidget::adjustLabelBorders(int firstX, int secondX)
+{
+    // adjust right border of first label
+    if (userDefinedClassLabels.contains(firstX))
+    {
+        auto label = userDefinedClassLabels[firstX].second;
+
+        for (auto rectangle : label)
+            rectangle->bottomRight->setCoords(QPointF(firstX+0.5, rectangle->bottomRight->coords().y()));
+    }
+    if (detectedClassLabels.contains(firstX))
+    {
+        auto label = detectedClassLabels[firstX].second;
+
+        for (auto rectangle : label)
+            rectangle->bottomRight->setCoords(QPointF(firstX+0.5, rectangle->bottomRight->coords().y()));
+    }
+
+    // adjust left border of second label
+    if (userDefinedClassLabels.contains(secondX))
+    {
+        auto label = userDefinedClassLabels[secondX].second;
+
+        for (auto rectangle : label)
+            rectangle->topLeft->setCoords(QPointF(secondX-0.5, rectangle->topLeft->coords().y()));
+    }
+    if (detectedClassLabels.contains(secondX))
+    {
+        auto label = detectedClassLabels[secondX].second;
+
+        for (auto rectangle : label)
+            rectangle->topLeft->setCoords(QPointF(secondX-0.5, rectangle->topLeft->coords().y()));
     }
 }
 
 void LineGraphWidget::redrawLabels()
 {
-    // no work to do if no labels exist
-    if (userDefinedClassLabels.isEmpty() && detectedClassLabels.isEmpty())
-        return;
 
-   for (auto label : joinedUserDefinedClassLabels)
-       ui->chart->removeItem(label);
-    joinedUserDefinedClassLabels.clear();
-
-    for (auto label : joinedDetectedClassLabels)
-        ui->chart->removeItem(label);
-     joinedDetectedClassLabels.clear();
-
-    QCPRange xRange = ui->chart->xAxis->range();
-
-    // ___ user defined labels ___
-    QCPItemText* userBeginLabel = nullptr;
-    QCPItemText* detectedBeginLabel = nullptr;    // marks the begin of labels of labels with the current class
-    QList<QList<QCPItemText*>> matchingUserLabels, matchingDetectedLabels;
-    QList<QCPItemText*> currentUserMatches, currentDetectedLabels;
-
-    auto keyRange = ui->chart->graph(0)->data()->dataRange();
-
-    // go through all data
-    for (int sortKey=keyRange.begin(); sortKey<keyRange.end(); sortKey++)
+    for (auto labelPair : userDefinedClassLabels)
     {
-        int xpos = qRound(ui->chart->graph(0)->data()->at(sortKey)->mainKey());
+        auto label = labelPair.second;   // list of QCPItemRect
 
-        // xpos in xRange+-1
-        if (xRange.lower-1 <= xpos && xpos <= xRange.upper+1)
+        if (!label.isEmpty())
         {
-            // --- user defined labels ---
-            // user label at xpos exists
-            if (userDefinedClassLabels.contains(xpos))
+            // get relative sizes of  rectangles
+            QMap<QCPItemRect*, double> rectSizeMap;
+            double oldDeltaY =  qAbs(label.first()->top->pixelPosition().y() - label.last()->bottom->pixelPosition().y());
+
+            for (auto rectangle : label)
+                rectSizeMap[rectangle] = qAbs(rectangle->top->pixelPosition().y() - rectangle->bottom->pixelPosition().y()) / oldDeltaY;
+
+            // reassign y-coords of rectangles
+            QPair<double, double> yCoords = getLabelYCoords(true);  // (lower, upper) bound of label
+            double deltaY = qAbs(yCoords.second - yCoords.first);
+            double lastY = yCoords.second;  // stores y-coord of last rectangle bottom bound
+
+            for (auto rectangle : label)
             {
-                auto currentLabel = userDefinedClassLabels[xpos];
-                currentLabel->setVisible(true);
+                double newY = lastY - deltaY * rectSizeMap[rectangle];    // newY: bottom of current rectangle, start of next rectangle
 
-                // set first beginlabel
-                if (userBeginLabel == nullptr)
-                    userBeginLabel = currentLabel;
+                rectangle->topLeft->setCoords(QPointF(rectangle->topLeft->coords().x(), lastY));
+                rectangle->bottomRight->setCoords(QPointF(rectangle->bottomRight->coords().x(), newY));
 
-                // matching classes
-                if (userBeginLabel->text() == currentLabel->text())
-                    currentUserMatches << currentLabel;
-                // new class begins
-                // store current matches & begin next match
-                else
-                {
-                    matchingUserLabels << currentUserMatches;
-                    currentUserMatches.clear();
-                    userBeginLabel = currentLabel;
-                    currentUserMatches << currentLabel;
-                }
-            }
-            // no label at xpos
-            else
-            {
-                // save last matches
-                if (currentUserMatches.size() > 1)
-                {
-                    matchingUserLabels << currentUserMatches;
-                }
-                // reset matching labels
-                currentUserMatches.clear();
-                userBeginLabel = nullptr;
-            }
-
-            // --- detected labels ---
-            // detected label at xpos exists
-            if (detectedClassLabels.contains(xpos))
-            {
-                auto currentLabel = detectedClassLabels[xpos];
-                currentLabel->setVisible(true);
-
-                // set first beginlabel
-                if (detectedBeginLabel == nullptr)
-                    detectedBeginLabel = currentLabel;
-
-                // matching classes
-                if (currentLabel->text() == detectedBeginLabel->text())
-                    currentDetectedLabels << currentLabel;
-                // new class begins
-                // store current matches & begin next match
-                else
-                {
-                    matchingDetectedLabels << currentDetectedLabels;
-                    currentDetectedLabels.clear();
-                    detectedBeginLabel = currentLabel;
-                    currentDetectedLabels << currentLabel;
-                }
-            }
-            // no label at xpos or not in xRange
-            else
-            {
-                // save last matches
-                if (currentDetectedLabels.size() > 1)
-                {
-                    matchingDetectedLabels << currentDetectedLabels;
-                }
-                // reset matching labels
-                currentDetectedLabels.clear();
-                detectedBeginLabel = nullptr;
+                lastY = newY;
             }
         }
     }
 
-    // store last match
-    matchingUserLabels << currentUserMatches;
-    matchingDetectedLabels << currentDetectedLabels;
-
-    // go through user matches & create joined labels
-    for (auto matchList : matchingUserLabels)
+    for (auto labelPair : detectedClassLabels)
     {
-        if (matchList.size() > 1)
+        auto label = labelPair.second;   // list of QCPItemRect
+
+        if (!label.isEmpty())
         {
-            // hide single labels
-            for (auto label : matchList)
-                label->setVisible(false);
-            QCPItemText* joinedUserLabel = new QCPItemText(ui->chart);
+            // get relative sizes of  rectangles
+            QMap<QCPItemRect*, double> rectSizeMap;
+            double oldDeltaY =  qAbs(label.first()->top->pixelPosition().y() - label.last()->bottom->pixelPosition().y());
 
-            joinedUserLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
-            joinedUserLabel->position->setType(QCPItemPosition::ptPlotCoords);
-            joinedUserLabel->setText(matchList.first()->text());
-            joinedUserLabel->setPen(QPen(Qt::black)); // show black border around text
+            for (auto rectangle : label)
+                rectSizeMap[rectangle] = qAbs(rectangle->top->pixelPosition().y() - rectangle->bottom->pixelPosition().y()) / oldDeltaY;
 
-            // set coords
-            int beginX = matchList.first()->positions()[0]->coords().x();
-            int endX = matchList.last()->positions()[0]->coords().x();
+            // reassign y-coords of rectangles
+            QPair<double, double> yCoords = getLabelYCoords(false);  // (lower, upper) bound of label
+            double deltaY = qAbs(yCoords.second - yCoords.first);
+            double lastY = yCoords.second;  // stores y-coord of last rectangle bottom bound
 
-            double xmid = (beginX+endX)/2.0;
-            joinedUserLabel->position->setCoords(xmid, getLabelYCoord(true)); // place position at center/top of axis rect
+            for (auto rectangle : label)
+            {
+                double newY = lastY - deltaY * rectSizeMap[rectangle];    // newY: bottom of current rectangle, start of next rectangle
 
-            // set width
-            int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
-            double relativeClassWidth = (endX - beginX + 1) / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
-            int margin = qRound(relativeClassWidth * xAxisWidth / 2.0);
-            joinedUserLabel->setPadding(QMargins(margin,0,margin,0));
+                rectangle->topLeft->setCoords(QPointF(rectangle->topLeft->coords().x(), lastY));
+                rectangle->bottomRight->setCoords(QPointF(rectangle->bottomRight->coords().x(), newY));
 
-            joinedUserDefinedClassLabels[xmid] = joinedUserLabel;
-        }
-    }
-
-    // go through defined matches & create joined labels
-    for (auto matchList : matchingDetectedLabels)
-    {
-        if (matchList.size() > 1)
-        {
-            // hide single labels
-            for (auto label : matchList)
-                label->setVisible(false);
-            QCPItemText* joinedDetectedLabel = new QCPItemText(ui->chart);
-
-            joinedDetectedLabel->setPositionAlignment(Qt::AlignTop|Qt::AlignHCenter);
-            joinedDetectedLabel->position->setType(QCPItemPosition::ptPlotCoords);
-            joinedDetectedLabel->setText(matchList.first()->text());
-            joinedDetectedLabel->setPen(QPen(Qt::black)); // show black border around text
-
-            // set coords
-            int beginX = matchList.first()->positions()[0]->coords().x();
-            int endX = matchList.last()->positions()[0]->coords().x();
-
-            double xmid = (beginX+endX)/2.0;
-            joinedDetectedLabel->position->setCoords(xmid, getLabelYCoord(false)); // place position at center/top of axis rect
-
-            // set width
-            int xAxisWidth = ui->chart->xAxis->axisRect()->width(); // width of xAxis in pixel
-            double relativeClassWidth = (endX - beginX + 1) / (xRange.upper - xRange.lower);    // relative width of current successive matching class to current xRange
-            int margin = qRound(relativeClassWidth * xAxisWidth / 2.0);
-
-            joinedDetectedLabel->setPadding(QMargins(margin,0,margin,0));
-
-            joinedDetectedClassLabels[xmid] = joinedDetectedLabel;
+                lastY = newY;
+            }
         }
     }
 
@@ -824,14 +879,20 @@ double LineGraphWidget::getIndex(int key)
     return  iter->key;
 }
 
-double LineGraphWidget::getLabelYCoord(bool isUserDefined)
+/*!
+ * \brief LineGraphWidget::getLabelYCoords returns (lower, upper) y-coordinate for user defined labels if \a isUserDefined is true, for detected labels if \a isUserDefined is false.
+ * \param isUserDefined
+ * \return
+ */
+QPair<double, double> LineGraphWidget::getLabelYCoords(bool isUserDefined)
 {
     auto yRange = ui->chart->yAxis->range();
 
     double yBaseHeight = (yRange.upper-yRange.lower) / (1.0+labelSpace);
 
     if (isUserDefined)
-        return yRange.upper;
+        return QPair<double, double>(yRange.upper - labelSpace / 2.0 * yBaseHeight, yRange.upper);
     else
-        return yRange.upper - labelSpace / 2.0 * yBaseHeight;
+        return QPair<double, double>(yRange.upper - labelSpace * yBaseHeight, yRange.upper - labelSpace / 2.0 * yBaseHeight);
 }
+

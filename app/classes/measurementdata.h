@@ -165,12 +165,12 @@ public:
     /*
      * set the user defined class of the current selection
      */
-    void setUserDefinedClassOfSelection(QString className, QString classBrief);
+    void setUserAnnotationOfSelection(Annotation annotation);
 
     /*
      * set the detected class of the current selection
      */
-    void setDetectedClassOfSelection(QString className, QString classBrief);
+    void setDetectedAnnotationOfSelection(Annotation annotation);
 
     static QString getTimestampStringFromUInt(uint timestamp);
     static uint getTimestampUIntfromString (QString string);

@@ -540,7 +540,7 @@ void MainWindow::on_actionClassify_selection_triggered()
 
     ClassSelector* dialog = new ClassSelector(this);
     dialog->setWindowTitle("Select class of selection");
-    dialog->setClassList(mData->getClassList());
+    dialog->setSelectedAnnotation(mData->getSelectionMap().first().userAnnotation);
 
     // connections
     connect(dialog, &ClassSelector::addClass, mData, &MeasurementData::addClass);
@@ -549,10 +549,8 @@ void MainWindow::on_actionClassify_selection_triggered()
 
     if (dialog->exec())
     {
-        aClass selectedClass = dialog->getClass();
-        Q_ASSERT("Selected class is not part of mData!" && (selectedClass.isEmpty() || mData->getClassList().contains(selectedClass)));
-
-        mData->setUserDefinedClassOfSelection(selectedClass.getName(), selectedClass.getAbreviation());
+        Annotation annotation = dialog->getAnnotation();
+        mData->setUserAnnotationOfSelection(annotation);
     }
 
     // disconnect
@@ -567,7 +565,7 @@ void MainWindow::on_actionSet_detected_class_of_selection_triggered()
 
     ClassSelector* dialog = new ClassSelector(this);
     dialog->setWindowTitle("[Debug] Select class of detected selection");
-    dialog->setClassList(mData->getClassList());
+    dialog->setSelectedAnnotation(mData->getSelectionMap().first().userAnnotation);
 
     // connections
     connect(dialog, &ClassSelector::addClass, mData, &MeasurementData::addClass);
@@ -576,10 +574,8 @@ void MainWindow::on_actionSet_detected_class_of_selection_triggered()
 
     if (dialog->exec())
     {
-        aClass selectedClass = dialog->getClass();
-        Q_ASSERT("Selected class is not part of mData!" && (selectedClass.isEmpty() || mData->getClassList().contains(selectedClass)));
-
-        mData->setDetectedClassOfSelection(selectedClass.getName(), selectedClass.getAbreviation());
+        Annotation annotation = dialog->getAnnotation();
+        mData->setDetectedAnnotationOfSelection(annotation);
     }
 
     // disconnect

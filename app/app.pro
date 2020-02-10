@@ -30,11 +30,13 @@ linux-g++ {
 
 SOURCES += \
     classes/aclass.cpp \
+    classes/annotation.cpp \
     classes/datasource.cpp \
+    classes/enosecolor.cpp \
     classes/measurementdata.cpp \
     classes/mvector.cpp \
-    classes/sensorcolor.cpp \
     classes/usbdatasource.cpp \
+    lib/comboboxitemdelegate.cpp \
     main.cpp \
     qcustomplot/qcustomplot.cpp \
     widgets/addattributedialog.cpp \
@@ -55,11 +57,13 @@ SOURCES += \
 
 HEADERS += \
     classes/aclass.h \
+    classes/annotation.h \
     classes/datasource.h \
+    classes/enosecolor.h \
     classes/measurementdata.h \
     classes/mvector.h \
-    classes/sensorcolor.h \
     classes/usbdatasource.h \
+    lib/comboboxitemdelegate.h \
     qcustomplot/qcustomplot.h \
     widgets/addattributedialog.h \
     widgets/attributeeditor.h \
@@ -100,8 +104,8 @@ FORMS += \
 DISTFILES += \
     documentation/source/overview.qdoc \
     icon.png \
-    readme \
-    project.qdocconf
+    project.qdocconf \
+    readme
 
 RESOURCES += \
     eNoseAnnotator.qrc

@@ -3,8 +3,10 @@
 
 #include <QtCore>
 #include <QDialog>
+#include <QTableWidgetItem>
 
 #include "../classes/aclass.h"
+#include "../classes/annotation.h"
 
 namespace Ui {
 class ClassSelector;
@@ -18,9 +20,13 @@ public:
     explicit ClassSelector(QWidget *parent = nullptr);
     ~ClassSelector();
 
-    void setClassList(const QList<aClass> &value);
+    void initClassList();
 
-    aClass getClass();
+    Annotation getAnnotation();
+
+    static QList<aClass> getClassList();
+
+    void setSelectedAnnotation(const Annotation &value);
 
 signals:
     void addClass(aClass newClass);
@@ -39,13 +45,16 @@ private slots:
 
     void on_deleteButton_clicked();
 
-    void on_comboBox_currentTextChanged(const QString &arg1);
+    void on_managedClassComboBox_currentTextChanged(const QString &arg1);
+
+    void on_tableWidget_itemChanged(QTableWidgetItem *item);
+
+    void on_annotationTypeComboBox_currentTextChanged(const QString &arg1);
 
 private:
     Ui::ClassSelector *ui;
-
-    QList<aClass> classList;
-    aClass selectedClass{"",""};
+    Annotation selectedAnnotation;
+    static QList<aClass> classList;
 
     void setButtonsEnabled(bool state);
 };

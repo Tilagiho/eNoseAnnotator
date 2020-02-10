@@ -7,30 +7,23 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 
-ClassInputDialog::ClassInputDialog(QWidget *parent, QString name, QString abreviation) : QDialog(parent)
+ClassInputDialog::ClassInputDialog(QWidget *parent, QString name) : QDialog(parent)
 {
     this->setWindowTitle("Add class");
-    QRegExp rx("[\\w| ]*");
+    QRegExp rx("[\\w _\\-]*");
 
     QFormLayout *lytMain = new QFormLayout(this);
 
-    for (int i = 0; i < 2; ++i)
-    {
      QLabel *tLabel;
      QLineEdit *tLine = new QLineEdit(this);
      tLine->setValidator(new QRegExpValidator(rx, this));
-     if (i==0) {
-         tLine->setText(name);
-         tLabel = new QLabel("Name:", this);
-     }
-     else if(i==1) {
-         tLine->setText(abreviation);
-         tLabel = new QLabel("Abreviation:", this);
-     }
+
+     tLine->setText(name);
+     tLabel = new QLabel("Name:", this);
+
      lytMain->addRow(tLabel, tLine);
 
      fields << tLine;
-    }
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox
          ( QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
@@ -47,9 +40,9 @@ ClassInputDialog::ClassInputDialog(QWidget *parent, QString name, QString abrevi
     setLayout(lytMain);
 }
 
-QStringList ClassInputDialog::getStrings(QWidget *parent, QString name, QString abreviation, bool *ok)
+QString ClassInputDialog::getName(QWidget *parent, QString name, bool *ok)
 {
-    ClassInputDialog *dialog = new ClassInputDialog(parent, name, abreviation);
+    ClassInputDialog *dialog = new ClassInputDialog(parent, name);
 
     QStringList list;
 
@@ -65,5 +58,8 @@ QStringList ClassInputDialog::getStrings(QWidget *parent, QString name, QString 
 
     dialog->deleteLater();
 
-    return list;
+    if (ret)
+        return list[0];
+    else
+        return "";
 }

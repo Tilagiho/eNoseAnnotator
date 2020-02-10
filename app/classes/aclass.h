@@ -3,23 +3,37 @@
 
 #include <QtCore>
 
-/*
- * Class of vector
+/*!
+ * \class aClass
+ * contains information of one classification
  */
 class aClass
 {
 public:
-    aClass(QString name, QString abreviation);
+    enum class Type {
+        CLASS_ONLY,  // the annotation consists of * aClasses _without_ numeric values
+        NUMERIC,     // the annotation consists of * aClasses _with_ numeric values
+        UNSPECIFIED  // not yet set
+    };
 
-    bool isEmpty();
+    static QString getClassTypeName(Type);
+    static Type getClassType(QString);
 
-    void setClass(QString name, QString abreviation);
+    static QSet<aClass> staticClassSet;   // contains all classes added in CLASS_ONLY form
+    static QColor getColor(aClass);
+
+    aClass(QString name,  double value = -1.0);
+    aClass(const aClass& aclass);
+
+    bool isEmpty() const;
+
+    void setClass(QString name, double value = -1.0);
 
     QString getName() const;
 
-    QString getAbreviation() const;
+    double getValue() const;
 
-    QString toString();
+    QString toString() const;
 
     static bool isClassString (QString string);
 
@@ -29,10 +43,31 @@ public:
 
     bool operator !=(const aClass &b) const;
 
-private:
+    bool operator< (const aClass &other) const;
 
+    bool operator> (const aClass &other) const;
+
+    bool operator<= (const aClass &other) const;
+
+    bool operator>= (const aClass &other) const;
+
+
+    Type getType() const;
+
+    void setType(Type type);
+
+    void setValue(double value);
+
+    void setName(const QString &value);
+
+private:
     QString name;
-    QString abreviation;
+    double value = -1.0;
 };
+
+inline uint qHash(const aClass &key, uint seed)
+{
+    return qHash(key.getName(), seed);
+}
 
 #endif // ACLASS_H

@@ -1,7 +1,7 @@
 #include "bargraphwidget.h"
 #include "ui_bargraphwidget.h"
 
-#include "../classes/sensorcolor.h"
+#include "../classes/enosecolor.h"
 
 BarGraphWidget::BarGraphWidget(QWidget *parent) :
     QWidget(parent),
@@ -38,7 +38,7 @@ void BarGraphWidget::initGraph()
         sensorBarVector[i]->setAntialiased(false);
 
         // set color
-        QColor color = SensorColor::getSensorColor(i);
+        QColor color = ENoseColor::getSensorColor(i);
         sensorBarVector[i]->setPen(QPen(color.lighter(170)));
         sensorBarVector[i]->setBrush(color);
 
@@ -187,7 +187,7 @@ void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::size>
             funcBarVector[i]->setAntialiased(false);
 
             // set color
-            QColor color = SensorColor::getFuncColor(i, funcSize);
+            QColor color = ENoseColor::getFuncColor(i, funcSize);
             funcBarVector[i]->setPen(QPen(color.lighter(170)));
             funcBarVector[i]->setBrush(color);
 

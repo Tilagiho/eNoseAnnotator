@@ -8,6 +8,8 @@
 #include <QMessageBox>
 #include <QDebug>
 
+#include "aclass.h"
+
 /*!
  * \class MeasurementData
  * \brief Container for all data concerning the current measurement.
@@ -225,7 +227,7 @@ void MeasurementData::setBaseLevel(uint timestamp, MVector baseLevel)
     {
         baseLevelMap.insert(timestamp, baseLevel);
         setDataChanged(true);
-        qDebug() << "New baselevel at " << timestamp << ":\n" << baseLevelMap[timestamp].toString();
+//        qDebug() << "New baselevel at " << timestamp << ":\n" << baseLevelMap[timestamp].toString();
     }
 }
 
@@ -468,7 +470,7 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
         for (int i=0; i<MVector::size; i++)
             valueList << QString::number(iter.value()[i], 'g', 10);
         // classes
-        valueList << iter.value().userDefinedClass.toString() << iter.value().detectedClass.toString();
+        valueList << iter.value().userAnnotation.toString() << iter.value().detectedAnnotation.toString();
         out <<  valueList.join(";") << "\n";
 
         iter++;
@@ -548,7 +550,7 @@ bool MeasurementData::loadData(QWidget* widget)
 
         // first line: check for version
         QString firstLine = in.readLine();
-        qDebug() << firstLine;
+//        qDebug() << firstLine;
 
         if (!firstLine.startsWith("#measurement data"))
         {
@@ -567,7 +569,7 @@ bool MeasurementData::loadData(QWidget* widget)
         bool readOk = true;
         while (readOk && in.readLineInto(&line))
         {
-            qDebug() << line;
+//            qDebug() << line;
             if (line == "")
                 continue;   // ignore
             if (line[0] == '~') // file help
@@ -719,7 +721,7 @@ bool MeasurementData::getData(QString line)
         if (query.size() > MVector::size+1)
         {
             if (aClass::isClassString(query[MVector::size+1]))
-                vector.userDefinedClass = aClass::fromString(query[MVector::size+1]);
+                vector.userAnnotation = Annotation::fromString(query[MVector::size+1]);
             else
             {
                 return false;
@@ -728,7 +730,7 @@ bool MeasurementData::getData(QString line)
         if (query.size() > MVector::size+2)
         {
             if (aClass::isClassString(query[MVector::size+2]))
-                vector.detectedClass = aClass::fromString(query[MVector::size+2]);
+                vector.detectedAnnotation = Annotation::fromString(query[MVector::size+2]);
             else
             {
                 return false;
@@ -767,7 +769,7 @@ bool MeasurementData::getData(QString line)
         {
             QString userString = query[MVector::size+1];
             if (aClass::isClassString(userString))
-                vector.userDefinedClass = aClass::fromString(userString);
+                vector.userAnnotation = Annotation::fromString(userString);
             else
             {
                 qWarning() << "Warning: User defined class invalid: \"" << userString << "\"";
@@ -777,7 +779,7 @@ bool MeasurementData::getData(QString line)
         {
             QString classString = query[MVector::size+2];
             if (aClass::isClassString(classString))
-                vector.detectedClass = aClass::fromString(classString);
+                vector.detectedAnnotation = Annotation::fromString(classString);
             else
             {
                 qWarning() << "Warning: Detected class invalid: \"" << classString << "\"";
@@ -961,28 +963,26 @@ std::array<bool, MVector::size> MeasurementData::sensorFailureArray(QString fail
     return failureArray;
 }
 
-void MeasurementData::setUserDefinedClassOfSelection(QString className, QString classBrief)
+void MeasurementData::setUserAnnotationOfSelection(Annotation annotation)
 {
     for (auto timestamp : selectedData.keys())
     {
-        // data and selectedData
-        data[timestamp].userDefinedClass = aClass(className, classBrief);
-
-        selectedData[timestamp].userDefinedClass = aClass(className, classBrief);
+        // add to data and selectedData
+        data[timestamp].userAnnotation = annotation;
+        selectedData[timestamp].userAnnotation = annotation;
     }
 
     setDataChanged(true);
     emit labelsUpdated(selectedData);
 }
 
-void MeasurementData::setDetectedClassOfSelection(QString className, QString classBrief)
+void MeasurementData::setDetectedAnnotationOfSelection(Annotation annotation)
 {
     for (auto timestamp : selectedData.keys())
     {
         // data and selectedData
-        data[timestamp].detectedClass = aClass(className, classBrief);
-
-        selectedData[timestamp].detectedClass = aClass(className, classBrief);
+        data[timestamp].detectedAnnotation = annotation;
+        selectedData[timestamp].detectedAnnotation = annotation;
     }
 
     setDataChanged(true);
@@ -991,18 +991,24 @@ void MeasurementData::setDetectedClassOfSelection(QString className, QString cla
 
 void MeasurementData::addClass(aClass newClass)
 {
-    Q_ASSERT("Trying to add class that already exists!" && !classList.contains(newClass));
+    // classes in the class list are always numeric only
+    Q_ASSERT("New classes added should be of type CLASS_ONLY!" && newClass.getType() == aClass::Type::CLASS_ONLY);
+    Q_ASSERT("Trying to add class name that already exists!" && !aClass::staticClassSet.contains(newClass));
 
-    classList.append(newClass);
+    // add to static aClass map
+    aClass::staticClassSet << newClass;
+
+    // add internally
+    classList << newClass;
+
     setDataChanged(true);
 }
 
 void MeasurementData::removeClass(aClass oldClass)
 {
-    Q_ASSERT("Trying to remove class that does not exist!" && classList.contains(oldClass));
-
-    int index = classList.indexOf(oldClass);
-    classList.removeAt(index);
+    Q_ASSERT("New classes removed should be of type CLASS_ONLY!" && oldClass.getType() == aClass::Type::CLASS_ONLY);
+    Q_ASSERT("Trying to remove class that does not exists!" && aClass::staticClassSet.contains(oldClass));
+    aClass::staticClassSet.remove(oldClass);
 
     // update measurement data
     QMap<uint, MVector> updatedVectors;
@@ -1011,16 +1017,29 @@ void MeasurementData::removeClass(aClass oldClass)
     {
         bool updated = false;   // flag for updated class
 
-        if (data[timestamp].userDefinedClass == oldClass)
+        if (data[timestamp].userAnnotation.contains(oldClass))
         {
-            data[timestamp].userDefinedClass = aClass{"", ""};
+            data[timestamp].userAnnotation.remove(oldClass);
             updated = true;
         }
-        if (data[timestamp].detectedClass == oldClass)
+        if (data[timestamp].detectedAnnotation.contains(oldClass))
         {
-            data[timestamp].detectedClass = aClass{"", ""};
+            data[timestamp].detectedAnnotation.remove(oldClass);
             updated = true;
         }
+
+//        if (data[timestamp].userAnnotation == oldClass)
+//        {
+//            double value = (userAnnotationType == aClass::Type::NUMERIC) ? 1.0 : -1.0;
+//            data[timestamp].userAnnotation = aClass{"", "", value};
+//            updated = true;
+//        }
+//        if (data[timestamp].detectedAnnotation == oldClass)
+//        {
+//            double value = (detectedAnnotationType == aClass::Type::NUMERIC) ? 1.0 : -1.0;
+//            data[timestamp].detectedAnnotation = aClass{"", "", value};
+//            updated = true;
+//        }
 
         if (updated)
             updatedVectors[timestamp] = data[timestamp];
@@ -1032,27 +1051,31 @@ void MeasurementData::removeClass(aClass oldClass)
 
 void MeasurementData::changeClass(aClass oldClass, aClass newClass)
 {
-    Q_ASSERT("Trying to change class that does not exist!" && classList.contains(oldClass));
-    Q_ASSERT("Trying to change class to new class that already exists!" && !classList.contains(newClass));
+    Q_ASSERT("oldClass should be of type CLASS_ONLY!" && oldClass.getType() == aClass::Type::CLASS_ONLY);
+    Q_ASSERT("newClass should be of type CLASS_ONLY!" && newClass.getType() == aClass::Type::CLASS_ONLY);
 
-    int index = classList.indexOf(oldClass);
-    classList[index] = newClass;
+    Q_ASSERT("Trying to change class that does not exist!" && aClass::staticClassSet.contains(oldClass));
+    Q_ASSERT("Trying to change to class that already exists!" && !aClass::staticClassSet.contains(newClass));
 
-    // update measurement data
+    // change class in static class map
+    aClass::staticClassSet.remove(oldClass);
+    aClass::staticClassSet << newClass;
+
+    // remember updated vectors
     QMap<uint, MVector> updatedVectors;
 
     for (uint timestamp: data.keys())
     {
         bool updated = false;   // flag for updated class
 
-        if (data[timestamp].userDefinedClass == oldClass)
+        if (data[timestamp].userAnnotation.contains(oldClass))
         {
-            data[timestamp].userDefinedClass = newClass;
+            data[timestamp].userAnnotation.changeClass(oldClass, newClass);
             updated = true;
         }
-        if (data[timestamp].detectedClass == oldClass)
+        if (data[timestamp].detectedAnnotation.contains(oldClass))
         {
-            data[timestamp].detectedClass = newClass;
+            data[timestamp].detectedAnnotation.changeClass(oldClass, newClass);
             updated = true;
         }
 

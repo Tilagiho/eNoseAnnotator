@@ -10,9 +10,9 @@ class ClassInputDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit ClassInputDialog(QWidget *parent = nullptr, QString name="", QString abreviation="");
+    explicit ClassInputDialog(QWidget *parent = nullptr, QString name="");
 
-    static QStringList getStrings(QWidget *parent, QString name="", QString abreviation="", bool *ok = nullptr);
+    static QString getName(QWidget *parent, QString name="", bool *ok = nullptr);
 
 private:
     QList<QLineEdit*> fields;
