@@ -33,9 +33,12 @@ LineGraphWidget::LineGraphWidget(QWidget *parent, uint startTime) :
     // show label information
     connect(ui->chart, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent*)));
 
-    // test: add measurement
-    QVector<MVector> measurementVector;
-    QVector<double> timestampVector;
+    // init coordText
+    coordText = new QCPItemText(ui->chart);
+    coordText->setClipToAxisRect(false);
+    coordText->position->setType(QCPItemPosition::PositionType::ptAbsolute);
+    coordText->position->setCoords(ui->chart->width()-80, ui->chart->height()-20);
+    coordText->setText("");
 }
 
 LineGraphWidget::~LineGraphWidget()
@@ -282,17 +285,6 @@ void LineGraphWidget::mousePressed(QMouseEvent * event)
 
 void LineGraphWidget::mouseMoved (QMouseEvent *  event)
 {
-    if (coordText == nullptr)
-    {
-        coordText = new QCPItemText(ui->chart);
-        coordText->setClipToAxisRect(false);
-        coordText->position->setType(QCPItemPosition::PositionType::ptViewportRatio);
-        coordText->position->setCoords(0.90,0.95);
-    }
-
-    double x = ui->chart->xAxis->pixelToCoord(event->pos().x());
-    double y = ui->chart->yAxis->pixelToCoord(event->pos().y());
-
     // check if mouse is over label
     auto item = ui->chart->itemAt(event->localPos());
     if (item != 0)  // item found
@@ -361,6 +353,10 @@ void LineGraphWidget::mouseMoved (QMouseEvent *  event)
         }
     }
 
+    // get mouse position in graph coordinates
+    double x = ui->chart->xAxis->pixelToCoord(event->pos().x());
+    double y = ui->chart->yAxis->pixelToCoord(event->pos().y());
+
     // mouse outside of graph:
     // -> delete text of coordText
     auto xRange = ui->chart->xAxis->range();
@@ -390,6 +386,11 @@ void LineGraphWidget::mouseMoved (QMouseEvent *  event)
     ui->chart->replot();
 }
 
+// adapt coordText position when resizing
+void LineGraphWidget::resizeEvent(QResizeEvent* event)
+{
+    coordText->position->setCoords(ui->chart->width()-60, ui->chart->height()-17);
+}
 
 void LineGraphWidget::dataSelected()
 {
@@ -591,7 +592,9 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
 
     // get time of last measurement
     // is used later to determine distance to current measurement
-    int lastMeasKey = ui->chart->graph(0)->data()->end()->key;
+    auto endIt = ui->chart->graph(0)->data()->end();
+    endIt--;
+    int lastMeasKey = std::round(endIt->key);
 
     int xpos = timestamp-startTimestamp;
     for (int i=0; i<MVector::size; i++)
@@ -888,11 +891,11 @@ QPair<double, double> LineGraphWidget::getLabelYCoords(bool isUserDefined)
 {
     auto yRange = ui->chart->yAxis->range();
 
-    double yBaseHeight = (yRange.upper-yRange.lower) / (1.0+labelSpace);
+    double yBaseHeight = (yRange.upper-yRange.lower) * (1.0-labelSpace);
 
     if (isUserDefined)
-        return QPair<double, double>(yRange.upper - labelSpace / 2.0 * yBaseHeight, yRange.upper);
+        return QPair<double, double>(yRange.upper - labelSpace / 3.3 * yBaseHeight, yRange.upper);
     else
-        return QPair<double, double>(yRange.upper - labelSpace * yBaseHeight, yRange.upper - labelSpace / 2.0 * yBaseHeight);
+        return QPair<double, double>(yRange.upper - labelSpace / 3.0 * 2.0 * yBaseHeight, yRange.upper - labelSpace / 2.7 * yBaseHeight);
 }
 

@@ -80,7 +80,7 @@ private:
     Ui::LineGraphWidget *ui;
     const int defaultXWidth = 30; // defines default range of xAxis: (-1; defaultXWidth)
     const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
-    const double labelSpace = 0.2;
+    const double labelSpace = 0.3;
 
     const double labelRatio = 2.0/50.0;
 
@@ -117,6 +117,8 @@ private slots:
     void replot(uint timestamp=0);
     void mousePressed(QMouseEvent*);
     void mouseMoved	(QMouseEvent *  event);
+    void resizeEvent(QResizeEvent*);
+
     void dataSelected();
     void onXRangeChanged(QCPRange range);
 
