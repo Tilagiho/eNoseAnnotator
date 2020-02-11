@@ -308,7 +308,7 @@ void LineGraphWidget::mouseMoved (QMouseEvent *  event)
                     for (auto labelRect : userDefinedClassLabels[xpos].second)
                         if (focusedRect == labelRect)
                         {
-                            labelString = userDefinedClassLabels[xpos].first;
+                            labelString = "User Annotation:\n" + userDefinedClassLabels[xpos].first;
                             break;
                         }
                 }
@@ -317,7 +317,7 @@ void LineGraphWidget::mouseMoved (QMouseEvent *  event)
                     for (auto labelRect : detectedClassLabels[xpos].second)
                         if (focusedRect == labelRect)
                         {
-                            labelString = detectedClassLabels[xpos].first;
+                            labelString = "Detected Annotation:\n" + detectedClassLabels[xpos].first;
                             break;
                         }
                 }
@@ -604,7 +604,6 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
             ui->chart->graph(i)->addData(xpos, measurement.array[i]);
         else // isAbsolute: values / kOhm
             ui->chart->graph(i)->addData(xpos, measurement.array[i] / 1000);
-
 
         // emit sensor failures
         if (useLimits && (measurement.array[i] < minVal || measurement.array[i] > maxVal))
