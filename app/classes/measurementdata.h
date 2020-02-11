@@ -234,7 +234,7 @@ private:
 
     QString version = "1.0";
 
-    QString saveFilename = "";
+    QString saveFilename = "./data/";
 
     /*
      * extracts measurement data from line

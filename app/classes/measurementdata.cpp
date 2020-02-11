@@ -78,6 +78,13 @@ void MeasurementData::clear()
     setComment("");
     setSensorId("");
 
+    // take filename away from saveFilename so the directory stays
+    QStringList pathList = saveFilename.split("/");
+    if (!pathList.isEmpty())
+        pathList.removeLast();
+    else
+        saveFilename = "data";
+    saveFilename = pathList.join("/") + "/";
 
     setDataChanged(false);
 }
@@ -373,7 +380,7 @@ bool MeasurementData::saveData(QWidget *widget, QString filename)
  */
 bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
 {
-    QString path = (saveFilename != "") ? saveFilename : "./data";
+    QString path = (saveFilename != "./data/") ? saveFilename : "./data/";
     QString fileName = QFileDialog::getSaveFileName(widget, QString("Save data"), path, "Data files (*.csv)");
 
     if (fileName.split(".").last() != "csv")
@@ -394,6 +401,10 @@ bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
  */
 bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVector> map)
 {
+    // filename is directory & based on saveFilename
+    if (filename.endsWith("/") && filename == saveFilename)
+        return saveData(widget, map);
+
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly))
     {
