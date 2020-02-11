@@ -4,6 +4,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++11
 
+
+
 # QMAKE_LFLAGS += -no-pie
 
 # The following define makes your compiler emit warnings if you use
@@ -35,10 +37,12 @@ SOURCES += \
     classes/enosecolor.cpp \
     classes/measurementdata.cpp \
     classes/mvector.cpp \
+    classes/torchclassifier.cpp \
     classes/usbdatasource.cpp \
     lib/comboboxitemdelegate.cpp \
     main.cpp \
     qcustomplot/qcustomplot.cpp \
+    widgets/acirclewidget.cpp \
     widgets/addattributedialog.cpp \
     widgets/attributeeditor.cpp \
     widgets/bargraphwidget.cpp \
@@ -62,9 +66,11 @@ HEADERS += \
     classes/enosecolor.h \
     classes/measurementdata.h \
     classes/mvector.h \
+    classes/torchclassifier.h \
     classes/usbdatasource.h \
     lib/comboboxitemdelegate.h \
     qcustomplot/qcustomplot.h \
+    widgets/acirclewidget.h \
     widgets/addattributedialog.h \
     widgets/attributeeditor.h \
     widgets/bargraphwidget.h \
@@ -82,6 +88,7 @@ HEADERS += \
 
 
 FORMS += \
+    widgets/acirclewidget.ui \
     widgets/addattributedialog.ui \
     widgets/attributeeditor.ui \
     widgets/bargraphwidget.ui \
@@ -109,3 +116,11 @@ DISTFILES += \
 
 RESOURCES += \
     eNoseAnnotator.qrc
+
+unix:!macx: LIBS += -L$$PWD/lib/libtorch/lib/ -ltorch -lc10
+
+INCLUDEPATH += $$PWD/lib/libtorch/include
+DEPENDPATH += $$PWD/lib/libtorch/include
+
+INCLUDEPATH += $$PWD/lib/libtorch/include/torch/csrc/api/include
+DEPENDPATH += $$PWD/lib/libtorch/include/torch/csrc/api/include

@@ -731,7 +731,7 @@ bool MeasurementData::getData(QString line)
         }
         if (query.size() > MVector::size+1)
         {
-            if (aClass::isClassString(query[MVector::size+1]))
+            if (Annotation::isAnnotationString(query[MVector::size+1]))
                 vector.userAnnotation = Annotation::fromString(query[MVector::size+1]);
             else
             {
@@ -740,7 +740,7 @@ bool MeasurementData::getData(QString line)
         }
         if (query.size() > MVector::size+2)
         {
-            if (aClass::isClassString(query[MVector::size+2]))
+            if (Annotation::isAnnotationString(query[MVector::size+2]))
                 vector.detectedAnnotation = Annotation::fromString(query[MVector::size+2]);
             else
             {
@@ -789,7 +789,7 @@ bool MeasurementData::getData(QString line)
         if (query.size() > MVector::size+2)
         {
             QString classString = query[MVector::size+2];
-            if (aClass::isClassString(classString))
+            if (Annotation::isAnnotationString(classString))
                 vector.detectedAnnotation = Annotation::fromString(classString);
             else
             {
@@ -974,6 +974,17 @@ std::array<bool, MVector::size> MeasurementData::sensorFailureArray(QString fail
     return failureArray;
 }
 
+void MeasurementData::setUserAnnotation(Annotation annotation, uint timestamp)
+{
+    data[timestamp].userAnnotation = annotation;
+    selectedData[timestamp].userAnnotation = annotation;
+
+    setDataChanged(true);
+    QMap<uint, MVector> changedMap;
+    changedMap[timestamp] = data[timestamp];
+    emit labelsUpdated(changedMap);
+}
+
 void MeasurementData::setUserAnnotationOfSelection(Annotation annotation)
 {
     for (auto timestamp : selectedData.keys())
@@ -985,6 +996,17 @@ void MeasurementData::setUserAnnotationOfSelection(Annotation annotation)
 
     setDataChanged(true);
     emit labelsUpdated(selectedData);
+}
+
+void MeasurementData::setDetectedAnnotation(Annotation annotation, uint timestamp)
+{
+    data[timestamp].detectedAnnotation = annotation;
+    selectedData[timestamp].detectedAnnotation = annotation;
+
+    setDataChanged(true);
+    QMap<uint, MVector> changedMap;
+    changedMap[timestamp] = data[timestamp];
+    emit labelsUpdated(changedMap);
 }
 
 void MeasurementData::setDetectedAnnotationOfSelection(Annotation annotation)

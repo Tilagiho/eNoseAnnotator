@@ -18,8 +18,23 @@ public:
     explicit ClassifierWidget(QWidget *parent = nullptr);
     ~ClassifierWidget();
 
+    bool getIsLive() const;
+
+    bool isSelectionAnnotation = false;
+
+public slots:
+    void setAnnotation (Annotation annotation);
+    void setClassifier (QString name, QStringList classNames,bool isInputAbsolute);
+    void setLiveClassification (bool isLive);
+    void setInfoString(QString string);
+    void clear();
+    void clearAnnotation();
+
 private:
     Ui::ClassifierWidget *ui;
+    bool isLive = true;
+
+    void setHidden(bool visible);
 };
 
 #endif // CLASSIFIERWIDGET_H

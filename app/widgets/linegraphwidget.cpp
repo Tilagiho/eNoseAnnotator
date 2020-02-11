@@ -617,6 +617,11 @@ void LineGraphWidget::clearGraph(bool replot)
     userDefinedClassLabels.clear();
     detectedClassLabels.clear();
 
+    // clear helping variables
+    highPoint = QPointF{-1000.0, -1.0};
+    lowPoint = QPointF {-1000.0, 1000.0};
+    lastRange = QCPRange{0.0, 0.0};
+
     if (replot)
         ui->chart->replot();
 }
@@ -744,6 +749,17 @@ void LineGraphWidget::setLabel(int xpos, Annotation annotation, bool isUserAnnot
     if (!annotation.isEmpty())
     {
         QList<aClass> classList = annotation.getClasses();
+
+        // remove numeric classes with value == 0.0 from classList
+        // delete labels with value == 0.0
+        for (int i=0; i<classList.size(); i++)
+        {
+            if (classList[i].getType() == aClass::Type::NUMERIC &&  qFuzzyIsNull(classList[i].getValue()))
+            {
+                classList.removeAt(i);
+                i--;    // decrement i in order to keep i the same value for the next turn
+            }
+        }
 
         // remove old label
         if (labelMap->contains(xpos))

@@ -9,6 +9,7 @@
 #include "../classes/measurementdata.h"
 #include "../classes/datasource.h"
 #include "../classes/mvector.h"
+#include "../classes/torchclassifier.h"
 #include "linegraphwidget.h"
 #include "bargraphwidget.h"
 #include "infowidget.h"
@@ -43,13 +44,15 @@ private slots:
 
     void on_actionReset_triggered();
 
-    void on_actionClassify_selection_triggered();
+    void on_actionAnnotate_selection_triggered();
 
     void on_actionSet_detected_class_of_selection_triggered();
 
     void on_actionSave_triggered();
 
     void on_actionAbout_triggered();
+
+    void on_actionLoadClassifier_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -68,6 +71,7 @@ private:
 
     MeasurementData *mData = nullptr;
     DataSource *source = nullptr;
+    TorchClassifier *classifier = nullptr;
 
     void closeEvent (QCloseEvent *event);
 

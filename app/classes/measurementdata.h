@@ -167,10 +167,21 @@ public:
      */
     void setUserAnnotationOfSelection(Annotation annotation);
 
+
+    /*
+     * set the user defined class at timestamp
+     */
+    void setUserAnnotation(Annotation annotation, uint timestamp);
+
     /*
      * set the detected class of the current selection
      */
     void setDetectedAnnotationOfSelection(Annotation annotation);
+
+    /*
+     * set the detected defined class at timestamp
+     */
+    void setDetectedAnnotation(Annotation annotation, uint timestamp);
 
     static QString getTimestampStringFromUInt(uint timestamp);
     static uint getTimestampUIntfromString (QString string);

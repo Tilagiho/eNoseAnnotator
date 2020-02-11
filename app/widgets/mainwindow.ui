@@ -102,7 +102,7 @@
     <property name="title">
      <string>Annotation</string>
     </property>
-    <addaction name="actionClassify_selection"/>
+    <addaction name="actionAnnotate_selection"/>
     <addaction name="actionSet_detected_class_of_selection"/>
    </widget>
    <widget class="QMenu" name="menuClassifier">
@@ -154,7 +154,7 @@
    <addaction name="actionStart"/>
    <addaction name="actionReset"/>
    <addaction name="separator"/>
-   <addaction name="actionClassify_selection"/>
+   <addaction name="actionAnnotate_selection"/>
    <addaction name="separator"/>
    <addaction name="actionSettings"/>
    <addaction name="actionSet_USB_Connection"/>
@@ -283,7 +283,7 @@
     <string>General Settings</string>
    </property>
   </action>
-  <action name="actionClassify_selection">
+  <action name="actionAnnotate_selection">
    <property name="icon">
     <iconset resource="../eNoseAnnotator.qrc">
      <normaloff>:/icons/label</normaloff>:/icons/label</iconset>

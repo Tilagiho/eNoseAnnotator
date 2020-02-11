@@ -124,6 +124,10 @@ bool aClass::isClassString (QString string)
         QString name = match.captured("name");
         QString value = match.captured("value");
 
+        // old version
+        if (name.contains('['))
+            name = name.split('[')[0];
+
         auto name_match = class_name_regex.match(name);
 
         bool valueIsDouble;
@@ -175,10 +179,16 @@ aClass aClass::fromString(QString string)
     {
         name = match.captured("name");
 
+        // old version
+        if (name.contains('['))
+            name = name.split('[')[0];
+
+        auto name_match = class_name_regex.match(name);
+
         bool valueIsDouble;
         double value = match.captured("value").toDouble(&valueIsDouble);
 
-        if (valueIsDouble)
+        if (name_match.hasMatch() && valueIsDouble)
             return aClass(name, value);
 
     }
@@ -224,7 +234,7 @@ void aClass::setType(Type type)
         value = 1.0;
     // unknown
     else
-        assert(false && "Unknown annotation type!");
+        Q_ASSERT(false && "Unknown annotation type!");
 }
 
 void aClass::setValue(double value)
@@ -244,7 +254,7 @@ QString aClass::getClassTypeName(Type type)
     else if (type == Type::NUMERIC)
         return  QString("numeric");
     else
-        assert (false && "enum case not implemented!");
+        Q_ASSERT (false && "enum case not implemented!");
 }
 
 aClass::Type aClass::getClassType(QString typeName)
@@ -254,7 +264,7 @@ aClass::Type aClass::getClassType(QString typeName)
     else if (typeName == "numeric")
         return Type::NUMERIC;
     else
-        assert (false && "enum case not implemented!");
+        Q_ASSERT (false && "enum case not implemented!");
 }
 
 QColor aClass::getColor(aClass aclass)

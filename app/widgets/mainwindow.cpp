@@ -3,6 +3,7 @@
 
 #include "../classes/datasource.h"
 #include "../classes/usbdatasource.h"
+#include "../classes/mvector.h"
 
 #include "functionalisationdialog.h"
 #include "generalsettings.h"
@@ -34,7 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionReset->setEnabled(false);
     ui->actionStop->setEnabled(false);
 
-    ui->actionClassify_selection->setEnabled(false);
+    ui->actionAnnotate_selection->setEnabled(false);
     ui->actionSet_detected_class_of_selection->setEnabled(false);
 
     // user can only set detected class in debug mode
@@ -75,15 +76,28 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::selectionCleared, vectorBarGraph, &BarGraphWidget::clearBars); // clear vector in vectorBarGraph
     connect(mData, &MeasurementData::selectionCleared, funcBarGraph, &BarGraphWidget::clearBars); // clear vector in funcBarGraph
     connect(mData, &MeasurementData::lgClearSelection, relLineGraph, &LineGraphWidget::clearSelection);
+    connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector selectionVector){
+        if (classifier != nullptr)
+        {
+            auto funcVector = selectionVector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
+
+            Annotation annotation = classifier->getAnnotation(funcVector);
+            classifierWidget->setAnnotation(annotation);
+            classifierWidget->setInfoString("Class of selection");
+            classifierWidget->isSelectionAnnotation = true;
+        }
+    }); // classify selection
+    connect(mData, &MeasurementData::selectionCleared, classifierWidget, &ClassifierWidget::clearAnnotation); // clear selection classification
+
 
     connect(mData, &MeasurementData::labelsUpdated, relLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
 
     connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::array<bool, MVector::size>){
-        ui->actionClassify_selection->setEnabled(true);
+        ui->actionAnnotate_selection->setEnabled(true);
         ui->actionSet_detected_class_of_selection->setEnabled(true);
     }); // show classification actions
     connect(mData, &MeasurementData::selectionCleared, this, [this](){
-        ui->actionClassify_selection->setEnabled(false);
+        ui->actionAnnotate_selection->setEnabled(false);
         ui->actionSet_detected_class_of_selection->setEnabled(false);
     }); // hide classification actions
 
@@ -101,6 +115,22 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::dataSet, relLineGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
     connect(mData, &MeasurementData::setReplotStatus, relLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
     connect(mData, &MeasurementData::setReplotStatus, absLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
+    connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, bool){
+        // no classifier loaded, no live measurement or current annotation is from selection
+        // -> don't classify
+        bool measRunning = source != nullptr && source->status() == DataSource::Status::RECEIVING_DATA;
+        if (classifier == nullptr || (measRunning && !classifierWidget->getIsLive()) || classifierWidget->isSelectionAnnotation)
+            return;
+
+        auto funcVector = vector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
+        Annotation annotation = classifier->getAnnotation(funcVector);
+
+        mData->setDetectedAnnotation(annotation, timestamp);
+
+        classifierWidget->setAnnotation(annotation);
+        classifierWidget->setInfoString("Live classification is running...");
+    });     // live classify
+
 
     // measurement data changed
     connect(mData, &MeasurementData::dataChangedSet, this, [this](bool dataChanged){
@@ -259,6 +289,8 @@ MainWindow::~MainWindow()
     delete ui;
 
     delete mData;
+    delete source;
+    delete classifier;
 }
 
 void MainWindow::setTitle(bool dataChanged)
@@ -534,7 +566,7 @@ void MainWindow::on_actionReset_triggered()
     source->reset();
 }
 
-void MainWindow::on_actionClassify_selection_triggered()
+void MainWindow::on_actionAnnotate_selection_triggered()
 {
     Q_ASSERT(!mData->getSelectionMap().isEmpty());
 
@@ -802,4 +834,69 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 //        classifierWidget->resize(newWidth, classifierWidget->size().width());
   }
   return QWidget::eventFilter(obj, event);
+}
+
+void MainWindow::on_actionLoadClassifier_triggered()
+{
+    // make data directory
+    if (!QDir("classifiers").exists())
+        QDir().mkdir("classifiers");
+
+    // get path to classifier
+    QString filename = QFileDialog::getOpenFileName(this, tr("Load smell classifier"), "./classifiers/", "TorchScript Files (*.pt)");
+    if (filename == "")
+        return;
+
+    if (classifier != nullptr)
+        delete classifier;
+
+    bool loadOk;
+    QString errorString;
+    classifier = new TorchClassifier(this, filename, &loadOk, &errorString);
+
+    if (!loadOk)
+    {
+        QMessageBox::critical(this, "Error loading model", errorString);
+        delete classifier;
+        classifier = nullptr;
+        return;
+    }
+
+    classifierWidget->setClassifier(classifier->getName(), classifier->getClassNames(), classifier->getIsInputAbsolute());
+
+    if (!mData->getAbsoluteData().empty())
+    {
+        auto ans = QMessageBox::question(this, "Classify data", "Do you want to classify the current measurement data?");
+
+        if (ans == QMessageBox::StandardButton::Yes)
+        {
+            // get measurement data
+            QMap<uint, MVector> measDataMap;
+            if (classifier->getIsInputAbsolute())
+                measDataMap = mData->getAbsoluteData();
+            else
+                measDataMap = mData->getRelativeData();
+
+            // classify
+            for (uint timestamp : measDataMap.keys())
+            {
+                auto funcVector = measDataMap[timestamp].getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
+                Annotation annotation = classifier->getAnnotation(funcVector);
+                mData->setDetectedAnnotation(annotation, timestamp);
+            }
+        }
+    }
+
+    // add classifier classes to mData
+    for (QString className : classifier->getClassNames())
+    {
+        aClass c{className};
+
+        if (!aClass::staticClassSet.contains(c))
+            mData->addClass(c);
+    }
+
+    // TODO
+    // classify data
+    // start live classification
 }

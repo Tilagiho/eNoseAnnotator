@@ -65,6 +65,8 @@ public:
      * WARNING: only use this function with relative vector
      */
     MVector getAbsoluteVector(MVector baseVector);
+
+    std::vector<double> getFuncVector(std::array<int, MVector::size> functionalisation, std::array<bool, MVector::size> sensorFailures);
 };
 
 #endif // MVECTOR_H
