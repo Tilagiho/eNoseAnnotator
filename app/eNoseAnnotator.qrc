@@ -15,5 +15,6 @@
         <file alias="disconnected">images/icons8-usb-getrennt-100-3.png</file>
         <file alias="recording">images/icons8-undefined-500.png</file>
         <file alias="baseVector">images/hourglass-1.png</file>
+        <file alias="label">images/price-tag.png</file>
     </qresource>
 </RCC>
