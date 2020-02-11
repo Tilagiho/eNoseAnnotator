@@ -2,25 +2,18 @@
 // important
 
 // optional
-- move multiMode to vector
 - free zoom
 - stop measurement based on gradient, ui symbols for status
-- selected/ deselect graph visibility
 - action to continue measurements
-
 
 // features
 - line graphs:
     - line graphs for functionalisation averages
     -> default: use functionalisation averages, option to see all channel values
     - channel colors based on functionalisation colors
-    - tool: select graph of single channel/ functionalisation
-    -> see number + graph in forefront
-    - tool: show current x/y position of mouse when hovering over line graphs
+
 - TorchScript support
-- support two annotation types: multiple aclasses with and without values:
-    - classes:
-        - add annotation class
+
 - reimplement color schemes:
     - better color palette
     - channel colors based on functionalisation

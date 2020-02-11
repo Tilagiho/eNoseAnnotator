@@ -11,9 +11,6 @@ LineGraphWidget::LineGraphWidget(QWidget *parent, uint startTime) :
 {
     ui->setupUi(this);
 
-    // init start timestamp
-    startTimestamp = startTime;
-
     // zero init sensorFailureFlags
     for (int i=0; i<MVector::size; i++)
         sensorFailureFlags[i] = false;
@@ -172,38 +169,75 @@ void LineGraphWidget::setMaxVal(double val)
 
 void LineGraphWidget::replot(uint timestamp)
 {
+    // replots are suspended
     if (!replotStatus)
         return;
 
-    //!set new y-range
+    // get current xaxis.range
+    auto xRange = ui->chart->xAxis->range();
+
+//    // last and current range are bigger than full graph range
+//    // -> no replot necessary
+//    bool foundRange;
+//    auto graphRange = ui->chart->graph(0)->data()->keyRange(foundRange);
+//    if (foundRange && graphRange.lower < xRange.lower && graphRange.upper > xRange.upper && graphRange.lower < lastRange.lower && graphRange.upper > lastRange.upper)
+//        return;
+
+    // set new y-range
     double y_lower = 1000;
     double y_upper = 0;
 
-    //!get current xaxis.range
-    double x_axis_range_lower = ui->chart->xAxis->range().lower;
-    double x_axis_range_upper = ui->chart->xAxis->range().upper;
+    // lowest point is in range
+    bool lowPointInXRange = lowPoint.x() >= xRange.lower && lowPoint.x() <= xRange.upper;
+    if (lowPointInXRange)
+        y_lower = lowPoint.y();
 
-    //iterate through graph(i) data keys and values
-    for (int i = 0; i < ui->chart->graphCount(); ++i) {
-        // ignore invisible graphs
-        if (!ui->chart->graph(i)->visible())
-            continue;
+    // highest point in range
+    bool highPointInXRange = highPoint.x() >= xRange.lower && highPoint.x() <= xRange.upper;
+    if (highPointInXRange)
+        y_upper = highPoint.y();
 
-        QCPGraphDataContainer::const_iterator it = ui->chart->graph(i)->data()->constBegin();
-        QCPGraphDataContainer::const_iterator itEnd = ui->chart->graph(i)->data()->constEnd();
-        while (it != itEnd)
+    // is checking all points in xRange necessary or is it sufficient only to consider new points?
+    bool checkAllPoints = !lowPointInXRange || !highPointInXRange;
+
+    // iterate through all data points of first graph
+    QCPGraphDataContainer::const_iterator it = ui->chart->graph(0)->data()->constBegin();
+    QCPGraphDataContainer::const_iterator itEnd = ui->chart->graph(0)->data()->constEnd();
+
+    int index = 0;
+    while (it != itEnd)
+    {
+        // check if data point is in xRange,
+        // if checkAllPoints == false, check if point was NOT in last range
+        bool inXRange = it->key >= xRange.lower && it->key <= xRange.upper;
+        if (inXRange && (checkAllPoints || (it->key < lastRange.lower || it->key > lastRange.upper)))
         {
-          if (it->key >= x_axis_range_lower && it->key <= x_axis_range_upper ){
-              if (it->value < y_lower ){
-                  y_lower = it->value;
-              }
-              if (it->value > y_upper ){
-                  y_upper = it->value;
-              }
-          }
-          ++it;
+            // loop through all graphs and check for new high/ low points at index (of it->key)
+            for (int i = 0; i < ui->chart->graphCount(); i++)
+            {
+                // ignore invisible graphs
+                if (!ui->chart->graph(i)->visible())
+                    continue;
+
+                 auto data  = ui->chart->graph(i)->data()->at(index);
+
+                 if (data->value < y_lower )
+                 {
+                     y_lower = data->value;
+                     lowPoint = QPointF{data->key, data->value};
+                 }
+                 if (data->value > y_upper )
+                 {
+                     y_upper = data->value;
+                     highPoint = QPointF{data->key, data->value};
+                 }
+            }
         }
+
+        it++;
+        index++;
     }
+
     // log plot for big y-intervals
     if (y_upper-y_lower > 1000.0)
     {
@@ -237,8 +271,11 @@ void LineGraphWidget::replot(uint timestamp)
     ui->chart->yAxis->setRange(y_lower, y_upper);
 
     // move x-range
-    if (autoMoveGraph && timestamp != 0 && timestamp >= x_axis_range_upper+startTimestamp-4 && timestamp <= x_axis_range_upper+startTimestamp)
-        ui->chart->xAxis->setRange(x_axis_range_lower+2, x_axis_range_upper+2);
+    if (autoMoveGraph && timestamp != 0 && timestamp >= xRange.upper+startTimestamp-4 && timestamp <= xRange.upper+startTimestamp)
+        ui->chart->xAxis->setRange(xRange.lower+2, xRange.upper+2);
+
+    // store xRange for next call
+    lastRange = xRange;
 
     redrawLabels();
 

@@ -82,7 +82,10 @@ private:
     const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
     const double labelSpace = 0.3;
 
-    const double labelRatio = 2.0/50.0;
+    // variables to optimise replot
+    QPointF highPoint {-1000.0, -1.0};
+    QPointF lowPoint {-1000.0, 1000.0};
+    QCPRange lastRange {0.0, 0.0};
 
     bool useLimits = true;
     bool isAbsolute = false;
