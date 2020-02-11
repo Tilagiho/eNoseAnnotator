@@ -59,6 +59,16 @@ Annotation Annotation::fromString(QString string)
     return Annotation(classes);
 }
 
+bool Annotation::isAnnotationString(QString string)
+{
+    for (QString classString : string.split(','))
+        if (!aClass::isClassString(classString))
+            return false;
+
+    return true;
+}
+
+
 const QList<aClass> Annotation::getClasses() const
 {
     QList<aClass> classList = classSet.toList();

@@ -416,7 +416,7 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
     QTextStream out(&file);
     // write info
     // version
-    out << "#measurement data v" << version << "\n";
+    out << "#measurement data v" << savefileFormatVersion << "\n";
 
     // sensorId
     out << "#sensorId:" << sensorId << "\n";
@@ -570,10 +570,10 @@ bool MeasurementData::loadData(QWidget* widget)
         }
         if (firstLine.startsWith("#measurement data v"))
         {
-            version = firstLine.right(firstLine.length()-QString("#measurement data v").length());
-            version = version.split(";").join("");
+            savefileFormatVersion = firstLine.right(firstLine.length()-QString("#measurement data v").length());
+            savefileFormatVersion = savefileFormatVersion.split(";").join("");
         } else
-            version = "0.1";
+            savefileFormatVersion = "0.1";
 
         emit setReplotStatus(false);
 
@@ -708,7 +708,7 @@ bool MeasurementData::getData(QString line)
 
     // support old format:
     // - measurement values stored as relative vectors
-    if (version == "0.1")
+    if (savefileFormatVersion == "0.1")
     {
         QStringList query = line.split(";");
 
@@ -779,7 +779,7 @@ bool MeasurementData::getData(QString line)
         if (query.size() > MVector::size+1)
         {
             QString userString = query[MVector::size+1];
-            if (aClass::isClassString(userString))
+            if (Annotation::isAnnotationString(userString))
                 vector.userAnnotation = Annotation::fromString(userString);
             else
             {

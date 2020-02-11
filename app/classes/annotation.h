@@ -19,6 +19,8 @@ public:
 
     static Annotation fromString(QString string);
 
+    static bool isAnnotationString(QString string);
+
     const QList<aClass> getClasses() const;
 
     const QList<QColor> getColor() const;

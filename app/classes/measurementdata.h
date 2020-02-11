@@ -232,7 +232,7 @@ private:
     std::array<bool, 64> sensorFailures;
     QList<aClass> classList;
 
-    QString version = "1.0";
+    QString savefileFormatVersion = "1.0";
 
     QString saveFilename = "./data/";
 

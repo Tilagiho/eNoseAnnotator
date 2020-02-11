@@ -209,7 +209,6 @@ void ClassSelector::on_deleteButton_clicked()
 
 void ClassSelector::setButtonsEnabled(bool state)
 {
-    ui->okButton->setEnabled(state);
     ui->editButton->setEnabled(state);
     ui->deleteButton->setEnabled(state);
 }
@@ -260,9 +259,6 @@ void ClassSelector::on_tableWidget_itemChanged(QTableWidgetItem *item)
             Q_ASSERT(classList.contains(c));
             classList.removeAll(c);
         }
-
-        // set status of acceptance button
-        ui->okButton->setEnabled(ui->tableWidget->rowCount() > 1);
     } else if (item->column() == 1)
     {
         // last row changed (no class selected for value)
