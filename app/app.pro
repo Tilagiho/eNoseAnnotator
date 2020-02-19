@@ -117,7 +117,7 @@ DISTFILES += \
 RESOURCES += \
     eNoseAnnotator.qrc
 
-unix:!macx: LIBS += -L$$PWD/lib/libtorch/lib/ -ltorch -lc10
+unix:!macx: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10
 
 INCLUDEPATH += $$PWD/lib/libtorch/include
 DEPENDPATH += $$PWD/lib/libtorch/include
