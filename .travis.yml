@@ -13,8 +13,7 @@ matrix:
       - gcc
     script:
       - wget -c -nv https://download.pytorch.org/libtorch/cu101/libtorch-cxx11-abi-shared-with-deps-1.4.0.zip
-      - ls
-      - ls eNoseAnnotator/app/lib
+      - unzip -q -o libtorch-cxx11-abi-shared-with-deps-1.4.0.zip  -d app/lib/
       - qmake CONFIG+=release PREFIX=/usr
       - make -j$(nproc)
       - make INSTALL_ROOT=eNoseAnnotator -j$(nproc) install ; find eNoseAnnotator/
