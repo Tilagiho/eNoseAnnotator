@@ -10,7 +10,7 @@ matrix:
       - sudo apt-get -y install qt510base  qt510serialport libgl1-mesa-dev tree
       - source /opt/qt*/bin/qt*-env.sh
     compiler:
-      - gcc
+      - gcc-5
     script:
       - wget -c -nv https://download.pytorch.org/libtorch/cu101/libtorch-cxx11-abi-shared-with-deps-1.4.0.zip
       - unzip -q -o libtorch-cxx11-abi-shared-with-deps-1.4.0.zip  -d app/lib/
