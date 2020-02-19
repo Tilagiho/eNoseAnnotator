@@ -116,19 +116,25 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::setReplotStatus, relLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
     connect(mData, &MeasurementData::setReplotStatus, absLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
     connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, bool){
-        // no classifier loaded, no live measurement or current annotation is from selection
+        // no classifier loaded or no live measurement running
         // -> don't classify
         bool measRunning = source != nullptr && source->status() == DataSource::Status::RECEIVING_DATA;
-        if (classifier == nullptr || (measRunning && !classifierWidget->getIsLive()) || classifierWidget->isSelectionAnnotation)
+        if (classifier == nullptr || (measRunning && !classifierWidget->getIsLive()))
             return;
 
+        // get annotation from the classifier
         auto funcVector = vector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
         Annotation annotation = classifier->getAnnotation(funcVector);
 
+        // set annotation
         mData->setDetectedAnnotation(annotation, timestamp);
 
-        classifierWidget->setAnnotation(annotation);
-        classifierWidget->setInfoString("Live classification is running...");
+        // don't show in classifier widget if selection is made
+        if (!classifierWidget->isSelectionAnnotation)
+        {
+            classifierWidget->setAnnotation(annotation);
+            classifierWidget->setInfoString("Live classification is running...");
+        }
     });     // live classify
 
 
@@ -201,7 +207,7 @@ MainWindow::MainWindow(QWidget *parent)
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
 
         // save image
-        if (filename != "")
+        if (!filename.isEmpty())
         {
             // add extension if none was set
             QStringList splitList = filename.split(".");
@@ -225,7 +231,7 @@ MainWindow::MainWindow(QWidget *parent)
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
 
         // save image
-        if (filename != "")
+        if (!filename.isEmpty())
         {
             // add extension if none was set
             QStringList splitList = filename.split(".");
@@ -259,7 +265,7 @@ MainWindow::MainWindow(QWidget *parent)
         QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
 
         // save image
-        if (filename != "")
+        if (!filename.isEmpty())
         {
             // add extension if none was set
             QStringList splitList = filename.split(".");
