@@ -3,15 +3,31 @@ matrix:
   include:
   - os: linux
     dist: trusty
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     before_install:
+      - eval "${MATRIX_EVAL}"
+      - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-7 /usr/bin/gcc
+      - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-7 /usr/bin/g++
       - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
       - sudo apt-get update -qq
     install:
       - sudo apt-get -y install qt510base  qt510serialport libgl1-mesa-dev tree
-      - source /opt/qt*/bin/qt*-env.sh
+      - source /opt/qt*/bin/qt*-env.sh      
+      - wget -c -nv https://download.pytorch.org/libtorch/cu101/libtorch-cxx11-abi-shared-with-deps-1.4.0.zip
+      - unzip -q -o libtorch-cxx11-abi-shared-with-deps-1.4.0.zip  -d app/lib/
     compiler:
-      - gcc
+      - gcc-7
+    sudo: required
     script:
+      - gcc --version
+      - g++ --version
       - qmake CONFIG+=release PREFIX=/usr
       - make -j$(nproc)
       - make INSTALL_ROOT=eNoseAnnotator -j$(nproc) install ; find eNoseAnnotator/
@@ -25,6 +41,7 @@ matrix:
       - cp eNoseAnnotator*.AppImage eNoseAnnotator-continuous-linux/
       - cp /home/travis/build/Tilagiho/eNoseAnnotator/misc/presets/* eNoseAnnotator-continuous-linux/presets
       - zip -r eNoseAnnotator-continuous-linux.zip eNoseAnnotator-continuous-linux/*
+     
     
     after_success:
       # find eNoseAnnotator -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
