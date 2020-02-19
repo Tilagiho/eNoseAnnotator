@@ -6,9 +6,10 @@ matrix:
     before_install:
       - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
       - sudo apt-get update -qq
+      - sudo apt-get -y install gcc-5 g++-5
     install:
       - sudo apt-get -y install qt510base  qt510serialport libgl1-mesa-dev tree
-      - sudo apt-get gcc-5 g++-5
+
       - source /opt/qt*/bin/qt*-env.sh      
       - wget -c -nv https://download.pytorch.org/libtorch/cu101/libtorch-cxx11-abi-shared-with-deps-1.4.0.zip
       - unzip -q -o libtorch-cxx11-abi-shared-with-deps-1.4.0.zip  -d app/lib/
