@@ -8,10 +8,11 @@ matrix:
         sources:
           - ubuntu-toolchain-r-test
         packages:
-          - g++-5
+          - g++-7
       env:
-         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     before_install:
+      - eval "${MATRIX_EVAL}"
       - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
       - sudo apt-get update -qq
     install:
@@ -20,7 +21,7 @@ matrix:
       - wget -c -nv https://download.pytorch.org/libtorch/cu101/libtorch-cxx11-abi-shared-with-deps-1.4.0.zip
       - unzip -q -o libtorch-cxx11-abi-shared-with-deps-1.4.0.zip  -d app/lib/
     compiler:
-      - gcc-5
+      - gcc
     sudo: required
     script:
       - gcc --version
