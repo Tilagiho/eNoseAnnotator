@@ -3,13 +3,12 @@ matrix:
   include:
   - os: linux
     dist: trusty
-        - os: linux
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-5
+    addons:
+      apt:
+        sources:
+          - ubuntu-toolchain-r-test
+        packages:
+          - g++-5
       env:
          - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
     before_install:
@@ -39,8 +38,7 @@ matrix:
       - cp eNoseAnnotator*.AppImage eNoseAnnotator-continuous-linux/
       - cp /home/travis/build/Tilagiho/eNoseAnnotator/misc/presets/* eNoseAnnotator-continuous-linux/presets
       - zip -r eNoseAnnotator-continuous-linux.zip eNoseAnnotator-continuous-linux/*
-      
-
+     
     
     after_success:
       # find eNoseAnnotator -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
