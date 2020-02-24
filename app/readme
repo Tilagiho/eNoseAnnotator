@@ -28,3 +28,5 @@
 - reset filename after starting new measurement
 - widgets move when saving
 
+// ci
+- tavis ci: move to xenial

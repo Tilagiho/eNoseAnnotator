@@ -2,8 +2,11 @@
 #define SETSENSORFAILURESDIALOG_H
 
 #include <QtCore>
-#include <QDialog>
+#include <QtGui>
 #include <QCheckBox>
+#include <QDialog>
+#include <array>
+#include <vector>
 
 namespace Ui {
 class SetSensorFailuresDialog;

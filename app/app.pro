@@ -1,10 +1,9 @@
+TEMPLATE = app
 QT       += core gui serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++11
-
-
 
 # QMAKE_LFLAGS += -no-pie
 
@@ -117,7 +116,10 @@ DISTFILES += \
 RESOURCES += \
     eNoseAnnotator.qrc
 
+win32: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10
 unix:!macx: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10
+unix:!macx: QMAKE_RPATHDIR += $$PWD/lib/libtorch/lib
+
 
 INCLUDEPATH += $$PWD/lib/libtorch/include
 DEPENDPATH += $$PWD/lib/libtorch/include

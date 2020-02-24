@@ -8,6 +8,7 @@ You can use eNoseAnnotator without compiling any source code or installing any a
 ### On Windows:
 Download the windows archive from the assets of the latest release.
 Unpack the zip file where you want to use the program. Go into the the directory created and double-click "eNoseAnnotator.exe" in order to run the program.
+If you encounter an error message about missing .dll files, you need install the vc redistributable package by running "vc_redist.x64.exe", which is located in the same directory.
 
 ### On Linux:
 Download the linux archive from the assets of the latest release. "\*" is replaced by the release version. Extract the zip file where you want to use the program.

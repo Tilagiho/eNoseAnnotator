@@ -1,5 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+// for windows build
+#define DLPACK_EXPORTS
 
 #include <QtCore>
 #include <QMainWindow>

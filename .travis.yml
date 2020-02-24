@@ -12,36 +12,50 @@ matrix:
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
     before_install:
+      # use g++-7
       - eval "${MATRIX_EVAL}"
       - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-7 /usr/bin/gcc
       - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-7 /usr/bin/g++
+      # qt version needed for linuxdeployqt
       - sudo add-apt-repository ppa:beineri/opt-qt-5.10.1-trusty -y
       - sudo apt-get update -qq
     install:
+      # qt version needed for linuxdeployqt
       - sudo apt-get -y install qt510base  qt510serialport libgl1-mesa-dev tree
-      - source /opt/qt*/bin/qt*-env.sh      
-      - wget -c -nv https://download.pytorch.org/libtorch/cu101/libtorch-cxx11-abi-shared-with-deps-1.4.0.zip
-      - unzip -q -o libtorch-cxx11-abi-shared-with-deps-1.4.0.zip  -d app/lib/
+      - source /opt/qt*/bin/qt*-env.sh   
+      # get libtorch
+      - wget -c -nv https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-1.4.0%2Bcpu.zip
+      - unzip -q -o libtorch-*.zip  -d app/lib/
     compiler:
       - gcc-7
-    sudo: required
     script:
-      - gcc --version
-      - g++ --version
+      # build app
       - qmake CONFIG+=release PREFIX=/usr
       - make -j$(nproc)
       - make INSTALL_ROOT=eNoseAnnotator -j$(nproc) install ; find eNoseAnnotator/
-      - mkdir -p eNoseAnnotator/usr/bin; mkdir -p eNoseAnnotator/share/icons/hicolor/256x256; cp app/app eNoseAnnotator/usr/bin/app; cp misc/icon.png eNoseAnnotator/share/icons/hicolor/256x256/icon.png;
+      
+      # prepare executable deployment:
+      # directory structure
+      - mkdir -p eNoseAnnotator/usr/bin; mkdir -p eNoseAnnotator/share/icons/hicolor/256x256;mkdir -p eNoseAnnotator/usr/lib/;
+      # copy app & icon
+      - cp app/app eNoseAnnotator/usr/bin/app; cp misc/icon.png eNoseAnnotator/share/icons/hicolor/256x256/icon.png;
+      # copy libtorch shared objects
+      - cp /home/travis/build/Tilagiho/eNoseAnnotator/app/lib/libtorch/lib/*.so* eNoseAnnotator/usr/lib/
+      
+      # get linuxdeployqt
       - wget -c -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
       - chmod a+x linuxdeployqt-continuous-x86_64.AppImage
       # export VERSION=... # linuxdeployqt uses this for naming the file
-      - ./linuxdeployqt-continuous-x86_64.AppImage eNoseAnnotator/usr/share/applications/*.desktop -appimage 
+      # create AppImage
+      # - ./linuxdeployqt-continuous-x86_64.AppImage eNoseAnnotator/usr/share/applications/*.desktop -appimage -executable="eNoseAnnotator/usr/lib/libc10.so" -executable=eNoseAnnotator/usr/lib/libtorch.so -executable=eNoseAnnotator/usr/lib/libcudart-*.so.10.1 -executable=eNoseAnnotator/usr/lib/libgomp-*.so.1 -executable=eNoseAnnotator/usr/lib/libc10_cuda.so -executable=eNoseAnnotator/usr/lib/libnvToolsExt-*.so.1 -verbose=3            
+      - ./linuxdeployqt-continuous-x86_64.AppImage eNoseAnnotator/usr/share/applications/*.desktop -appimage -executable="eNoseAnnotator/usr/lib/"         
+    
+      # create zip archive
       - mkdir eNoseAnnotator-continuous-linux
       - mkdir eNoseAnnotator-continuous-linux/data eNoseAnnotator-continuous-linux/export eNoseAnnotator-continuous-linux/presets 
       - cp eNoseAnnotator*.AppImage eNoseAnnotator-continuous-linux/
       - cp /home/travis/build/Tilagiho/eNoseAnnotator/misc/presets/* eNoseAnnotator-continuous-linux/presets
-      - zip -r eNoseAnnotator-continuous-linux.zip eNoseAnnotator-continuous-linux/*
-     
+      - zip -r eNoseAnnotator-continuous-linux.zip eNoseAnnotator-continuous-linux/*     
     
     after_success:
       # find eNoseAnnotator -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging

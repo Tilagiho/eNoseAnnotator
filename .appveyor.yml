@@ -1,25 +1,36 @@
 skip_non_tags: true
 
-image: Visual Studio 2015
+image: Visual Studio 2019
 install:
-  - set QTDIR=C:\Qt\5.13.2\mingw73_32
-  - set PATH=%QTDIR%\bin;C:\Qt\Tools\mingw730_32\bin;%PATH%;
+  - set QTDIR=C:\Qt\5.13.2\msvc2017_64
+  - set PATH=%QTDIR%\bin;\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%;
 build_script:
-  - qmake eNoseAnnotator.pro
-  - mingw32-make
+  # get libtorch
+  - curl https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.4.0.zip -o libtorch-win-shared-with-deps-1.4.0.zip
+  - ps: Expand-Archive -Force libtorch-win-shared-with-deps-1.4.0.zip app/lib/
+  # setup build env
+  - vcvars64.bat
+  #- set QMAKESPEC=win32-msvc
+  # build app
+  - qmake -config release -r eNoseAnnotator.pro
+  - nmake
   - cd "app/release/"
   - ren app.exe eNoseAnnotator.exe
   - cd ../..
 after_build:
+  # create executable
   - cd app
-  - windeployqt release/eNoseAnnotator.exe
-  - rm release/*.o
+  - windeployqt --compiler-runtime release/eNoseAnnotator.exe
+  # remove unneeded files
+  - rm release/*.obj
   - rm release/*.cpp
+  - rm release/*.h
+  # create directories to be deployed
   - cd ..
-  - echo %appveyor_build_version%
   - mkdir eNoseAnnotator-continuous-Windows
   - mkdir "eNoseAnnotator-continuous-Windows/eNoseAnnotator-Windows/"
   - mkdir "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/data/" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/export/" "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/presets/"
+  - cp app/lib/libtorch/lib/*.dll "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/"
   - cp -r app/release/* "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/"
   - cp -r misc/presets "eNoseAnnotator-continuous-Windows/eNoseAnnotator-continuous-Windows/"
 
@@ -38,4 +49,3 @@ deploy:
       secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75
     on:
       APPVEYOR_REPO_TAG: true
-
