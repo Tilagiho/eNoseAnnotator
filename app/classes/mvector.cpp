@@ -142,7 +142,7 @@ MVector MVector::getAbsoluteVector(MVector baseVector)
     return absoluteVector;
 }
 
-std::vector<double> MVector::getFuncVector(std::array<int, MVector::size> functionalisation, std::array<bool, MVector::size> sensorFailures)
+FVector MVector::getFuncVector(std::array<int, MVector::size> functionalisation, std::array<bool, MVector::size> sensorFailures)
 {
     // get number of functionalisations, ignore channels with sensor failures
     QMap<int, int> funcMap;
@@ -158,11 +158,9 @@ std::vector<double> MVector::getFuncVector(std::array<int, MVector::size> functi
     }
 
     // init func vector
-    std::vector<double> funcVector;
     auto keyList = funcMap.keys();
     int maxFunc = *std::max_element(keyList.begin(), keyList.end());
-    for (int i=0; i<= maxFunc; i++)
-        funcVector.push_back(0.0);
+    FVector funcVector(maxFunc);
 
     // calc averages of functionalisations
     for (int i=0; i<MVector::size; i++)

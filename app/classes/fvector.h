@@ -1,35 +1,34 @@
-#ifndef MVECTOR_H
-#define MVECTOR_H
+#ifndef FVECTOR_H
+#define FVECTOR_H
 
 #include <QtCore>
 #include <array>
 
 #include "aclass.h"
 #include "annotation.h"
-#include "fvector.h"
 
 
-class MVector
+class FVector
 {
 
 public:
-    static const int size = 64;    // number of sensor inputs
+    int size = 1;    // number of functionalisations
 
-    MVector();
-    ~MVector();
+    FVector(int n_funcs = 1);
+    ~FVector();
 
     QString toString();
 
-    bool operator ==(const MVector &other) const;
+    bool operator ==(const FVector &other) const;
 
-    bool operator !=(const MVector &other) const;
+    bool operator !=(const FVector &other) const;
 
-    MVector operator *(const double denominator);
-    MVector operator *(const int denominator);
-    MVector operator /(const double denominator);
-    MVector operator /(const int denominator);
+    FVector operator *(const double denominator);
+    FVector operator *(const int denominator);
+    FVector operator /(const double denominator);
+    FVector operator /(const int denominator);
 
-    MVector operator +(const MVector other);
+    FVector operator +(const FVector other);
 
     // Overloading [] operator to access elements in array style
     double &operator[] (int index);
@@ -37,7 +36,7 @@ public:
     /*
      * contains the sensor values measured
      */
-    std::array<double, size> array;
+    std::vector<double> vector;
 
     /*
      * class annotated by the user
@@ -53,21 +52,19 @@ public:
     /*
      * returns MVector with all elements being zero initialzed
      */
-    static MVector zeroes();
+    static FVector zeroes();
 
     /*
      * returns the deviation vector (/ %) of this relative to baseVector
      * WARNING: only use this function with an absolute vector
      */
-    MVector getRelativeVector(MVector baseVector);
+    FVector getRelativeVector(FVector baseVector);
 
     /*
      * returns the absolute vector (/ Ohm) of this based on baseVector
      * WARNING: only use this function with relative vector
      */
-    MVector getAbsoluteVector(MVector baseVector);
-
-    FVector getFuncVector(std::array<int, MVector::size> functionalisation, std::array<bool, MVector::size> sensorFailures);
+    FVector getAbsoluteVector(FVector baseVector);
 };
 
-#endif // MVECTOR_H
+#endif // FVECTOR_H

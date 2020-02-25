@@ -81,7 +81,7 @@ MainWindow::MainWindow(QWidget *parent)
         {
             auto funcVector = selectionVector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
 
-            Annotation annotation = classifier->getAnnotation(funcVector);
+            Annotation annotation = classifier->getAnnotation(funcVector.vector);
             classifierWidget->setAnnotation(annotation);
             classifierWidget->setInfoString("Class of selection");
             classifierWidget->isSelectionAnnotation = true;
@@ -124,7 +124,7 @@ MainWindow::MainWindow(QWidget *parent)
 
         // get annotation from the classifier
         auto funcVector = vector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
-        Annotation annotation = classifier->getAnnotation(funcVector);
+        Annotation annotation = classifier->getAnnotation(funcVector.vector);
 
         // set annotation
         mData->setDetectedAnnotation(annotation, timestamp);
@@ -887,7 +887,7 @@ void MainWindow::on_actionLoadClassifier_triggered()
             for (uint timestamp : measDataMap.keys())
             {
                 auto funcVector = measDataMap[timestamp].getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
-                Annotation annotation = classifier->getAnnotation(funcVector);
+                Annotation annotation = classifier->getAnnotation(funcVector.vector);
                 mData->setDetectedAnnotation(annotation, timestamp);
             }
         }
