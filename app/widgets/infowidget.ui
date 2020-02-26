@@ -364,6 +364,19 @@
          </spacer>
         </item>
         <item>
+         <widget class="QLabel" name="funcLabel">
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>None</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="pushButton_2">
           <property name="font">
            <font>

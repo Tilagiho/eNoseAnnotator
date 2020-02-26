@@ -109,3 +109,13 @@ void InfoWidget::on_pushButton_2_clicked()
 {
     emit setFunctionalities();
 }
+
+void InfoWidget::setFuncLabel(QString label)
+{
+    ui->funcLabel->setText(label);
+}
+
+QString InfoWidget::getFuncLabel()
+{
+    return ui->funcLabel->text();
+}

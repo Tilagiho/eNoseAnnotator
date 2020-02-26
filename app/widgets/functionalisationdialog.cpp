@@ -3,6 +3,7 @@
 
 #include "QInputDialog"
 #include <QMessageBox>
+#include <QObject>
 
 FunctionalisationDialog::FunctionalisationDialog(QWidget *parent) :
     QDialog(parent),
@@ -78,6 +79,10 @@ FunctionalisationDialog::FunctionalisationDialog(QWidget *parent) :
     spArray[61] = ui->sp62;
     spArray[62] = ui->sp63;
     spArray[63] = ui->sp64;
+
+
+    for (QSpinBox* spinBox : spArray)
+        QObject::connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &FunctionalisationDialog::valueChanged);
 
     // presets
     loadPresets();
@@ -162,6 +167,8 @@ void FunctionalisationDialog::on_pushButton_clicked()
         {
             for (int i = 0; i<spArray.size(); i++)
                 spArray[i]->setValue(presetArray[i]);
+
+            presetName = presetFileName;
         }
     }
 }
@@ -203,4 +210,16 @@ void FunctionalisationDialog::on_pushButton_3_clicked()
     }
     // update preset combo box
     ui->comboBox->addItem(input);
+}
+
+void FunctionalisationDialog::valueChanged(int)
+{
+    presetName = "Custom";
+
+    // check if no functionalisation  was set
+    for (int i=0; i<spArray.size(); i++)
+        if (spArray[i]->value() != 0)
+            return;
+    presetName = "None";
+
 }

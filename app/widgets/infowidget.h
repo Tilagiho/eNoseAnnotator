@@ -21,6 +21,7 @@ public:
 
     DataSource::Status statusSet = DataSource::Status::NOT_CONNECTED;
 
+    QString getFuncLabel();
 
 public slots:
     void setSensor(QString sensor);
@@ -28,6 +29,7 @@ public slots:
     void setTimestamp(double timestamp);
     void setMComment(QString comment);
     void setFailures(std::array<bool, 64> failures);
+    void setFuncLabel(QString label);
 
 signals:
     void mCommentChanged(QString comment);

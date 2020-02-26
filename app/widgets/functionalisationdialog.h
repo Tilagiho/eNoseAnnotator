@@ -23,6 +23,9 @@ public:
 
     std::array<int, 64> getFunctionalities();
 
+    QString presetName = "None";
+
+
 private slots:
     void on_comboBox_currentTextChanged(const QString &arg1);
 
@@ -31,6 +34,8 @@ private slots:
     void on_pushButton_2_clicked();
 
     void on_pushButton_3_clicked();
+
+    void valueChanged(int);
 
 private:
     Ui::FunctionalisationDialog *ui;

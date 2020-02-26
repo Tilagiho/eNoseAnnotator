@@ -245,12 +245,14 @@ MainWindow::MainWindow(QWidget *parent)
     // set functionalities dialog
     connect(measInfoWidget, &InfoWidget::setFunctionalities, this, [this](){
         FunctionalisationDialog dialog;
+        dialog.presetName = measInfoWidget->getFuncLabel();
 
         dialog.setFunctionalities(mData->getFunctionalities());
 
         if (dialog.exec())
         {
             mData->setFunctionalities(dialog.getFunctionalities());
+            measInfoWidget->setFuncLabel(dialog.presetName);
         }
     });
 
@@ -594,11 +596,15 @@ void MainWindow::on_actionStart_triggered()
         if (answer == QMessageBox::StandardButton::Yes)
         {
             FunctionalisationDialog dialog;
+            dialog.presetName = measInfoWidget->getFuncLabel();
 
             dialog.setFunctionalities(mData->getFunctionalities());
 
             if (dialog.exec())
+            {
                 mData->setFunctionalities(dialog.getFunctionalities());
+                measInfoWidget->setFuncLabel(dialog.presetName);
+            }
         }
     }
 
