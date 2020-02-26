@@ -257,7 +257,32 @@ void MeasurementData::setFunctionalities(const std::array<int, MVector::nChannel
     {
         functionalisation = value;
         setDataChanged(true);
+        emit functionalisationChanged();
     }
+}
+
+/*!
+ * \brief MeasurementData::getFuncMap return map of functionalsations & the number of their appearences in funcs, ignoring channels with fails[channel] == true
+ * \param funcs
+ * \param sensorFailures
+ * \return
+ */
+QMap<int, int> MeasurementData::getFuncMap(const std::array<int, MVector::nChannels> &funcs, std::array<bool, 64> fails)
+{
+    // get number of functionalisations, ignore channels with sensor failures
+    QMap<int, int> funcMap;
+    for (int i=0; i<MVector::nChannels; i++)
+    {
+        if (!fails[i])
+        {
+            int func = funcs[i];
+            if (!funcMap.contains(func))
+                funcMap[func] = 1;
+            else
+                funcMap[func]++;
+        }
+    }
+    return funcMap;
 }
 
 /*!
@@ -577,9 +602,9 @@ bool MeasurementData::loadData(QWidget* widget)
         } else
             savefileFormatVersion = "0.1";
 
-        emit setReplotStatus(false);
 
         bool readOk = true;
+        bool replotStatusSet = false;
         while (readOk && in.readLineInto(&line))
         {
 //            qDebug() << line;
@@ -590,7 +615,14 @@ bool MeasurementData::loadData(QWidget* widget)
             else if (line[0] == '#') // meta info
                 readOk = getMetaData(line);
             else  // data
+            {
+                if (!replotStatusSet)
+                {
+                    replotStatusSet = true;
+                    emit setReplotStatus(false);
+                }
                 readOk = getData(line);
+            }
         }
 
         emit setReplotStatus (true);
@@ -644,8 +676,10 @@ bool MeasurementData::getMetaData(QString line)
         QString rawString = line.right(line.length()-QString("#functionalisation:").length());
         QStringList funcList = rawString.split(";");
 
-        for (int i=0; i<functionalisation.size(); i++)
-            functionalisation[i] = funcList[i].toInt();
+        std::array<int, MVector::nChannels> newFunc;
+        for (int i=0; i<MVector::nChannels; i++)
+            newFunc[i] = funcList[i].toInt();
+        setFunctionalities(newFunc);
     }
     else if (line.startsWith("#baseLevel:"))
     {
@@ -767,7 +801,6 @@ bool MeasurementData::getData(QString line)
         }
         // prepare vector
         // get timestamp: uint or string
-        timestamp;
         bool isInt;
         timestamp = query[0].toUInt(&isInt);
 

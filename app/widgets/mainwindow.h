@@ -59,6 +59,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    LineGraphWidget* funcLineGraph;
     LineGraphWidget* absLineGraph;
     LineGraphWidget* relLineGraph;
     BarGraphWidget* vectorBarGraph;
@@ -88,6 +89,10 @@ private:
     void sensorConnected(QString sensorId);
 
     void setTitle(bool);
+
+    void updateFuncGraph();
+
+    void connectFLGraph();
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);

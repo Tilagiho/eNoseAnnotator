@@ -1,4 +1,5 @@
 #include "mvector.h"
+#include "measurementdata.h"
 
 #include <QtCore>
 
@@ -163,23 +164,13 @@ MVector MVector::getFuncVector(std::array<int, MVector::nChannels> functionalisa
     Q_ASSERT(functionalisation.size() == this->size);
     Q_ASSERT(sensorFailures.size() == this->size);
 
-    // get number of functionalisations, ignore channels with sensor failures
-    QMap<int, int> funcMap;
-    for (int i=0; i<size; i++)
-    {
-        if (!sensorFailures[i])
-        {
-            if (!funcMap.contains(functionalisation[i]))
-                funcMap[functionalisation[i]] = 1;
-            else
-                funcMap[functionalisation[i]]++;
-        }
-    }
+    // get func map
+    auto funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
 
     // init func vector
     auto keyList = funcMap.keys();
     int maxFunc = *std::max_element(keyList.begin(), keyList.end());
-    MVector funcVector(maxFunc);
+    MVector funcVector(maxFunc+1);
 
     // calc averages of functionalisations
     for (int i=0; i<MVector::nChannels; i++)

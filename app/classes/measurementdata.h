@@ -159,6 +159,8 @@ public:
     std::array<int, MVector::nChannels> getFunctionalities() const;
     void setFunctionalities(const std::array<int, MVector::nChannels> &value);
 
+    static QMap<int, int> getFuncMap(const std::array<int, MVector::nChannels> &funcs, std::array<bool, 64> sensorFailures);
+
     bool getSaveRawInput() const;
     void setSaveRawInput(bool value);
 
@@ -231,6 +233,8 @@ signals:
     void setReplotStatus(bool status);
 
     void dataChangedSet(bool);
+
+    void functionalisationChanged();
 
 private:
     QMap<uint, MVector> data;  // map containing vectors of measurements with timestamps as keys

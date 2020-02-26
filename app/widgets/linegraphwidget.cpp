@@ -5,7 +5,7 @@
 
 #include "../classes/enosecolor.h"
 #include <QTime>
-LineGraphWidget::LineGraphWidget(QWidget *parent, uint startTime, int nChannels) :
+LineGraphWidget::LineGraphWidget(QWidget *parent, int nChannels) :
     QWidget(parent),
     ui(new Ui::LineGraphWidget),
     nChannels(nChannels)
@@ -164,7 +164,13 @@ void LineGraphWidget::setXRange(QCPRange range)
     {
         ui->chart->xAxis->setRange(range);
         replot();
+        emit xRangeChanged(range);
     }
+}
+
+int LineGraphWidget::getNChannels() const
+{
+    return nChannels;
 }
 
 void LineGraphWidget::setMaxVal(double val)
@@ -192,19 +198,6 @@ void LineGraphWidget::replot(uint timestamp)
     double y_lower = 1000;
     double y_upper = 0;
 
-    // lowest point is in range
-    bool lowPointInXRange = lowPoint.x() >= xRange.lower && lowPoint.x() <= xRange.upper;
-    if (lowPointInXRange)
-        y_lower = lowPoint.y();
-
-    // highest point in range
-    bool highPointInXRange = highPoint.x() >= xRange.lower && highPoint.x() <= xRange.upper;
-    if (highPointInXRange)
-        y_upper = highPoint.y();
-
-    // is checking all points in xRange necessary or is it sufficient only to consider new points?
-    bool checkAllPoints = !lowPointInXRange || !highPointInXRange;
-
     // iterate through all data points of first graph
     QCPGraphDataContainer::const_iterator it = ui->chart->graph(0)->data()->constBegin();
     QCPGraphDataContainer::const_iterator itEnd = ui->chart->graph(0)->data()->constEnd();
@@ -215,7 +208,7 @@ void LineGraphWidget::replot(uint timestamp)
         // check if data point is in xRange,
         // if checkAllPoints == false, check if point was NOT in last range
         bool inXRange = it->key >= xRange.lower && it->key <= xRange.upper;
-        if (inXRange && (checkAllPoints || (it->key < lastRange.lower || it->key > lastRange.upper)))
+        if (inXRange)
         {
             // loop through all graphs and check for new high/ low points at index (of it->key)
             for (int i = 0; i < ui->chart->graphCount(); i++)
@@ -227,15 +220,9 @@ void LineGraphWidget::replot(uint timestamp)
                  auto data  = ui->chart->graph(i)->data()->at(index);
 
                  if (data->value < y_lower )
-                 {
                      y_lower = data->value;
-                     lowPoint = QPointF{data->key, data->value};
-                 }
                  if (data->value > y_upper )
-                 {
                      y_upper = data->value;
-                     highPoint = QPointF{data->key, data->value};
-                 }
             }
         }
 
@@ -248,18 +235,28 @@ void LineGraphWidget::replot(uint timestamp)
     {
         setLogXAxis(true);
         y_upper *= 1.1;
-        y_lower *= 0.9;
+        if (y_lower > 0)
+            y_lower *= 0.9;
+        else
+            y_lower *= 1.1;
     }
     // normal plot for medium y-intervals
     else if (y_lower > 100.0)
     {
         setLogXAxis(false);
         y_upper *= 1.2;
-        y_lower *= 0.8;
+        if (y_lower > 0)
+            y_lower *= 0.8;
+        else
+            y_lower *= 1.1;
     }
     // plot around 0 for small y-intervals
     else
     {
+        if (y_lower > 0)
+            y_lower *= 0.8;
+        else
+            y_lower *= 1.1;
         setLogXAxis(false);
 
         // check for minimal y range
@@ -278,9 +275,6 @@ void LineGraphWidget::replot(uint timestamp)
     // move x-range
     if (autoMoveGraph && timestamp != 0 && timestamp >= xRange.upper+startTimestamp-4 && timestamp <= xRange.upper+startTimestamp)
         ui->chart->xAxis->setRange(xRange.lower+2, xRange.upper+2);
-
-    // store xRange for next call
-    lastRange = xRange;
 
     redrawLabels();
 
@@ -391,7 +385,12 @@ void LineGraphWidget::mouseMoved (QMouseEvent *  event)
                 }
             }
             if (channel != -1)
-                QToolTip::showText(event->globalPos(), "ch" + QString::number(channel+1));
+            {
+                if (nChannels == MVector::nChannels)
+                    QToolTip::showText(event->globalPos(), "ch" + QString::number(channel+1));
+                else
+                    QToolTip::showText(event->globalPos(), "f" + QString::number(channel+1));
+
         }
     }
 
@@ -459,6 +458,7 @@ void LineGraphWidget::dataSelected()
     if (upper<lower || selection.isEmpty())
     {
         dataSelection.clear();
+        clearSelection();
         emit selectionCleared();
         return;
     }
@@ -590,6 +590,7 @@ void LineGraphWidget::setSelection(QCPDataSelection newSelection)
 
         ui->chart->replot();
         emit selectionChanged(lower+startTimestamp, upper+startTimestamp);
+        emit dataSelectionChanged(newSelection);
     }
 }
 
@@ -622,11 +623,6 @@ void LineGraphWidget::clearGraph(bool replot)
     userDefinedClassLabels.clear();
     detectedClassLabels.clear();
 
-    // clear helping variables
-    highPoint = QPointF{-1000.0, -1.0};
-    lowPoint = QPointF {-1000.0, 1000.0};
-    lastRange = QCPRange{0.0, 0.0};
-
     if (replot)
         ui->chart->replot();
 }
@@ -650,12 +646,12 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
     {
         // add data point
         if (!isAbsolute)
-            ui->chart->graph(i)->addData(xpos, measurement.vector[i]);
+            ui->chart->graph(i)->addData(xpos, measurement[i]);
         else // isAbsolute: values / kOhm
-            ui->chart->graph(i)->addData(xpos, measurement.vector[i] / 1000);
+            ui->chart->graph(i)->addData(xpos, measurement[i] / 1000);
 
         // emit sensor failures
-        if (useLimits && (measurement.vector[i] < minVal || measurement.vector[i] > maxVal))
+        if (useLimits && (measurement[i] < minVal || measurement[i] > maxVal))
             emit sensorFailure(i);
     }
 
@@ -700,8 +696,15 @@ void LineGraphWidget::setAutoMoveGraph(bool value)
 
 void LineGraphWidget::clearSelection()
 {
-    ui->chart->deselectAll();
-    ui->chart->replot();
+    auto selection = ui->chart->graph(0)->selection();
+    bool selected = selection.isEmpty();
+
+    if (!ui->chart->graph(0)->selection().isEmpty())
+    {
+        ui->chart->deselectAll();
+        ui->chart->replot();
+        emit selectionCleared();
+    }
 }
 
 double LineGraphWidget::getMinVal() const

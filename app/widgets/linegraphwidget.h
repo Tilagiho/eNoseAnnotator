@@ -18,7 +18,7 @@ class LineGraphWidget : public QWidget
 public:
 
 
-    explicit LineGraphWidget(QWidget *parent = nullptr, uint startTime = QDateTime::currentDateTime().toTime_t(), int nChannels = MVector::nChannels);
+    explicit LineGraphWidget(QWidget *parent = nullptr, int nChannels = MVector::nChannels);
     ~LineGraphWidget();
     void clearGraph(bool replot = true);
 
@@ -43,6 +43,8 @@ public:
 
 
     void setIsAbsolute(bool value);
+
+    int getNChannels() const;
 
 public slots:
     void addMeasurement(MVector measurement, uint timestamp, bool rescale=false);   // add single measurement; rescale y-axis if rescale==true
@@ -83,11 +85,6 @@ private:
     const int defaultXWidth = 30; // defines default range of xAxis: (-1; defaultXWidth)
     const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
     const double labelSpace = 0.3;
-
-    // variables to optimise replot
-    QPointF highPoint {-1000.0, -1.0};
-    QPointF lowPoint {-1000.0, 1000.0};
-    QCPRange lastRange {0.0, 0.0};
 
     bool useLimits = true;
     bool isAbsolute = false;

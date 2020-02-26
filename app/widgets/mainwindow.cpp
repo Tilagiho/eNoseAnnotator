@@ -52,10 +52,13 @@ MainWindow::MainWindow(QWidget *parent)
     relLineGraph->setUseLimits(false);
 
     // connections:
-    // connect lGraph & absLGraph
+    // connect funcLineGraph, lGraph & absLGraph
     // xAxis
     connect(relLineGraph, &LineGraphWidget::xRangeChanged, absLineGraph, &LineGraphWidget::setXRange);
     connect(absLineGraph, &LineGraphWidget::xRangeChanged, relLineGraph, &LineGraphWidget::setXRange);
+    connect(funcLineGraph, &LineGraphWidget::xRangeChanged, relLineGraph, &LineGraphWidget::setXRange);
+    connect(relLineGraph, &LineGraphWidget::xRangeChanged, funcLineGraph, &LineGraphWidget::setXRange);
+
     // selection
     connect(relLineGraph, &LineGraphWidget::dataSelectionChanged, absLineGraph, &LineGraphWidget::setSelection);
     connect(relLineGraph, &LineGraphWidget::selectionCleared, absLineGraph, &LineGraphWidget::clearSelection);
@@ -64,6 +67,10 @@ MainWindow::MainWindow(QWidget *parent)
         // illegal data selection: force selectionCleared signal
         relLineGraph->setSelection(QCPDataSelection(QCPDataRange(2,1)));
     });
+    connect(funcLineGraph, &LineGraphWidget::dataSelectionChanged, absLineGraph, &LineGraphWidget::setSelection);
+    connect(funcLineGraph, &LineGraphWidget::selectionCleared, absLineGraph, &LineGraphWidget::clearSelection);
+    connect(absLineGraph, &LineGraphWidget::dataSelectionChanged, funcLineGraph, &LineGraphWidget::setSelection);
+    connect(absLineGraph, &LineGraphWidget::selectionCleared, funcLineGraph, &LineGraphWidget::clearSelection);
 
     // selection flow
     connect(relLineGraph, &LineGraphWidget::selectionChanged, mData, &MeasurementData::setSelection); // change selection in mData
@@ -76,6 +83,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::selectionCleared, vectorBarGraph, &BarGraphWidget::clearBars); // clear vector in vectorBarGraph
     connect(mData, &MeasurementData::selectionCleared, funcBarGraph, &BarGraphWidget::clearBars); // clear vector in funcBarGraph
     connect(mData, &MeasurementData::lgClearSelection, relLineGraph, &LineGraphWidget::clearSelection);
+    connect(mData, &MeasurementData::lgClearSelection, funcLineGraph, &LineGraphWidget::clearSelection);
+
     connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector selectionVector){
         if (classifier != nullptr)
         {
@@ -89,7 +98,8 @@ MainWindow::MainWindow(QWidget *parent)
     }); // classify selection
     connect(mData, &MeasurementData::selectionCleared, classifierWidget, &ClassifierWidget::clearAnnotation); // clear selection classification
 
-
+    connect(mData, &MeasurementData::labelsUpdated, funcLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
+    connect(mData, &MeasurementData::labelsUpdated, absLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
     connect(mData, &MeasurementData::labelsUpdated, relLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
 
     connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::array<bool, MVector::nChannels>){
@@ -103,6 +113,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // reset graphs
     connect(mData, &MeasurementData::dataReset, this, [this]{
+        funcLineGraph->clearGraph();
         relLineGraph->clearGraph();
         absLineGraph->clearGraph();
         vectorBarGraph->clearBars();
@@ -110,9 +121,25 @@ MainWindow::MainWindow(QWidget *parent)
     }); // clear all graphs when data is reset
 
     // new data
-    connect(mData, &MeasurementData::dataAdded, relLineGraph, &LineGraphWidget::addMeasurement);    // add new data to lGraph                        // add new data to lGraph
+    connect(mData, &MeasurementData::dataAdded, relLineGraph, &LineGraphWidget::addMeasurement);    // add new data to lGraph
+    connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, bool yRescale){
+        MVector funcVector = vector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
+        funcLineGraph->addMeasurement(funcVector, timestamp, yRescale);
+    });    // add new data to func line graph
     connect(mData, &MeasurementData::absoluteDataAdded, absLineGraph, &LineGraphWidget::addMeasurement); // add new absolute measruement
     connect(mData, &MeasurementData::dataSet, relLineGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
+    connect(mData, &MeasurementData::dataSet, this, [this](QMap<uint, MVector> data){
+        auto funcs = mData->getFunctionalities();
+        auto failures = mData->getSensorFailures();
+
+        // add recalculated functionalitisation averages to cleared funcLineGraph
+        QMap<uint, MVector> funcData;
+        for (int timestamp : data.keys())
+            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures);
+
+        funcLineGraph->setData(funcData);    });     // set loaded data in lGraph
+
+    connect(mData, &MeasurementData::setReplotStatus, funcLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
     connect(mData, &MeasurementData::setReplotStatus, relLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
     connect(mData, &MeasurementData::setReplotStatus, absLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
     connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, bool){
@@ -135,7 +162,7 @@ MainWindow::MainWindow(QWidget *parent)
             classifierWidget->setAnnotation(annotation);
             classifierWidget->setInfoString("Live classification is running...");
         }
-    });     // live classify
+    });     // live classification
 
 
     // measurement data changed
@@ -145,8 +172,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // sensor failures detected
     connect(absLineGraph, &LineGraphWidget::sensorFailure, this, [this](int channel){
-
-
         auto failures = mData->getSensorFailures();
         if (!failures[channel])
         {
@@ -158,14 +183,47 @@ MainWindow::MainWindow(QWidget *parent)
     }); // absGraph -> mData
     connect(mData, &MeasurementData::sensorFailuresSet, relLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
     connect(mData, &MeasurementData::sensorFailuresSet, absLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
+    connect(mData, &MeasurementData::sensorFailuresSet, this, [this](std::array<bool, 64>){
+        funcLineGraph->clearGraph();
+
+        auto data = mData->getRelativeData();
+        auto funcs = mData->getFunctionalities();
+        auto failures = mData->getSensorFailures();
+
+        // add recalculated functionalitisation averages to cleared funcLineGraph
+        QMap<uint, MVector> funcData;
+        for (int timestamp : data.keys())
+            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures);
+
+        funcLineGraph->setData(funcData);
+    });     // update functionalisation graph
+
+    // redraw line graphs
+    connect(funcLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
+        // re-add data to graph
+        funcLineGraph->clearGraph();
+
+        auto data = mData->getRelativeData();
+        auto funcs = mData->getFunctionalities();
+        auto failures = mData->getSensorFailures();
+
+        // add recalculated functionalitisation averages to cleared funcLineGraph
+        QMap<uint, MVector> funcData;
+        for (int timestamp : data.keys())
+            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures);
+
+        funcLineGraph->setData(funcData);
+    }); // funcLineGraph requested redraw
     connect(relLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
         // re-add data to graph
         relLineGraph->setData(mData->getRelativeData());
-    });
+    }); // relLineGraph requested redraw
     connect(absLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
         // re-add data to graph
         absLineGraph->setData(mData->getAbsoluteData());
-    });
+    }); // absLineGraph requested redraw
+
+    // sensor failures changed
     connect(mData, &MeasurementData::sensorFailuresSet, this, [this]{
         MVector selectionVector = mData->getSelectionVector();
 
@@ -196,7 +254,7 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
-    // image saves
+    // saving images of the graphs
     connect(relLineGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
         // create export folder
         if(!QDir ("./export").exists())
@@ -288,6 +346,9 @@ MainWindow::MainWindow(QWidget *parent)
             funcBarGraph->saveImage(filename);
         }
     });
+
+    // functionalisation changed
+    connect(mData, &MeasurementData::functionalisationChanged, this, &MainWindow::updateFuncGraph); // recalculate func line graph
 }
 
 MainWindow::~MainWindow()
@@ -774,14 +835,23 @@ void MainWindow::createGraphWidgets()
     setDockNestingEnabled(true);
 
     // create graph widgets & their docks
+    // func line graph
+    QDockWidget *flgdock = ui->dock1;
+    funcLineGraph = new LineGraphWidget;  // init func line Graph
+    flgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    flgdock->setWidget(funcLineGraph);
+    addDockWidget(Qt::LeftDockWidgetArea, flgdock);
+    leftDocks << flgdock;
+
+
     // relative line graph
-    QDockWidget *rlgdock = ui->dock1;
+    QDockWidget *rlgdock = new QDockWidget(tr("Relative Line Graph"), this);
     relLineGraph = new LineGraphWidget;
     rlgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
     rlgdock->setWidget(relLineGraph);
     addDockWidget(Qt::LeftDockWidgetArea, rlgdock);
     leftDocks << rlgdock;
-    ui->menuView->addAction(rlgdock->toggleViewAction());
+    rlgdock->hide();
 
     // absolute line graph
     QDockWidget *algdock = new QDockWidget(tr("Absolute Line Graph"), this);
@@ -791,7 +861,7 @@ void MainWindow::createGraphWidgets()
     algdock->setWidget(absLineGraph);
     addDockWidget(Qt::LeftDockWidgetArea, algdock);
     leftDocks << algdock;
-    ui->menuView->addAction(algdock->toggleViewAction());
+    algdock->hide();
 
     // vector bar graph
     QDockWidget *vbgdock = ui->dock2;
@@ -801,8 +871,7 @@ void MainWindow::createGraphWidgets()
     vbgdock->setWidget(vectorBarGraph);
     addDockWidget(Qt::LeftDockWidgetArea, vbgdock);
     leftDocks << vbgdock;
-    ui->menuView->addAction(vbgdock->toggleViewAction());
-
+    vbgdock->hide();
 
     // functionalisation bar graph
     QDockWidget *fbgdock = new QDockWidget(tr("Functionalisation Bar Graph"), this);
@@ -812,10 +881,17 @@ void MainWindow::createGraphWidgets()
     fbgdock->setWidget(funcBarGraph);
     addDockWidget(Qt::LeftDockWidgetArea, fbgdock);
     leftDocks << fbgdock;
+
+    // add actions to view menu
+    ui->menuView->addAction(flgdock->toggleViewAction());
     ui->menuView->addAction(fbgdock->toggleViewAction());
+    ui->menuView->addAction(rlgdock->toggleViewAction());
+    ui->menuView->addAction(algdock->toggleViewAction());
+    ui->menuView->addAction(vbgdock->toggleViewAction());
 
     // create tabs
     tabifyDockWidget(algdock, rlgdock);
+    tabifyDockWidget(rlgdock, flgdock);
     tabifyDockWidget(fbgdock, vbgdock);
 
     // right widgets
@@ -905,4 +981,71 @@ void MainWindow::on_actionLoadClassifier_triggered()
     // TODO
     // classify data
     // start live classification
+}
+
+void MainWindow::updateFuncGraph()
+{
+    auto data = mData->getRelativeData();
+    auto fails = mData->getSensorFailures();
+    auto funcs = mData->getFunctionalities();
+
+    // get number of funcs
+    auto funcMap = MeasurementData::getFuncMap(funcs, fails);
+    auto keyList = funcMap.keys();
+    int maxFunc = *std::max_element(keyList.begin(), keyList.end());
+
+    // else: reset graph
+    delete funcLineGraph;
+    funcLineGraph = new LineGraphWidget(this, maxFunc+1);
+    leftDocks[0]->setWidget(funcLineGraph);
+    connectFLGraph();   // reconnect funcLineGraph
+
+    // add func vectors to func vector
+
+    for (uint timestamp : data.keys())
+    {
+        MVector funcVector = data[timestamp].getFuncVector(funcs, fails);
+        funcLineGraph->addMeasurement(funcVector, timestamp);
+    }
+
+}
+
+/*!
+ * \brief MainWindow::connectFLGraph makes connections for funcLineGraph. has to be called each time funcLineGraph is recreated.
+ */
+void MainWindow::connectFLGraph()
+{
+    // xRange
+    connect(funcLineGraph, &LineGraphWidget::xRangeChanged, relLineGraph, &LineGraphWidget::setXRange);
+    connect(relLineGraph, &LineGraphWidget::xRangeChanged, funcLineGraph, &LineGraphWidget::setXRange);
+
+    // selection
+    connect(funcLineGraph, &LineGraphWidget::dataSelectionChanged, absLineGraph, &LineGraphWidget::setSelection);
+    connect(funcLineGraph, &LineGraphWidget::selectionCleared, absLineGraph, &LineGraphWidget::clearSelection);
+    connect(absLineGraph, &LineGraphWidget::dataSelectionChanged, funcLineGraph, &LineGraphWidget::setSelection);
+    connect(absLineGraph, &LineGraphWidget::selectionCleared, funcLineGraph, &LineGraphWidget::clearSelection);
+    connect(mData, &MeasurementData::lgClearSelection, funcLineGraph, &LineGraphWidget::clearSelection);
+
+    // labels
+    connect(mData, &MeasurementData::labelsUpdated, funcLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
+
+    // replot status
+    connect(mData, &MeasurementData::setReplotStatus, funcLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
+
+    // redraw line graphs
+    connect(funcLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
+        // re-add data to graph
+        funcLineGraph->clearGraph();
+
+        auto data = mData->getRelativeData();
+        auto funcs = mData->getFunctionalities();
+        auto failures = mData->getSensorFailures();
+
+        // add recalculated functionalitisation averages to cleared funcLineGraph
+        QMap<uint, MVector> funcData;
+        for (int timestamp : data.keys())
+            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures);
+
+        funcLineGraph->setData(funcData);
+    }); // funcLineGraph requested redraw
 }

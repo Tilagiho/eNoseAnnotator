@@ -170,7 +170,7 @@
     <set>Qt::LeftDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>Relative Line Graph</string>
+    <string>Functionalisation Graph</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
