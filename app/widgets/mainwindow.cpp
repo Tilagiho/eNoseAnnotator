@@ -587,6 +587,21 @@ void MainWindow::on_actionStart_triggered()
     Q_ASSERT("Error: No connection was specified!" && source!=nullptr);
     Q_ASSERT("Error: Cannot start non-active connection!" && ((source->status() == DataSource::Status::CONNECTED) || (source->status() == DataSource::Status::CONNECTION_ERROR)));
 
+    if (mData->getFuncMap(mData->getFunctionalities(), mData->getSensorFailures()).size() == 1)
+    {
+        auto answer = QMessageBox::question(this, "Set Functionalisation", "The sensor functionalisation was not set.\nDo you want to set it before starting a new measurement?");
+
+        if (answer == QMessageBox::StandardButton::Yes)
+        {
+            FunctionalisationDialog dialog;
+
+            dialog.setFunctionalities(mData->getFunctionalities());
+
+            if (dialog.exec())
+                mData->setFunctionalities(dialog.getFunctionalities());
+        }
+    }
+
     // reconnect
     if (source->status() == DataSource::Status::CONNECTION_ERROR)
     {
