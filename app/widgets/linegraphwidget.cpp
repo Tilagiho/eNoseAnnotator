@@ -390,6 +390,7 @@ void LineGraphWidget::mouseMoved (QMouseEvent *  event)
                     QToolTip::showText(event->globalPos(), "ch" + QString::number(channel+1));
                 else
                     QToolTip::showText(event->globalPos(), "f" + QString::number(channel+1));
+            }
 
         }
     }
