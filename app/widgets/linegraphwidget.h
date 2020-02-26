@@ -18,7 +18,7 @@ class LineGraphWidget : public QWidget
 public:
 
 
-    explicit LineGraphWidget(QWidget *parent = nullptr, uint startTime = QDateTime::currentDateTime().toTime_t());
+    explicit LineGraphWidget(QWidget *parent = nullptr, uint startTime = QDateTime::currentDateTime().toTime_t(), int nChannels = MVector::nChannels);
     ~LineGraphWidget();
     void clearGraph(bool replot = true);
 
@@ -49,7 +49,7 @@ public slots:
 //    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements
 //    void addMeasurement(QMap<uint, MVector>);
     void setData(QMap<uint, MVector> map);
-    void setSensorFailureFlags(const std::array<bool, MVector::size> sensorFailureFlags);
+    void setSensorFailureFlags(const std::array<bool, MVector::nChannels> sensorFailureFlags);
     void setAutoMoveGraph(bool value);
     void clearSelection();
 
@@ -78,6 +78,8 @@ signals:
 
 private:
     Ui::LineGraphWidget *ui;
+    int nChannels = MVector::nChannels;
+
     const int defaultXWidth = 30; // defines default range of xAxis: (-1; defaultXWidth)
     const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
     const double labelSpace = 0.3;
@@ -100,7 +102,7 @@ private:
     double maxVal = 90000.0;
     double minVal = 300.0;
 
-    std::array<bool, MVector::size> sensorFailureFlags;
+    std::array<bool, MVector::nChannels> sensorFailureFlags;
     bool autoMoveGraph = true;
 
     QMap<int, QPair<QString, QList<QCPItemRect *>>> userDefinedClassLabels;

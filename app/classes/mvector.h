@@ -6,16 +6,14 @@
 
 #include "aclass.h"
 #include "annotation.h"
-#include "fvector.h"
-
 
 class MVector
 {
 
 public:
-    static const int size = 64;    // number of sensor inputs
+    static const int nChannels = 64;
 
-    MVector();
+    MVector(int size=nChannels);
     ~MVector();
 
     QString toString();
@@ -37,7 +35,7 @@ public:
     /*
      * contains the sensor values measured
      */
-    std::array<double, size> array;
+    std::vector<double> vector;
 
     /*
      * class annotated by the user
@@ -67,7 +65,9 @@ public:
      */
     MVector getAbsoluteVector(MVector baseVector);
 
-    FVector getFuncVector(std::array<int, MVector::size> functionalisation, std::array<bool, MVector::size> sensorFailures);
+    MVector getFuncVector(std::array<int, MVector::nChannels> functionalisation, std::array<bool, MVector::nChannels> sensorFailures);
+
+    int size = nChannels;    // number of sensor inputs
 };
 
 #endif // MVECTOR_H

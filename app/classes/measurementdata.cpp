@@ -23,7 +23,7 @@ MeasurementData::MeasurementData(QObject *parent) : QObject(parent)
     // zero init info
     setComment("");
     setSensorId("");
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
         sensorFailures[i] = false;
 
     for (int i=0; i<functionalisation.size(); i++)
@@ -71,7 +71,7 @@ void MeasurementData::clear()
     clearSelection();
     data.clear();
     std::array<bool, 64> zeroFailures;
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
         zeroFailures[i] = false;
     setSensorFailures(zeroFailures);
 
@@ -195,15 +195,15 @@ void MeasurementData::setFailures(std::array<bool, 64> failures)
 
 /*!
  * \brief MeasurementData::setFailures sets sensor failures from a QString.
- * \param failureString is expected to be a numeric string of length MVector::size.
+ * \param failureString is expected to be a numeric string of length MVector::nChannels.
  */
 void MeasurementData::setFailures(QString failureString)
 {
-    Q_ASSERT(failureString.length()==MVector::size);
+    Q_ASSERT(failureString.length()==MVector::nChannels);
 
     std::array<bool, 64> failures;
 
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
     {
         Q_ASSERT(failureString[i]=="0" || failureString[i]=="1");
         failures[i] = failureString[i] == "1";
@@ -246,12 +246,12 @@ QList<aClass> MeasurementData::getClassList() const
     return classList;
 }
 
-std::array<int, MVector::size> MeasurementData::getFunctionalities() const
+std::array<int, MVector::nChannels> MeasurementData::getFunctionalities() const
 {
     return functionalisation;
 }
 
-void MeasurementData::setFunctionalities(const std::array<int, MVector::size> &value)
+void MeasurementData::setFunctionalities(const std::array<int, MVector::nChannels> &value)
 {
     if (value != functionalisation)
     {
@@ -340,14 +340,14 @@ QString MeasurementData::getSensorId() const
 }
 
 /*!
- * \brief MeasurementData::getFailureString returns a QString of length MVector::size consisting of '0' & '1'.
+ * \brief MeasurementData::getFailureString returns a QString of length MVector::nChannels consisting of '0' & '1'.
  * \return
  */
 QString MeasurementData::getFailureString()
 {
     QString failureString("");
 
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
         if (sensorFailures[i])
             failureString += "1";
         else
@@ -446,7 +446,7 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
     {
         out << "#baseLevel:" << getTimestampStringFromUInt(timestamp) << ";";
         QStringList valueList;
-        for (int i=0; i<MVector::size; i++)
+        for (int i=0; i<MVector::nChannels; i++)
             valueList << QString::number(baseLevelMap[timestamp][i], 'g', 10);
         out <<  valueList.join(";") << "\n";
     }
@@ -463,7 +463,7 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
 
     headerList << "#header:timestamp";
 
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
         headerList << "ch" + QString::number(i+1);
 
     headerList << "user defined class";
@@ -480,7 +480,7 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
         valueList << getTimestampStringFromUInt(iter.key());      // timestamp
 
         // vector
-        for (int i=0; i<MVector::size; i++)
+        for (int i=0; i<MVector::nChannels; i++)
             valueList << QString::number(iter.value()[i], 'g', 10);
         // classes
         valueList << iter.value().userAnnotation.toString() << iter.value().detectedAnnotation.toString();
@@ -632,7 +632,7 @@ bool MeasurementData::getMetaData(QString line)
     {
         QString failureString = line.right(line.length()-QString("#failures:").length());
         failureString=failureString.split(";").join("");
-        if (failureString.size() != MVector::size)
+        if (failureString.size() != MVector::nChannels)
         {
             qWarning() << "Failure string not valid. Using empty failure string.";
             failureString = "0000000000000000000000000000000000000000000000000000000000000000";
@@ -663,7 +663,7 @@ bool MeasurementData::getMetaData(QString line)
 
         // get base level vector
         MVector baseLevel;
-        for (int i=0; i<MVector::size; i++)
+        for (int i=0; i<MVector::nChannels; i++)
             baseLevel[i] = valueList[i+1].toDouble();
 
         setBaseLevel(timestamp, baseLevel);
@@ -715,7 +715,7 @@ bool MeasurementData::getData(QString line)
         QStringList query = line.split(";");
 
         // line has to contain vector + [user defined and detected class]
-        if ((query.size() < MVector::size+1) || (query.size() > MVector::size+3))
+        if ((query.size() < MVector::nChannels+1) || (query.size() > MVector::nChannels+3))
         {
             QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "Data format is not compatible (len=" + QString::number(query.size()) + "):\n" + line);
             return false;
@@ -727,23 +727,23 @@ bool MeasurementData::getData(QString line)
         // prepare vector
         timestamp = query[0].toUInt(&readOk);
         vector;
-        for (int i=0; i<MVector::size; i++)
+        for (int i=0; i<MVector::nChannels; i++)
         {
             vector[i] = query[i+1].toDouble(&readOk);
         }
-        if (query.size() > MVector::size+1)
+        if (query.size() > MVector::nChannels+1)
         {
-            if (Annotation::isAnnotationString(query[MVector::size+1]))
-                vector.userAnnotation = Annotation::fromString(query[MVector::size+1]);
+            if (Annotation::isAnnotationString(query[MVector::nChannels+1]))
+                vector.userAnnotation = Annotation::fromString(query[MVector::nChannels+1]);
             else
             {
                 return false;
             }
         }
-        if (query.size() > MVector::size+2)
+        if (query.size() > MVector::nChannels+2)
         {
-            if (Annotation::isAnnotationString(query[MVector::size+2]))
-                vector.detectedAnnotation = Annotation::fromString(query[MVector::size+2]);
+            if (Annotation::isAnnotationString(query[MVector::nChannels+2]))
+                vector.detectedAnnotation = Annotation::fromString(query[MVector::nChannels+2]);
             else
             {
                 return false;
@@ -756,7 +756,7 @@ bool MeasurementData::getData(QString line)
         QStringList query = line.split(";");
 
         // line has to contain vector + [user defined and detected class]
-        if ((query.size() < MVector::size+1) || (query.size() > MVector::size+3))
+        if ((query.size() < MVector::nChannels+1) || (query.size() > MVector::nChannels+3))
         {
             QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "Data format is not compatible (len=" + QString::number(query.size()) + "):\n" + line);
             return false;
@@ -774,13 +774,13 @@ bool MeasurementData::getData(QString line)
         if(!isInt)
             timestamp = getTimestampUIntfromString(query[0]);
 
-        for (int i=0; i<MVector::size; i++)
+        for (int i=0; i<MVector::nChannels; i++)
         {
             vector[i] = query[i+1].toDouble(&readOk);
         }
-        if (query.size() > MVector::size+1)
+        if (query.size() > MVector::nChannels+1)
         {
-            QString userString = query[MVector::size+1];
+            QString userString = query[MVector::nChannels+1];
             if (Annotation::isAnnotationString(userString))
                 vector.userAnnotation = Annotation::fromString(userString);
             else
@@ -788,9 +788,9 @@ bool MeasurementData::getData(QString line)
                 qWarning() << "Warning: User defined class invalid: \"" << userString << "\"";
             }
         }
-        if (query.size() > MVector::size+2)
+        if (query.size() > MVector::nChannels+2)
         {
-            QString classString = query[MVector::size+2];
+            QString classString = query[MVector::nChannels+2];
             if (Annotation::isAnnotationString(classString))
                 vector.detectedAnnotation = Annotation::fromString(classString);
             else
@@ -879,7 +879,7 @@ void MeasurementData::setSelection(int lower, int upper)
 //{
 //    // init vector
 //    MVector vector;
-//    for (int i=0; i<MVector::size; i++)
+//    for (int i=0; i<MVector::nChannels; i++)
 //        vector[i] = 0.0;
 
 //    if (mode == MultiMode::Average)
@@ -890,7 +890,7 @@ void MeasurementData::setSelection(int lower, int upper)
 //    // iterate until end; if endTimestamp was set (!= 0) also check for endTimestamp
 //    while (iter != end && (endTimestamp==0 || iter.key() <= endTimestamp))
 //    {
-//        for (int i=0; i<MVector::size; i++)
+//        for (int i=0; i<MVector::nChannels; i++)
 //            vector[i] += iter.value()[i];
 
 //        iter++;
@@ -898,7 +898,7 @@ void MeasurementData::setSelection(int lower, int upper)
 //    }
 
 
-//    for (int i=0; i<MVector::size; i++)
+//    for (int i=0; i<MVector::nChannels; i++)
 //        vector[i] = vector[i] / n;
 //    }
 //    else
@@ -914,7 +914,7 @@ const MVector MeasurementData::getSelectionVector(MultiMode mode)
 
     MVector selectionVector;
     // zero init
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
         selectionVector[i] = 0.0;
 
     for (auto timestamp : selectedData.keys())
@@ -928,7 +928,7 @@ const MVector MeasurementData::getSelectionVector(MultiMode mode)
 
         // calculate average
         if (mode == MultiMode::Average)
-            for (int i=0; i<MVector::size; i++)
+            for (int i=0; i<MVector::nChannels; i++)
                 selectionVector[i] += vector[i] / selectedData.size();
     }
 
@@ -939,7 +939,7 @@ QString MeasurementData::sensorFailureString(std::array<bool, 64> failureBits)
 {
     QString failureString;
 
-    for (int hex=0; hex<MVector::size/4; hex++)
+    for (int hex=0; hex<MVector::nChannels/4; hex++)
     {
         QString hexadecimal;
         int failureInt = 0;
@@ -954,10 +954,10 @@ QString MeasurementData::sensorFailureString(std::array<bool, 64> failureBits)
     return failureString;
 }
 
-std::array<bool, MVector::size> MeasurementData::sensorFailureArray(QString failureString)
+std::array<bool, MVector::nChannels> MeasurementData::sensorFailureArray(QString failureString)
 {
-    std::array<bool, MVector::size> failureArray;
-    for (int i=0; i<MVector::size; i++)
+    std::array<bool, MVector::nChannels> failureArray;
+    for (int i=0; i<MVector::nChannels; i++)
         failureArray[i] = 0;
 
     if (failureString == "None")

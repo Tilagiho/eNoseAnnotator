@@ -5,14 +5,15 @@
 
 #include "../classes/enosecolor.h"
 #include <QTime>
-LineGraphWidget::LineGraphWidget(QWidget *parent, uint startTime) :
+LineGraphWidget::LineGraphWidget(QWidget *parent, uint startTime, int nChannels) :
     QWidget(parent),
-    ui(new Ui::LineGraphWidget)
+    ui(new Ui::LineGraphWidget),
+    nChannels(nChannels)
 {
     ui->setupUi(this);
 
     // zero init sensorFailureFlags
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<nChannels; i++)
         sensorFailureFlags[i] = false;
 
     setupGraph();
@@ -55,8 +56,8 @@ void LineGraphWidget::setupGraph()
     // make graphs selectable
     ui->chart->setInteraction(QCP::iSelectPlottables);
 
-    // init 64 graphs
-    for (uint i=0; i<MVector::size; i++)
+    // init graphs
+    for (uint i=0; i<nChannels; i++)
     {
         ui->chart->addGraph();
 
@@ -108,11 +109,15 @@ void LineGraphWidget::setStartTimestamp(uint timestamp)
     startTimestamp = timestamp;
 }
 
-void LineGraphWidget::setSensorFailureFlags(const std::array<bool, MVector::size> flags)
+void LineGraphWidget::setSensorFailureFlags(const std::array<bool, MVector::nChannels> flags)
 {
+    // ignore if different nChannels was set
+    if (nChannels != MVector::nChannels)
+        return;
+
     if (flags != sensorFailureFlags)
     {
-        for (int i=0; i<MVector::size; i++)
+        for (int i=0; i<MVector::nChannels; i++)
         {
             if (flags[i] && !sensorFailureFlags[i])
             {
@@ -433,7 +438,7 @@ void LineGraphWidget::dataSelected()
 {
     // get selection
     QCPDataSelection selection;
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<nChannels; i++)
     {
         selection = ui->chart->graph(i)->selection();
 
@@ -575,7 +580,7 @@ void LineGraphWidget::setSelection(QCPDataSelection newSelection)
     {
         ui->chart->deselectAll();
 
-        for (int i=0; i<MVector::size; i++)
+        for (int i=0; i<nChannels; i++)
             ui->chart->graph(i)->setSelection(newSelection);
 
         int lower = qRound(ui->chart->graph(0)->data()->at(newSelection.dataRange(0).begin())->mainKey());
@@ -601,7 +606,7 @@ void LineGraphWidget::setUseLimits(bool value)
 void LineGraphWidget::clearGraph(bool replot)
 {
     // clear graphs
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<nChannels; i++)
     {
         ui->chart->graph(i)->data()->clear();
     }
@@ -628,6 +633,8 @@ void LineGraphWidget::clearGraph(bool replot)
 
 void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool rescale)
 {
+    Q_ASSERT(measurement.size == nChannels);
+
     // set timestamp:
     if (ui->chart->graph(0)->data()->isEmpty())
         setStartTimestamp(timestamp);
@@ -639,16 +646,16 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
     int lastMeasKey = std::round(endIt->key);
 
     int xpos = timestamp-startTimestamp;
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<nChannels; i++)
     {
         // add data point
         if (!isAbsolute)
-            ui->chart->graph(i)->addData(xpos, measurement.array[i]);
+            ui->chart->graph(i)->addData(xpos, measurement.vector[i]);
         else // isAbsolute: values / kOhm
-            ui->chart->graph(i)->addData(xpos, measurement.array[i] / 1000);
+            ui->chart->graph(i)->addData(xpos, measurement.vector[i] / 1000);
 
         // emit sensor failures
-        if (useLimits && (measurement.array[i] < minVal || measurement.array[i] > maxVal))
+        if (useLimits && (measurement.vector[i] < minVal || measurement.vector[i] > maxVal))
             emit sensorFailure(i);
     }
 

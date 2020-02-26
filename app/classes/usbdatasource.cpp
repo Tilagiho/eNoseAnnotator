@@ -203,7 +203,7 @@ void USBDataSource::processLine(const QByteArray &data)
             // reset base level:
             // add vector to baselevelVetorMap
             MVector vector;
-            for (uint i=0; i<MVector::size; i++)
+            for (uint i=0; i<vector.size; i++)
                 vector[i] = valueList[i+1].toDouble();
 
             baselevelVectorMap[timestamp] = vector;
@@ -211,14 +211,14 @@ void USBDataSource::processLine(const QByteArray &data)
         else if (count < startCount + nBaseVectors -1) // prepare baselevel
         {
             MVector vector;
-            for (uint i=0; i<MVector::size; i++)
+            for (uint i=0; i<vector.size; i++)
                 vector[i] = valueList[i+1].toDouble();
 
             baselevelVectorMap[timestamp] = vector;
         } else if (count == startCount + nBaseVectors -1) // set baselevel
         {
             MVector vector;
-            for (uint i=0; i<MVector::size; i++)
+            for (uint i=0; i<vector.size; i++)
                 vector[i] = valueList[i+1].toDouble();
 
             baselevelVectorMap[timestamp] = vector;
@@ -243,8 +243,8 @@ void USBDataSource::processLine(const QByteArray &data)
                 setStatus (Status::RECEIVING_DATA);
 
             MVector vector;
-            for (uint i=0; i<MVector::size; i++)
-                vector.array[i] = valueList[i+1].toDouble();
+            for (uint i=0; i<MVector::nChannels; i++)
+                vector.vector[i] = valueList[i+1].toDouble();
 
 //            qDebug() << "Vector Received: \n" << vector.toString();
             emit vectorReceived(timestamp, vector);

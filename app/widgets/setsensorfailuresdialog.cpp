@@ -82,7 +82,7 @@ SetSensorFailuresDialog::SetSensorFailuresDialog(QWidget *parent, QString failur
     checkBoxArray[63] = ui->checkBox_64;
 
     // set failure states
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
     {
         if (failureArray[i])
         {
@@ -109,7 +109,7 @@ std::array<bool, 64> SetSensorFailuresDialog::getSensorFailures()
 void SetSensorFailuresDialog::on_buttonBox_accepted()
 {
     // get bits
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
     {
         sensorFailures[i] = checkBoxArray[i]->checkState() == Qt::CheckState::Checked;
     }
@@ -119,6 +119,6 @@ void SetSensorFailuresDialog::on_buttonBox_accepted()
 
 void SetSensorFailuresDialog::on_ResetButton_clicked()
 {
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
         checkBoxArray[i]->setCheckState(Qt::CheckState::Unchecked);
 }

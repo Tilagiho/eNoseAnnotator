@@ -92,7 +92,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(mData, &MeasurementData::labelsUpdated, relLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
 
-    connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::array<bool, MVector::size>){
+    connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::array<bool, MVector::nChannels>){
         ui->actionAnnotate_selection->setEnabled(true);
         ui->actionSet_detected_class_of_selection->setEnabled(true);
     }); // show classification actions
@@ -471,7 +471,7 @@ void MainWindow::on_actionSettings_triggered()
 
             for (MVector vector : dataMap)
             {
-                for (int i = 0; i<MVector::size; i++)
+                for (int i = 0; i<MVector::nChannels; i++)
                 {
                     // case 1+2
                     if (useLimitsChanged)
@@ -485,12 +485,12 @@ void MainWindow::on_actionSettings_triggered()
                         // minVal changed
                         if (newMinVal < oldMinVal)  // case 4
                         {
-                            for (int i=0; i<MVector::size; i++)
+                            for (int i=0; i<MVector::nChannels; i++)
                                 if (vector[i] >= newMinVal && vector[i] < oldMinVal)
                                     sensorFailureFlags[i] = false;
                         } else if (newMinVal > oldMinVal)   // case 3
                         {
-                            for (int i=0; i<MVector::size; i++)
+                            for (int i=0; i<MVector::nChannels; i++)
                                 if (vector[i] < newMinVal && vector[i] >= oldMinVal)
                                     sensorFailureFlags[i] = true;
                         }
@@ -498,12 +498,12 @@ void MainWindow::on_actionSettings_triggered()
                         // maxVal changed
                         if (newMaxVal > oldMaxVal)  // case 4
                         {
-                            for (int i=0; i<MVector::size; i++)
+                            for (int i=0; i<MVector::nChannels; i++)
                                 if (vector[i] <= newMaxVal && vector[i] > oldMaxVal)
                                     sensorFailureFlags[i] = false;
                         } else if (newMaxVal < oldMaxVal)   // case 3
                         {
-                            for (int i=0; i<MVector::size; i++)
+                            for (int i=0; i<MVector::nChannels; i++)
                                 if (vector[i] > newMaxVal && vector[i] <= oldMaxVal)
                                     sensorFailureFlags[i] = true;
                         }

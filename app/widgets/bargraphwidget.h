@@ -29,7 +29,7 @@ public:
     void setMode(const Mode &value);
 
 public slots:
-    void setBars(MVector, std::array<bool, MVector::size> sensorFailures, std::array<int, MVector::size> functionalisation);
+    void setBars(MVector, std::array<bool, MVector::nChannels> sensorFailures, std::array<int, MVector::nChannels> functionalisation);
     void clearBars();
     bool saveImage(const QString &filename);
 

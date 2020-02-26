@@ -156,8 +156,8 @@ public:
      */
     MVector getBaseLevel (uint timestamp);
 
-    std::array<int, MVector::size> getFunctionalities() const;
-    void setFunctionalities(const std::array<int, MVector::size> &value);
+    std::array<int, MVector::nChannels> getFunctionalities() const;
+    void setFunctionalities(const std::array<int, MVector::nChannels> &value);
 
     bool getSaveRawInput() const;
     void setSaveRawInput(bool value);
@@ -207,7 +207,7 @@ public slots:
     void changeClass(aClass oldClass, aClass newClass);
 
 signals:
-    void selectionVectorChanged(MVector vector, std::array<bool, MVector::size> sensorFailures, std::array<int, MVector::size>);  // emits new vector when dataSelected is changed
+    void selectionVectorChanged(MVector vector, std::array<bool, MVector::nChannels> sensorFailures, std::array<int, MVector::nChannels>);  // emits new vector when dataSelected is changed
     void selectionMapChanged(QMap<uint, MVector> selectionMap);
     void labelsUpdated(QMap<uint, MVector> updatedVectors);
 
@@ -236,11 +236,11 @@ private:
     QMap<uint, MVector> data;  // map containing vectors of measurements with timestamps as keys
     QMap<uint, MVector> selectedData;
     QMap<uint, MVector> baseLevelMap;
-    std::array<int, MVector::size> functionalisation;
+    std::array<int, MVector::nChannels> functionalisation;
     bool dataChanged = false;
     QString dataComment = "";
     QString sensorId = "";
-    std::array<bool, 64> sensorFailures;
+    std::array<bool, MVector::nChannels> sensorFailures;
     QList<aClass> classList;
 
     QString savefileFormatVersion = "1.0";

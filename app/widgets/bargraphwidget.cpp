@@ -31,7 +31,7 @@ void BarGraphWidget::initGraph()
     // init bars & ticks
     QVector<double> ticks;
 
-    for (uint i=0; i<MVector::size; i++)
+    for (uint i=0; i<MVector::nChannels; i++)
     {
         // init bar graphs
         sensorBarVector << new QCPBars(ui->barGraph->xAxis, ui->barGraph->yAxis);
@@ -49,7 +49,7 @@ void BarGraphWidget::initGraph()
     QVector<double> data;
     // set data:
     // i-th element of i-th bar is initialized with vector[i]
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
     {
         if (!data.isEmpty())
             data.clear();
@@ -126,16 +126,16 @@ void BarGraphWidget::replot()
     ui->funcBarGraph->replot();
 }
 
-void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::size> sensorFailures, std::array<int, MVector::size> functionalisation)
+void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::nChannels> sensorFailures, std::array<int, MVector::nChannels> functionalisation)
 {
     // update fullBarVector
     QVector<double> ticks;
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
         ticks << i+1;
 
     QVector<double> data;
 
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
     {
         if (!data.isEmpty())
             data.clear();
@@ -154,7 +154,7 @@ void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::size>
     // update funcBarVector:
     // get number of functionalisations, ignore sensor failures
     QMap<int, int> funcMap;
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
     {
         if (!sensorFailures[i])
         {
@@ -211,7 +211,7 @@ void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::size>
             funcDataMap [i] << 0.0;
 
     // calc average of functionalisations
-    for (int i=0; i<MVector::size; i++)
+    for (int i=0; i<MVector::nChannels; i++)
     {
         if (!sensorFailures[i])
         {
