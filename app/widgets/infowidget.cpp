@@ -112,6 +112,8 @@ void InfoWidget::on_pushButton_2_clicked()
 
 void InfoWidget::setFuncLabel(QString label)
 {
+    if (label.endsWith(".preset"))
+        label = label.left(label.size()-QString(".preset").size());
     ui->funcLabel->setText(label);
 }
 

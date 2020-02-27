@@ -409,9 +409,9 @@ void MainWindow::on_actionsave_selection_triggered()
 
 void MainWindow::on_actionLoad_triggered()
 {
-    mData->loadData(this);
-    setTitle(false);
-
+    bool saved = mData->loadData(this);
+    if (saved)
+        setTitle(false);
 }
 
 void MainWindow::on_actionSet_USB_Connection_triggered()
@@ -758,6 +758,7 @@ void MainWindow::on_actionAbout_triggered()
 void MainWindow::clearData()
 {
     mData->clear();
+    funcLineGraph->clearGraph();
     relLineGraph->clearGraph();
     absLineGraph->clearGraph();
 }
