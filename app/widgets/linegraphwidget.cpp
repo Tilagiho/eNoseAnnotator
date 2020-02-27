@@ -62,7 +62,11 @@ void LineGraphWidget::setupGraph()
         ui->chart->addGraph();
 
         // style of plotted lines
-        QColor color = ENoseColor::getSensorColor(i);
+        QColor color;
+        if (nChannels == MVector::nChannels)
+            color = ENoseColor::getSensorColor(i);
+        else
+            color = ENoseColor::getFuncColor(i);
         ui->chart->graph(i)->setLineStyle(QCPGraph::lsLine);
         ui->chart->graph(i)->setPen(QPen(color));
         ui->chart->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 3));
@@ -166,6 +170,25 @@ void LineGraphWidget::setXRange(QCPRange range)
         replot();
         emit xRangeChanged(range);
     }
+}
+
+void LineGraphWidget::resetColors()
+{
+    for (int i=0; i<ui->chart->graphCount(); i++)
+    {
+        QColor color;
+        if (nChannels == MVector::nChannels)
+            color = ENoseColor::getSensorColor(i);
+        else
+            color = ENoseColor::getFuncColor(i);
+
+        QPen pen;
+        pen.setColor(color);
+
+        ui->chart->graph(i)->setPen(pen);
+    }
+
+    ui->chart->replot();
 }
 
 int LineGraphWidget::getNChannels() const

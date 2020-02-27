@@ -10,8 +10,10 @@ class ENoseColor
 {
 public:
     static QColor getSensorColor(int i);
-    static QColor getFuncColor(int func, int funcSize);
+    static QColor getFuncColor(int func);
     static QColor getClassColor(int i, int n);
+    static QList<QColor> smallColorList;
+    static QList<QColor> bigColorList;
 
 private:
     ENoseColor();

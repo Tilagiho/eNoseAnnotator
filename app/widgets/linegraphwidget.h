@@ -69,6 +69,8 @@ public slots:
 
     void setXRange(QCPRange range);
 
+    void resetColors();
+
 signals:
     void selectionChanged(int, int);
     void dataSelectionChanged(QCPDataSelection);

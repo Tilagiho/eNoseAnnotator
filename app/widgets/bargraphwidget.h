@@ -32,6 +32,7 @@ public slots:
     void setBars(MVector, std::array<bool, MVector::nChannels> sensorFailures, std::array<int, MVector::nChannels> functionalisation);
     void clearBars();
     bool saveImage(const QString &filename);
+    void resetColors();
 
 signals:
     void imageSaveRequested();

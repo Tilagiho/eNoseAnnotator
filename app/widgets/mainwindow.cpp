@@ -1029,6 +1029,10 @@ void MainWindow::updateFuncGraph()
         funcLineGraph->addMeasurement(funcVector, timestamp);
     }
 
+    // reset graph pens
+    relLineGraph->resetColors();
+    absLineGraph->resetColors();
+    vectorBarGraph->resetColors();
 }
 
 /*!

@@ -1,23 +1,118 @@
 #include "enosecolor.h"
 
 #include <math.h>
+#include "measurementdata.h"
+#include "mvector.h"
 
-ENoseColor::ENoseColor() {}
+QList<QColor> ENoseColor::smallColorList {
 
-QColor ENoseColor::getSensorColor(int i)
+//    1)
+//    QColor("#556b2f"),      // darkolivegreen
+//    QColor("#191970"),      // midnightblue
+//    QColor("#ff4500"),      // orangered
+//    QColor("#ffd700"),      // gold
+//    QColor("#00ff00"),      // lime
+//    QColor("#00bfff"),      // deepskyblue
+//    QColor("#0000ff"),      // blue
+//    QColor("#ff1493")       // deeppink
+
+//    2)
+//    QColor("#2f4f4f"), // darkslategray
+//    QColor("#006400"),  //darkgreen
+//    QColor("#cd5c5c"),  // indianred
+//    QColor("#00008b"),  // darkblue
+//    QColor("#ff0000"),  // red
+//    QColor("#ffa500"),  // orange
+//    QColor("#ffff00"),  // yellow
+//    QColor("#00ff00"), // lime
+//    QColor("#00fa9a"),  // mediumspringgreen
+//    QColor("#00ffff"),  // aqua
+//    QColor("#0000ff"),  // blue
+//    QColor("#da70d6"),  // orchid
+//    QColor("#d8bfd8"),  // thistle
+//    QColor("#ff00ff"),  // fuchsia
+//    QColor("#1e90ff"),  // dodgerblue
+//    QColor("#f0e68c")  // khaki
+
+    QColor("#006400"),  // darkgreen
+    QColor("#1e90ff"),  // dodgerblue
+    QColor("#ff0000"),  // red
+    QColor("#ffd700"),  // gold
+    QColor("#c71585"),  // mediumvioletred
+    QColor("#00ff00"),  // lime
+    QColor("#0000ff"),  // blue
+    QColor("#7fffd4")   // aquamarine
+};
+
+QList<QColor> ENoseColor::bigColorList {
+    QColor("#2f4f4f"),  // darkslategray
+    QColor("#6b8e23"),  // olivedrab
+    QColor("#7f0000"),  // maroon2
+    QColor("#4b0082"),  // indigo
+    QColor("#ff0000"),  // red
+    QColor("#ffa500"),  // orange
+    QColor("#c71585"),  // mediumvioletred
+    QColor("#00ff00"),  // lime
+    QColor("#00fa9a"),  // mediumspringgreen
+    QColor("#e9967a"),  // darksalmon
+    QColor("#00ffff"),  // aqua
+    QColor("#0000ff"),  // blue
+    QColor("#b0c4de"),  // lightsteelblue
+    QColor("#ff00ff"),  // fuchsia
+    QColor("#1e90ff"),  // dodgerblue
+    QColor("#ffff54")   // laserlemon
+};
+
+ENoseColor::ENoseColor()
+{}
+
+QColor ENoseColor::getSensorColor(int ch)
 {
     QColor color;
-    float hue = fmod(45.625/4.0 * i, 360.0);
-    color.setHsv(hue, 250, 150);
+
+    // get
+    auto functionalisation = MeasurementData::functionalisation;
+    int maxFunc = 0;
+    for (int i=0; i<MVector::nChannels; i++)
+        if (functionalisation[i] > maxFunc)
+            maxFunc = functionalisation[i];
+
+    // pick color from list
+    if (maxFunc < smallColorList.size())
+        color = smallColorList[functionalisation[ch]];
+    else if (maxFunc < bigColorList.size())
+        color = bigColorList[functionalisation[ch]];
+    // too many funcs: pick equally spaced color
+    else
+    {
+        float hue = fmod(360/maxFunc * functionalisation[ch], 360.0);
+        color.setHsv(hue, 200, 120);
+    }
 
     return color;
 }
 
-QColor ENoseColor::getFuncColor(int func, int funcSize)
+QColor ENoseColor::getFuncColor(int func)
 {
     QColor color;
-    float hue = fmod(360/funcSize * func, 360.0);
-    color.setHsv(hue, 250, 150);
+
+    auto functionalisation = MeasurementData::functionalisation;
+    int maxFunc = 0;
+    for (int i=0; i<MVector::nChannels; i++)
+        if (functionalisation[i] > maxFunc)
+            maxFunc = functionalisation[i];
+
+    // pick color from list
+    if (maxFunc < smallColorList.size())
+        color = smallColorList[func];
+    else if (maxFunc < bigColorList.size())
+        color = bigColorList[func];
+    // too many funcs: pick equally spaced color
+    else
+    {
+        float hue = fmod(360/maxFunc * func, 360.0);
+        color.setHsv(hue, 250, 150);
+    }
 
     return color;
 }
@@ -30,5 +125,9 @@ QColor ENoseColor::getFuncColor(int func, int funcSize)
  */
 QColor ENoseColor::getClassColor(int i, int size)
 {
-    return getFuncColor(i, size);
+    if (size < bigColorList.size())
+        return bigColorList[i];
+    else
+        return
+                getFuncColor(i);
 }

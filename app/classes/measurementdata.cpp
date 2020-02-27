@@ -18,6 +18,8 @@
  *
  */
 
+std::array<int, MVector::nChannels> MeasurementData::functionalisation = std::array<int, MVector::nChannels>{};
+
 MeasurementData::MeasurementData(QObject *parent) : QObject(parent)
 {
     // zero init info

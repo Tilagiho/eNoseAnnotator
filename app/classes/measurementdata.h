@@ -193,6 +193,8 @@ public:
 
     QString getSaveFilename() const;
 
+    static std::array<int, MVector::nChannels> functionalisation;
+
 public slots:
     /*
      * clears selectedData and adds all vectors with timestamp between lower and upper to selectedData
@@ -240,7 +242,6 @@ private:
     QMap<uint, MVector> data;  // map containing vectors of measurements with timestamps as keys
     QMap<uint, MVector> selectedData;
     QMap<uint, MVector> baseLevelMap;
-    std::array<int, MVector::nChannels> functionalisation;
     bool dataChanged = false;
     QString dataComment = "";
     QString sensorId = "";

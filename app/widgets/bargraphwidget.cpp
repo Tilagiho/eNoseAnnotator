@@ -113,6 +113,8 @@ void BarGraphWidget::initGraph()
     ui->funcBarGraph->yAxis->grid()->setPen(QPen(Qt::black, 0, Qt::SolidLine));
     ui->funcBarGraph->yAxis->grid()->setSubGridPen(QPen(Qt::black, 0, Qt::DotLine));
     ui->funcBarGraph->yAxis->setLabel("R  / R0 [%]");
+
+    resetColors();
 }
 
 void BarGraphWidget::replot()
@@ -124,6 +126,8 @@ void BarGraphWidget::replot()
     ui->funcBarGraph->xAxis->setRange(-1, funcBarVector.size());
     ui->funcBarGraph->yAxis->rescale();
     ui->funcBarGraph->replot();
+
+    resetColors();
 }
 
 void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::nChannels> sensorFailures, std::array<int, MVector::nChannels> functionalisation)
@@ -187,7 +191,7 @@ void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::nChan
             funcBarVector[i]->setAntialiased(false);
 
             // set color
-            QColor color = ENoseColor::getFuncColor(i, funcSize);
+            QColor color = ENoseColor::getFuncColor(i);
             funcBarVector[i]->setPen(QPen(color.lighter(170)));
             funcBarVector[i]->setBrush(color);
 
@@ -312,4 +316,34 @@ bool BarGraphWidget::saveImage(const QString &filename)
         Q_ASSERT("Unknown file extension!" && false);
 
     return writeOk;
+}
+
+void BarGraphWidget::resetColors()
+{
+    if (mode == Mode::showAll)
+    {
+        for (int i=0; i<sensorBarVector.size(); i++)
+        {
+            QColor color = ENoseColor::getSensorColor(i);
+            QPen pen;
+            pen.setColor(color.lighter(170));
+
+            sensorBarVector[i]->setPen(pen);
+            sensorBarVector[i]->setBrush(color);
+        }
+    }
+    else    // func vectors
+    {
+        for (int i=0; i<funcBarVector.size(); i++)
+        {
+            QColor color = ENoseColor::getFuncColor(i);
+            QPen pen;
+            pen.setColor(color.lighter(170));
+
+            funcBarVector[i]->setPen(pen);
+            funcBarVector[i]->setBrush(color);
+        }
+    }
+
+    ui->barGraph->replot();
 }
