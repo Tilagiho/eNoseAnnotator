@@ -17,5 +17,6 @@
         <file alias="baseVector">images/hourglass-1.png</file>
         <file alias="label">images/price-tag.png</file>
         <file alias="ai_running">images/idea.png</file>
+        <file alias="delete_label">images/delete-tag.png</file>
     </qresource>
 </RCC>

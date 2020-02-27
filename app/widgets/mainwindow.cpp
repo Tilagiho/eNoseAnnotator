@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionStop->setEnabled(false);
 
     ui->actionAnnotate_selection->setEnabled(false);
+    ui->actionDelete_Annotation->setEnabled(false);
+
     ui->actionSet_detected_class_of_selection->setEnabled(false);
 
     // user can only set detected class in debug mode
@@ -104,10 +106,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::array<bool, MVector::nChannels>){
         ui->actionAnnotate_selection->setEnabled(true);
+        ui->actionDelete_Annotation->setEnabled(true);
         ui->actionSet_detected_class_of_selection->setEnabled(true);
     }); // show classification actions
     connect(mData, &MeasurementData::selectionCleared, this, [this](){
         ui->actionAnnotate_selection->setEnabled(false);
+        ui->actionDelete_Annotation->setEnabled(false);
         ui->actionSet_detected_class_of_selection->setEnabled(false);
     }); // hide classification actions
 
@@ -1091,4 +1095,11 @@ void MainWindow::connectFLGraph()
 
     // replot status
     connect(mData, &MeasurementData::setReplotStatus, funcLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
+}
+
+void MainWindow::on_actionDelete_Annotation_triggered()
+{
+    Q_ASSERT(!mData->getSelectionMap().isEmpty());
+
+    mData->setUserAnnotationOfSelection(Annotation());
 }
