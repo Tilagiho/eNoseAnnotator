@@ -41,10 +41,11 @@ void FakeDatasource::setNextStatus()
         //      do nothing
         if (nextStatus == Status::CONNECTED)
             ;
-        else if (nextStatus == Status::SET_BASEVECTOR)
+        else if (nextStatus == Status::RECEIVING_DATA)
         {
-            nextStatus = Status::RECEIVING_DATA;
-            statusTimer.start(3000);
+            nextStatus = Status::CONNECTION_ERROR;
+            statusTimer.start(30000);
+            measTimer.start(2000);
         }
         break;
     case Status::CONNECTED:
@@ -95,10 +96,14 @@ void FakeDatasource::emitMeasurement()
 
 void FakeDatasource::start()
 {
-    Q_ASSERT(status() == Status::CONNECTED);
+    Q_ASSERT(status() == Status::CONNECTED || status() == Status::PAUSED);
 
-    nextStatus = Status::SET_BASEVECTOR;
+    if (status() == Status::PAUSED)
+        setStatus(Status::CONNECTING);
+    else
+        setStatus(Status::SET_BASEVECTOR);
     statusTimer.start(3000);
+    nextStatus = Status::RECEIVING_DATA;
 }
 
 void FakeDatasource::pause()
@@ -111,9 +116,11 @@ void FakeDatasource::pause()
 
 void FakeDatasource::reset()
 {
-    Q_ASSERT(status() == Status::RECEIVING_DATA);
+    Q_ASSERT(status() == Status::RECEIVING_DATA || status() == Status::PAUSED);
 
-    measTimer.stop();
+    if (status() == Status::RECEIVING_DATA)
+        measTimer.stop();
+
     setStatus(Status::SET_BASEVECTOR);
     nextStatus = Status::RECEIVING_DATA;
     statusTimer.start(3000);
@@ -121,18 +128,19 @@ void FakeDatasource::reset()
 
 void FakeDatasource::stop()
 {
-    Q_ASSERT(status() == Status::RECEIVING_DATA);
+    Q_ASSERT(status() == Status::RECEIVING_DATA || status() == Status::PAUSED);
 
     measTimer.stop();
+    statusTimer.stop();
     setStatus(Status::CONNECTED);
 }
 
 void FakeDatasource::reconnect()
 {
-    Q_ASSERT(status() == Status::RECEIVING_DATA);
+    Q_ASSERT(status() == Status::CONNECTION_ERROR);
 
     setStatus(Status::CONNECTING);
-    nextStatus = Status::SET_BASEVECTOR;
+    nextStatus = Status::RECEIVING_DATA;
     statusTimer.start(3000);
 }
 
