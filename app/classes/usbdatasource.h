@@ -33,9 +33,11 @@ public:
 
 public slots:
     void start();
+    void pause();
     void stop();
     void reset();
 
+private slots:
     void handleReadyRead();
     void handleError(QSerialPort::SerialPortError serialPortError);
     void handleTimeout();

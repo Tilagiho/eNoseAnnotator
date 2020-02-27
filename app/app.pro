@@ -34,6 +34,7 @@ SOURCES += \
     classes/annotation.cpp \
     classes/datasource.cpp \
     classes/enosecolor.cpp \
+    classes/fakedatasource.cpp \
     classes/measurementdata.cpp \
     classes/mvector.cpp \
     classes/torchclassifier.cpp \
@@ -63,6 +64,7 @@ HEADERS += \
     classes/annotation.h \
     classes/datasource.h \
     classes/enosecolor.h \
+    classes/fakedatasource.h \
     classes/measurementdata.h \
     classes/mvector.h \
     classes/torchclassifier.h \

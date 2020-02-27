@@ -56,6 +56,8 @@ private slots:
 
     void on_actionLoadClassifier_triggered();
 
+    void on_actionDelete_Annotation_triggered();
+
 private:
     Ui::MainWindow *ui;
 

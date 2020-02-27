@@ -103,6 +103,7 @@
      <string>Annotation</string>
     </property>
     <addaction name="actionAnnotate_selection"/>
+    <addaction name="actionDelete_Annotation"/>
     <addaction name="actionSet_detected_class_of_selection"/>
    </widget>
    <widget class="QMenu" name="menuClassifier">
@@ -155,6 +156,7 @@
    <addaction name="actionReset"/>
    <addaction name="separator"/>
    <addaction name="actionAnnotate_selection"/>
+   <addaction name="actionDelete_Annotation"/>
    <addaction name="separator"/>
    <addaction name="actionSettings"/>
    <addaction name="actionSet_USB_Connection"/>
@@ -239,6 +241,9 @@
    </property>
   </action>
   <action name="actionStart">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="../eNoseAnnotator.qrc">
      <normaloff>:/icons/start</normaloff>:/icons/start</iconset>
@@ -362,6 +367,15 @@
    </property>
    <property name="text">
     <string>Functionalisation Bar Graph</string>
+   </property>
+  </action>
+  <action name="actionDelete_Annotation">
+   <property name="icon">
+    <iconset resource="../eNoseAnnotator.qrc">
+     <normaloff>:/icons/delete_label</normaloff>:/icons/delete_label</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Annotation</string>
    </property>
   </action>
  </widget>

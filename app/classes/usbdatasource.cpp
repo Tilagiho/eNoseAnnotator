@@ -260,9 +260,25 @@ void USBDataSource::start()
     Q_ASSERT("Usb connection was already started!" && connectionStatus != Status::RECEIVING_DATA);
     Q_ASSERT("Usb connection is not connected!" && connectionStatus != Status::NOT_CONNECTED);
 
-    startCount = 0;
+    if (status() != Status::PAUSED)
+        startCount = 0;
 
     emitData = true;
+}
+
+/*!
+ * triggered to pause emition of measurements
+ */
+void USBDataSource::pause()
+{
+    Q_ASSERT("Usb connection was already started!" && connectionStatus != Status::RECEIVING_DATA);
+    Q_ASSERT("Usb connection is not connected!" && connectionStatus != Status::NOT_CONNECTED);
+
+    startCount = 0;
+
+    emitData = false;
+    setStatus (Status::PAUSED);
+
 }
 
 /*!

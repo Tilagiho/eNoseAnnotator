@@ -16,13 +16,15 @@ public:
         CONNECTED,  // connected, but not emitting data
         SET_BASEVECTOR,  // base level is being set
         RECEIVING_DATA,           // measurement data is being received & emitted
+        PAUSED,
         CONNECTION_ERROR           // error occurred
     };
 
     // used to differentiate different source types
     enum class SourceType {
         USB,
-        BLUETOOTH
+        BLUETOOTH,
+        FAKE
     };
 
     // constants
@@ -64,6 +66,7 @@ signals:
 
 public slots:
     virtual void start() = 0;
+    virtual void pause() = 0;
     virtual void stop() = 0;
     virtual void reset() = 0;
 

@@ -5,7 +5,8 @@
 SourceDialog::SourceDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SourceDialog),
-    usbWidget(new USBSettingsWidget(this))
+    usbWidget(new USBSettingsWidget(this)),
+    fakeWidget(new USBSettingsWidget(this))
 {
     ui->setupUi(this);
 
@@ -17,6 +18,11 @@ SourceDialog::SourceDialog(QWidget *parent) :
 
     // add source widgets
     ui->stackedWidget->addWidget(usbWidget);
+
+    #ifdef QT_DEBUG
+    ui->comboBox->addItem("Debug: Fake Data Source");
+    ui->stackedWidget->addWidget(fakeWidget);
+    #endif
 }
 
 SourceDialog::~SourceDialog()
@@ -50,6 +56,11 @@ void SourceDialog::on_applyButton_clicked()
         sourceType = DataSource::SourceType::USB;
         identifier = usbWidget->getPortName();
     }
+    else if (ui->comboBox->currentText() == "Debug: Fake Data Source")
+    {
+        sourceType = DataSource::SourceType::FAKE;
+        identifier = "Fake";
+    }
     else
         Q_ASSERT("Unknown source type selected!" && false);
 
@@ -67,6 +78,8 @@ void SourceDialog::setSourceType(const DataSource::SourceType &value)
 
     if (sourceType == DataSource::SourceType::USB)
         ui->stackedWidget->setCurrentWidget(usbWidget);
+    else if (sourceType == DataSource::SourceType::FAKE)
+        ui->stackedWidget->setCurrentWidget(fakeWidget);
 }
 
 void SourceDialog::on_sensorIdLineEdit_textEdited(const QString &newText)
@@ -89,6 +102,11 @@ void SourceDialog::on_comboBox_currentTextChanged(const QString &text)
     {
         ui->stackedWidget->setCurrentWidget(usbWidget);
         sourceType = DataSource::SourceType::USB;
+    }
+    if (text == "Debug: Fake Data Source")
+    {
+        ui->stackedWidget->setCurrentWidget(fakeWidget);
+        sourceType = DataSource::SourceType::FAKE;
     }
     else
         Q_ASSERT("Unknown source type selected!" && false);

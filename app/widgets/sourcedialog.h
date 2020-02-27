@@ -43,6 +43,7 @@ private:
     Ui::SourceDialog *ui;
 
     USBSettingsWidget* usbWidget;
+    USBSettingsWidget* fakeWidget;
 
     DataSource::SourceType sourceType;
     QString identifier;
