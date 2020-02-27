@@ -123,8 +123,23 @@ MainWindow::MainWindow(QWidget *parent)
     // new data
     connect(mData, &MeasurementData::dataAdded, relLineGraph, &LineGraphWidget::addMeasurement);    // add new data to lGraph
     connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, bool yRescale){
-        MVector funcVector = vector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
-        funcLineGraph->addMeasurement(funcVector, timestamp, yRescale);
+        // calculate funcVector, if necessary
+        bool calcFuncVector = false;
+        for (int func : mData->functionalisation)
+        {
+            if (func != 0)
+            {
+                calcFuncVector = true;
+                break;
+            }
+        }
+        if (!calcFuncVector)
+            funcLineGraph->addMeasurement(vector, timestamp);
+        else
+        {
+            MVector funcVector = vector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
+            funcLineGraph->addMeasurement(funcVector, timestamp, yRescale);
+        }
     });    // add new data to func line graph
     connect(mData, &MeasurementData::absoluteDataAdded, absLineGraph, &LineGraphWidget::addMeasurement); // add new absolute measruement
     connect(mData, &MeasurementData::dataSet, relLineGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
@@ -1021,18 +1036,32 @@ void MainWindow::updateFuncGraph()
     auto keyList = funcMap.keys();
     int maxFunc = *std::max_element(keyList.begin(), keyList.end());
 
-    // else: reset graph
-    delete funcLineGraph;
-    funcLineGraph = new LineGraphWidget(this, maxFunc+1);
-    leftDocks[0]->setWidget(funcLineGraph);
-    connectFLGraph();   // reconnect funcLineGraph
-
-    // add func vectors to func vector
-
-    for (uint timestamp : data.keys())
+    // no funcs set:
+    // use normal graph
+    if (maxFunc == 0)
     {
-        MVector funcVector = data[timestamp].getFuncVector(funcs, fails);
-        funcLineGraph->addMeasurement(funcVector, timestamp);
+        delete funcLineGraph;
+        funcLineGraph = new LineGraphWidget(this);
+        leftDocks[0]->setWidget(funcLineGraph);
+        connectFLGraph();   // reconnect funcLineGraph
+
+        funcLineGraph->setData(data);
+    }
+    // else: reset graph
+    else
+    {
+        delete funcLineGraph;
+        funcLineGraph = new LineGraphWidget(this, maxFunc+1);
+        leftDocks[0]->setWidget(funcLineGraph);
+        connectFLGraph();   // reconnect funcLineGraph
+
+        // add func vectors to func vector
+
+        for (uint timestamp : data.keys())
+        {
+            MVector funcVector = data[timestamp].getFuncVector(funcs, fails);
+            funcLineGraph->addMeasurement(funcVector, timestamp);
+        }
     }
 
     // reset graph pens
@@ -1062,21 +1091,4 @@ void MainWindow::connectFLGraph()
 
     // replot status
     connect(mData, &MeasurementData::setReplotStatus, funcLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
-
-    // redraw line graphs
-    connect(funcLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
-        // re-add data to graph
-        funcLineGraph->clearGraph();
-
-        auto data = mData->getRelativeData();
-        auto funcs = mData->getFunctionalities();
-        auto failures = mData->getSensorFailures();
-
-        // add recalculated functionalitisation averages to cleared funcLineGraph
-        QMap<uint, MVector> funcData;
-        for (int timestamp : data.keys())
-            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures);
-
-        funcLineGraph->setData(funcData);
-    }); // funcLineGraph requested redraw
 }
