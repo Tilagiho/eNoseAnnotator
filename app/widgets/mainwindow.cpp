@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionStart->setEnabled(false);
     ui->actionReset->setEnabled(false);
     ui->actionStop->setEnabled(false);
+    ui->actionReconnect->setEnabled(false);
 
     ui->actionAnnotate_selection->setEnabled(false);
     ui->actionDelete_Annotation->setEnabled(false);
@@ -660,14 +661,6 @@ void MainWindow::on_actionStart_triggered()
             }
         }
 
-
-        // reconnect
-        if (source->status() == DataSource::Status::CONNECTION_ERROR)
-        {
-            qDebug() << "Reconnecting Sensor \"" << source->identifier() << "\"";
-            source->reconnect();
-        }
-
         if (mData->changed())
         {
             // save old data
@@ -691,7 +684,7 @@ void MainWindow::on_actionStart_triggered()
 void MainWindow::on_actionStop_triggered()
 {
     Q_ASSERT("Error: No connection was specified!" && source!=nullptr);
-    Q_ASSERT("Error: Cannot stop non-active connection!" && (source->status() == DataSource::Status::RECEIVING_DATA || source->status() == DataSource::Status::SET_BASEVECTOR));
+    Q_ASSERT("Error: Cannot stop non-active connection!" && (source->status() == DataSource::Status::RECEIVING_DATA || source->status() == DataSource::Status::SET_BASEVECTOR || source->status() == DataSource::Status::PAUSED));
     if (source->sourceType() == DataSource::SourceType::USB)
         Q_ASSERT("Error: Connection is not open!" && static_cast<USBDataSource*>(source)->getSerial()->isOpen());
 
@@ -701,7 +694,7 @@ void MainWindow::on_actionStop_triggered()
 void MainWindow::on_actionReset_triggered()
 {
     Q_ASSERT("Error: No connection was specified!" && source!=nullptr);
-    Q_ASSERT("Error: Cannot stop non-active connection!" && source->status() == DataSource::Status::RECEIVING_DATA);
+    Q_ASSERT("Error: Cannot stop non-active connection!" && source->status() == DataSource::Status::RECEIVING_DATA || source->status() == DataSource::Status::PAUSED);
     if (source->sourceType() == DataSource::SourceType::USB)
         Q_ASSERT("Error: Connection is not open!" && static_cast<USBDataSource*>(source)->getSerial()->isOpen());
 
@@ -857,6 +850,7 @@ void MainWindow::makeSourceConnections()
                 ui->actionStart->setChecked(false);
                 ui->actionStop->setEnabled(false);
                 ui->actionReset->setEnabled(false);
+                ui->actionReconnect->setEnabled(false);
                 ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
                 statusTextLabel->setText("Sensor Status: Not Connected");
                 statusImageLabel->setPixmap(QPixmap(":/icons/disconnected"));
@@ -867,6 +861,7 @@ void MainWindow::makeSourceConnections()
                 ui->actionStop->setEnabled(false);
                 ui->actionReset->setEnabled(false);
                 ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
+                ui->actionReconnect->setEnabled(false);
                 statusTextLabel->setText("Sensor Status: Connecting...");
                 statusImageLabel->setPixmap(QPixmap(":/icons/baseVector"));
                 break;
@@ -875,6 +870,7 @@ void MainWindow::makeSourceConnections()
                 ui->actionStart->setChecked(false);
                 ui->actionStop->setEnabled(false);
                 ui->actionReset->setEnabled(false);
+                ui->actionReconnect->setEnabled(false);
                 ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
                 statusTextLabel->setText("Sensor Status: Connected");
                 statusImageLabel->setPixmap(QPixmap(":/icons/connected"));
@@ -884,6 +880,7 @@ void MainWindow::makeSourceConnections()
                 ui->actionStart->setChecked(false);
                 ui->actionStop->setEnabled(true);
                 ui->actionReset->setEnabled(false);
+                ui->actionReconnect->setEnabled(false);
                 ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
                 statusTextLabel->setText("Sensor Status: Setting Base Vector (R0)...");
                 statusImageLabel->setPixmap(QPixmap(":/icons/baseVector"));
@@ -893,6 +890,7 @@ void MainWindow::makeSourceConnections()
                 ui->actionStart->setChecked(false);
                 ui->actionStop->setEnabled(true);
                 ui->actionReset->setEnabled(true);
+                ui->actionReconnect->setEnabled(false);
                 ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
                 statusTextLabel->setText("Sensor Status: Receiving Data");
                 statusImageLabel->setPixmap(QPixmap(":/icons/recording"));
@@ -902,6 +900,7 @@ void MainWindow::makeSourceConnections()
                 ui->actionStart->setChecked(false);
                 ui->actionStop->setEnabled(false);
                 ui->actionReset->setEnabled(false);
+                ui->actionReconnect->setEnabled(true);
                 ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
                 statusTextLabel->setText("Sensor Status: Error");
                 statusImageLabel->setPixmap(QPixmap(":/icons/error"));
@@ -909,9 +908,10 @@ void MainWindow::makeSourceConnections()
             case DataSource::Status::PAUSED:
                 ui->actionStart->setEnabled(true);
                 ui->actionStart->setChecked(true);
-                ui->actionStop->setEnabled(false);
-                ui->actionReset->setEnabled(false);
-                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/disconnected"));
+                ui->actionStop->setEnabled(true);
+                ui->actionReset->setEnabled(true);
+                ui->actionReconnect->setEnabled(false);
+                ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
                 statusTextLabel->setText("Sensor Status: Error");
                 statusImageLabel->setPixmap(QPixmap(":/icons/error"));
                 break;
@@ -1147,4 +1147,12 @@ void MainWindow::on_actionDelete_Annotation_triggered()
     Q_ASSERT(!mData->getSelectionMap().isEmpty());
 
     mData->setUserAnnotationOfSelection(Annotation());
+}
+
+void MainWindow::on_actionReconnect_triggered()
+{
+    Q_ASSERT(source->status() == DataSource::Status::CONNECTION_ERROR);
+    // reconnect sensor
+    qDebug() << "Reconnecting Sensor \"" << source->identifier() << "\"";
+    source->reconnect();
 }

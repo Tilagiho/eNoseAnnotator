@@ -58,6 +58,8 @@ private slots:
 
     void on_actionDelete_Annotation_triggered();
 
+    void on_actionReconnect_triggered();
+
 private:
     Ui::MainWindow *ui;
 

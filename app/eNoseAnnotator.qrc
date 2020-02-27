@@ -18,5 +18,6 @@
         <file alias="ai_running">images/idea.png</file>
         <file alias="start">images/start-pause.png</file>
         <file alias="delete_label">images/delete-tag.png</file>
+        <file alias="reconnect">images/reconnect.png</file>
     </qresource>
 </RCC>

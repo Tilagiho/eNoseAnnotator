@@ -95,6 +95,7 @@
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
     <addaction name="actionReset"/>
+    <addaction name="actionReconnect"/>
     <addaction name="separator"/>
     <addaction name="actionSettings"/>
    </widget>
@@ -160,6 +161,7 @@
    <addaction name="separator"/>
    <addaction name="actionSettings"/>
    <addaction name="actionSet_USB_Connection"/>
+   <addaction name="actionReconnect"/>
   </widget>
   <widget class="QDockWidget" name="dock1">
    <property name="sizePolicy">
@@ -376,6 +378,15 @@
    </property>
    <property name="text">
     <string>Delete Annotation</string>
+   </property>
+  </action>
+  <action name="actionReconnect">
+   <property name="icon">
+    <iconset resource="../eNoseAnnotator.qrc">
+     <normaloff>:/icons/reconnect</normaloff>:/icons/reconnect</iconset>
+   </property>
+   <property name="text">
+    <string>Reconnect sensor</string>
    </property>
   </action>
  </widget>

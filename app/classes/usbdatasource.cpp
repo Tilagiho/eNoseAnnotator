@@ -299,6 +299,7 @@ void USBDataSource::reset()
 {
     Q_ASSERT("Trying to reset base vector without receiving data!" && connectionStatus == Status::RECEIVING_DATA);
 
+    emitData = true;
     startCount = 0;
     setStatus (Status::SET_BASEVECTOR);
 }

@@ -46,6 +46,9 @@ void InfoWidget::setStatus(DataSource::Status status)
     case DataSource::Status::CONNECTION_ERROR:
         ui->statusLabel->setText("Error");
         break;
+    case DataSource::Status::PAUSED:
+        ui->statusLabel->setText("Paused");
+        break;
     }
 
     statusSet = status;
