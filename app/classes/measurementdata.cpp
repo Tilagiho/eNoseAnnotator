@@ -18,6 +18,7 @@
  *
  */
 
+QString MeasurementData::funcName = "Custom";
 std::array<int, MVector::nChannels> MeasurementData::functionalisation = std::array<int, MVector::nChannels>{};
 
 MeasurementData::MeasurementData(QObject *parent) : QObject(parent)
@@ -463,6 +464,7 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
     }
 
     // sensor functionalisation
+    out << "#funcName:" << funcName << "\n";
     QStringList funcList;
     for (int i=0; i<functionalisation.size(); i++)
         funcList << QString::number(functionalisation[i]);
@@ -673,6 +675,11 @@ bool MeasurementData::getMetaData(QString line)
         }
         setFailures(failureString);
     }
+    else if (line.startsWith("#funcName:"))
+    {
+        funcName = line.split(":")[1];
+        emit funcNameSet(funcName);
+    }
     else if (line.startsWith("#functionalisation:"))
     {
         QString rawString = line.right(line.length()-QString("#functionalisation:").length());
@@ -682,6 +689,20 @@ bool MeasurementData::getMetaData(QString line)
         for (int i=0; i<MVector::nChannels; i++)
             newFunc[i] = funcList[i].toInt();
         setFunctionalities(newFunc);
+
+        // funcName not stored in file?!
+        // -> emit Custom
+        if (funcName == "Custom")
+        {
+            for (int i=0; i<functionalisation.size(); i++)
+            {
+                if (functionalisation[i] != 0)
+                {
+                    emit funcNameSet("Custom");
+                    break;
+                }
+            }
+        }
     }
     else if (line.startsWith("#baseLevel:"))
     {
@@ -1172,4 +1193,9 @@ uint MeasurementData::getTimestampUIntfromString(QString string)
 {
     QDateTime dateTime = QDateTime::fromString(string, "d.M.yyyy - h:mm:ss");
     return dateTime.toTime_t();
+}
+
+void MeasurementData::setFuncName(QString name)
+{
+    funcName = name;
 }

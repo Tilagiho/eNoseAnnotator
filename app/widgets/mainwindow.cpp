@@ -253,7 +253,12 @@ MainWindow::MainWindow(QWidget *parent)
         {
             mData->setFunctionalities(dialog.getFunctionalities());
             measInfoWidget->setFuncLabel(dialog.presetName);
+            mData->setFuncName(dialog.presetName);
         }
+    });
+    connect(mData, &MeasurementData::funcNameSet, this, [this](QString name){
+        measInfoWidget->setFuncLabel(name);
+        mData->setFuncName(name);
     });
 
     // saving images of the graphs

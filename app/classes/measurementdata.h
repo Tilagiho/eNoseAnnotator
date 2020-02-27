@@ -193,6 +193,7 @@ public:
 
     QString getSaveFilename() const;
 
+    static QString funcName;
     static std::array<int, MVector::nChannels> functionalisation;
 
 public slots:
@@ -209,6 +210,7 @@ public slots:
     void addClass(aClass newClass);
     void removeClass(aClass oldClass);
     void changeClass(aClass oldClass, aClass newClass);
+    void setFuncName(QString);
 
 signals:
     void selectionVectorChanged(MVector vector, std::array<bool, MVector::nChannels> sensorFailures, std::array<int, MVector::nChannels>);  // emits new vector when dataSelected is changed
@@ -237,6 +239,8 @@ signals:
     void dataChangedSet(bool);
 
     void functionalisationChanged();
+
+    void funcNameSet(QString);
 
 private:
     QMap<uint, MVector> data;  // map containing vectors of measurements with timestamps as keys

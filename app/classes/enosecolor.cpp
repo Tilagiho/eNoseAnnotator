@@ -5,35 +5,6 @@
 #include "mvector.h"
 
 QList<QColor> ENoseColor::smallColorList {
-
-//    1)
-//    QColor("#556b2f"),      // darkolivegreen
-//    QColor("#191970"),      // midnightblue
-//    QColor("#ff4500"),      // orangered
-//    QColor("#ffd700"),      // gold
-//    QColor("#00ff00"),      // lime
-//    QColor("#00bfff"),      // deepskyblue
-//    QColor("#0000ff"),      // blue
-//    QColor("#ff1493")       // deeppink
-
-//    2)
-//    QColor("#2f4f4f"), // darkslategray
-//    QColor("#006400"),  //darkgreen
-//    QColor("#cd5c5c"),  // indianred
-//    QColor("#00008b"),  // darkblue
-//    QColor("#ff0000"),  // red
-//    QColor("#ffa500"),  // orange
-//    QColor("#ffff00"),  // yellow
-//    QColor("#00ff00"), // lime
-//    QColor("#00fa9a"),  // mediumspringgreen
-//    QColor("#00ffff"),  // aqua
-//    QColor("#0000ff"),  // blue
-//    QColor("#da70d6"),  // orchid
-//    QColor("#d8bfd8"),  // thistle
-//    QColor("#ff00ff"),  // fuchsia
-//    QColor("#1e90ff"),  // dodgerblue
-//    QColor("#f0e68c")  // khaki
-
     QColor("#006400"),  // darkgreen
     QColor("#1e90ff"),  // dodgerblue
     QColor("#ff0000"),  // red
