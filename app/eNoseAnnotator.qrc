@@ -7,7 +7,6 @@
         <file alias="settings">images/settings-4.png</file>
         <file alias="save">images/save.png</file>
         <file alias="repeat">images/repeat.png</file>
-        <file alias="start">images/play-button-1.png</file>
         <file alias="load">images/folder-10.png</file>
         <file alias="error">images/error.png</file>
         <file alias="unknown">images/info.png</file>
@@ -17,6 +16,7 @@
         <file alias="baseVector">images/hourglass-1.png</file>
         <file alias="label">images/price-tag.png</file>
         <file alias="ai_running">images/idea.png</file>
+        <file alias="start">images/start-pause.png</file>
         <file alias="delete_label">images/delete-tag.png</file>
     </qresource>
 </RCC>
