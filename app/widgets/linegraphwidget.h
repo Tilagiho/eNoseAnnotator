@@ -47,7 +47,7 @@ public:
     int getNChannels() const;
 
 public slots:
-    void addMeasurement(MVector measurement, uint timestamp, bool rescale=false);   // add single measurement; rescale y-axis if rescale==true
+    void addMeasurement(MVector measurement, uint timestamp, bool rescale=true);   // add single measurement; rescale y-axis if rescale==true
 //    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements
 //    void addMeasurement(QMap<uint, MVector>);
     void setData(QMap<uint, MVector> map);
