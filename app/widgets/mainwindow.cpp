@@ -205,6 +205,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::sensorFailuresSet, relLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
     connect(mData, &MeasurementData::sensorFailuresSet, absLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
     connect(mData, &MeasurementData::sensorFailuresSet, this, [this](std::array<bool, 64>){
+        // update func line graph:
         funcLineGraph->clearGraph();
 
         auto data = mData->getRelativeData();
@@ -217,7 +218,17 @@ MainWindow::MainWindow(QWidget *parent)
             funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures);
 
         funcLineGraph->setData(funcData);
-    });     // update functionalisation graph
+
+        // update func bar graphs:
+        if (!mData->getSelectionMap().isEmpty())
+        {
+            MVector selectionVector = mData->getSelectionVector();
+
+            funcBarGraph->setBars(selectionVector, failures, funcs);
+        }
+
+    });     // update functionalisation graphs
+
 
     // redraw line graphs
     connect(funcLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
@@ -1089,20 +1100,26 @@ void MainWindow::updateFuncGraph()
     // use normal graph
     if (maxFunc == 0)
     {
-        delete funcLineGraph;
-        funcLineGraph = new LineGraphWidget(this);
-        leftDocks[0]->setWidget(funcLineGraph);
-        connectFLGraph();   // reconnect funcLineGraph
+        if (maxFunc != funcLineGraph->getNChannels())
+        {
+            delete funcLineGraph;
+            funcLineGraph = new LineGraphWidget(this);
+            leftDocks[0]->setWidget(funcLineGraph);
+            connectFLGraph();   // reconnect funcLineGraph
+        }
 
         funcLineGraph->setData(data);
     }
     // else: reset graph
     else
     {
-        delete funcLineGraph;
-        funcLineGraph = new LineGraphWidget(this, maxFunc+1);
-        leftDocks[0]->setWidget(funcLineGraph);
-        connectFLGraph();   // reconnect funcLineGraph
+        if (maxFunc != funcLineGraph->getNChannels())
+        {
+            delete funcLineGraph;
+            funcLineGraph = new LineGraphWidget(this, maxFunc+1);
+            leftDocks[0]->setWidget(funcLineGraph);
+            connectFLGraph();   // reconnect funcLineGraph
+        }
 
         // add func vectors to func vector
 
@@ -1111,6 +1128,14 @@ void MainWindow::updateFuncGraph()
             MVector funcVector = data[timestamp].getFuncVector(funcs, fails);
             funcLineGraph->addMeasurement(funcVector, timestamp);
         }
+    }
+
+    // update func bar graph
+    if (!mData->getSelectionMap().isEmpty())
+    {
+        MVector selectionVector = mData->getSelectionVector();
+
+        funcBarGraph->setBars(selectionVector, fails, funcs);
     }
 
     // reset graph pens
