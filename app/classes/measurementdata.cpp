@@ -276,14 +276,14 @@ QMap<int, int> MeasurementData::getFuncMap(const std::array<int, MVector::nChann
     QMap<int, int> funcMap;
     for (int i=0; i<MVector::nChannels; i++)
     {
-        if (!fails[i])
-        {
-            int func = funcs[i];
-            if (!funcMap.contains(func))
-                funcMap[func] = 1;
-            else
+        int func = funcs[i];
+        if (!funcMap.contains(func))
+            // sensor failure in channel i:
+            // assign 0, so failing funcs are not overseen
+            funcMap[func] = fails[i] ? 0 : 1;
+        else
+            if (!fails[i])
                 funcMap[func]++;
-        }
     }
     return funcMap;
 }
