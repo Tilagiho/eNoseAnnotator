@@ -151,5 +151,5 @@ QString FakeDatasource::identifier()
 
 DataSource::SourceType FakeDatasource::sourceType()
 {
-    SourceType::FAKE;
+   return SourceType::FAKE;
 }
