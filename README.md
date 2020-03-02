@@ -49,7 +49,7 @@ The data is stored in the format of a .csv file.
 
 The vectors of a measurement can be classified using [TorchScript(.pt)](https://pytorch.org/tutorials/advanced/cpp_export.html) models. 
 
-### Using own models
+### Training own classfiers
 
 You can train your own models using pyTorch and convert it into TorchScript. The following information should be considered when doing so.
 
