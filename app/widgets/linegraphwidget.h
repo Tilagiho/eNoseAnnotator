@@ -84,6 +84,8 @@ private:
     Ui::LineGraphWidget *ui;
     int nChannels = MVector::nChannels;
 
+    const double det_class_tresh = 0.001;   // only classes with values higher than this are shown in the detected class labels
+
     const int defaultXWidth = 30; // defines default range of xAxis: (-1; defaultXWidth)
     const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
     const double labelSpace = 0.3;

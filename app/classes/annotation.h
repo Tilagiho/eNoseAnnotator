@@ -17,6 +17,8 @@ public:
 
     const QString toString() const;
 
+    const QString getProbString() const;
+
     static Annotation fromString(QString string);
 
     static bool isAnnotationString(QString string);

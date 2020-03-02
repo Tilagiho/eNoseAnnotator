@@ -368,6 +368,8 @@ void LineGraphWidget::mouseMoved (QMouseEvent *  event)
                         if (focusedRect == labelRect)
                         {
                             labelString = "User Annotation:\n" + userDefinedClassLabels[xpos].first;
+                            labelString = labelString.split(',').join('\n');
+                            QToolTip::showText(event->globalPos(), labelString);
                             break;
                         }
                 }
@@ -376,15 +378,12 @@ void LineGraphWidget::mouseMoved (QMouseEvent *  event)
                     for (auto labelRect : detectedClassLabels[xpos].second)
                         if (focusedRect == labelRect)
                         {
-                            labelString = "Detected Annotation:\n" + detectedClassLabels[xpos].first;
+                            labelString = "Detected class probabilities:\n" + detectedClassLabels[xpos].first;
+
+                            QToolTip::showText(event->globalPos(), labelString);
                             break;
                         }
                 }
-            }
-            if (labelString != "")
-            {
-                labelString = labelString.split(',').join('\n');
-                QToolTip::showText(event->globalPos(), labelString);
             }
         }
     }
@@ -788,7 +787,7 @@ void LineGraphWidget::setLabel(int xpos, Annotation annotation, bool isUserAnnot
         // delete labels with value == 0.0
         for (int i=0; i<classList.size(); i++)
         {
-            if (classList[i].getType() == aClass::Type::NUMERIC &&  qFuzzyIsNull(classList[i].getValue()))
+            if (classList[i].getType() == aClass::Type::NUMERIC &&  classList[i].getValue() <= det_class_tresh)
             {
                 classList.removeAt(i);
                 i--;    // decrement i in order to keep i the same value for the next turn
@@ -805,9 +804,12 @@ void LineGraphWidget::setLabel(int xpos, Annotation annotation, bool isUserAnnot
         // create new label
         QList<QCPItemRect*> labels;
         for (aClass aclass : classList)
-            labels << new QCPItemRect(ui->chart);
-        (*labelMap)[xpos] = QPair<QString, QList<QCPItemRect*>>(annotation.toString(), labels);
-
+            if (isUserAnnotation || (aclass.getType() == aClass::Type::NUMERIC && aclass.getValue() > det_class_tresh))
+                labels << new QCPItemRect(ui->chart);
+        if (isUserAnnotation)
+            (*labelMap)[xpos] = QPair<QString, QList<QCPItemRect*>>(annotation.toString(), labels);
+        else
+            (*labelMap)[xpos] = QPair<QString, QList<QCPItemRect*>>(annotation.getProbString(), labels);
 
         // get normation value for height of rectangles of the label
         double valueSum = 0;
@@ -824,7 +826,7 @@ void LineGraphWidget::setLabel(int xpos, Annotation annotation, bool isUserAnnot
         double yDelta = qAbs(yCoords.second - yCoords.first); // delta between lower and uppr bound of the label
         double lastY = yCoords.second; // stores the y-coord of the bottom of the last rectangle drawn
 
-        for (int i=0; i<classList.size(); i++)
+        for (int i=0; i<labels.size(); i++)
         {
             auto rectangle = labels[i];
             auto aclass = classList[i];

@@ -92,6 +92,22 @@ const QString Annotation::toString() const
     return classStrings.join(',');
 }
 
+const QString Annotation::getProbString() const
+{
+   if (getType() != aClass::Type::NUMERIC)
+       return toString().split(",").join("\n");
+
+   QList<QString> classStrings;
+
+    for (aClass aclass : getClasses())
+    {
+        if (aclass.getValue() > 0.001)
+            classStrings << aclass.getName() + ": " + QString::number(100*aclass.getValue(), 'f', 1) + "%\n";
+    }
+
+    return classStrings.join('\n');
+}
+
 /*!
  * \brief Annotation::contains \a aclass is contained in an Annotation, if one class in \a classList matches its name regardless of the class type.
  * \param aclass
