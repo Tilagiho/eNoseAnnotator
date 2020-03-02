@@ -40,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->actionAnnotate_selection->setEnabled(false);
     ui->actionDelete_Annotation->setEnabled(false);
 
+    ui->actionClassify_measurement->setEnabled(false);
+    ui->actionLive_classifcation->setChecked(true);
+
     ui->actionSet_detected_class_of_selection->setEnabled(false);
 
     // user can only set detected class in debug mode
@@ -633,26 +636,35 @@ void MainWindow::on_actionSettings_triggered()
 void MainWindow::on_actionStart_triggered()
 {
     Q_ASSERT("Error: No connection was specified!" && source!=nullptr);
-    Q_ASSERT("Error: Cannot start or pause non-active  connection!" && ((source->status() == DataSource::Status::CONNECTED) ||(source->status() == DataSource::Status::PAUSED) ||  source->status() == DataSource::Status::RECEIVING_DATA) || (source->status() == DataSource::Status::CONNECTION_ERROR));
 
+    switch(source->status())
+    {
     // measurement running
     // -> pause connection
-    if (source->status() == DataSource::Status::RECEIVING_DATA)
-    {
+    case DataSource::Status::RECEIVING_DATA:
+    case DataSource::Status::SET_BASEVECTOR:
         source->pause();
-        return;
-    }
-    // measurement pause
+        break;
+
+    // measurement paused
     // -> resume measurement
-    else if (source->status() == DataSource::Status::PAUSED)
-    {
+    case DataSource::Status::PAUSED:
         source->start();
-        return;
-    }
+        break;
+
     // no measurement running
-    // start
-    else if ((source->status() == DataSource::Status::CONNECTED) || (source->status() == DataSource::Status::CONNECTION_ERROR))
+    // -> start new measurement
+    case DataSource::Status::CONNECTED:
     {
+        // save old data if changed
+        if (mData->changed())
+        {
+            auto answer = QMessageBox::question(this, "Save measurement data", "Do you want to save the current data before starting a new measurement?");
+            if (answer == QMessageBox::StandardButton::Yes)
+                mData->saveData(this);
+        }
+
+        // set functionalisation if not set
         if (mData->getFuncMap(mData->getFunctionalities(), mData->getSensorFailures()).size() == 1)
         {
             auto answer = QMessageBox::question(this, "Set Functionalisation", "The sensor functionalisation was not set.\nDo you want to set it before starting a new measurement?");
@@ -672,14 +684,6 @@ void MainWindow::on_actionStart_triggered()
             }
         }
 
-        if (mData->changed())
-        {
-            // save old data
-            auto answer = QMessageBox::question(this, "Save measurement data", "Do you want to save the current data before starting a new measurement?");
-            if (answer == QMessageBox::StandardButton::Yes)
-                mData->saveData(this);
-        }
-
         // clear data, init with sensor id, set dataChanged to false
         QString sensorId = mData->getSensorId();
         clearData();
@@ -689,7 +693,12 @@ void MainWindow::on_actionStart_triggered()
         source->start();
 
         qDebug() << "New measurement started!";
+        break;
     }
+    default:
+        Q_ASSERT("Error: Cannot start or pause non-active  connection!" && source->status() != DataSource::Status::CONNECTING && source->status() != DataSource::Status::NOT_CONNECTED && source->status() != DataSource::Status::CONNECTION_ERROR);
+    }
+
 }
 
 void MainWindow::on_actionStop_triggered()
@@ -890,9 +899,9 @@ void MainWindow::makeSourceConnections()
                 statusImageLabel->setPixmap(QPixmap(":/icons/connected"));
                 break;
             case DataSource::Status::SET_BASEVECTOR:
-                ui->actionStart->setEnabled(true);
+                ui->actionStart->setEnabled(false);
                 ui->actionStart->setChecked(false);
-                ui->actionStop->setEnabled(true);
+                ui->actionStop->setEnabled(false);
                 ui->actionReset->setEnabled(false);
                 ui->actionReconnect->setEnabled(false);
                 ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
@@ -926,8 +935,8 @@ void MainWindow::makeSourceConnections()
                 ui->actionReset->setEnabled(true);
                 ui->actionReconnect->setEnabled(false);
                 ui->actionSet_USB_Connection->setIcon(QIcon(":/icons/connected"));
-                statusTextLabel->setText("Sensor Status: Error");
-                statusImageLabel->setPixmap(QPixmap(":/icons/error"));
+                statusTextLabel->setText("Sensor Status: Paused");
+                statusImageLabel->setPixmap(QPixmap(":/icons/paused"));
                 break;
             default:
                 Q_ASSERT("Unknown Sensor Status!" && false);
@@ -1041,6 +1050,7 @@ void MainWindow::on_actionLoadClassifier_triggered()
     QString errorString;
     classifier = new TorchClassifier(this, filename, &loadOk, &errorString);
 
+    // loading classifier failed
     if (!loadOk)
     {
         QMessageBox::critical(this, "Error loading model", errorString);
@@ -1049,34 +1059,7 @@ void MainWindow::on_actionLoadClassifier_triggered()
         return;
     }
 
-    if (classifier->getPresetName() != measInfoWidget->getFuncLabel())
-        QMessageBox::warning(this, "Different functionalisation preset", "The classifier uses different functionalisation preset than currently set.\nMake sure the right functionalisation is used!\n\nClassifier: " + classifier->getPresetName() + "\nCurrently set: " + measInfoWidget->getFuncLabel());
-
-    classifierWidget->setClassifier(classifier->getName(), classifier->getClassNames(), classifier->getIsInputAbsolute(), classifier->getPresetName());
-
-    if (!mData->getAbsoluteData().empty())
-    {
-        auto ans = QMessageBox::question(this, "Classify data", "Do you want to classify the current measurement data?");
-
-        if (ans == QMessageBox::StandardButton::Yes)
-        {
-            // get measurement data
-            QMap<uint, MVector> measDataMap;
-            if (classifier->getIsInputAbsolute())
-                measDataMap = mData->getAbsoluteData();
-            else
-                measDataMap = mData->getRelativeData();
-
-            // classify
-            for (uint timestamp : measDataMap.keys())
-            {
-                auto funcVector = measDataMap[timestamp].getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
-                Annotation annotation = classifier->getAnnotation(funcVector.vector);
-                mData->setDetectedAnnotation(annotation, timestamp);
-            }
-        }
-    }
-
+    // loading classifier successfull
     // add classifier classes to mData
     for (QString className : classifier->getClassNames())
     {
@@ -1086,9 +1069,14 @@ void MainWindow::on_actionLoadClassifier_triggered()
             mData->addClass(c);
     }
 
-    // TODO
-    // classify data
-    // start live classification
+    // update menu
+    ui->actionClassify_measurement->setEnabled(true);
+
+    // check func preset
+    if (classifier->getPresetName() != measInfoWidget->getFuncLabel())
+        QMessageBox::warning(this, "Different functionalisation preset", "The classifier uses different functionalisation preset than currently set.\nMake sure the right functionalisation is used!\n\nClassifier: " + classifier->getPresetName() + "\nCurrently set: " + measInfoWidget->getFuncLabel());
+
+    classifierWidget->setClassifier(classifier->getName(), classifier->getClassNames(), classifier->getIsInputAbsolute(), classifier->getPresetName());
 }
 
 void MainWindow::updateFuncGraph()
@@ -1186,4 +1174,34 @@ void MainWindow::on_actionReconnect_triggered()
     // reconnect sensor
     qDebug() << "Reconnecting Sensor \"" << source->identifier() << "\"";
     source->reconnect();
+}
+
+void MainWindow::classifyMeasurement()
+{
+    // get measurement data
+    QMap<uint, MVector> measDataMap;
+    if (classifier->getIsInputAbsolute())
+        measDataMap = mData->getAbsoluteData();
+    else
+        measDataMap = mData->getRelativeData();
+
+    // classify
+    for (uint timestamp : measDataMap.keys())
+    {
+        auto funcVector = measDataMap[timestamp].getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
+        Annotation annotation = classifier->getAnnotation(funcVector.vector);
+        mData->setDetectedAnnotation(annotation, timestamp);
+    }
+}
+
+void MainWindow::on_actionClassify_measurement_triggered()
+{
+    Q_ASSERT(classifier != nullptr);
+
+    classifyMeasurement();
+}
+
+void MainWindow::on_actionLive_classifcation_triggered(bool checked)
+{
+    classifierWidget->setLiveClassification(checked);
 }

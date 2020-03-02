@@ -51,6 +51,7 @@ private:
 
     QSerialPort *serial = nullptr;
     Settings settings;
+    bool runningMeasFailed = false;
 
     bool emitData;
 };

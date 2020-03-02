@@ -60,6 +60,10 @@ private slots:
 
     void on_actionReconnect_triggered();
 
+    void on_actionClassify_measurement_triggered();
+
+    void on_actionLive_classifcation_triggered(bool checked);
+
 private:
     Ui::MainWindow *ui;
 
@@ -97,6 +101,8 @@ private:
     void updateFuncGraph();
 
     void connectFLGraph();
+
+    void classifyMeasurement();
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);

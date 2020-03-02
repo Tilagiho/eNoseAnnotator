@@ -4,28 +4,11 @@
 // optional
 - free zoom
 - stop measurement based on gradient, ui symbols for status
-- action to continue measurements
 
 // features
-- line graphs:
-    - line graphs for functionalisation averages
-    -> default: use functionalisation averages, option to see all channel values
-    - channel colors based on functionalisation colors
-
-- TorchScript support
-
-- reimplement color schemes:
-    - better color palette
-    - channel colors based on functionalisation
-    - clear difference between classification & measurement colors
 - create new measurement without starting it
 
 // bugs
-- connecting sensor after some time -> neative resistance values
-- zero-vectors in save file?
-- continuous marking -> only part is selected
-- update functionalisation bar graph after changing funtionalisation
-- reset filename after starting new measurement
 - widgets move when saving
 
 // ci

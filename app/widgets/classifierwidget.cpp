@@ -26,8 +26,7 @@ void ClassifierWidget::setAnnotation(Annotation annotation)
     aClass detectedClass = annotation.getClasses().first();
     ui->widget->set(detectedClass.getName());
 
-    QString annotationString = annotation.toString();
-    ui->widget->setToolTip(annotationString.split(",").join("\n"));
+    ui->widget->setToolTip(annotation.getProbString());
 
     setHidden(false);
 }
@@ -49,9 +48,15 @@ void ClassifierWidget::setClassifier(QString name, QStringList classNames,bool i
 
 }
 
-void ClassifierWidget::setLiveClassification(bool isLive)
+void ClassifierWidget::setLiveClassification(bool newLive)
 {
-    isLive = isLive;
+    if (isLive != newLive)
+    {
+        isLive = newLive;
+
+        if (!isLive && ui->infoLabel->text() == "Live classification is running...")
+            ui->infoLabel->setText("");
+    }
 }
 
 void ClassifierWidget::setInfoString(QString string)

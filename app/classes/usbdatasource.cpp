@@ -142,6 +142,8 @@ void USBDataSource::handleError(QSerialPort::SerialPortError serialPortError)
     // ignore signals other than read errors
     if (serialPortError != QSerialPort::SerialPortError::ReadError)
         return;
+    if (status() == Status::RECEIVING_DATA)
+        runningMeasFailed = true;
 
     closeSerialPort();
 
@@ -153,8 +155,11 @@ void USBDataSource::handleTimeout()
 {
     if (connectionStatus == Status::CONNECTION_ERROR)
         return; // ignore if already in error state
+    if (status() == Status::RECEIVING_DATA)
+        runningMeasFailed = true;
 
     closeSerialPort();
+
     setStatus (Status::CONNECTION_ERROR);
     emit error("USB connection timed out without receiving data.\nCheck the connection settings and replug the sensor. Try to reconnect by starting a new measurement.");
 }
@@ -168,7 +173,15 @@ void USBDataSource::handleTimeout()
 void USBDataSource::processLine(const QByteArray &data)
 {
     if (connectionStatus == DataSource::Status::CONNECTING)
-        setStatus(DataSource::Status::CONNECTED);
+    {
+        if (runningMeasFailed)
+        {
+            runningMeasFailed = false;
+            setStatus(DataSource::Status::PAUSED);
+        }
+        else
+            setStatus(DataSource::Status::CONNECTED);
+    }
     // reset timer
     timer.start(5000);
 
@@ -194,8 +207,10 @@ void USBDataSource::processLine(const QByteArray &data)
         // extract values
         int count = valueList[0].toInt();
 
-        if (startCount == 0 || count == 1)    // first count
+        if (startCount == 0)    // first count
         {
+            baselevelVectorMap.clear();
+
             setStatus (Status::SET_BASEVECTOR);
 
             startCount = count;
@@ -208,14 +223,14 @@ void USBDataSource::processLine(const QByteArray &data)
 
             baselevelVectorMap[timestamp] = vector;
         }
-        else if (count < startCount + nBaseVectors -1) // prepare baselevel
+        else if (status() == Status::SET_BASEVECTOR && count < startCount + nBaseVectors -1) // prepare baselevel
         {
             MVector vector;
             for (uint i=0; i<vector.size; i++)
                 vector[i] = valueList[i+1].toDouble();
 
             baselevelVectorMap[timestamp] = vector;
-        } else if (count == startCount + nBaseVectors -1) // set baselevel
+        } else if (status() == Status::SET_BASEVECTOR && count == startCount + nBaseVectors -1) // set baselevel
         {
             MVector vector;
             for (uint i=0; i<vector.size; i++)
@@ -235,7 +250,6 @@ void USBDataSource::processLine(const QByteArray &data)
 //            for (uint ts : baselevelVectorMap.keys())
 //                emit vectorReceived(ts, baselevelVectorMap[ts]);
 
-            baselevelVectorMap.clear();
         }
         else // get vector & emit
         {
@@ -260,8 +274,15 @@ void USBDataSource::start()
     Q_ASSERT("Usb connection was already started!" && connectionStatus != Status::RECEIVING_DATA);
     Q_ASSERT("Usb connection is not connected!" && connectionStatus != Status::NOT_CONNECTED);
 
-    if (status() != Status::PAUSED)
+    // start new measurement
+    if (status() != Status::PAUSED && !baselevelVectorMap.isEmpty())
+    {
         startCount = 0;
+        setStatus(Status::SET_BASEVECTOR);
+    }
+    // resume existing measurement
+    else
+        setStatus(Status::RECEIVING_DATA);
 
     emitData = true;
 }
@@ -271,10 +292,10 @@ void USBDataSource::start()
  */
 void USBDataSource::pause()
 {
-    Q_ASSERT("Usb connection was already started!" && connectionStatus != Status::RECEIVING_DATA);
-    Q_ASSERT("Usb connection is not connected!" && connectionStatus != Status::NOT_CONNECTED);
+    Q_ASSERT("Usb connection was already started!" && connectionStatus == Status::RECEIVING_DATA || connectionStatus == Status::SET_BASEVECTOR);
 
-    startCount = 0;
+    if (connectionStatus == Status::SET_BASEVECTOR)
+        baselevelVectorMap.clear();
 
     emitData = false;
     setStatus (Status::PAUSED);
@@ -286,9 +307,10 @@ void USBDataSource::pause()
  */
 void USBDataSource::stop()
 {
-    Q_ASSERT("Trying to stop connection that is not receiving data!" && connectionStatus == Status::RECEIVING_DATA);
+    Q_ASSERT("Trying to stop connection that is not receiving data!" && (connectionStatus == Status::RECEIVING_DATA ||  connectionStatus == Status::PAUSED));
 
     emitData = false;
+    runningMeasFailed = false;
     setStatus (Status::CONNECTED);
 }
 
@@ -297,7 +319,7 @@ void USBDataSource::stop()
  */
 void USBDataSource::reset()
 {
-    Q_ASSERT("Trying to reset base vector without receiving data!" && connectionStatus == Status::RECEIVING_DATA);
+    Q_ASSERT("Trying to reset base vector without receiving data!" && connectionStatus == Status::RECEIVING_DATA || connectionStatus == Status::PAUSED);
 
     emitData = true;
     startCount = 0;

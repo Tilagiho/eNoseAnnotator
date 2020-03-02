@@ -112,6 +112,9 @@
      <string>Classifier</string>
     </property>
     <addaction name="actionLoadClassifier"/>
+    <addaction name="actionClassify_measurement"/>
+    <addaction name="separator"/>
+    <addaction name="actionLive_classifcation"/>
    </widget>
    <widget class="QMenu" name="menuConnection">
     <property name="title">
@@ -241,6 +244,9 @@
    <property name="text">
     <string>Set Connection...</string>
    </property>
+   <property name="toolTip">
+    <string>Set connection to sensor</string>
+   </property>
   </action>
   <action name="actionStart">
    <property name="checkable">
@@ -254,7 +260,7 @@
     <string>Start/ Pause</string>
    </property>
    <property name="toolTip">
-    <string>Start Measurement</string>
+    <string>Start/ pause measurement</string>
    </property>
   </action>
   <action name="actionStop">
@@ -266,7 +272,7 @@
     <string>Stop</string>
    </property>
    <property name="toolTip">
-    <string>Stop Measurement</string>
+    <string>Stop measurement</string>
    </property>
   </action>
   <action name="actionReset">
@@ -379,6 +385,9 @@
    <property name="text">
     <string>Delete Annotation</string>
    </property>
+   <property name="toolTip">
+    <string>Delete annotation from selection</string>
+   </property>
   </action>
   <action name="actionReconnect">
    <property name="icon">
@@ -387,6 +396,19 @@
    </property>
    <property name="text">
     <string>Reconnect sensor</string>
+   </property>
+  </action>
+  <action name="actionLive_classifcation">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Live classifcation</string>
+   </property>
+  </action>
+  <action name="actionClassify_measurement">
+   <property name="text">
+    <string>Classify measurement</string>
    </property>
   </action>
  </widget>
