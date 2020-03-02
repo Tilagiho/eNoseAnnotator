@@ -5,9 +5,12 @@ eNoseAnnotator is a program used to view, annotate and store measurements of the
 ## How to install
 
 ### Windows:
-Download the windows archive from the assets of the latest release (green label).
+First, install the [sensor drivers](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers).
+Then download the eNoseAnnotator windows archive from the assets of the latest release (green label).
 Unpack the zip file where you want to use the program. Go into the the directory created and double-click "eNoseAnnotator.exe" in order to run the program.
+
 If you encounter an error message about missing .dll files, you need install the vc redistributable package by running "vc_redist.x64.exe", which is located in the same directory.
+
 
 ### Linux:
 Download the linux archive from the assets of the latest release (green label). Extract the zip file where you want to use the program.
@@ -48,7 +51,7 @@ The vectors of a measurement can be classified using [TorchScript(.pt)](https://
 
 ### Using own models
 
-You can train your own models using pyTorch. The following information should be considered when doing so.
+You can train your own models using pyTorch and convert it into TorchScript. The following information should be considered when doing so.
 
 The output of the model is assumed to be a vector of the class logits. In order to interpret the model in the right way, some variables have to be part the model, while others are optional.
 
