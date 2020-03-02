@@ -42,9 +42,15 @@ You can load and save data using "Measurement->Load..."/ "Measurement->Save" in 
 
 The data is stored in the format of a .csv file.
 
-### Using classifiers
+## Classifiers
 
-The vectors of a measurement can be classified using [TorchScript](https://pytorch.org/tutorials/advanced/cpp_export.html) models. The output of the model is assumed to be a vector of the class logits. In order to interpret the model in the right way, some variables have to be part the model, while others are optional.
+The vectors of a measurement can be classified using [TorchScript(.pt)](https://pytorch.org/tutorials/advanced/cpp_export.html) models. 
+
+### Using own models
+
+You can train your own models using pyTorch. The following information should be considered when doing so.
+
+The output of the model is assumed to be a vector of the class logits. In order to interpret the model in the right way, some variables have to be part the model, while others are optional.
 
 Necessary variables:
 - classList (list of strings): list of the class name strings, have to be in the same order as the output vector
