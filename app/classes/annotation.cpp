@@ -102,7 +102,7 @@ const QString Annotation::getProbString() const
     for (aClass aclass : getClasses())
     {
         if (aclass.getValue() > 0.001)
-            classStrings << aclass.getName() + ": " + QString::number(100*aclass.getValue(), 'f', 1) + "%\n";
+            classStrings << aclass.getName() + ": " + QString::number(100*aclass.getValue(), 'f', 1) + "%";
     }
 
     return classStrings.join('\n');
