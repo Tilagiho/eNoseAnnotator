@@ -32,6 +32,8 @@ public:
 
     int getM() const;
 
+    QString getPresetName() const;
+
 signals:
     void isInputAbsoluteSet (bool);
 
@@ -44,6 +46,7 @@ private:
     QStringList classNames{};
     QString name;
     QString filename;
+    QString presetName = "None";
     int N, M;
     std::vector<double> mean_vector, stdev_vector;
 

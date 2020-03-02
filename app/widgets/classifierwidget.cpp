@@ -32,15 +32,18 @@ void ClassifierWidget::setAnnotation(Annotation annotation)
     setHidden(false);
 }
 
-void ClassifierWidget::setClassifier(QString name, QStringList classNames,bool isInputAbsolute)
+void ClassifierWidget::setClassifier(QString name, QStringList classNames,bool isInputAbsolute, QString inputType)
 {
     ui->nameLabel->setText(name);
     ui->classLabel->setText(classNames.join(", "));
 
+
     if (isInputAbsolute)
-        ui->input_type_label->setText("absolute");
+        inputType += " (absolute)";
     else
-        ui->input_type_label->setText("relative");
+        inputType += " (relative)";
+
+    ui->input_type_label->setText(inputType);
 
     setHidden(false);
 

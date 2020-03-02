@@ -95,6 +95,10 @@ TorchClassifier::TorchClassifier(QObject *parent, QString filename, bool* loadOk
         }
     }
 
+    if (module.hasattr("preset_name"))
+        presetName = QString(module.attr("preset_name").toString()->string().c_str());
+
+
 //    qDebug() << module.dump_to_str(false, true, true, 3).c_str();
 //    qDebug() << classNames.join(", ");
 
@@ -178,6 +182,11 @@ int TorchClassifier::getN() const
 int TorchClassifier::getM() const
 {
     return M;
+}
+
+QString TorchClassifier::getPresetName() const
+{
+    return presetName;
 }
 
 std::vector<double> TorchClassifier::normalise(std::vector<double> input)

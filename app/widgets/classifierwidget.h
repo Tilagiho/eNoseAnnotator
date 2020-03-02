@@ -24,7 +24,7 @@ public:
 
 public slots:
     void setAnnotation (Annotation annotation);
-    void setClassifier (QString name, QStringList classNames,bool isInputAbsolute);
+    void setClassifier (QString name, QStringList classNames,bool isInputAbsolute, QString inputType="Vector");
     void setLiveClassification (bool isLive);
     void setInfoString(QString string);
     void clear();

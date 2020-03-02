@@ -1049,7 +1049,10 @@ void MainWindow::on_actionLoadClassifier_triggered()
         return;
     }
 
-    classifierWidget->setClassifier(classifier->getName(), classifier->getClassNames(), classifier->getIsInputAbsolute());
+    if (classifier->getPresetName() != measInfoWidget->getFuncLabel())
+        QMessageBox::warning(this, "Different functionalisation preset", "The classifier uses different functionalisation preset than currently set.\nMake sure the right functionalisation is used!\n\nClassifier: " + classifier->getPresetName() + "\nCurrently set: " + measInfoWidget->getFuncLabel());
+
+    classifierWidget->setClassifier(classifier->getName(), classifier->getClassNames(), classifier->getIsInputAbsolute(), classifier->getPresetName());
 
     if (!mData->getAbsoluteData().empty())
     {
