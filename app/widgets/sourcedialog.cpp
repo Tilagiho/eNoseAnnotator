@@ -18,10 +18,12 @@ SourceDialog::SourceDialog(QWidget *parent) :
 
     // add source widgets
     ui->stackedWidget->addWidget(usbWidget);
+    ui->stackedWidget->addWidget(fakeWidget);
+    fakeWidget->setHidden(true);
 
     #ifdef QT_DEBUG
     ui->comboBox->addItem("Debug: Fake Data Source");
-    ui->stackedWidget->addWidget(fakeWidget);
+    ui->stackedWidget->setHidden(false);
     #endif
 }
 
