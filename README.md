@@ -56,7 +56,7 @@ Necessary variables:
 - classList (list of strings): list of the class name strings, has to be in the same order as the output vector
 
 Optional:
-- name (string): string of the classifier name
+- name (string): name of the model
 - N (integer): number of inputs of the model
 - M (integer): number of outputs of the model
 - isInputAbsolute (bool): true if absolute vectors should be used, otherwise relative vectors are used as input. Assumed to be false if not set.
