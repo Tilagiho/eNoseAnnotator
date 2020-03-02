@@ -53,7 +53,7 @@ You can train your own models using pyTorch. The following information should be
 The output of the model is assumed to be a vector of the class logits. In order to interpret the model in the right way, some variables have to be part the model, while others are optional.
 
 Necessary variables:
-- classList (list of strings): list of the class name strings, have to be in the same order as the output vector
+- classList (list of strings): list of the class name strings, has to be in the same order as the output vector
 
 Optional:
 - name (string): string of the classifier name
