@@ -53,7 +53,7 @@ Optional:
 - name (string): string of the classifier name
 - N (integer): number of inputs of the model
 - M (integer): number of outputs of the model
-- isInputAbsolute (bool): true if absolute vectors should be used, otherwise relative vectors are used as input
+- isInputAbsolute (bool): true if absolute vectors should be used, otherwise relative vectors are used as input. Assumed to be false if not set.
 - mean (list of doubles): mean for each input, should be set if the model's training set was normalised
 - variance (list of doubles): variance for each input, should be set if the model's training set was normalised
 - preset_name (string): name of the sensor's functionalisation preset 
