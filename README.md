@@ -5,12 +5,12 @@ eNoseAnnotator is a program used to view, annotate and store measurements of the
 ## How to install
 
 ### Windows:
-Download the windows archive from the assets of the latest release.
+Download the windows archive from the assets of the latest release (green label).
 Unpack the zip file where you want to use the program. Go into the the directory created and double-click "eNoseAnnotator.exe" in order to run the program.
 If you encounter an error message about missing .dll files, you need install the vc redistributable package by running "vc_redist.x64.exe", which is located in the same directory.
 
 ### Linux:
-Download the linux archive from the assets of the latest release. "\*" is replaced by the release version. Extract the zip file where you want to use the program.
+Download the linux archive from the assets of the latest release (green label). Extract the zip file where you want to use the program.
 
 Make the AppImage in the extracted directory executable: 
 - In Nautilus (default ubuntu file browser): Right-click on the "eNoseAnnotator-\*.AppImage" and select "Properties". Under "Permissions" check "Allow executing file as program".
