@@ -55,7 +55,7 @@ void BarGraphWidget::initGraph()
         if (!data.isEmpty())
             data.clear();
 
-        for (int j=0; j<64; j++)
+        for (int j=0; j<MVector::nChannels; j++)
         {
             if (i==j)
                 data << 0.0;
@@ -133,93 +133,97 @@ void BarGraphWidget::replot()
 
 void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::nChannels> sensorFailures, std::array<int, MVector::nChannels> functionalisation)
 {
-    // update fullBarVector
-    QVector<double> ticks;
-    for (int i=0; i<MVector::nChannels; i++)
-        ticks << i+1;
-
-    QVector<double> data;
-
-    for (int i=0; i<MVector::nChannels; i++)
+    if (mode == Mode::showAll)
     {
-        if (!data.isEmpty())
-            data.clear();
+        // update fullBarVector
+        QVector<double> ticks;
+        for (int i=0; i<MVector::nChannels; i++)
+            ticks << i+1;
 
-        for (int j=0; j<64; j++)
+        QMap<int, QVector<double>> data;
+
+        for (int i=0; i<MVector::nChannels; i++)
         {
-            if (i==j && !sensorFailures[i])
-                data << new_vector[i];
-            else
-                data << 0.0;
+
+            for (int j=0; j<MVector::nChannels; j++)
+            {
+                if (i==j && !sensorFailures[i])
+                    data[i] << new_vector[i];
+                else
+                    data[i] << 0.0;
+            }
+
         }
 
-        sensorBarVector[i]->setData(ticks, data);
+        for (int i=0; i<MVector::nChannels; i++)
+            sensorBarVector[i]->setData(ticks, data[i]);
     }
-
-    // update funcBarVector:
-    // get number of functionalisations, ignore sensor failures
-    QMap<int, int> funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
-
-    auto keyList = funcMap.keys();
-    int maxFunc = *std::max_element(keyList.begin(), keyList.end());
-
-    // no func set: plot channels
-    if (maxFunc <= 1)
-        maxFunc = MVector::nChannels-1;
-
-    // new number of functionalisations:
-    // reinit funcBarVector
-    // ignore funcSize == 0 (no functionalisation set)
-    if (maxFunc != funcBarVector.size())
+    else if (mode == Mode::showFunc)
     {
-        clearBars();
-        funcBarVector.clear();
+        // update funcBarVector:
+        // get number of functionalisations, ignore sensor failures
+        QMap<int, int> funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
 
+        auto keyList = funcMap.keys();
+        int maxFunc = *std::max_element(keyList.begin(), keyList.end());
+
+        // no func set: plot channels
+        if (maxFunc <= 1)
+            maxFunc = MVector::nChannels-1;
+
+        // new number of functionalisations:
+        // reinit funcBarVector
+        // ignore funcSize == 0 (no functionalisation set)
+        if (maxFunc != funcBarVector.size())
+        {
+            clearBars();
+            funcBarVector.clear();
+
+            for (int i=0; i<=maxFunc; i++)
+            {
+                // init bar
+                funcBarVector << new QCPBars(ui->funcBarGraph->xAxis, ui->funcBarGraph->yAxis);
+                funcBarVector[i]->setAntialiased(false);
+
+                // set color
+                QColor color;
+                if (maxFunc == MVector::nChannels-1)
+                    color = ENoseColor::getSensorColor(i);
+                else
+                    color = ENoseColor::getFuncColor(i);
+                funcBarVector[i]->setPen(QPen(color.lighter(170)));
+                funcBarVector[i]->setBrush(color);
+            }
+        }
+
+        // set funcBarVector data
+        // update fullBarVector
+        QVector<double> funcTicks;
         for (int i=0; i<=maxFunc; i++)
-        {
-            // init bar
-            funcBarVector << new QCPBars(ui->funcBarGraph->xAxis, ui->funcBarGraph->yAxis);
-            funcBarVector[i]->setAntialiased(false);
+            funcTicks << i;
 
-            // set color
-            QColor color;
-            if (maxFunc == MVector::nChannels-1)
-                color = ENoseColor::getSensorColor(i);
-            else
-                color = ENoseColor::getFuncColor(i);
-            funcBarVector[i]->setPen(QPen(color.lighter(170)));
-            funcBarVector[i]->setBrush(color);
+        // get func vector
+        MVector funcVector;
+        if (maxFunc == MVector::nChannels-1)
+            funcVector = new_vector;
+        else
+            funcVector = new_vector.getFuncVector(functionalisation, sensorFailures);
 
-            // add tick + label
-            ticks.append(i+1);
-        }
+        // assign funcVector values to funcData
+        QMap<int, QVector<double>> funcDataMap;
+        for (int i=0; i<=maxFunc; i++)
+            for (int j=0;j<=maxFunc; j++)
+                if (i==j)
+                    funcDataMap [i] << funcVector[i];
+                else
+                    funcDataMap [i] << 0.0;
+
+        // set funcData
+        for (int i=0; i<=maxFunc; i++)
+            funcBarVector[i]->setData(funcTicks, funcDataMap[i]);
     }
-
-    // set funcBarVector data
-    // update fullBarVector
-    QVector<double> funcTicks;
-    for (int i=0; i<=maxFunc; i++)
-        funcTicks << i;
-
-    // get func vector
-    MVector funcVector;
-    if (maxFunc == MVector::nChannels-1)
-        funcVector = new_vector;
     else
-        funcVector = new_vector.getFuncVector(functionalisation, sensorFailures);
-
-    // assign funcVector values to funcData
-    QMap<int, QVector<double>> funcDataMap;
-    for (int i=0; i<=maxFunc; i++)
-        for (int j=0;j<=maxFunc; j++)
-            if (i==j)
-                funcDataMap [i] << funcVector[i];
-            else
-                funcDataMap [i] << 0.0;
-
-    // set funcData
-    for (int i=0; i<=maxFunc; i++)
-        funcBarVector[i]->setData(funcTicks, funcDataMap[i]);
+        Q_ASSERT("Unknown bar graph mode!" && false);
 
     replot();
 }
