@@ -45,6 +45,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->actionSet_detected_class_of_selection->setEnabled(false);
 
+    ui->actionCloseClassifier->setEnabled(false);
+
     // user can only set detected class in debug mode
     #ifdef QT_NO_DEBUG
     ui->actionSet_detected_class_of_selection->setVisible(false);
@@ -97,10 +99,20 @@ MainWindow::MainWindow(QWidget *parent)
         {
             auto funcVector = selectionVector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
 
-            Annotation annotation = classifier->getAnnotation(funcVector.vector);
-            classifierWidget->setAnnotation(annotation);
-            classifierWidget->setInfoString("Class of selection");
-            classifierWidget->isSelectionAnnotation = true;
+            try {
+                Annotation annotation = classifier->getAnnotation(funcVector.vector);
+                classifierWidget->setAnnotation(annotation);
+                classifierWidget->setInfoString("Class of selection");
+                classifierWidget->isSelectionAnnotation = true;
+            } catch (std::invalid_argument& e) {
+                QString error_message = e.what() + QString("\nDo you want to close the classifier?");
+                QMessageBox::StandardButton answer = QMessageBox::question(this, "Classifier error", error_message);
+                if (answer == QMessageBox::StandardButton::Yes)
+                {
+                    closeClassifier();
+                }
+            }
+
         }
     }); // classify selection
     connect(mData, &MeasurementData::selectionCleared, classifierWidget, &ClassifierWidget::clearAnnotation); // clear selection classification
@@ -170,23 +182,36 @@ MainWindow::MainWindow(QWidget *parent)
         // no classifier loaded or no live measurement running
         // -> don't classify
         bool measRunning = source != nullptr && source->status() == DataSource::Status::RECEIVING_DATA;
-        if (classifier == nullptr || (measRunning && !classifierWidget->getIsLive()))
+        bool isLiveClassification = classifierWidget->getIsLive();
+        if (classifier == nullptr || !measRunning || !isLiveClassification)
             return;
 
         // get annotation from the classifier
         auto funcVector = vector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
-        Annotation annotation = classifier->getAnnotation(funcVector.vector);
 
-        // set annotation
-        mData->setDetectedAnnotation(annotation, timestamp);
+        try {
+            Annotation annotation = classifier->getAnnotation(funcVector.vector);
 
-        // don't show in classifier widget if selection is made
-        if (!classifierWidget->isSelectionAnnotation)
-        {
-            classifierWidget->setAnnotation(annotation);
-            classifierWidget->setInfoString("Live classification is running...");
+            // set annotation
+            mData->setDetectedAnnotation(annotation, timestamp);
+
+            // don't show in classifier widget if selection is made
+            if (!classifierWidget->isSelectionAnnotation)
+            {
+                classifierWidget->setAnnotation(annotation);
+                classifierWidget->setInfoString("Live classification is running...");
+            }
+        } catch (std::invalid_argument& e) {
+            QString error_message = e.what() + QString("\nDo you want to close the classifier?");
+            QMessageBox::StandardButton answer = QMessageBox::question(this, "Classifier error", error_message);
+            if (answer == QMessageBox::StandardButton::Yes)
+            {
+                closeClassifier();
+            }
         }
+
     });     // live classification
+    connect(classifierWidget, &ClassifierWidget::isLiveChanged, this, &MainWindow::setIsLiveClassificationState);
 
 
     // measurement data changed
@@ -492,9 +517,22 @@ void MainWindow::on_actionsave_selection_triggered()
 
 void MainWindow::on_actionLoad_triggered()
 {
-    bool saved = mData->loadData(this);
-    if (saved)
+    // load data
+    bool loaded = mData->loadData(this);
+    if (loaded)
         setTitle(false);
+
+    // check classifier
+    if (classifier != nullptr)
+    {
+        auto funcMap = MeasurementData::getFuncMap(mData->getFunctionalities(), mData->getSensorFailures());
+
+        if (classifier->getN() != funcMap.size())
+        {
+            QString error_message = "Functionalisation of the data loaded is incompatible with the loaded classifier.\nWas the functionalisation set correctly? Is the classifier compatible with the sensor used?";
+            QMessageBox::warning(this, "Classifier error", error_message);
+        }
+    }
 }
 
 void MainWindow::on_actionSet_USB_Connection_triggered()
@@ -1092,7 +1130,7 @@ void MainWindow::on_actionLoadClassifier_triggered()
         return;
 
     if (classifier != nullptr)
-        delete classifier;
+        closeClassifier();
 
     bool loadOk;
     QString errorString;
@@ -1102,8 +1140,7 @@ void MainWindow::on_actionLoadClassifier_triggered()
     if (!loadOk)
     {
         QMessageBox::critical(this, "Error loading model", errorString);
-        delete classifier;
-        classifier = nullptr;
+        closeClassifier();
         return;
     }
 
@@ -1119,10 +1156,11 @@ void MainWindow::on_actionLoadClassifier_triggered()
 
     // update menu
     ui->actionClassify_measurement->setEnabled(true);
+    ui->actionCloseClassifier->setEnabled(true);
 
     // check func preset
     if (classifier->getPresetName() != measInfoWidget->getFuncLabel())
-        QMessageBox::warning(this, "Different functionalisation preset", "The classifier uses different functionalisation preset than currently set.\nMake sure the right functionalisation is used!\n\nClassifier: " + classifier->getPresetName() + "\nCurrently set: " + measInfoWidget->getFuncLabel());
+        QMessageBox::warning(this, "Error loading classifier", "The classifier uses different functionalisation preset than currently set.\nMake sure the right functionalisation is used!\n\nClassifier: " + classifier->getPresetName() + "\nCurrently set: " + measInfoWidget->getFuncLabel());
 
     classifierWidget->setClassifier(classifier->getName(), classifier->getClassNames(), classifier->getIsInputAbsolute(), classifier->getPresetName());
 }
@@ -1240,8 +1278,20 @@ void MainWindow::classifyMeasurement()
     for (uint timestamp : measDataMap.keys())
     {
         auto funcVector = measDataMap[timestamp].getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
-        Annotation annotation = classifier->getAnnotation(funcVector.vector);
-        mData->setDetectedAnnotation(annotation, timestamp);
+        try {
+            Annotation annotation = classifier->getAnnotation(funcVector.vector);
+            mData->setDetectedAnnotation(annotation, timestamp);
+        } catch (std::invalid_argument& e) {
+            QString error_message = e.what() + QString("\nDo you want to close the classifier?");
+
+            QMessageBox::StandardButton answer = QMessageBox::question(this, "Classifier error", error_message);
+            if (answer == QMessageBox::StandardButton::Yes)
+            {
+                closeClassifier();
+            }
+
+            break;
+        }
     }
 }
 
@@ -1255,4 +1305,24 @@ void MainWindow::on_actionClassify_measurement_triggered()
 void MainWindow::on_actionLive_classifcation_triggered(bool checked)
 {
     classifierWidget->setLiveClassification(checked);
+}
+
+void MainWindow::setIsLiveClassificationState(bool isLive)
+{
+    ui->actionLive_classifcation->setChecked(isLive);
+    classifierWidget->setLiveClassification(isLive);
+}
+
+void MainWindow::closeClassifier()
+{
+    delete classifier;
+    classifier = nullptr;
+
+    classifierWidget->clear();
+    ui->actionCloseClassifier->setEnabled(false);
+}
+
+void MainWindow::on_actionCloseClassifier_triggered()
+{
+    closeClassifier();
 }

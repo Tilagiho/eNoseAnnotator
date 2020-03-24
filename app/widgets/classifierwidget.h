@@ -22,6 +22,9 @@ public:
 
     bool isSelectionAnnotation = false;
 
+signals:
+    void isLiveChanged(bool isLive);
+
 public slots:
     void setAnnotation (Annotation annotation);
     void setClassifier (QString name, QStringList classNames,bool isInputAbsolute, QString inputType="Vector");

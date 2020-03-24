@@ -56,6 +56,8 @@ void ClassifierWidget::setLiveClassification(bool newLive)
 
         if (!isLive && ui->infoLabel->text() == "Live classification is running...")
             ui->infoLabel->setText("");
+
+        emit isLiveChanged(newLive);
     }
 }
 

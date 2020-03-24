@@ -130,6 +130,10 @@ at::Tensor TorchClassifier::forward(std::vector<double> rawInput, bool asChances
 
 Annotation TorchClassifier::getAnnotation(std::vector<double> input)
 {
+    if (input.size() != N)
+        throw std::invalid_argument("Input vector has wrong size.");
+
+
 //    std::cout << "input" << input << "\n";
     auto normalised_input = normalise(input);
 //    std::cout << "normalised input" << normalised_input << "\n";

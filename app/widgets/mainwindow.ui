@@ -112,6 +112,7 @@
      <string>Classifier</string>
     </property>
     <addaction name="actionLoadClassifier"/>
+    <addaction name="actionCloseClassifier"/>
     <addaction name="actionClassify_measurement"/>
     <addaction name="separator"/>
     <addaction name="actionLive_classifcation"/>
@@ -409,6 +410,11 @@
   <action name="actionClassify_measurement">
    <property name="text">
     <string>Classify measurement</string>
+   </property>
+  </action>
+  <action name="actionCloseClassifier">
+   <property name="text">
+    <string>Close</string>
    </property>
   </action>
  </widget>

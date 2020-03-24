@@ -64,6 +64,8 @@ private slots:
 
     void on_actionLive_classifcation_triggered(bool checked);
 
+    void on_actionCloseClassifier_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -103,6 +105,10 @@ private:
     void connectFLGraph();
 
     void classifyMeasurement();
+
+    void setIsLiveClassificationState(bool isLive);
+
+    void closeClassifier();
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);
