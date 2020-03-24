@@ -541,6 +541,84 @@ bool MeasurementData::saveSelection(QWidget *widget, QString filename)
 }
 
 /*!
+ * \brief MeasurementData::saveAverageSelectionMeasVector saves average vector of the current selection.
+ * \param widget
+ * \param filename
+ * \return
+ */
+bool MeasurementData::saveAverageSelectionMeasVector(QWidget *widget, QString filename)
+{
+    Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
+
+    // calculate average selection vector
+    MVector selectionMeasVector = getSelectionVector();
+
+    // save average vector in file
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        QMessageBox::information(widget, tr("Unable to open file"),
+            file.errorString());
+        return false;
+    }
+
+    QTextStream out(&file);
+
+    // write to file:
+    // vector string without annotations
+    QStringList vectorList = selectionMeasVector.toString().split(";");
+    vectorList = vectorList.mid(0, vectorList.size()-2);
+
+    int i = 0;
+    for (QString valueString : vectorList)
+    {
+        out << QString::number(i) << ";" << valueString << "\n";
+        i++;
+    }
+    return true;
+}
+
+/*!
+ * \brief MeasurementData::saveAverageSelectionFuncVector saves average vector of the current selection.
+ * \param widget
+ * \param filename
+ * \return
+ */
+bool MeasurementData::saveAverageSelectionFuncVector(QWidget *widget, QString filename)
+{
+    Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
+
+    // calculate average selection vector
+    MVector selectionVector = getSelectionVector();
+    MVector selectionFuncVector = selectionVector.getFuncVector(functionalisation, sensorFailures);
+
+    // save average vector in file
+    QFile file(filename);
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        QMessageBox::information(widget, tr("Unable to open file"),
+            file.errorString());
+        return false;
+    }
+
+    QTextStream out(&file);
+
+    // write to file:
+    // vector string without annotations
+    QStringList vectorList = selectionFuncVector.toString().split(";");
+    vectorList = vectorList.mid(0, vectorList.size()-2);
+
+    int i = 0;
+    for (QString valueString : vectorList)
+    {
+        out << QString::number(i) << ";" << valueString << "\n";
+        i++;
+    }
+
+    return true;
+}
+
+/*!
  * \brief MeasurementData::loadData loads file determined by QFileDialog::getOpenFileName.
  */
 bool MeasurementData::loadData(QWidget* widget)

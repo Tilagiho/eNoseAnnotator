@@ -120,6 +120,9 @@ public:
      */
     bool saveSelection(QWidget* widget);
     bool saveSelection(QWidget* widget, QString filename);
+    bool saveAverageSelectionMeasVector(QWidget* widget, QString filename);
+    bool saveAverageSelectionFuncVector(QWidget* widget, QString filename);
+
 
     /*
      * loads data file

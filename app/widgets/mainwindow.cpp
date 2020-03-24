@@ -321,6 +321,54 @@ MainWindow::MainWindow(QWidget *parent)
         }
     });
 
+    connect(funcLineGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
+        // create export folder
+        if(!QDir ("./export").exists())
+            QDir().mkdir("./export");
+
+        // save file dialog
+        QString selectedExtension;
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
+
+        // save image
+        if (!filename.isEmpty())
+        {
+            // add extension if none was set
+            QStringList splitList = filename.split(".");
+            if (splitList.size() < 2)
+                filename += ".jpg";
+            // unknown file extension
+            else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
+                filename += ".jpg";
+
+            funcLineGraph->saveImage(filename);
+        }
+    });
+
+    connect(absLineGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
+        // create export folder
+        if(!QDir ("./export").exists())
+            QDir().mkdir("./export");
+
+        // save file dialog
+        QString selectedExtension;
+        QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
+
+        // save image
+        if (!filename.isEmpty())
+        {
+            // add extension if none was set
+            QStringList splitList = filename.split(".");
+            if (splitList.size() < 2)
+                filename += ".jpg";
+            // unknown file extension
+            else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
+                filename += ".jpg";
+
+            absLineGraph->saveImage(filename);
+        }
+    });
+
     connect(vectorBarGraph, &BarGraphWidget::imageSaveRequested, this, [this](){
         // create export folder
         if(!QDir ("./export").exists())
@@ -341,14 +389,14 @@ MainWindow::MainWindow(QWidget *parent)
             else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
                 filename += ".jpg";
 
-            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the selection data that created the bar graph alongside the image?");
+            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the values of the bar graph alongside the image?");
 
             if (answer == QMessageBox::StandardButton::Yes)
             {
                 // dataFilemame = filename - image extension + ".csv"
                 QStringList list = filename.split(".");
                 QString dataFilename = list.mid(0, list.length()-1).join(".") + ".csv";
-                mData->saveSelection(this, dataFilename);
+                mData->saveAverageSelectionMeasVector(this, dataFilename);
             }
 
             vectorBarGraph->saveImage(filename);
@@ -375,14 +423,14 @@ MainWindow::MainWindow(QWidget *parent)
             else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
                 filename += ".jpg";
 
-            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the selection data that created the bar graph alongside the image?");
+            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the values of the bar graph alongside the image?");
 
             if (answer == QMessageBox::StandardButton::Yes)
             {
                 // dataFilemame = filename - image extension + ".csv"
                 QStringList list = filename.split(".");
                 QString dataFilename = list.mid(0, list.length()-1).join(".") + ".csv";
-                mData->saveSelection(this, dataFilename);
+                mData->saveAverageSelectionFuncVector(this, dataFilename);
             }
 
             funcBarGraph->saveImage(filename);
