@@ -147,6 +147,8 @@ private slots:
     QPair<double, double> getLabelYCoords(bool userDefinedLabel);
 
     void adjustLabelBorders(int firstX, int secondX);
+
+    QCPGraph* firstVisibleGraph();
 };
 
 #endif // LINEGRAPH_H

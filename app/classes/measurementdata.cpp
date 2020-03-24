@@ -866,6 +866,10 @@ bool MeasurementData::getData(QString line)
 
 void MeasurementData::setSelection(int lower, int upper)
 {
+    // ignore existing selections
+    if (!selectedData.isEmpty() && selectedData.firstKey() == lower && selectedData.lastKey() == upper)
+        return;
+
     // clear selectedData
     clearSelection();
 

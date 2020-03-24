@@ -152,7 +152,6 @@ void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::nChan
                 else
                     data[i] << 0.0;
             }
-
         }
 
         for (int i=0; i<MVector::nChannels; i++)
