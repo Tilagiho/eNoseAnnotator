@@ -39,7 +39,7 @@ matrix:
       # upload continuous pre-release
       - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" == "" ]; then bash upload.sh eNoseAnnotator-continuous-linux.zip; fi'
       # upload release
-      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" != "" ]; then UPLOADTOOL_SUFFIX = "${TRAVIS_TAG}"; bash upload.sh "eNoseAnnotator-${TRAVIS_TAG}-linux.zip"; fi'
+      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" != "" ]; then UPLOADTOOL_SUFFIX="${TRAVIS_TAG}"; bash upload.sh "eNoseAnnotator-${TRAVIS_TAG}-linux.zip"; fi'
 # safelist
 branches:
   only:
