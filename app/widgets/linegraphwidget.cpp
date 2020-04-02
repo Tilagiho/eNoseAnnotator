@@ -140,8 +140,16 @@ void LineGraphWidget::setSensorFailureFlags(const std::array<bool, MVector::nCha
     replot();
 }
 
-void LineGraphWidget::setXAxis(double x1, double x2)
+QPair<double, double> LineGraphWidget::getXRange()
 {
+    auto range = ui->chart->xAxis->range();
+    return QPair<double, double>(range.lower, range.upper);
+}
+
+void LineGraphWidget::setXRange(QPair<double, double> xRange)
+{
+    double x1 = xRange.first;
+    double x2 = xRange.second;
     ui->chart->xAxis->setRange(x1, x2);
 }
 

@@ -26,7 +26,8 @@ public:
 
     std::array<uint, 2> getSelection();  // returns start and end timestamp of selection
     void setStartTimestamp(uint timestamp);
-    void setXAxis(double x1, double x2);
+    QPair<double, double> getXRange();
+    void setXRange(QPair<double, double>);
     void setLogXAxis(bool logOn);
     void setMaxVal(double val);
 

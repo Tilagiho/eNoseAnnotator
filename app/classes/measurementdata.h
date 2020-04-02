@@ -164,6 +164,8 @@ public:
 
     static QMap<int, int> getFuncMap(const std::array<int, MVector::nChannels> &funcs, std::array<bool, 64> sensorFailures);
 
+    QMap<int, int> getFuncMap();
+
     bool getSaveRawInput() const;
     void setSaveRawInput(bool value);
 

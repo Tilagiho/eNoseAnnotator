@@ -288,6 +288,11 @@ QMap<int, int> MeasurementData::getFuncMap(const std::array<int, MVector::nChann
     return funcMap;
 }
 
+QMap<int, int> MeasurementData::getFuncMap()
+{
+    return getFuncMap(functionalisation, sensorFailures);
+}
+
 /*!
  * \brief MeasurementData::changed returns change status of MeasurementData.
  * Is \c true if any data was changed since loading or saving the measurement

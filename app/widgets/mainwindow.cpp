@@ -63,10 +63,10 @@ MainWindow::MainWindow(QWidget *parent)
     // connections:
     // connect funcLineGraph, lGraph & absLGraph
     // xAxis
-    connect(relLineGraph, &LineGraphWidget::xRangeChanged, absLineGraph, &LineGraphWidget::setXRange);
-    connect(absLineGraph, &LineGraphWidget::xRangeChanged, relLineGraph, &LineGraphWidget::setXRange);
-    connect(funcLineGraph, &LineGraphWidget::xRangeChanged, relLineGraph, &LineGraphWidget::setXRange);
-    connect(relLineGraph, &LineGraphWidget::xRangeChanged, funcLineGraph, &LineGraphWidget::setXRange);
+    connect(relLineGraph, SIGNAL(xRangeChanged(QCPRange)), absLineGraph, SLOT(setXRange(QCPRange)));
+    connect(absLineGraph, SIGNAL(xRangeChanged(QCPRange)), relLineGraph, SLOT(setXRange(QCPRange)));
+    connect(funcLineGraph, SIGNAL(xRangeChanged(QCPRange)), relLineGraph, SLOT(setXRange(QCPRange)));
+    connect(relLineGraph, SIGNAL(xRangeChanged(QCPRange)), funcLineGraph, SLOT(setXRange(QCPRange)));
 
     // selection
     connect(relLineGraph, &LineGraphWidget::dataSelectionChanged, absLineGraph, &LineGraphWidget::setSelection);
@@ -525,11 +525,11 @@ void MainWindow::on_actionLoad_triggered()
     // check classifier
     if (classifier != nullptr)
     {
-        auto funcMap = MeasurementData::getFuncMap(mData->getFunctionalities(), mData->getSensorFailures());
-
-        if (classifier->getN() != funcMap.size())
+        auto funcMap = mData->getFuncMap();
+        // check func preset
+        if (classifier->getN() != funcMap.size() || classifier->getPresetName() != measInfoWidget->getFuncLabel())
         {
-            QString error_message = "Functionalisation of the data loaded is incompatible with the loaded classifier.\nWas the functionalisation set correctly? Is the classifier compatible with the sensor used?";
+            QString error_message = "Functionalisation of the data loaded seems to be incompatible with the loaded classifier.\nWas the functionalisation set correctly? Is the classifier compatible with the sensor used?";
             QMessageBox::warning(this, "Classifier error", error_message);
         }
     }
@@ -751,7 +751,7 @@ void MainWindow::on_actionStart_triggered()
         }
 
         // set functionalisation if not set
-        if (mData->getFuncMap(mData->getFunctionalities(), mData->getSensorFailures()).size() == 1)
+        if (mData->getFuncMap().size() == 1)
         {
             auto answer = QMessageBox::question(this, "Set Functionalisation", "The sensor functionalisation was not set.\nDo you want to set it before starting a new measurement?");
 
@@ -1143,6 +1143,9 @@ void MainWindow::on_actionLoadClassifier_triggered()
         closeClassifier();
         return;
     }
+    // store changed status to reset after adding new classes
+    // loading a classifier should not change the measurement!
+    bool prevChanged = mData->changed();
 
     // loading classifier successfull
     // add classifier classes to mData
@@ -1153,15 +1156,20 @@ void MainWindow::on_actionLoadClassifier_triggered()
         if (!aClass::staticClassSet.contains(c))
             mData->addClass(c);
     }
+    // restore changed state
+    mData->setDataChanged(prevChanged);
 
     // update menu
     ui->actionClassify_measurement->setEnabled(true);
     ui->actionCloseClassifier->setEnabled(true);
 
-    // check func preset
-    if (classifier->getPresetName() != measInfoWidget->getFuncLabel())
-        QMessageBox::warning(this, "Error loading classifier", "The classifier uses different functionalisation preset than currently set.\nMake sure the right functionalisation is used!\n\nClassifier: " + classifier->getPresetName() + "\nCurrently set: " + measInfoWidget->getFuncLabel());
-
+    // check classifier func and the functionalisation set
+    auto funcMap = mData->getFuncMap();
+    if (classifier->getN() != funcMap.size() || classifier->getPresetName() != measInfoWidget->getFuncLabel())
+    {
+        QString error_message = "Functionalisation of the data loaded seems to be incompatible with the loaded classifier.\nWas the functionalisation set correctly? Is the classifier compatible with the sensor used?";
+        QMessageBox::warning(this, "Classifier error", error_message);
+    }
     classifierWidget->setClassifier(classifier->getName(), classifier->getClassNames(), classifier->getIsInputAbsolute(), classifier->getPresetName());
 }
 
@@ -1172,7 +1180,7 @@ void MainWindow::updateFuncGraph()
     auto funcs = mData->getFunctionalities();
 
     // get number of funcs
-    auto funcMap = MeasurementData::getFuncMap(funcs, fails);
+    auto funcMap = mData->getFuncMap();
     auto keyList = funcMap.keys();
     int maxFunc = *std::max_element(keyList.begin(), keyList.end());
 
@@ -1193,21 +1201,27 @@ void MainWindow::updateFuncGraph()
     // else: reset graph
     else
     {
-        if (maxFunc != funcLineGraph->getNChannels())
+        if (maxFunc != funcLineGraph->getNChannels()-1)
         {
+            // store xAxis range
+            auto oldRange = funcLineGraph->getXRange();
+
+            // init new funcLineGraph
             delete funcLineGraph;
             funcLineGraph = new LineGraphWidget(this, maxFunc+1);
             leftDocks[0]->setWidget(funcLineGraph);
             connectFLGraph();   // reconnect funcLineGraph
+
+            // restore xAxis range
+            funcLineGraph->setXRange(oldRange);
         }
 
         // add func vectors to func vector
+        QMap<uint, MVector> funcVectors;
+        for (uint timestamp : data.keys())       
+            funcVectors[timestamp] = data[timestamp].getFuncVector(funcs, fails);
 
-        for (uint timestamp : data.keys())
-        {
-            MVector funcVector = data[timestamp].getFuncVector(funcs, fails);
-            funcLineGraph->addMeasurement(funcVector, timestamp);
-        }
+        funcLineGraph->setData(funcVectors);
     }
 
     // update func bar graph
@@ -1230,8 +1244,8 @@ void MainWindow::updateFuncGraph()
 void MainWindow::connectFLGraph()
 {
     // xRange
-    connect(funcLineGraph, &LineGraphWidget::xRangeChanged, relLineGraph, &LineGraphWidget::setXRange);
-    connect(relLineGraph, &LineGraphWidget::xRangeChanged, funcLineGraph, &LineGraphWidget::setXRange);
+    connect(funcLineGraph, SIGNAL(xRangeChanged(QCPRange)), relLineGraph, SLOT(setXRange(QCPRange)));
+    connect(relLineGraph, SIGNAL(xRangeChanged(QCPRange)), funcLineGraph, SLOT(setXRange(QCPRange)));
 
     // selection
     connect(funcLineGraph, &LineGraphWidget::dataSelectionChanged, absLineGraph, &LineGraphWidget::setSelection);
