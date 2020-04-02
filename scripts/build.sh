@@ -36,7 +36,7 @@ zip -r eNoseAnnotator-continuous-linux.zip eNoseAnnotator-continuous-linux/*
 else
 DIR="eNoseAnnotator-${TRAVIS_TAG}-linux"
 mkdir -p "${DIR}/data" "${DIR}/export" "${DIR}/presets" "${DIR}/classifiers"
-cp eNoseAnnotator*.AppImage "${DIR}/eNoseAnnotator-${TRAVIX_TAG}.AppImage"
+cp eNoseAnnotator*.AppImage "${DIR}/eNoseAnnotator-${TRAVIS_TAG}.AppImage"
 cp /home/travis/build/Tilagiho/eNoseAnnotator/misc/presets/* "${DIR}/presets"
 zip -r "eNoseAnnotator-${TRAVIS_TAG}-linux.zip" ${DIR}/*
 fi
