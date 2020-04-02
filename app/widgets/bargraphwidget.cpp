@@ -252,7 +252,12 @@ void BarGraphWidget::clearBars()
     for (int i=0; i<funcBarVector.size(); i++)
         funcBarVector[i]->setData(ticks, data);
 
-    replot();
+    // replot
+    ui->barGraph->yAxis->rescale();
+    ui->barGraph->replot();
+
+    ui->funcBarGraph->yAxis->rescale();
+    ui->funcBarGraph->replot();
 }
 
 BarGraphWidget::Mode BarGraphWidget::getMode() const
