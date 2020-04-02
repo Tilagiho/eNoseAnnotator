@@ -30,7 +30,7 @@ matrix:
       - gcc-7
     script:
       # build AppImage & create directory structure
-      - ./scripts/build.sh
+      - bash /scripts/build.sh
     
     after_success:
       # find eNoseAnnotator -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
