@@ -58,6 +58,8 @@ public:
      */
     const QMap<uint, MVector> getRelativeData();
 
+    const QMap<uint, MVector> getFuncData();
+
     /*
      * returns absolute data in a map<timestamp, vector>
      */

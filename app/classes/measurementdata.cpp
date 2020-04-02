@@ -47,6 +47,21 @@ const QMap<uint, MVector> MeasurementData::getRelativeData()
     return relativeData;
 }
 
+const QMap<uint, MVector> MeasurementData::getFuncData()
+{
+    // only one func set
+    // -> return full relative data
+    if (getFuncMap().size() == 1)
+        return getRelativeData();
+
+    QMap<uint, MVector> funcData;
+    for (int timestamp : data.keys())
+        funcData[timestamp] = data[timestamp].getFuncVector(functionalisation, sensorFailures);
+
+    return funcData;
+}
+
+
 /*!
  * \brief MeasurementData::getAbsoluteData returns a map of the vectors contained in the MeasurementData as absolute vectors
  * \return

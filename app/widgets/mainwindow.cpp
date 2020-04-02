@@ -173,7 +173,8 @@ MainWindow::MainWindow(QWidget *parent)
         for (int timestamp : data.keys())
             funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures);
 
-        funcLineGraph->setData(funcData);    });     // set loaded data in lGraph
+        funcLineGraph->setData(funcData);
+    });     // set loaded data in lGraph
 
     connect(mData, &MeasurementData::setReplotStatus, funcLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
     connect(mData, &MeasurementData::setReplotStatus, relLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
@@ -240,12 +241,7 @@ MainWindow::MainWindow(QWidget *parent)
         auto funcs = mData->getFunctionalities();
         auto failures = mData->getSensorFailures();
 
-        // add recalculated functionalitisation averages to cleared funcLineGraph
-        QMap<uint, MVector> funcData;
-        for (int timestamp : data.keys())
-            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures);
-
-        funcLineGraph->setData(funcData);
+        funcLineGraph->setData(mData->getFuncData());
 
         // update func bar graphs:
         if (!mData->getSelectionMap().isEmpty())
@@ -254,7 +250,6 @@ MainWindow::MainWindow(QWidget *parent)
 
             funcBarGraph->setBars(selectionVector, failures, funcs);
         }
-
     });     // update functionalisation graphs
 
 
@@ -268,11 +263,7 @@ MainWindow::MainWindow(QWidget *parent)
         auto failures = mData->getSensorFailures();
 
         // add recalculated functionalitisation averages to cleared funcLineGraph
-        QMap<uint, MVector> funcData;
-        for (int timestamp : data.keys())
-            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures);
-
-        funcLineGraph->setData(funcData);
+        funcLineGraph->setData(mData->getFuncData());
     }); // funcLineGraph requested redraw
     connect(relLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
         // re-add data to graph
@@ -1186,7 +1177,7 @@ void MainWindow::updateFuncGraph()
 
     // no funcs set:
     // use normal graph
-    if (maxFunc == 0)
+    if (mData->getFuncMap().size() == 1)
     {
         if (maxFunc != funcLineGraph->getNChannels())
         {
@@ -1216,12 +1207,7 @@ void MainWindow::updateFuncGraph()
             funcLineGraph->setXRange(oldRange);
         }
 
-        // add func vectors to func vector
-        QMap<uint, MVector> funcVectors;
-        for (uint timestamp : data.keys())       
-            funcVectors[timestamp] = data[timestamp].getFuncVector(funcs, fails);
-
-        funcLineGraph->setData(funcVectors);
+        funcLineGraph->setData(mData->getFuncData());
     }
 
     // update func bar graph
