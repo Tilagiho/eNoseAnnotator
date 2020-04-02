@@ -21,9 +21,9 @@ chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 ./linuxdeployqt-continuous-x86_64.AppImage eNoseAnnotator/usr/share/applications/*.desktop -appimage -executable="eNoseAnnotator/usr/lib/"         
 
 
-if [ TRAVIS_TAG = "" ]
+if [ "$TRAVIS_TAG" == "" ]
 # no tag
-# -> default build
+# -> continuous pre-release structure
 then
 # create zip archive
 mkdir eNoseAnnotator-continuous-linux
@@ -32,9 +32,9 @@ cp eNoseAnnotator*.AppImage eNoseAnnotator-continuous-linux/
 cp /home/travis/build/Tilagiho/eNoseAnnotator/misc/presets/* eNoseAnnotator-continuous-linux/presets
 zip -r eNoseAnnotator-continuous-linux.zip eNoseAnnotator-continuous-linux/*
 
-# tag
+# tag -> release structure
 else
-DIR = "eNoseAnnotator-${TRAVIS_TAG}-linux"
+DIR="eNoseAnnotator-${TRAVIS_TAG}-linux"
 mkdir -p "${DIR}/data" "${DIR}/export" "${DIR}/presets" "${DIR}/classifiers"
 cp eNoseAnnotator*.AppImage "${DIR}/eNoseAnnotator-${TRAVIX_TAG}.AppImage"
 cp /home/travis/build/Tilagiho/eNoseAnnotator/misc/presets/* "${DIR}/presets"

@@ -36,8 +36,10 @@ matrix:
       # find eNoseAnnotator -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
       # curl --upload-file eNoseAnnotator*.AppImage https://transfer.sh/eNoseAnnotator-git.$(git rev-parse --short HEAD)-x86_64.AppImage
       - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh; fi'
-      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then bash upload.sh eNoseAnnotator-continuous-linux.zip; fi'
-
+      # upload continuous pre-release
+      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" == "" ]; then bash upload.sh eNoseAnnotator-continuous-linux.zip; fi'
+      # upload release
+      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" != "" ]; then UPLOADTOOL_SUFFIX = "${TRAVIS_TAG}"; bash upload.sh "eNoseAnnotator-${TRAVIS_TAG}-linux.zip"; fi'
 # safelist
 branches:
   only:
