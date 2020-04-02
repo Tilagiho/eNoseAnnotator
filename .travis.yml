@@ -45,4 +45,5 @@ branches:
   only:
   - master
   - stable
+  - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
 
