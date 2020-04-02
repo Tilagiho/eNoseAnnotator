@@ -467,7 +467,10 @@ void LineGraphWidget::resizeEvent(QResizeEvent* event)
 void LineGraphWidget::dataSelected()
 {
     // get current selection
-    QCPDataSelection selection = firstVisibleGraph()->selection();
+    auto firstVisGraph = firstVisibleGraph();
+    if (firstVisGraph == nullptr)
+        return;
+    QCPDataSelection selection = firstVisGraph->selection();
 
     // find x range of selection rectangle
     QCPRange rectRange = ui->chart->selectionRect()->range(ui->chart->xAxis);
@@ -580,7 +583,11 @@ void LineGraphWidget::setReplotStatus(bool value)
 
         // reset xRange to show all data
         bool foundRange;
-        auto range = firstVisibleGraph()->getKeyRange(foundRange);
+
+        auto firstVisGraph = firstVisibleGraph();
+        if (firstVisGraph == nullptr)
+            return;
+        auto range = firstVisGraph->getKeyRange(foundRange);
         if (foundRange)
             ui->chart->xAxis->setRange(range.lower, range.upper);
         replot();
@@ -595,7 +602,10 @@ void LineGraphWidget::setSelection(QCPDataSelection newSelection)
     // determine old selection:
     // only visible graphs are selectable
     // -> find first visble graph and get selection
-    QCPDataSelection oldSelection = firstVisibleGraph()->selection();
+    auto firstVisGraph = firstVisibleGraph();
+    if (firstVisGraph == nullptr)
+        return;
+    QCPDataSelection oldSelection = firstVisGraph->selection();
 
     if (newSelection.dataRange(0).end() < newSelection.dataRange(0).begin())
     {
@@ -611,8 +621,8 @@ void LineGraphWidget::setSelection(QCPDataSelection newSelection)
         for (int i=0; i<nChannels; i++)
             ui->chart->graph(i)->setSelection(newSelection);
 
-        int lower = qFloor(firstVisibleGraph()->data()->at(newSelection.dataRange(0).begin())->mainKey());
-        int upper = qCeil(firstVisibleGraph()->data()->at(newSelection.dataRange(0).end()-1)->mainKey());
+        int lower = qFloor(firstVisGraph->data()->at(newSelection.dataRange(0).begin())->mainKey());
+        int upper = qCeil(firstVisGraph->data()->at(newSelection.dataRange(0).end()-1)->mainKey());
 
         qDebug() << "Selection synced: " << lower << ", " << upper;
 
@@ -724,10 +734,13 @@ void LineGraphWidget::setAutoMoveGraph(bool value)
 
 void LineGraphWidget::clearSelection()
 {
-    auto selection =firstVisibleGraph()->selection();
+    auto firstVisGraph = firstVisibleGraph();
+    if (firstVisGraph == nullptr)
+        return;
+    auto selection = firstVisGraph->selection();
     bool selected = selection.isEmpty();
 
-    if (!firstVisibleGraph()->selection().isEmpty())
+    if (!firstVisGraph->selection().isEmpty())
     {
         ui->chart->deselectAll();
         ui->chart->replot();
@@ -992,9 +1005,13 @@ QPair<double, double> LineGraphWidget::getLabelYCoords(bool isUserDefined)
         return QPair<double, double>(yRange.upper - labelSpace / 3.0 * 2.0 * yBaseHeight, yRange.upper - labelSpace / 2.7 * yBaseHeight);
 }
 
+/*!
+ * \brief LineGraphWidget::firstVisibleGraph returns a pointer to the first visible PCPGraph. If no graph visible, nullptr is returned.
+ * \return
+ */
 QCPGraph* LineGraphWidget::firstVisibleGraph()
 {
-    QCPGraph* firstVisGraph;
+    QCPGraph* firstVisGraph = nullptr;
     for (int i=0; i<nChannels; i++)
     {
         if (ui->chart->graph(i)->visible())
