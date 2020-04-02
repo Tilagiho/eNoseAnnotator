@@ -172,6 +172,10 @@ MVector MVector::getFuncVector(std::array<int, MVector::nChannels> functionalisa
     int maxFunc = *std::max_element(keyList.begin(), keyList.end());
     MVector funcVector(maxFunc+1);
 
+    // copy atributes
+    funcVector.userAnnotation = userAnnotation;
+    funcVector.detectedAnnotation = detectedAnnotation;
+
     // calc averages of functionalisations
     for (int i=0; i<MVector::nChannels; i++)
     {
