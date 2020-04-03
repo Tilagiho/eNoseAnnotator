@@ -6,7 +6,7 @@ install:
   - set PATH=%QTDIR%\bin;\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%;
 build_script:
   # info
-  - echo "Tagname: %APPVEYOR_REPO_TAG_NAME%"
+  - echo "%APPVEYOR_REPO_TAG_NAME%"
   - if "%APPVEYOR_REPO_TAG_NAME%" equ "continuous" set NAME=continuous else set NAME=APPVEYOR_REPO_TAG_NAME
 
   # get libtorch
