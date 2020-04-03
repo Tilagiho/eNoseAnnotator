@@ -49,6 +49,8 @@ private:
     void makeConnections();
     void closeConnections();
 
+     MVector getVector(QStringList);
+
     QSerialPort *serial = nullptr;
     Settings settings;
     bool runningMeasFailed = false;

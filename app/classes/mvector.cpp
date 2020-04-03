@@ -1,7 +1,10 @@
 #include "mvector.h"
 #include "measurementdata.h"
 
+#include "../widgets/linegraphwidget.h"
+
 #include <QtCore>
+
 
 
 /*!
@@ -24,6 +27,10 @@ MVector::~MVector()
 
 }
 
+/*!
+ * \brief MVector::toString returns QString with format "ch0;ch1;...;ch63;userAnnoation;detectedAnnotation"
+ * \return
+ */
 QString MVector::toString()
 {
     QStringList stringList;
@@ -31,7 +38,8 @@ QString MVector::toString()
     for (int i=0; i<size; i++)
         stringList << QString::number(vector[i]);
 
-    stringList << userAnnotation.toString() << detectedAnnotation.toString();
+    stringList << userAnnotation.toString();
+    stringList << detectedAnnotation.toString();
 
     return stringList.join(";");
 }
@@ -61,7 +69,12 @@ MVector MVector::operator*(const double multiplier)
     MVector vector;
 
     for (int i=0; i<size; i++)
-        vector[i] = this->vector[i] * multiplier;
+    {
+        if (qIsInf(this->vector[i]))
+            vector[i] = this->vector[i] * multiplier;
+        else    // deal with infinte values
+            vector[i] = qInf();
+    }
 
     return vector;
 }
@@ -76,7 +89,12 @@ MVector MVector::operator/(const double denominator)
     MVector vector;
 
     for (int i=0; i<size; i++)
-        vector[i] = this->vector[i] / denominator;
+    {
+        if (qIsFinite(this->vector[i]))
+            vector[i] = this->vector[i] / denominator;
+        else    // deal with infinite values
+            vector[i] = qInf();
+    }
 
     return vector;
 }
@@ -93,7 +111,12 @@ MVector MVector::operator+(const MVector other)
     MVector vector;
 
     for (int i=0; i<size; i++)
-        vector[i] = this->vector[i] + other.vector[i];
+    {
+        if (qIsFinite(this->vector[i]) && qIsFinite(other.vector[i]))
+            vector[i] = this->vector[i] + other.vector[i];
+        else    // deal with infinte values
+            vector[i] = qInf();
+    }
 
     return vector;
 }
@@ -127,7 +150,19 @@ MVector MVector::getRelativeVector(MVector baseVector)
     // calculate deviation / %
     for (int i=0; i<size; i++)
     {
-        deviationVector[i] = 100 * ((this->vector[i] /  baseVector[i]) - 1.0);
+        // normal case: finite values
+        if (qIsFinite(baseVector[i]) && qIsFinite(this->vector[i]))
+            deviationVector[i] = 100 * ((this->vector[i] /  baseVector[i]) - 1.0);
+        // deal with infinite values
+        else
+        {
+            if (qIsInf(baseVector[i]) && qIsInf(this->vector[i]))   // both infinite
+                deviationVector[i] = 0.0;
+            else if (qIsInf(baseVector[i]))                         // vector finite, baseVector infinite
+                deviationVector[i] = this->vector[i] / LineGraphWidget::maxVal;
+            else                                                    // vector infinite, baseVector finite
+                deviationVector[i] = qInf();
+        }
     }
 
     return deviationVector;

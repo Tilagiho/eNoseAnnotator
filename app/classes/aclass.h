@@ -61,7 +61,7 @@ public:
     void setName(const QString &value);
 
 private:
-    QString name;
+    QString name = "";
     double value = -1.0;
 };
 

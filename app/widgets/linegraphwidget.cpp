@@ -5,6 +5,11 @@
 
 #include "../classes/enosecolor.h"
 #include <QTime>
+
+// static limits
+double LineGraphWidget::maxVal = 90000.0;
+double LineGraphWidget::minVal = 300.0;
+
 LineGraphWidget::LineGraphWidget(QWidget *parent, int nChannels) :
     QWidget(parent),
     ui(new Ui::LineGraphWidget),
@@ -683,13 +688,23 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
     for (int i=0; i<nChannels; i++)
     {
         // add data point
-        if (!isAbsolute)
-            ui->chart->graph(i)->addData(xpos, measurement[i]);
-        else // isAbsolute: values / kOhm
-            ui->chart->graph(i)->addData(xpos, measurement[i] / 1000);
+        if (!isAbsolute)    // not isAbsolute: relative values / %
+        {
+            if (qIsFinite(measurement[i]))
+                ui->chart->graph(i)->addData(xpos, measurement[i]);
+            else    // infinite value: assume 100x deviation
+                ui->chart->graph(i)->addData(xpos, 10000);
+        }
+        else // isAbsolute: absolute values / kOhm
+        {
+            if (qIsFinite(measurement[i]))
+                ui->chart->graph(i)->addData(xpos, measurement[i] / 1000);
+            else    // infinte value: use maxVal
+                ui->chart->graph(i)->addData(xpos, maxVal / 1000);
+        }
 
-        // emit sensor failures
-        if (useLimits && (measurement[i] < minVal || measurement[i] > maxVal))
+        // emit sensor failures (only for finite values)
+        if (useLimits && qIsFinite(measurement[i]) && (measurement[i] < minVal || measurement[i] > maxVal))
             emit sensorFailure(i);
     }
 

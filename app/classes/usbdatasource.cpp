@@ -190,52 +190,40 @@ void USBDataSource::processLine(const QByteArray &data)
 
     QString line(data);
 
-//    qDebug() << line;
+    qDebug() << line;
     if (line.startsWith("count"))
     {
         uint timestamp = QDateTime::currentDateTime().toTime_t();
 
-        qDebug() << timestamp << ": Received new data";
+        qDebug() << timestamp << ": Received new vector";
 
         // line looks like: count=___,var1=____._,var2=____._,....
-        QList<QString> dataList = line.split(',');
-        QList<QString> valueList;
+        QStringList dataList = line.split(',');
+        QStringList valueList;
 
         for (auto element : dataList)
             valueList << element.split('=')[1];
 
         // extract values
         int count = valueList[0].toInt();
+        MVector vector = getVector(valueList);
+
+        qDebug() << vector.toString();
 
         if (startCount == 0)    // first count
         {
+            // reset baselevel vector
             baselevelVectorMap.clear();
 
             setStatus (Status::SET_BASEVECTOR);
-
             startCount = count;
-
-            // reset base level:
-            // add vector to baselevelVetorMap
-            MVector vector;
-            for (uint i=0; i<vector.size; i++)
-                vector[i] = valueList[i+1].toDouble();
-
             baselevelVectorMap[timestamp] = vector;
         }
         else if (status() == Status::SET_BASEVECTOR && count < startCount + nBaseVectors -1) // prepare baselevel
         {
-            MVector vector;
-            for (uint i=0; i<vector.size; i++)
-                vector[i] = valueList[i+1].toDouble();
-
             baselevelVectorMap[timestamp] = vector;
         } else if (status() == Status::SET_BASEVECTOR && count == startCount + nBaseVectors -1) // set baselevel
         {
-            MVector vector;
-            for (uint i=0; i<vector.size; i++)
-                vector[i] = valueList[i+1].toDouble();
-
             baselevelVectorMap[timestamp] = vector;
 
             MVector baselevelVector = MVector::zeroes();
@@ -255,10 +243,6 @@ void USBDataSource::processLine(const QByteArray &data)
         {
             if (connectionStatus != Status::RECEIVING_DATA)
                 setStatus (Status::RECEIVING_DATA);
-
-            MVector vector;
-            for (uint i=0; i<MVector::nChannels; i++)
-                vector[i] = valueList[i+1].toDouble();
 
 //            qDebug() << "Vector Received: \n" << vector.toString();
             emit vectorReceived(timestamp, vector);
@@ -332,4 +316,27 @@ void USBDataSource::reset()
 QString USBDataSource::identifier()
 {
     return settings.portName;
+}
+
+/*!
+ * \brief USBDataSource::getVector return MVector with values contained in line.
+ * Set infinite for negative values
+ * \return
+ */
+MVector USBDataSource::getVector(QStringList vectorList)
+{
+    MVector vector;
+
+    for (int i=0; i<MVector::nChannels; i++)
+    {
+        // get values
+        vector[i] = vectorList[i+1].toDouble(); // ignore first entry in vectorList (count)
+
+        // values < 0 or value == 1.0:
+        // huge resistances on sensor
+        if (vector[i] < 0 || qFuzzyCompare(vector[i], 1.0))
+            vector[i] = qInf();
+    }
+
+    return vector;
 }

@@ -47,6 +47,12 @@ public:
 
     int getNChannels() const;
 
+    // static variables
+    // interval in which data is plotted: data > maxVal or < minVal is ignored
+    // can be ignored with useLimits
+    static double maxVal;
+    static double minVal;
+
 public slots:
     void addMeasurement(MVector measurement, uint timestamp, bool rescale=true);   // add single measurement; rescale y-axis if rescale==true
 //    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements
@@ -99,10 +105,7 @@ private:
     bool selectionFlag = false;     // used to avoid looping behaviour when selecting data
     bool replotStatus = true;   // replot() is only active if true
 
-    // interval in which data is plotted: data > maxVal or < minVal is ignored
-    // can be ignored with useLimits
-    double maxVal = 90000.0;
-    double minVal = 300.0;
+
 
     std::array<bool, MVector::nChannels> sensorFailureFlags;
     bool autoMoveGraph = true;
