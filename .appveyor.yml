@@ -5,6 +5,10 @@ install:
   - set QTDIR=C:\Qt\5.13.2\msvc2017_64
   - set PATH=%QTDIR%\bin;\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%;
 build_script:
+  # info
+  - echo "Tagname: %APPVEYOR_REPO_TAG_NAME%"
+  - if "%APPVEYOR_REPO_TAG_NAME%" equ "continuous" set NAME=continuous else set NAME=APPVEYOR_REPO_TAG_NAME
+
   # get libtorch
   - curl https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.4.0.zip -o libtorch-win-shared-with-deps-1.4.0.zip
   - ps: Expand-Archive -Force libtorch-win-shared-with-deps-1.4.0.zip app/lib/
@@ -27,34 +31,18 @@ after_build:
   - rm release/*.h
   # create directories to be deployed
   - cd ..
-  - if "%APPVEYOR_REPO_TAG_NAME%" equ "continuous" set NAME=continuous else set NAME=APPVEYOR_REPO_TAG_NAME
   - mkdir "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/data/" "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/export/" "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/presets/" "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/classifiers/"
   - cp app/lib/libtorch/lib/*.dll "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/"
   - cp -r app/release/* "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/"
   - cp -r misc/presets "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/"
 
 artifacts:
-
-
-  - path: eNoseAnnotator-continuous-Windows
-    type: zip
   - path: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows"
     type: zip
 
 deploy:
   - provider: GitHub
-    name: continuous
-    on:
-       APPVEYOR_REPO_TAG: false
-    artifact: eNoseAnnotator-continuous-Windows.zip
-    draft: false
-    prerelease: true
-    force_update: true
-    auth_token:
-      secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75
-
-  - provider: GitHub
-    name: release
+    name: prerelease
     on:
        APPVEYOR_REPO_TAG: true
     artifact: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows.zip"
