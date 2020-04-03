@@ -258,7 +258,7 @@ void USBDataSource::processLine(const QByteArray &data)
 
             MVector vector;
             for (uint i=0; i<MVector::nChannels; i++)
-                vector.vector[i] = valueList[i+1].toDouble();
+                vector[i] = valueList[i+1].toDouble();
 
 //            qDebug() << "Vector Received: \n" << vector.toString();
             emit vectorReceived(timestamp, vector);

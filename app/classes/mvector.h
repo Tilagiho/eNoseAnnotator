@@ -33,11 +33,6 @@ public:
     double &operator[] (int index);
 
     /*
-     * contains the sensor values measured
-     */
-    std::vector<double> vector;
-
-    /*
      * class annotated by the user
      * -> can be used as base truth
      */
@@ -68,6 +63,14 @@ public:
     MVector getFuncVector(std::array<int, MVector::nChannels> functionalisation, std::array<bool, MVector::nChannels> sensorFailures);
 
     int size = nChannels;    // number of sensor inputs
+
+    std::vector<double> getVector() const;
+
+private:
+    /*
+     * contains the sensor values measured
+     */
+    std::vector<double> vector;
 };
 
 #endif // MVECTOR_H

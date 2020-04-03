@@ -100,7 +100,7 @@ MainWindow::MainWindow(QWidget *parent)
             auto funcVector = selectionVector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
 
             try {
-                Annotation annotation = classifier->getAnnotation(funcVector.vector);
+                Annotation annotation = classifier->getAnnotation(funcVector.getVector());
                 classifierWidget->setAnnotation(annotation);
                 classifierWidget->setInfoString("Class of selection");
                 classifierWidget->isSelectionAnnotation = true;
@@ -191,7 +191,7 @@ MainWindow::MainWindow(QWidget *parent)
         auto funcVector = vector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
 
         try {
-            Annotation annotation = classifier->getAnnotation(funcVector.vector);
+            Annotation annotation = classifier->getAnnotation(funcVector.getVector());
 
             // set annotation
             mData->setDetectedAnnotation(annotation, timestamp);
@@ -1279,7 +1279,7 @@ void MainWindow::classifyMeasurement()
     {
         auto funcVector = measDataMap[timestamp].getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
         try {
-            Annotation annotation = classifier->getAnnotation(funcVector.vector);
+            Annotation annotation = classifier->getAnnotation(funcVector.getVector());
             mData->setDetectedAnnotation(annotation, timestamp);
         } catch (std::invalid_argument& e) {
             QString error_message = e.what() + QString("\nDo you want to close the classifier?");

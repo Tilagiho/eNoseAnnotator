@@ -102,7 +102,6 @@ double &MVector::operator[](int index)
 {
     Q_ASSERT("index out of range!" && index >= 0 && index < size);
 
-    vector.at(index);
     return vector[index];
 }
 
@@ -187,4 +186,9 @@ MVector MVector::getFuncVector(std::array<int, MVector::nChannels> functionalisa
     }
 
     return funcVector;
+}
+
+std::vector<double> MVector::getVector() const
+{
+    return vector;
 }
