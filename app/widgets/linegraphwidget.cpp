@@ -105,7 +105,7 @@ void LineGraphWidget::setupGraph()
     ui->chart->yAxis->setBasePen(QPen(Qt::black));
     ui->chart->yAxis->setTickPen(QPen(Qt::black));
     ui->chart->yAxis->setSubTickPen(QPen(Qt::black));
-    ui->chart->yAxis->setLabel("R / R0 [%]");
+    ui->chart->yAxis->setLabel(QString(u8"\u0394") + " R / R0 [%]");
 
 
     // set axis ranges to show all data:
