@@ -6,7 +6,7 @@ matrix:
     addons:
       apt:
         sources:
-          - sourceline: "ppa:ubuntu-toolchain-r/test"
+        - sourceline: "ppa:ubuntu-toolchain-r/test"
 addons:
     apt:
         sources:
