@@ -56,7 +56,7 @@ deploy:
     auth_token:
       secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75	
   
-- provider: GitHub
+  - provider: GitHub
     name: release
     on:
        APPVEYOR_REPO_TAG: true
