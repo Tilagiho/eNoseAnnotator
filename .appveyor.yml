@@ -1,4 +1,4 @@
-# skip_non_tags: true
+skip_non_tags: true
 
 image: Visual Studio 2019
 install:
@@ -27,7 +27,7 @@ after_build:
   - rm release/*.h
   # create directories to be deployed
   - cd ..
-  - if %APPVEYOR_REPO_TAG% equ true set NAME=continuous else NAME=APPVEYOR_REPO_TAG_NAME
+  - if "%APPVEYOR_REPO_TAG_NAME%" equ "continuous" set NAME=continuous else set NAME=APPVEYOR_REPO_TAG_NAME
   - mkdir "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/data/" "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/export/" "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/presets/" "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/classifiers/"
   - cp app/lib/libtorch/lib/*.dll "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/"
   - cp -r app/release/* "eNoseAnnotator-%NAME%-Windows/eNoseAnnotator-%NAME%-Windows/"
