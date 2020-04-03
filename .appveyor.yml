@@ -41,7 +41,8 @@ artifacts:
 
 # scripts to run before deployment
 before_deploy:
-   - if "%APPVEYOR_REPO_TAG_NAME%" == "continuous" setx ENOSE_RELEASE=true else setx ENOSE_RELEASE=false
+   - if "%APPVEYOR_REPO_TAG_NAME%" == "continuous" set ENOSE_RELEASE=true else set ENOSE_RELEASE=false
+   - setx ENOSE_RELEASE $env:ENOSE_RELEASE /M
 
 deploy:
   - provider: GitHub
