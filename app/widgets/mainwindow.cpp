@@ -405,14 +405,14 @@ MainWindow::MainWindow(QWidget *parent)
             else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
                 filename += ".jpg";
 
-            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the values of the bar graph alongside the image?");
+            // save data?
+            QStringList list = filename.split(".");
+            QString dataFilePathName = list.mid(0, list.length()-1).join(".") + ".csv";
+            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the values of the bar graph in \"" + dataFilePathName + "\"?");
 
             if (answer == QMessageBox::StandardButton::Yes)
             {
-                // dataFilemame = filename - image extension + ".csv"
-                QStringList list = filename.split(".");
-                QString dataFilename = list.mid(0, list.length()-1).join(".") + ".csv";
-                mData->saveAverageSelectionMeasVector(this, dataFilename);
+                mData->saveAverageSelectionMeasVector(this, dataFilePathName);
             }
 
             vectorBarGraph->saveImage(filename);
@@ -439,14 +439,15 @@ MainWindow::MainWindow(QWidget *parent)
             else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
                 filename += ".jpg";
 
-            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the values of the bar graph alongside the image?");
+            // save data?
+            QStringList list = filename.split(".");
+            QString dataFilePathName = list.mid(0, list.length()-1).join(".") + ".csv";
+            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the values of the bar graph in \"" + dataFilePathName + "\"?");
 
             if (answer == QMessageBox::StandardButton::Yes)
             {
                 // dataFilemame = filename - image extension + ".csv"
-                QStringList list = filename.split(".");
-                QString dataFilename = list.mid(0, list.length()-1).join(".") + ".csv";
-                mData->saveAverageSelectionFuncVector(this, dataFilename);
+                mData->saveAverageSelectionFuncVector(this, dataFilePathName);
             }
 
             funcBarGraph->saveImage(filename);
