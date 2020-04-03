@@ -7,8 +7,6 @@ install:
 build_script:
   # info
   - echo "%APPVEYOR_REPO_TAG_NAME%"
-  #- if "%APPVEYOR_REPO_TAG_NAME%" == "continuous" set ENOSE_BUILD_NAME=continuous else set ENOSE_BUILD_NAME=APPVEYOR_REPO_TAG_NAME
-  #- echo "%ENOSE_BUILD_NAME%"
   # get libtorch
   - curl https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.4.0.zip -o libtorch-win-shared-with-deps-1.4.0.zip
   - ps: Expand-Archive -Force libtorch-win-shared-with-deps-1.4.0.zip app/lib/
@@ -41,14 +39,31 @@ artifacts:
   - path: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows"
     type: zip
 
+# scripts to run before deployment
+before_deploy:
+   - if "%APPVEYOR_REPO_TAG_NAME%" == "continuous" setx ENOSE_RELEASE=true else setx ENOSE_RELEASE=false
+
 deploy:
   - provider: GitHub
     name: prerelease
     on:
        APPVEYOR_REPO_TAG: true
+       ENOSE_RELEASE: false
     artifact: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows.zip"
     draft: false
     prerelease: true
+    force_update: true
+    auth_token:
+      secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75	
+  
+- provider: GitHub
+    name: release
+    on:
+       APPVEYOR_REPO_TAG: true
+       ENOSE_RELEASE: true
+    artifact: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows.zip"
+    draft: false
+    prerelease: false
     force_update: true
     auth_token:
       secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75	
