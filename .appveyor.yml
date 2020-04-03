@@ -39,32 +39,15 @@ artifacts:
   - path: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows"
     type: zip
 
-# scripts to run before deployment
-before_deploy:
-   - if "%APPVEYOR_REPO_TAG_NAME%" == "continuous" set ENOSE_RELEASE=true else set ENOSE_RELEASE=false
-   - setx ENOSE_RELEASE $env:ENOSE_RELEASE /M
-
 deploy:
   - provider: GitHub
     name: prerelease
     on:
        APPVEYOR_REPO_TAG: true
-       ENOSE_RELEASE: false
+
     artifact: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows.zip"
     draft: false
     prerelease: true
-    force_update: true
-    auth_token:
-      secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75	
-  
-  - provider: GitHub
-    name: release
-    on:
-       APPVEYOR_REPO_TAG: true
-       ENOSE_RELEASE: true
-    artifact: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows.zip"
-    draft: false
-    prerelease: false
     force_update: true
     auth_token:
       secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75	
