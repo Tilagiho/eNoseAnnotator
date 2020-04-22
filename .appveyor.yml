@@ -23,6 +23,16 @@ after_build:
   # create executable
   - cd app
   - windeployqt --compiler-runtime release/eNoseAnnotator.exe
+  
+  # generate symbol file
+  - dir
+  - set SYMBOL_DIR=symbols_%APPVEYOR_REPO_COMMIT%_win
+  - set SYMBOL_FILE=%SYMBOL_DIR%/%SYMBOL_DIR%.sym
+  - set crashHandlerPath=lib/QCrashHandler
+  - set PATH=%crashHandlerPath%/deps/breakpad.git/src/tools/windows/binaries;%crashHandlerPath%/deps/breakpad.git/src/processor;%PATH%;
+  - mkdir ../%SYMBOL_DIR%
+  - dump_syms *.pdb > ../%SYMBOL_FILE%
+
   # remove unneeded files
   - rm release/*.obj
   - rm release/*.cpp
@@ -38,6 +48,8 @@ after_build:
 artifacts:
   - path: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows"
     type: zip
+  - path: "symbols_%APPVEYOR_REPO_COMMIT%_win"
+    type: zip
 
 deploy:
   - provider: GitHub
@@ -50,4 +62,12 @@ deploy:
     prerelease: true
     force_update: true
     auth_token:
-      secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75	
+      secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75
+
+    artifact: "symbols_%APPVEYOR_REPO_COMMIT%_win.zip"
+    draft: false
+    prerelease: true
+    force_update: true
+    auth_token:
+      secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75
+
