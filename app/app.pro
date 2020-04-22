@@ -28,6 +28,18 @@ linux-g++ {
     INSTALLS += target
 }
 
+# configurations for QCrashHandler (google breakpad wrapper):
+include($$PWD/lib/QCrashHandler/src/qcrashhandler.pri)
+
+CONFIG(debug, debug|release) {
+    TARGET = appd
+} else {
+    TARGET = app
+    # create debug symbols for release builds
+    CONFIG *= force_debug_info
+    QMAKE_CXXFLAGS_RELEASE_WITH_DEBUGINFO -= -O2
+}
+
 
 SOURCES += \
     classes/aclass.cpp \
@@ -122,7 +134,7 @@ win32: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10
 unix:!macx: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10
 unix:!macx: QMAKE_RPATHDIR += $$PWD/lib/libtorch/lib
 
-
+# libtorch
 INCLUDEPATH += $$PWD/lib/libtorch/include
 DEPENDPATH += $$PWD/lib/libtorch/include
 

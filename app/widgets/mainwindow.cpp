@@ -1327,3 +1327,8 @@ void MainWindow::on_actionCloseClassifier_triggered()
 {
     closeClassifier();
 }
+
+void MainWindow::on_actionDEBUG_Crash_Application_triggered()
+{
+    throw "Crashing the application!";
+}
