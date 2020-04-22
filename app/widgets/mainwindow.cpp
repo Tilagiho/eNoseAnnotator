@@ -887,7 +887,8 @@ void MainWindow::on_actionSave_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
     std::stringstream ss;
-    ss << "<a href='https://github.com/Tilagiho/eNoseAnnotator'>eNoseAnnotator</a><br><br>Compiled with QT Version " << QT_VERSION_STR << "<br>Graphs made using <a href='https://www.qcustomplot.com/'>QCustomPlot</a><br><br>";
+    QString gitCommit(GIT_VERSION); // git has to be on path in order to be set!
+    ss << "<a href='https://github.com/Tilagiho/eNoseAnnotator'>eNoseAnnotator</a> Version: " << gitCommit.toStdString() << "<br><br>Compiled with QT Version " << QT_VERSION_STR << "<br>Graphs made using <a href='https://www.qcustomplot.com/'>QCustomPlot</a><br><br>";
     QString appCredits = ss.str().c_str();
     QString iconCredits = "Application Icon made by: Timo Land<br>USB icons from <a href='https://www.icons8.de'>Icons8</a><br>All other icons made by <a href='https://smashicons.com'>SmashIcons</a> from <a href='https://www.flaticon.com'>www.flaticon.com</a>";
 
