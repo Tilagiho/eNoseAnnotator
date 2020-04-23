@@ -22,11 +22,18 @@ make INSTALL_ROOT=eNoseAnnotator -j$(nproc) install ; find eNoseAnnotator/
 # create symbol file	#
 #			#
 # prepare path
-crashHandlerPath="eNoseAnnotator/app/lib/QCrashHandler"
+crashHandlerPath="app/lib/QCrashHandler"
 PATH="${PATH}:${PWD}/${crashHandlerPath}/deps/breakpad.git/src/tools/linux/dump_syms"
 PATH="${PATH}:${PWD}/${crashHandlerPath}/deps/breakpad.git/src/processor"
 PATH="${PATH}:${PWD}/${crashHandlerPath}/deps/breakpad.git/src/tools/linux/core2md"
 PATH="${PATH}:${PWD}/${crashHandlerPath}/deps/breakpad.git/src/tools/linux/md2core"
+
+# build breakpad tools
+pushd "${PWD}/${crashHandlerPath}/deps/breakpad.git"	# cd to the breakpad dir
+./configure
+make
+popd	# return to the root of the eNoseAnnotator repo
+ls
 
 # strip debug info from binary
 mkdir "${symbol_dir}"
@@ -35,7 +42,7 @@ strip --strip-debug --strip-unneeded "${binary_file}"
 objcopy --add-gnu-debuglink="${debug_symbols_file}" "${binary_file}"
 
 # dump symbols
-dump_syms ${debug_symbols_file} > linux.sym
+dump_syms ${debug_symbols_file} > ${symbol_file}
 
 #				#
 #	generate AppImage	#

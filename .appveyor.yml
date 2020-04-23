@@ -4,12 +4,14 @@ image: Visual Studio 2019
 install:
   - set QTDIR=C:\Qt\5.13.2\msvc2017_64
   - set PATH=%QTDIR%\bin;\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%;
+  - git submodule update --init --recursive
 build_script:
-  # info
-  - echo "%APPVEYOR_REPO_TAG_NAME%"
   # get libtorch
   - curl https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.4.0.zip -o libtorch-win-shared-with-deps-1.4.0.zip
   - ps: Expand-Archive -Force libtorch-win-shared-with-deps-1.4.0.zip app/lib/
+
+  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
   # setup build env
   - vcvars64.bat
   #- set QMAKESPEC=win32-msvc
@@ -57,14 +59,7 @@ deploy:
     on:
        APPVEYOR_REPO_TAG: true
 
-    artifact: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows.zip"
-    draft: false
-    prerelease: true
-    force_update: true
-    auth_token:
-      secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75
-
-    artifact: "symbols_%APPVEYOR_REPO_COMMIT%_win.zip"
+    artifact:
     draft: false
     prerelease: true
     force_update: true

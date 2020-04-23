@@ -10,11 +10,11 @@ int main(int argc, char *argv[])
 
     // setup breakpad crash handler:
     // save crash minidumps in reports
-    QString reportPath = a.applicationDirPath() + "/crash reports";
-    if (!QDir(reportPath).exists()) // create reportPath if necessary
-        QDir().mkdir(reportPath);
+    QDir reportDir ("crash reports/");
+    if (!reportDir.exists()) // create reportPath if necessary
+        QDir().mkdir(reportDir.absolutePath());
 
-    Breakpad::CrashHandler::instance()->Init(reportPath);
+    Breakpad::CrashHandler::instance()->Init(reportDir.absolutePath());
 
     // start application
     MainWindow w;

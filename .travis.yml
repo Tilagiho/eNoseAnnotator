@@ -26,11 +26,13 @@ matrix:
       # get libtorch
       - wget -c -nv https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-1.4.0%2Bcpu.zip
       - unzip -q -o libtorch-*.zip  -d app/lib/
+      # add linux syscall support needed for QCrashHandler
+      - git clone https://chromium.googlesource.com/linux-syscall-support app/lib/QCrashHandler/deps/breakpad.git/src/third_party/lss
     compiler:
       - gcc-7
     script:
       # build AppImage & create directory structure
-      - bash scripts/build.sh
+      - bash -xv scripts/build.sh
     
     after_success:
       # find eNoseAnnotator -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
