@@ -510,7 +510,9 @@ void MainWindow::on_actionsave_selection_triggered()
 void MainWindow::on_actionLoad_triggered()
 {
     // load data
+    try {
     bool loaded = mData->loadData(this);
+
     if (loaded)
         setTitle(false);
 
@@ -524,6 +526,10 @@ void MainWindow::on_actionLoad_triggered()
             QString error_message = "Functionalisation of the data loaded seems to be incompatible with the loaded classifier.\nWas the functionalisation set correctly? Is the classifier compatible with the sensor used?";
             QMessageBox::warning(this, "Classifier error", error_message);
         }
+    }
+    }
+    catch (const std::exception& e) {
+        QMessageBox::warning(this, "Error loading measurement", e.what());
     }
 }
 
@@ -1322,6 +1328,7 @@ void MainWindow::closeClassifier()
 
     classifierWidget->clear();
     ui->actionCloseClassifier->setEnabled(false);
+    ui->actionClassify_measurement->setEnabled(false);
 }
 
 void MainWindow::on_actionCloseClassifier_triggered()

@@ -674,15 +674,21 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
 {
     Q_ASSERT(measurement.size == nChannels);
 
-    // set timestamp:
+    // set timestamp & lastMeasKey:
+    int lastMeasKey;
     if (ui->chart->graph(0)->data()->isEmpty())
+    {
         setStartTimestamp(timestamp);
-
-    // get time of last measurement
-    // is used later to determine distance to current measurement
-    auto endIt = ui->chart->graph(0)->data()->end();
-    endIt--;
-    int lastMeasKey = std::round(endIt->key);
+        lastMeasKey = -2;
+    }
+    else
+    {
+        // get time of last measurement
+        // is used later to determine distance to current measurement
+        auto endIt = ui->chart->graph(0)->data()->end();
+        endIt--;
+        lastMeasKey = std::round(endIt->key);
+    }
 
     int xpos = timestamp-startTimestamp;
     for (int i=0; i<nChannels; i++)
