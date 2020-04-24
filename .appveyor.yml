@@ -6,34 +6,32 @@ install:
   - set PATH=%QTDIR%\bin;\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build;%PATH%;
   - git submodule update --init --recursive
 build_script:
+  # debug
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  #			#
+  # 	prepare build	#
+  #			#
   # get libtorch
   - curl https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.4.0.zip -o libtorch-win-shared-with-deps-1.4.0.zip
   - ps: Expand-Archive -Force libtorch-win-shared-with-deps-1.4.0.zip app/lib/
 
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
   # setup build env
   - vcvars64.bat
-  #- set QMAKESPEC=win32-msvc
-  # build app
+  
+  #			#
+  # 	build app	#
+  #			#
   - qmake -config release -r eNoseAnnotator.pro
   - nmake
   - cd "app/release/"
   - ren app.exe eNoseAnnotator.exe
   - cd ../..
 after_build:
-  # create executable
-  - cd app
+  - cd app   
+  # 				# 
+  # 	create executable	#
+  #				#
   - windeployqt --compiler-runtime release/eNoseAnnotator.exe
-  
-  # generate symbol file
-  - dir
-  - set SYMBOL_DIR=symbols_%APPVEYOR_REPO_COMMIT%_win
-  - set SYMBOL_FILE=%SYMBOL_DIR%/%SYMBOL_DIR%.sym
-  - set crashHandlerPath=lib/QCrashHandler
-  - set PATH=%crashHandlerPath%/deps/breakpad.git/src/tools/windows/binaries;%crashHandlerPath%/deps/breakpad.git/src/processor;%PATH%;
-  - mkdir ../%SYMBOL_DIR%
-  - dump_syms *.pdb > ../%SYMBOL_FILE%
 
   # remove unneeded files
   - rm release/*.obj
@@ -41,11 +39,36 @@ after_build:
   - rm release/*.h
   # create directories to be deployed
   - cd ..
+
   - mkdir "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/data/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/export/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/presets/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/classifiers/"
   - cp app/lib/libtorch/lib/*.dll "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/"
   - cp -r app/release/* "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/"
   - cp -r misc/presets "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/"
   - dir
+
+  #				#
+  # 	generate symbol file	#
+  # 				#
+  - dir
+  - cd app
+  - dir
+  # setup environment
+  - ren "release\eNoseAnnotator.exe" "app.exe"
+  - set SYMBOL_DIR="symbols_%APPVEYOR_REPO_COMMIT%_win"
+  - set SYMBOL_FILE="app.sym"
+  - set crashHandlerPath=%cd%/lib/QCrashHandler
+  - set PATH=%crashHandlerPath%/deps/breakpad.git/src/tools/windows/binaries;%crashHandlerPath%/deps/breakpad.git/src/processor;%PATH%;
+
+  # register msdia140.dll
+  - cp "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\DIA SDK\bin\msdia140.dll" "C:\Program Files\Common Files\Microsoft Shared\VC\msdia140.dll"
+  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - C:\Windows\system32\regsvr32 /s "C:\Program Files\Common Files\Microsoft Shared\VC\msdia140.dll"
+  # dump symbols
+  - cd ..
+  - mkdir "%SYMBOL_DIR%"
+  - dump_syms "app/release/app.pdb" > "%SYMBOL_DIR%/%SYMBOL_FILE%"
+  - cp "app/release/app.pdb" "%SYMBOL_DIR%/"
+
 
 artifacts:
   - path: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows"

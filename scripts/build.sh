@@ -43,6 +43,7 @@ objcopy --add-gnu-debuglink="${debug_symbols_file}" "${binary_file}"
 
 # dump symbols
 dump_syms ${debug_symbols_file} > ${symbol_file}
+cp ${debug_symbols_file} ${symbol_dir} 
 
 #				#
 #	generate AppImage	#
