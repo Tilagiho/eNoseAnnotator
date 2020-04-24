@@ -5,7 +5,7 @@
 
 #include <QtCore>
 
-
+int MVector::nChannels = 64;
 
 /*!
   \class MVector
@@ -15,11 +15,9 @@
   MVector can contain absolute resistance values, but also deviations relative to a base resistance (R0).
 */
 MVector::MVector(int size):
-    size(size)
+    size(size),
+    vector(size, 0.0)   // init array
 {
-    // init array
-    for (int i=0; i<size; i++)
-        vector.push_back(0.0);
 }
 
 MVector::~MVector()
@@ -193,7 +191,7 @@ MVector MVector::getAbsoluteVector(MVector baseVector)
  * \param sensorFailures
  * \return
  */
-MVector MVector::getFuncVector(std::array<int, MVector::nChannels> functionalisation, std::array<bool, MVector::nChannels> sensorFailures)
+MVector MVector::getFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures)
 {
     Q_ASSERT(functionalisation.size() == this->size);
     Q_ASSERT(sensorFailures.size() == this->size);

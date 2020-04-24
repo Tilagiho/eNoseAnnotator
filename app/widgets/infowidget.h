@@ -28,12 +28,12 @@ public slots:
     void setStatus(DataSource::Status status);
     void setTimestamp(double timestamp);
     void setMComment(QString comment);
-    void setFailures(std::array<bool, 64> failures);
+    void setFailures(std::vector<bool> failures);
     void setFuncLabel(QString label);
 
 signals:
     void mCommentChanged(QString comment);
-    void failuresChanged(std::array<bool, 64> failures);
+    void failuresChanged(std::vector<bool> failures);
     void setFunctionalities();
 
 private slots:

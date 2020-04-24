@@ -19,18 +19,16 @@
  */
 
 QString MeasurementData::funcName = "Custom";
-std::array<int, MVector::nChannels> MeasurementData::functionalisation = std::array<int, MVector::nChannels>{};
+std::vector<int> MeasurementData::functionalisation(MVector::nChannels, 0);
 
-MeasurementData::MeasurementData(QObject *parent) : QObject(parent)
+
+MeasurementData::MeasurementData(QObject *parent) :
+    QObject(parent),
+    sensorFailures(MVector::nChannels, false)
 {
     // zero init info
     setComment("");
     setSensorId("");
-    for (int i=0; i<MVector::nChannels; i++)
-        sensorFailures[i] = false;
-
-    for (int i=0; i<functionalisation.size(); i++)
-        functionalisation[i] = 0;
 }
 
 /*!
@@ -88,9 +86,9 @@ void MeasurementData::clear()
     baseLevelMap.clear();
     clearSelection();
     data.clear();
-    std::array<bool, 64> zeroFailures;
+    std::vector<bool> zeroFailures;
     for (int i=0; i<MVector::nChannels; i++)
-        zeroFailures[i] = false;
+        zeroFailures.push_back(false);
     setSensorFailures(zeroFailures);
 
     setComment("");
@@ -201,8 +199,10 @@ void MeasurementData::setComment(QString new_comment)
     }
 }
 
-void MeasurementData::setFailures(std::array<bool, 64> failures)
+void MeasurementData::setFailures(const std::vector<bool> failures)
 {
+    Q_ASSERT(failures.size() == MVector::nChannels);
+
     if (failures != sensorFailures)
     {
         sensorFailures = failures;
@@ -219,12 +219,12 @@ void MeasurementData::setFailures(QString failureString)
 {
     Q_ASSERT(failureString.length()==MVector::nChannels);
 
-    std::array<bool, 64> failures;
+    std::vector<bool> failures;
 
     for (int i=0; i<MVector::nChannels; i++)
     {
         Q_ASSERT(failureString[i]=="0" || failureString[i]=="1");
-        failures[i] = failureString[i] == "1";
+        failures.push_back(failureString[i] == "1");
     }
 
     setFailures(failures);
@@ -264,13 +264,15 @@ QList<aClass> MeasurementData::getClassList() const
     return classList;
 }
 
-std::array<int, MVector::nChannels> MeasurementData::getFunctionalities() const
+std::vector<int> MeasurementData::getFunctionalities() const
 {
     return functionalisation;
 }
 
-void MeasurementData::setFunctionalities(const std::array<int, MVector::nChannels> &value)
+void MeasurementData::setFunctionalities(const std::vector<int> &value)
 {
+    Q_ASSERT(value.size() == MVector::nChannels);
+
     if (value != functionalisation)
     {
         functionalisation = value;
@@ -285,8 +287,11 @@ void MeasurementData::setFunctionalities(const std::array<int, MVector::nChannel
  * \param sensorFailures
  * \return
  */
-QMap<int, int> MeasurementData::getFuncMap(const std::array<int, MVector::nChannels> &funcs, std::array<bool, 64> fails)
+QMap<int, int> MeasurementData::getFuncMap(const std::vector<int> &funcs, std::vector<bool> fails)
 {
+    Q_ASSERT(funcs.size() == MVector::nChannels);
+    Q_ASSERT(fails.size() == MVector::nChannels);
+
     // get number of functionalisations, ignore channels with sensor failures
     QMap<int, int> funcMap;
     for (int i=0; i<MVector::nChannels; i++)
@@ -367,13 +372,15 @@ MVector MeasurementData::getBaseLevel(uint timestamp)
     return baseLevelMap[bsTimestamp];
 }
 
-std::array<bool, 64> MeasurementData::getSensorFailures() const
+std::vector<bool> MeasurementData::getSensorFailures() const
 {
     return sensorFailures;
 }
 
-void MeasurementData::setSensorFailures(const std::array<bool, 64> &value)
+void MeasurementData::setSensorFailures(const std::vector<bool> &value)
 {
+    Q_ASSERT(value.size() == MVector::nChannels);
+
     if (value != sensorFailures)
     {
         sensorFailures = value;
@@ -783,9 +790,9 @@ bool MeasurementData::getMetaData(QString line)
         QString rawString = line.right(line.length()-QString("#functionalisation:").length());
         QStringList funcList = rawString.split(";");
 
-        std::array<int, MVector::nChannels> newFunc;
+        std::vector<int> newFunc;
         for (int i=0; i<MVector::nChannels; i++)
-            newFunc[i] = funcList[i].toInt();
+            newFunc.push_back(funcList[i].toInt());
         setFunctionalities(newFunc);
 
         // funcName not stored in file?!
@@ -1093,8 +1100,10 @@ const MVector MeasurementData::getSelectionVector(MultiMode mode)
     return selectionVector;
 }
 
-QString MeasurementData::sensorFailureString(std::array<bool, 64> failureBits)
+QString MeasurementData::sensorFailureString(std::vector<bool> failureBits)
 {
+    Q_ASSERT(failureBits.size() == MVector::nChannels);
+
     QString failureString;
 
     for (int hex=0; hex<MVector::nChannels/4; hex++)
@@ -1112,11 +1121,11 @@ QString MeasurementData::sensorFailureString(std::array<bool, 64> failureBits)
     return failureString;
 }
 
-std::array<bool, MVector::nChannels> MeasurementData::sensorFailureArray(QString failureString)
+std::vector<bool> MeasurementData::sensorFailureArray(QString failureString)
 {
-    std::array<bool, MVector::nChannels> failureArray;
+    std::vector<bool> failureArray;
     for (int i=0; i<MVector::nChannels; i++)
-        failureArray[i] = 0;
+        failureArray.push_back(false);
 
     if (failureString == "None")
         return failureArray;
@@ -1127,7 +1136,7 @@ std::array<bool, MVector::nChannels> MeasurementData::sensorFailureArray(QString
 
         for (int bit=0; bit<4; bit++)
         {
-            failureArray[4*hex+bit] |= failureInt & (1UL << bit);
+            failureArray[4*hex+bit] = failureInt & (1UL << bit);
         }
     }
 

@@ -19,7 +19,7 @@ class SetSensorFailuresDialog : public QDialog
 public:
     explicit SetSensorFailuresDialog(QWidget *parent = nullptr, QString failureString="");
     ~SetSensorFailuresDialog();
-    std::array<bool, 64> getSensorFailures();
+    std::vector<bool> getSensorFailures();
 
 private slots:
     void on_buttonBox_accepted();
@@ -28,8 +28,8 @@ private slots:
 
 private:
     Ui::SetSensorFailuresDialog *ui;
-    std::array<QCheckBox*, 64> checkBoxArray;
-    std::array<bool, 64> sensorFailures;
+    std::vector<QCheckBox*> checkBoxes;
+    std::vector<bool> sensorFailures;
 };
 
 #endif // SETSENSORFAILURESDIALOG_H

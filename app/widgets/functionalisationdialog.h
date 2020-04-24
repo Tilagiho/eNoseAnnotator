@@ -19,9 +19,9 @@ public:
     explicit FunctionalisationDialog(QWidget *parent = nullptr);
     ~FunctionalisationDialog();
 
-    void setFunctionalities(std::array<int, 64> funcs);
+    void setFunctionalities(std::vector<int> funcs);
 
-    std::array<int, 64> getFunctionalities();
+    std::vector<int> getFunctionalities();
 
     QString presetName = "None";
 
@@ -41,7 +41,7 @@ private:
     Ui::FunctionalisationDialog *ui;
 
     // stores spinboxes
-    std::array<QSpinBox*, 64> spArray;
+    std::vector<QSpinBox*> spinBoxes;
 
     void loadPresets();
 };

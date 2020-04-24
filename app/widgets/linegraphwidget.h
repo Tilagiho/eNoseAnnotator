@@ -58,7 +58,7 @@ public slots:
 //    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements
 //    void addMeasurement(QMap<uint, MVector>);
     void setData(QMap<uint, MVector> map);
-    void setSensorFailureFlags(const std::array<bool, MVector::nChannels> sensorFailureFlags);
+    void setSensorFailureFlags(const std::vector<bool> sensorFailureFlags);
     void setAutoMoveGraph(bool value);
     void clearSelection();
 
@@ -107,7 +107,7 @@ private:
 
 
 
-    std::array<bool, MVector::nChannels> sensorFailureFlags;
+    std::vector<bool> sensorFailureFlags;
     bool autoMoveGraph = true;
 
     QMap<int, QPair<QString, QList<QCPItemRect *>>> userDefinedClassLabels;

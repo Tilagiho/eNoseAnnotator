@@ -18,8 +18,7 @@ LineGraphWidget::LineGraphWidget(QWidget *parent, int nChannels) :
     ui->setupUi(this);
 
     // zero init sensorFailureFlags
-    for (int i=0; i<nChannels; i++)
-        sensorFailureFlags[i] = false;
+    sensorFailureFlags = std::vector<bool>(MVector::nChannels, false);
 
     setupGraph();
 
@@ -118,8 +117,10 @@ void LineGraphWidget::setStartTimestamp(uint timestamp)
     startTimestamp = timestamp;
 }
 
-void LineGraphWidget::setSensorFailureFlags(const std::array<bool, MVector::nChannels> flags)
+void LineGraphWidget::setSensorFailureFlags(const std::vector<bool> flags)
 {
+    Q_ASSERT(flags.size() == MVector::nChannels);
+
     // ignore if different nChannels was set
     if (nChannels != MVector::nChannels)
         return;

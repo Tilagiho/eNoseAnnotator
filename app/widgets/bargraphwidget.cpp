@@ -131,7 +131,7 @@ void BarGraphWidget::replot()
     resetColors();
 }
 
-void BarGraphWidget::setBars(MVector new_vector, std::array<bool, MVector::nChannels> sensorFailures, std::array<int, MVector::nChannels> functionalisation)
+void BarGraphWidget::setBars(MVector new_vector, std::vector<bool> sensorFailures, std::vector<int> functionalisation)
 {
     if (mode == Mode::showAll)
     {

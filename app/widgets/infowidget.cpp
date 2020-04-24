@@ -68,7 +68,7 @@ void InfoWidget::setMComment(QString comment)
         ui->commentTextEdit->setText(comment);
 }
 
-void InfoWidget::setFailures(std::array<bool, 64> failures)
+void InfoWidget::setFailures(std::vector<bool> failures)
 {
 
     QString label = MeasurementData::sensorFailureString(failures);

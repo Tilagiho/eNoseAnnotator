@@ -143,11 +143,11 @@ public:
 
     QString getSensorId() const;
 
-    std::array<bool, 64> getSensorFailures() const;
-    void setSensorFailures(const std::array<bool, 64> &value);
+    std::vector<bool> getSensorFailures() const;
+    void setSensorFailures(const std::vector<bool> &value);
 
-    static QString sensorFailureString(std::array<bool, 64>);
-    static std::array<bool, 64> sensorFailureArray(QString);
+    static QString sensorFailureString(std::vector<bool>);
+    static std::vector<bool> sensorFailureArray(QString);
 
     /*
      * returns true if data was changed since last save/ load action
@@ -161,10 +161,10 @@ public:
      */
     MVector getBaseLevel (uint timestamp);
 
-    std::array<int, MVector::nChannels> getFunctionalities() const;
-    void setFunctionalities(const std::array<int, MVector::nChannels> &value);
+    std::vector<int> getFunctionalities() const;
+    void setFunctionalities(const std::vector<int> &value);
 
-    static QMap<int, int> getFuncMap(const std::array<int, MVector::nChannels> &funcs, std::array<bool, 64> sensorFailures);
+    static QMap<int, int> getFuncMap(const std::vector<int> &funcs, const std::vector<bool> sensorFailures);
 
     QMap<int, int> getFuncMap();
 
@@ -201,7 +201,7 @@ public:
     QString getSaveFilename() const;
 
     static QString funcName;
-    static std::array<int, MVector::nChannels> functionalisation;
+    static std::vector<int> functionalisation;
 
 public slots:
     /*
@@ -210,7 +210,7 @@ public slots:
     void setSelection(int lower, int upper);
 
     void setComment(QString comment);
-    void setFailures(std::array<bool, 64>);
+    void setFailures(std::vector<bool>);
     void setFailures(QString failureString);
     void setSensorId(QString sensorId);
     void setBaseLevel(uint timestamp, MVector baseLevel);
@@ -220,7 +220,7 @@ public slots:
     void setFuncName(QString);
 
 signals:
-    void selectionVectorChanged(MVector vector, std::array<bool, MVector::nChannels> sensorFailures, std::array<int, MVector::nChannels>);  // emits new vector when dataSelected is changed
+    void selectionVectorChanged(MVector vector, std::vector<bool> sensorFailures, std::vector<int>);  // emits new vector when dataSelected is changed
     void selectionMapChanged(QMap<uint, MVector> selectionMap);
     void labelsUpdated(QMap<uint, MVector> updatedVectors);
 
@@ -238,7 +238,7 @@ signals:
     void sensorIdSet(QString sensorId);
     void startTimestempSet(uint timestamp);
     void commentSet(QString comment);
-    void sensorFailuresSet(std::array<bool, 64>);
+    void sensorFailuresSet(std::vector<bool>);
 
     // emitted when replotStatus in LinegraphWidgets should be set
     void setReplotStatus(bool status);
@@ -256,7 +256,7 @@ private:
     bool dataChanged = false;
     QString dataComment = "";
     QString sensorId = "";
-    std::array<bool, MVector::nChannels> sensorFailures;
+    std::vector<bool> sensorFailures;
     QList<aClass> classList;
 
     QString savefileFormatVersion = "1.0";

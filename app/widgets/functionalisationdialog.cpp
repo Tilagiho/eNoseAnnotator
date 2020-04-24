@@ -7,7 +7,8 @@
 
 FunctionalisationDialog::FunctionalisationDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::FunctionalisationDialog)
+    ui(new Ui::FunctionalisationDialog),
+    spinBoxes(64, nullptr)
 {
     ui->setupUi(this);
 
@@ -15,73 +16,73 @@ FunctionalisationDialog::FunctionalisationDialog(QWidget *parent) :
     this->setWindowTitle("Set Functionalization");
 
     // setup spArray
-    spArray[0] = ui->sp1;
-    spArray[1] = ui->sp2;
-    spArray[2] = ui->sp3;
-    spArray[3] = ui->sp4;
-    spArray[4] = ui->sp5;
-    spArray[5] = ui->sp6;
-    spArray[6] = ui->sp7;
-    spArray[7] = ui->sp8;
-    spArray[8] = ui->sp9;
-    spArray[9] = ui->sp10;
-    spArray[10] = ui->sp11;
-    spArray[11] = ui->sp12;
-    spArray[12] = ui->sp13;
-    spArray[13] = ui->sp14;
-    spArray[14] = ui->sp15;
-    spArray[15] = ui->sp16;
-    spArray[16] = ui->sp17;
-    spArray[17] = ui->sp18;
-    spArray[18] = ui->sp19;
-    spArray[19] = ui->sp20;
-    spArray[20] = ui->sp21;
-    spArray[21] = ui->sp22;
-    spArray[22] = ui->sp23;
-    spArray[23] = ui->sp24;
-    spArray[24] = ui->sp25;
-    spArray[25] = ui->sp26;
-    spArray[26] = ui->sp27;
-    spArray[27] = ui->sp28;
-    spArray[28] = ui->sp29;
-    spArray[29] = ui->sp30;
-    spArray[30] = ui->sp31;
-    spArray[31] = ui->sp32;
-    spArray[32] = ui->sp33;
-    spArray[33] = ui->sp34;
-    spArray[34] = ui->sp35;
-    spArray[35] = ui->sp36;
-    spArray[36] = ui->sp37;
-    spArray[37] = ui->sp38;
-    spArray[38] = ui->sp39;
-    spArray[39] = ui->sp40;
-    spArray[40] = ui->sp41;
-    spArray[41] = ui->sp42;
-    spArray[42] = ui->sp43;
-    spArray[43] = ui->sp44;
-    spArray[44] = ui->sp45;
-    spArray[45] = ui->sp46;
-    spArray[46] = ui->sp47;
-    spArray[47] = ui->sp48;
-    spArray[48] = ui->sp49;
-    spArray[49] = ui->sp50;
-    spArray[50] = ui->sp51;
-    spArray[51] = ui->sp52;
-    spArray[52] = ui->sp53;
-    spArray[53] = ui->sp54;
-    spArray[54] = ui->sp55;
-    spArray[55] = ui->sp56;
-    spArray[56] = ui->sp57;
-    spArray[57] = ui->sp58;
-    spArray[58] = ui->sp59;
-    spArray[59] = ui->sp60;
-    spArray[60] = ui->sp61;
-    spArray[61] = ui->sp62;
-    spArray[62] = ui->sp63;
-    spArray[63] = ui->sp64;
+    spinBoxes[0] = ui->sp1;
+    spinBoxes[1] = ui->sp2;
+    spinBoxes[2] = ui->sp3;
+    spinBoxes[3] = ui->sp4;
+    spinBoxes[4] = ui->sp5;
+    spinBoxes[5] = ui->sp6;
+    spinBoxes[6] = ui->sp7;
+    spinBoxes[7] = ui->sp8;
+    spinBoxes[8] = ui->sp9;
+    spinBoxes[9] = ui->sp10;
+    spinBoxes[10] = ui->sp11;
+    spinBoxes[11] = ui->sp12;
+    spinBoxes[12] = ui->sp13;
+    spinBoxes[13] = ui->sp14;
+    spinBoxes[14] = ui->sp15;
+    spinBoxes[15] = ui->sp16;
+    spinBoxes[16] = ui->sp17;
+    spinBoxes[17] = ui->sp18;
+    spinBoxes[18] = ui->sp19;
+    spinBoxes[19] = ui->sp20;
+    spinBoxes[20] = ui->sp21;
+    spinBoxes[21] = ui->sp22;
+    spinBoxes[22] = ui->sp23;
+    spinBoxes[23] = ui->sp24;
+    spinBoxes[24] = ui->sp25;
+    spinBoxes[25] = ui->sp26;
+    spinBoxes[26] = ui->sp27;
+    spinBoxes[27] = ui->sp28;
+    spinBoxes[28] = ui->sp29;
+    spinBoxes[29] = ui->sp30;
+    spinBoxes[30] = ui->sp31;
+    spinBoxes[31] = ui->sp32;
+    spinBoxes[32] = ui->sp33;
+    spinBoxes[33] = ui->sp34;
+    spinBoxes[34] = ui->sp35;
+    spinBoxes[35] = ui->sp36;
+    spinBoxes[36] = ui->sp37;
+    spinBoxes[37] = ui->sp38;
+    spinBoxes[38] = ui->sp39;
+    spinBoxes[39] = ui->sp40;
+    spinBoxes[40] = ui->sp41;
+    spinBoxes[41] = ui->sp42;
+    spinBoxes[42] = ui->sp43;
+    spinBoxes[43] = ui->sp44;
+    spinBoxes[44] = ui->sp45;
+    spinBoxes[45] = ui->sp46;
+    spinBoxes[46] = ui->sp47;
+    spinBoxes[47] = ui->sp48;
+    spinBoxes[48] = ui->sp49;
+    spinBoxes[49] = ui->sp50;
+    spinBoxes[50] = ui->sp51;
+    spinBoxes[51] = ui->sp52;
+    spinBoxes[52] = ui->sp53;
+    spinBoxes[53] = ui->sp54;
+    spinBoxes[54] = ui->sp55;
+    spinBoxes[55] = ui->sp56;
+    spinBoxes[56] = ui->sp57;
+    spinBoxes[57] = ui->sp58;
+    spinBoxes[58] = ui->sp59;
+    spinBoxes[59] = ui->sp60;
+    spinBoxes[60] = ui->sp61;
+    spinBoxes[61] = ui->sp62;
+    spinBoxes[62] = ui->sp63;
+    spinBoxes[63] = ui->sp64;
 
 
-    for (QSpinBox* spinBox : spArray)
+    for (QSpinBox* spinBox : spinBoxes)
         QObject::connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &FunctionalisationDialog::valueChanged);
 
     // presets
@@ -93,18 +94,20 @@ FunctionalisationDialog::~FunctionalisationDialog()
     delete ui;
 }
 
-void FunctionalisationDialog::setFunctionalities(std::array<int, 64> funcs)
+void FunctionalisationDialog::setFunctionalities(std::vector<int> funcs)
 {
+    Q_ASSERT(funcs.size() == MVector::nChannels);
+
     for (int i=0; i<64; i++)
-        spArray[i]->setValue(funcs[i]);
+        spinBoxes[i]->setValue(funcs[i]);
 }
 
-std::array<int, 64> FunctionalisationDialog::getFunctionalities()
+std::vector<int> FunctionalisationDialog::getFunctionalities()
 {
-    std::array<int, 64> funcs;
+    std::vector<int> funcs (MVector::nChannels, 0);
 
-    for (int i=0; i<64; i++)
-        funcs[i] = spArray[i]->value();
+    for (int i=0; i<MVector::nChannels; i++)
+        funcs[i] = spinBoxes[i]->value();
 
     return funcs;
 }
@@ -147,9 +150,9 @@ void FunctionalisationDialog::on_pushButton_clicked()
         QTextStream in(&file);
 
         QString line;
-        std::array<int, 64> presetArray;
+        std::vector<int> presetArray (MVector::nChannels, 0);
         bool readOk = true;
-        for (int i = 0; i<spArray.size(); i++)
+        for (int i = 0; i<spinBoxes.size(); i++)
         {
             // load line & convert to integer
             readOk = in.readLineInto(&line);
@@ -165,8 +168,8 @@ void FunctionalisationDialog::on_pushButton_clicked()
 
         if (readOk)
         {
-            for (int i = 0; i<spArray.size(); i++)
-                spArray[i]->setValue(presetArray[i]);
+            for (int i = 0; i<spinBoxes.size(); i++)
+                spinBoxes[i]->setValue(presetArray[i]);
 
             presetName = presetFileName;
         }
@@ -175,8 +178,8 @@ void FunctionalisationDialog::on_pushButton_clicked()
 
 void FunctionalisationDialog::on_pushButton_2_clicked()
 {
-    for (int i=0; i<spArray.size(); i++)
-        spArray[i]->setValue(0);
+    for (int i=0; i<spinBoxes.size(); i++)
+        spinBoxes[i]->setValue(0);
 }
 
 void FunctionalisationDialog::on_pushButton_3_clicked()
@@ -205,8 +208,8 @@ void FunctionalisationDialog::on_pushButton_3_clicked()
     {
         QTextStream out(&file);
 
-        for (int i = 0; i<spArray.size(); i++)
-            out << QString::number(spArray[i]->value()) << "\n";
+        for (int i = 0; i<spinBoxes.size(); i++)
+            out << QString::number(spinBoxes[i]->value()) << "\n";
     }
     // update preset combo box
     ui->comboBox->addItem(input);
@@ -217,8 +220,8 @@ void FunctionalisationDialog::valueChanged(int)
     presetName = "Custom";
 
     // check if no functionalisation  was set
-    for (int i=0; i<spArray.size(); i++)
-        if (spArray[i]->value() != 0)
+    for (int i=0; i<spinBoxes.size(); i++)
+        if (spinBoxes[i]->value() != 0)
             return;
     presetName = "None";
 

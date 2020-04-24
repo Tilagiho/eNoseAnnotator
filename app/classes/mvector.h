@@ -11,7 +11,7 @@ class MVector
 {
 
 public:
-    static const int nChannels = 64;
+    static int nChannels;
 
     MVector(int size=nChannels);
     ~MVector();
@@ -60,7 +60,7 @@ public:
      */
     MVector getAbsoluteVector(MVector baseVector);
 
-    MVector getFuncVector(std::array<int, MVector::nChannels> functionalisation, std::array<bool, MVector::nChannels> sensorFailures);
+    MVector getFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures);
 
     int size = nChannels;    // number of sensor inputs
 

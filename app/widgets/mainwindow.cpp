@@ -121,7 +121,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::labelsUpdated, absLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
     connect(mData, &MeasurementData::labelsUpdated, relLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
 
-    connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::array<bool, MVector::nChannels>){
+    connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::vector<bool>){
         ui->actionAnnotate_selection->setEnabled(true);
         ui->actionDelete_Annotation->setEnabled(true);
         ui->actionSet_detected_class_of_selection->setEnabled(true);
@@ -233,7 +233,7 @@ MainWindow::MainWindow(QWidget *parent)
     }); // absGraph -> mData
     connect(mData, &MeasurementData::sensorFailuresSet, relLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
     connect(mData, &MeasurementData::sensorFailuresSet, absLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
-    connect(mData, &MeasurementData::sensorFailuresSet, this, [this](std::array<bool, 64>){
+    connect(mData, &MeasurementData::sensorFailuresSet, this, [this](std::vector<bool>){
         // update func line graph:
         funcLineGraph->clearGraph();
 
@@ -285,7 +285,7 @@ MainWindow::MainWindow(QWidget *parent)
     // measurement info
     // info -> mData
     connect(measInfoWidget, &InfoWidget::mCommentChanged, mData, &MeasurementData::setComment);    // comment changed in infoWidget: change comment in mData
-    connect(measInfoWidget, SIGNAL(failuresChanged(std::array<bool, 64>)), mData, SLOT(setFailures(std::array<bool, 64>)));   // failures changed in infoWidget: change failures in mData
+    connect(measInfoWidget, SIGNAL(failuresChanged(std::vector<bool>)), mData, SLOT(setFailures(std::vector<bool>)));   // failures changed in infoWidget: change failures in mData
 
     // mData -> info
     connect(mData, &MeasurementData::sensorIdSet, measInfoWidget, &InfoWidget::setSensor);            // mData: sensorId changed -> InfoWidget: show new sensorId

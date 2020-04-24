@@ -9,88 +9,90 @@
 
 SetSensorFailuresDialog::SetSensorFailuresDialog(QWidget *parent, QString failureString) :
     QDialog(parent),
-    ui(new Ui::SetSensorFailuresDialog)
+    ui(new Ui::SetSensorFailuresDialog),
+    checkBoxes(64, nullptr),
+    sensorFailures(MVector::nChannels, false)
 {
-    auto failureArray = MeasurementData::sensorFailureArray(failureString);
+    auto failures = MeasurementData::sensorFailureArray(failureString);
 
     ui->setupUi(this);
 
     // set up checkbox array
-    checkBoxArray[0] = ui->checkBox;
-    checkBoxArray[1] = ui->checkBox_2;
-    checkBoxArray[2] = ui->checkBox_3;
-    checkBoxArray[3] = ui->checkBox_4;
-    checkBoxArray[4] = ui->checkBox_5;
-    checkBoxArray[5] = ui->checkBox_6;
-    checkBoxArray[6] = ui->checkBox_7;
-    checkBoxArray[7] = ui->checkBox_8;
-    checkBoxArray[8] = ui->checkBox_9;
-    checkBoxArray[9] = ui->checkBox_10;
-    checkBoxArray[10] = ui->checkBox_11;
-    checkBoxArray[11] = ui->checkBox_12;
-    checkBoxArray[12] = ui->checkBox_13;
-    checkBoxArray[13] = ui->checkBox_14;
-    checkBoxArray[14] = ui->checkBox_15;
-    checkBoxArray[15] = ui->checkBox_16;
-    checkBoxArray[16] = ui->checkBox_17;
-    checkBoxArray[17] = ui->checkBox_18;
-    checkBoxArray[18] = ui->checkBox_19;
-    checkBoxArray[19] = ui->checkBox_20;
-    checkBoxArray[20] = ui->checkBox_21;
-    checkBoxArray[21] = ui->checkBox_22;
-    checkBoxArray[22] = ui->checkBox_23;
-    checkBoxArray[23] = ui->checkBox_24;
-    checkBoxArray[24] = ui->checkBox_25;
-    checkBoxArray[25] = ui->checkBox_26;
-    checkBoxArray[26] = ui->checkBox_27;
-    checkBoxArray[27] = ui->checkBox_28;
-    checkBoxArray[28] = ui->checkBox_29;
-    checkBoxArray[29] = ui->checkBox_30;
-    checkBoxArray[30] = ui->checkBox_31;
-    checkBoxArray[31] = ui->checkBox_32;
-    checkBoxArray[32] = ui->checkBox_33;
-    checkBoxArray[33] = ui->checkBox_34;
-    checkBoxArray[34] = ui->checkBox_35;
-    checkBoxArray[35] = ui->checkBox_36;
-    checkBoxArray[36] = ui->checkBox_37;
-    checkBoxArray[37] = ui->checkBox_38;
-    checkBoxArray[38] = ui->checkBox_39;
-    checkBoxArray[39] = ui->checkBox_40;
-    checkBoxArray[40] = ui->checkBox_41;
-    checkBoxArray[41] = ui->checkBox_42;
-    checkBoxArray[42] = ui->checkBox_43;
-    checkBoxArray[43] = ui->checkBox_44;
-    checkBoxArray[44] = ui->checkBox_45;
-    checkBoxArray[45] = ui->checkBox_46;
-    checkBoxArray[46] = ui->checkBox_47;
-    checkBoxArray[47] = ui->checkBox_48;
-    checkBoxArray[48] = ui->checkBox_49;
-    checkBoxArray[49] = ui->checkBox_50;
-    checkBoxArray[50] = ui->checkBox_51;
-    checkBoxArray[51] = ui->checkBox_52;
-    checkBoxArray[52] = ui->checkBox_53;
-    checkBoxArray[53] = ui->checkBox_54;
-    checkBoxArray[54] = ui->checkBox_55;
-    checkBoxArray[55] = ui->checkBox_56;
-    checkBoxArray[56] = ui->checkBox_57;
-    checkBoxArray[57] = ui->checkBox_58;
-    checkBoxArray[58] = ui->checkBox_59;
-    checkBoxArray[59] = ui->checkBox_60;
-    checkBoxArray[60] = ui->checkBox_61;
-    checkBoxArray[61] = ui->checkBox_62;
-    checkBoxArray[62] = ui->checkBox_63;
-    checkBoxArray[63] = ui->checkBox_64;
+    checkBoxes[0] = ui->checkBox;
+    checkBoxes[1] = ui->checkBox_2;
+    checkBoxes[2] = ui->checkBox_3;
+    checkBoxes[3] = ui->checkBox_4;
+    checkBoxes[4] = ui->checkBox_5;
+    checkBoxes[5] = ui->checkBox_6;
+    checkBoxes[6] = ui->checkBox_7;
+    checkBoxes[7] = ui->checkBox_8;
+    checkBoxes[8] = ui->checkBox_9;
+    checkBoxes[9] = ui->checkBox_10;
+    checkBoxes[10] = ui->checkBox_11;
+    checkBoxes[11] = ui->checkBox_12;
+    checkBoxes[12] = ui->checkBox_13;
+    checkBoxes[13] = ui->checkBox_14;
+    checkBoxes[14] = ui->checkBox_15;
+    checkBoxes[15] = ui->checkBox_16;
+    checkBoxes[16] = ui->checkBox_17;
+    checkBoxes[17] = ui->checkBox_18;
+    checkBoxes[18] = ui->checkBox_19;
+    checkBoxes[19] = ui->checkBox_20;
+    checkBoxes[20] = ui->checkBox_21;
+    checkBoxes[21] = ui->checkBox_22;
+    checkBoxes[22] = ui->checkBox_23;
+    checkBoxes[23] = ui->checkBox_24;
+    checkBoxes[24] = ui->checkBox_25;
+    checkBoxes[25] = ui->checkBox_26;
+    checkBoxes[26] = ui->checkBox_27;
+    checkBoxes[27] = ui->checkBox_28;
+    checkBoxes[28] = ui->checkBox_29;
+    checkBoxes[29] = ui->checkBox_30;
+    checkBoxes[30] = ui->checkBox_31;
+    checkBoxes[31] = ui->checkBox_32;
+    checkBoxes[32] = ui->checkBox_33;
+    checkBoxes[33] = ui->checkBox_34;
+    checkBoxes[34] = ui->checkBox_35;
+    checkBoxes[35] = ui->checkBox_36;
+    checkBoxes[36] = ui->checkBox_37;
+    checkBoxes[37] = ui->checkBox_38;
+    checkBoxes[38] = ui->checkBox_39;
+    checkBoxes[39] = ui->checkBox_40;
+    checkBoxes[40] = ui->checkBox_41;
+    checkBoxes[41] = ui->checkBox_42;
+    checkBoxes[42] = ui->checkBox_43;
+    checkBoxes[43] = ui->checkBox_44;
+    checkBoxes[44] = ui->checkBox_45;
+    checkBoxes[45] = ui->checkBox_46;
+    checkBoxes[46] = ui->checkBox_47;
+    checkBoxes[47] = ui->checkBox_48;
+    checkBoxes[48] = ui->checkBox_49;
+    checkBoxes[49] = ui->checkBox_50;
+    checkBoxes[50] = ui->checkBox_51;
+    checkBoxes[51] = ui->checkBox_52;
+    checkBoxes[52] = ui->checkBox_53;
+    checkBoxes[53] = ui->checkBox_54;
+    checkBoxes[54] = ui->checkBox_55;
+    checkBoxes[55] = ui->checkBox_56;
+    checkBoxes[56] = ui->checkBox_57;
+    checkBoxes[57] = ui->checkBox_58;
+    checkBoxes[58] = ui->checkBox_59;
+    checkBoxes[59] = ui->checkBox_60;
+    checkBoxes[60] = ui->checkBox_61;
+    checkBoxes[61] = ui->checkBox_62;
+    checkBoxes[62] = ui->checkBox_63;
+    checkBoxes[63] = ui->checkBox_64;
 
     // set failure states
     for (int i=0; i<MVector::nChannels; i++)
     {
-        if (failureArray[i])
+        if (failures[i])
         {
-            checkBoxArray[i]->setCheckState(Qt::CheckState::Checked);
+            checkBoxes[i]->setCheckState(Qt::CheckState::Checked);
             sensorFailures[i] = true;
         } else
         {
-            checkBoxArray[i]->setCheckState(Qt::CheckState::Unchecked);
+            checkBoxes[i]->setCheckState(Qt::CheckState::Unchecked);
             sensorFailures[i] = false;
         }
     }
@@ -101,7 +103,7 @@ SetSensorFailuresDialog::~SetSensorFailuresDialog()
     delete ui;
 }
 
-std::array<bool, 64> SetSensorFailuresDialog::getSensorFailures()
+std::vector<bool> SetSensorFailuresDialog::getSensorFailures()
 {
     return sensorFailures;
 }
@@ -111,7 +113,7 @@ void SetSensorFailuresDialog::on_buttonBox_accepted()
     // get bits
     for (int i=0; i<MVector::nChannels; i++)
     {
-        sensorFailures[i] = checkBoxArray[i]->checkState() == Qt::CheckState::Checked;
+        sensorFailures[i] = checkBoxes[i]->checkState() == Qt::CheckState::Checked;
     }
 
     this->close();
@@ -120,5 +122,5 @@ void SetSensorFailuresDialog::on_buttonBox_accepted()
 void SetSensorFailuresDialog::on_ResetButton_clicked()
 {
     for (int i=0; i<MVector::nChannels; i++)
-        checkBoxArray[i]->setCheckState(Qt::CheckState::Unchecked);
+        checkBoxes[i]->setCheckState(Qt::CheckState::Unchecked);
 }
