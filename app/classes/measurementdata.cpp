@@ -52,9 +52,10 @@ const QMap<uint, MVector> MeasurementData::getFuncData()
     if (getFuncMap().size() == 1)
         return getRelativeData();
 
+    QMap<uint, MVector> relativeData = getRelativeData();
     QMap<uint, MVector> funcData;
-    for (int timestamp : data.keys())
-        funcData[timestamp] = data[timestamp].getFuncVector(functionalisation, sensorFailures);
+    for (int timestamp : relativeData.keys())
+        funcData[timestamp] = relativeData[timestamp].getFuncVector(functionalisation, sensorFailures);
 
     return funcData;
 }
