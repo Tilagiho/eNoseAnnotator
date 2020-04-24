@@ -112,7 +112,6 @@ MainWindow::MainWindow(QWidget *parent)
                     closeClassifier();
                 }
             }
-
         }
     }); // classify selection
     connect(mData, &MeasurementData::selectionCleared, classifierWidget, &ClassifierWidget::clearAnnotation); // clear selection classification
@@ -954,6 +953,7 @@ void MainWindow::makeSourceConnections()
     connect(source, &DataSource::statusSet, this, [this](DataSource::Status status){
         switch (status) {
             case DataSource::Status::NOT_CONNECTED:
+                ui->actionStart->setIcon(QIcon(":/icons/start"));
                 ui->actionStart->setEnabled(false);
                 ui->actionStart->setChecked(false);
                 ui->actionStop->setEnabled(false);
@@ -964,6 +964,7 @@ void MainWindow::makeSourceConnections()
                 statusImageLabel->setPixmap(QPixmap(":/icons/disconnected"));
                 break;
             case DataSource::Status::CONNECTING:
+                ui->actionStart->setIcon(QIcon(":/icons/start"));
                 ui->actionStart->setEnabled(false);
                 ui->actionStart->setChecked(false);
                 ui->actionStop->setEnabled(false);
@@ -974,6 +975,7 @@ void MainWindow::makeSourceConnections()
                 statusImageLabel->setPixmap(QPixmap(":/icons/baseVector"));
                 break;
             case DataSource::Status::CONNECTED:
+                ui->actionStart->setIcon(QIcon(":/icons/start"));
                 ui->actionStart->setEnabled(true);
                 ui->actionStart->setChecked(false);
                 ui->actionStop->setEnabled(false);
@@ -984,6 +986,7 @@ void MainWindow::makeSourceConnections()
                 statusImageLabel->setPixmap(QPixmap(":/icons/connected"));
                 break;
             case DataSource::Status::SET_BASEVECTOR:
+                ui->actionStart->setIcon(QIcon(":/icons/paused"));
                 ui->actionStart->setEnabled(false);
                 ui->actionStart->setChecked(false);
                 ui->actionStop->setEnabled(false);
@@ -994,6 +997,7 @@ void MainWindow::makeSourceConnections()
                 statusImageLabel->setPixmap(QPixmap(":/icons/baseVector"));
                 break;
             case DataSource::Status::RECEIVING_DATA:
+                ui->actionStart->setIcon(QIcon(":/icons/paused"));
                 ui->actionStart->setEnabled(true);
                 ui->actionStart->setChecked(false);
                 ui->actionStop->setEnabled(true);
@@ -1014,6 +1018,7 @@ void MainWindow::makeSourceConnections()
                 statusImageLabel->setPixmap(QPixmap(":/icons/error"));
                 break;
             case DataSource::Status::PAUSED:
+                ui->actionStart->setIcon(QIcon(":/icons/start"));
                 ui->actionStart->setEnabled(true);
                 ui->actionStart->setChecked(true);
                 ui->actionStop->setEnabled(true);

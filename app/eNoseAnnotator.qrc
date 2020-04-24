@@ -16,9 +16,10 @@
         <file alias="baseVector">images/hourglass-1.png</file>
         <file alias="label">images/price-tag.png</file>
         <file alias="ai_running">images/idea.png</file>
-        <file alias="start">images/start-pause.png</file>
+        <file>images/start-pause.png</file>
         <file alias="delete_label">images/delete-tag.png</file>
         <file alias="reconnect">images/reconnect.png</file>
         <file alias="paused">images/paused.png</file>
+        <file alias="start">images/play-button.png</file>
     </qresource>
 </RCC>
