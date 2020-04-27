@@ -128,7 +128,6 @@
      <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
-    <addaction name="actionDEBUG_Crash_Application"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -416,11 +415,6 @@
   <action name="actionCloseClassifier">
    <property name="text">
     <string>Close</string>
-   </property>
-  </action>
-  <action name="actionDEBUG_Crash_Application">
-   <property name="text">
-    <string>DEBUG: Crash Application</string>
    </property>
   </action>
  </widget>

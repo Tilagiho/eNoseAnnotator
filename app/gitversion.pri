@@ -11,31 +11,19 @@ win32 {
 # Need to call git with manually specified paths to repository
 BASE_GIT_COMMAND = git
 
-# Trying to get version from git tag / revision
-GIT_VERSION = $$system($$BASE_GIT_COMMAND describe --always --tags 2> $$NULL_DEVICE)
+# get last annotated tag
+GIT_VERSION = $$system($$BASE_GIT_COMMAND describe 2> $$NULL_DEVICE)
 
-# Check if we only have hash without version number
-!contains($${GIT_VERSION},\d+\.\d+\.\d+) {
-    # If there is nothing we simply use version defined manually
-    isEmpty($${GIT_VERSION}) {
-        GIT_VERSION = $$VERSION
-    } else { # otherwise construct proper git describe string
-        GIT_COMMIT_COUNT = $$system($$BASE_GIT_COMMAND rev-list HEAD --count 2> $$NULL_DEVICE)
-        isEmpty($${GIT_COMMIT_COUNT}) {
-            GIT_COMMIT_COUNT = 0
-        }
-        GIT_VERSION = $$VERSION-$$GIT_COMMIT_COUNT-g$$GIT_VERSION
-    }
-}
-
-# Turns describe output like 0.1.5-42-g652c397 into "0.1.5.42.652c397"
-GIT_VERSION ~= s/-/"."
-GIT_VERSION ~= s/g/""
+# add commit count since last annotated tag
+GIT_COMMIT_COUNT = $$system($$BASE_GIT_COMMAND rev-list $(git describe --abbrev=0)..HEAD --count 2> $$NULL_DEVICE)
+GIT_VERSION = "$${GIT_VERSION}_$${GIT_COMMIT_COUNT}"
 
 # Now we are ready to pass parsed version to Qt
 VERSION = $$GIT_VERSION
-win32 { # On windows version can only be numerical so remove commit hash
+win32 { # On windows version can only be numerical so remove commit hash, the prefix "v" & _ in front of the commit count
     VERSION ~= s/\.\d+\.[a-f0-9]{6,}//
+    VERSION ~= s/v//
+    VERSION ~= s/_/"."/
 }
 
 # Adding C preprocessor #DEFINE so we can use it in C++ code
