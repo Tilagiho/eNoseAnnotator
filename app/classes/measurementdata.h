@@ -263,6 +263,8 @@ private:
 
     QString saveFilename = "./data/";
 
+    QList<QString> sensorAttributes;
+
     /*
      * extracts measurement data from line
      */

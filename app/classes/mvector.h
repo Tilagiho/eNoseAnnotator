@@ -66,6 +66,8 @@ public:
 
     std::vector<double> getVector() const;
 
+    QMap<QString, double> sensorAttributes;   // map: attributeName, attributeValue
+
 private:
     /*
      * contains the sensor values measured
