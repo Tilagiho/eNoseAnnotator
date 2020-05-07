@@ -47,6 +47,8 @@ public:
 
     int getNChannels() const;
 
+    void resetGraph(int channels = MVector::nChannels);
+
     // static variables
     // interval in which data is plotted: data > maxVal or < minVal is ignored
     // can be ignored with useLimits

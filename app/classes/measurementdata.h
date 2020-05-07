@@ -12,10 +12,12 @@ class MeasurementData : public QObject
     Q_OBJECT
 
 public:
-    explicit MeasurementData(QObject *parent = nullptr);
+    explicit MeasurementData(QObject *parent);
     /*
      * enumeration MultiMode can be used to define how the result of a selection of multiple vectors should be calculated
      */
+    ~MeasurementData();
+
     enum class MultiMode {
         Average // calculate average of selected vectors
     };
@@ -70,6 +72,8 @@ public:
      */
     const QMap<uint, MVector> getSelectionMap();
 
+    int getNFuncs() const;
+
     QString getComment();
     QString getFailureString();
 
@@ -82,6 +86,14 @@ public:
      * add absolute vector + baseLevelVector to data
      */
     void addMeasurement(uint timestamp, MVector vector, MVector baseLevelVector);
+
+    void setData (QMap<uint, MVector> absoluteData, QMap<uint, MVector> baseVectors);
+
+    void setClasslist(QList<aClass> classList);
+
+    void setSensorAttributes(QSet<QString> sensorAttributes);
+
+    void setSaveFilename(QString saveFilename);
 
     /*
      * returns vector stored at timestamp
@@ -125,18 +137,13 @@ public:
     bool saveAverageSelectionMeasVector(QWidget* widget, QString filename);
     bool saveAverageSelectionFuncVector(QWidget* widget, QString filename);
 
-
-    /*
-     * loads data file
-     * opens QFileDialog in order to get path to the data file
-     */
-    bool loadData(QWidget* widget);
-
 //    /*
 //     * calculates average of vectors in range from iterator begin until, but not including, iterator end
 //     * if endTimestamp is set: additionally end if timestamp of current vector > endTimestamp
 //     */
 //    static const MVector getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp=0, MultiMode mode=MultiMode::Average);
+
+    void copyFrom(MeasurementData* otherMData);
 
     const MVector getSelectionVector(MultiMode mode=MultiMode::Average);
 
@@ -152,21 +159,21 @@ public:
     /*
      * returns true if data was changed since last save/ load action
      */
-    bool changed() const;
+    bool isChanged() const;
 
-    void setDataChanged(bool changed);
+    void setDataChanged(bool isChanged);
 
     /*
      * returns baselevel at timestamp
      */
     MVector getBaseLevel (uint timestamp);
 
-    std::vector<int> getFunctionalities() const;
+    std::vector<int> getFunctionalisation() const;
     void setFunctionalities(const std::vector<int> &value);
 
     static QMap<int, int> getFuncMap(const std::vector<int> &funcs, const std::vector<bool> sensorFailures);
 
-    QMap<int, int> getFuncMap();
+    QMap<int, int> getFuncMap() const;
 
     bool getSaveRawInput() const;
     void setSaveRawInput(bool value);
@@ -200,8 +207,13 @@ public:
 
     QString getSaveFilename() const;
 
+    QSet<QString> getSensorAttributes() const;
+
+    QMap<uint, MVector> getBaseLevelMap() const;
+
     static QString funcName;
     static std::vector<int> functionalisation;
+
 
 public slots:
     /*
@@ -218,6 +230,9 @@ public slots:
     void removeClass(aClass oldClass);
     void changeClass(aClass oldClass, aClass newClass);
     void setFuncName(QString);
+    void addAttributes(QSet<QString> attributes);
+    void deleteAttributes(QSet<QString> attributes);
+    void renameAttribute(QString oldName, QString newName);
 
 signals:
     void selectionVectorChanged(MVector vector, std::vector<bool> sensorFailures, std::vector<int>);  // emits new vector when dataSelected is changed
@@ -263,20 +278,63 @@ private:
 
     QString saveFilename = "./data/";
 
-    QList<QString> sensorAttributes;
+    QSet<QString> sensorAttributes;
+};
 
-    /*
-     * extracts measurement data from line
-     */
-    bool getData(QString line);
+/*!
+ * \brief The fileParser class parses file & returns Measurementdata with the information contained within it.
+ */
+class FileReader
+{
+public:
+    FileReader(QString filePath, QObject *parent=nullptr);
+    ~FileReader();
 
-    /*
-     * extracts meta data from line
-     * meta data lines always start with '#'
-     */
-    bool getMetaData(QString line);
+    MeasurementData* getMeasurementData();
+    FileReader* getSpecificReader();
+
+private:
 
 
+protected:
+    MeasurementData* data;
+    QFile file;
+    QTextStream in;
+    int lineCount = -1;
+};
+
+class AnnotatorFileReader : public FileReader
+{
+public:
+    AnnotatorFileReader(QString filePath);
+
+private:
+    void parseHeader(QString line);
+    void parseValues(QString line);
+
+    QString formatVersion;
+
+    uint timestampIndex = 0;
+    int userAnnotationIndex = -1;
+    int detectedAnnotationIndex = -1;
+
+    QMap<uint, uint> resistanceIndexMap;
+    QMap<QString, uint> sensorAttributeMap;
+};
+
+class LeifFileReader : public FileReader
+{
+public:
+    LeifFileReader(QString filePath);
+
+private:
+    void parseHeader(QString line);
+    void parseValues(QString line);
+
+    QMap<QString, int> sensorAttributeIndexMap;
+    QMap<int, int> resistanceIndexes;
+    int t_index;
+    uint start_time = 0;
 };
 
 #endif // MEASUREMENTDATA_H

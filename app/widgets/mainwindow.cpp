@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent)
     #endif
 
 
-    mData = new MeasurementData();
+    mData = new MeasurementData(this);
 
     // this->setStyleSheet("QSplitter::handle{background: black;}"); // make splitter visible
 
@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector selectionVector){
         if (classifier != nullptr)
         {
-            auto funcVector = selectionVector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
+            auto funcVector = selectionVector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures());
 
             try {
                 Annotation annotation = classifier->getAnnotation(funcVector.getVector());
@@ -157,14 +157,14 @@ MainWindow::MainWindow(QWidget *parent)
             funcLineGraph->addMeasurement(vector, timestamp);
         else
         {
-            MVector funcVector = vector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
+            MVector funcVector = vector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures());
             funcLineGraph->addMeasurement(funcVector, timestamp, yRescale);
         }
     });    // add new data to func line graph
     connect(mData, &MeasurementData::absoluteDataAdded, absLineGraph, &LineGraphWidget::addMeasurement); // add new absolute measruement
     connect(mData, &MeasurementData::dataSet, relLineGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
     connect(mData, &MeasurementData::dataSet, this, [this](QMap<uint, MVector> data){
-        auto funcs = mData->getFunctionalities();
+        auto funcs = mData->getFunctionalisation();
         auto failures = mData->getSensorFailures();
 
         // add recalculated functionalitisation averages to cleared funcLineGraph
@@ -187,7 +187,7 @@ MainWindow::MainWindow(QWidget *parent)
             return;
 
         // get annotation from the classifier
-        auto funcVector = vector.getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
+        auto funcVector = vector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures());
 
         try {
             Annotation annotation = classifier->getAnnotation(funcVector.getVector());
@@ -237,7 +237,7 @@ MainWindow::MainWindow(QWidget *parent)
         funcLineGraph->clearGraph();
 
         auto data = mData->getRelativeData();
-        auto funcs = mData->getFunctionalities();
+        auto funcs = mData->getFunctionalisation();
         auto failures = mData->getSensorFailures();
 
         funcLineGraph->setData(mData->getFuncData());
@@ -258,7 +258,7 @@ MainWindow::MainWindow(QWidget *parent)
         funcLineGraph->clearGraph();
 
         auto data = mData->getRelativeData();
-        auto funcs = mData->getFunctionalities();
+        auto funcs = mData->getFunctionalisation();
         auto failures = mData->getSensorFailures();
 
         // add recalculated functionalitisation averages to cleared funcLineGraph
@@ -277,8 +277,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::sensorFailuresSet, this, [this]{
         MVector selectionVector = mData->getSelectionVector();
 
-        vectorBarGraph->setBars(selectionVector, mData->getSensorFailures(), mData->getFunctionalities());
-        funcBarGraph->setBars(selectionVector, mData->getSensorFailures(), mData->getFunctionalities());
+        vectorBarGraph->setBars(selectionVector, mData->getSensorFailures(), mData->getFunctionalisation());
+        funcBarGraph->setBars(selectionVector, mData->getSensorFailures(), mData->getFunctionalisation());
     }); // reset bars when sensorFailures changed
 
     // measurement info
@@ -297,7 +297,7 @@ MainWindow::MainWindow(QWidget *parent)
         FunctionalisationDialog dialog;
         dialog.presetName = measInfoWidget->getFuncLabel();
 
-        dialog.setFunctionalities(mData->getFunctionalities());
+        dialog.setFunctionalities(mData->getFunctionalisation());
 
         if (dialog.exec())
         {
@@ -509,27 +509,72 @@ void MainWindow::on_actionsave_selection_triggered()
 void MainWindow::on_actionLoad_triggered()
 {
     // load data
-    try {
-    bool loaded = mData->loadData(this);
+    bool dataSaved = false;
 
-    if (loaded)
-        setTitle(false);
-
-    // check classifier
-    if (classifier != nullptr)
+    while (!dataSaved)
     {
-        auto funcMap = mData->getFuncMap();
-        // check func preset
-        if (classifier->getN() != funcMap.size() || classifier->getPresetName() != measInfoWidget->getFuncLabel())
+        // ask to save old data
+        if (!mData->getAbsoluteData().isEmpty() && mData->isChanged())
         {
-            QString error_message = "Functionalisation of the data loaded seems to be incompatible with the loaded classifier.\nWas the functionalisation set correctly? Is the classifier compatible with the sensor used?";
-            QMessageBox::warning(this, "Classifier error", error_message);
+            if (QMessageBox::question(this, tr("Save data"),
+                "Do you want to save the current measurement before loading data?\t") == QMessageBox::Ok)
+                dataSaved=mData->saveData(this);
+        } else
+            dataSaved = true;
+    }
+
+    // make data directory
+    if (!QDir("data").exists())
+        QDir().mkdir("data");
+
+    QString saveFilename = mData->getSaveFilename();
+    QString path = (saveFilename != "") ? saveFilename : "./data";
+    QString fileName = QFileDialog::getOpenFileName(this, "Open data file", path, "Data files (*.csv)");
+
+    if (fileName.isEmpty())
+        return;
+
+    FileReader* specificReader = nullptr;
+    try {
+        // use general reader to get specific reader for the format of filename
+        FileReader generalFileReader(fileName, this);
+        specificReader = generalFileReader.getSpecificReader();
+
+        MeasurementData* newData = specificReader->getMeasurementData();
+
+        int nFuncs = newData->getNFuncs();
+        nFuncs = nFuncs == 1 ? MVector::nChannels : nFuncs;
+        funcLineGraph->resetGraph(nFuncs);
+        relLineGraph->resetGraph();
+        absLineGraph->resetGraph();
+
+        mData->copyFrom(newData);
+
+        funcLineGraph->resetColors();
+        relLineGraph->resetColors();
+        absLineGraph->resetColors();
+
+//        setTitle(false);
+
+        // check compability to loaded classifier
+        if (classifier != nullptr)
+        {
+            auto funcMap = mData->getFuncMap();
+            // check func preset
+            if (classifier->getN() != funcMap.size() || classifier->getPresetName() != measInfoWidget->getFuncLabel())
+            {
+                QString error_message = "Functionalisation of the data loaded seems to be incompatible with the loaded classifier.\nWas the functionalisation set correctly? Is the classifier compatible with the sensor used?";
+                QMessageBox::warning(this, "Classifier error", error_message);
+            }
         }
     }
+    catch (std::runtime_error e)
+    {
+        QMessageBox::critical(this, "Error loading measurement", e.what());
     }
-    catch (const std::exception& e) {
-        QMessageBox::warning(this, "Error loading measurement", e.what());
-    }
+
+    if (specificReader != nullptr)
+        delete specificReader;
 }
 
 void MainWindow::on_actionSet_USB_Connection_triggered()
@@ -740,7 +785,7 @@ void MainWindow::on_actionStart_triggered()
     case DataSource::Status::CONNECTED:
     {
         // save old data if changed
-        if (mData->changed())
+        if (mData->isChanged())
         {
             auto answer = QMessageBox::question(this, "Save measurement data", "Do you want to save the current data before starting a new measurement?");
             if (answer == QMessageBox::StandardButton::Yes)
@@ -757,7 +802,7 @@ void MainWindow::on_actionStart_triggered()
                 FunctionalisationDialog dialog;
                 dialog.presetName = measInfoWidget->getFuncLabel();
 
-                dialog.setFunctionalities(mData->getFunctionalities());
+                dialog.setFunctionalities(mData->getFunctionalisation());
 
                 if (dialog.exec())
                 {
@@ -856,7 +901,7 @@ void MainWindow::on_actionSet_detected_class_of_selection_triggered()
 
 void MainWindow::closeEvent (QCloseEvent *event)
 {
-    if (mData->changed())
+    if (mData->isChanged())
     {
         QMessageBox::StandardButton resBtn = QMessageBox::question( this, "eNoseAnnotator",
                                                                     tr("The measurement data was changed without saving.\nDo you want to save the measurement before leaving?\n"),
@@ -1149,7 +1194,7 @@ void MainWindow::on_actionLoadClassifier_triggered()
     }
     // store changed status to reset after adding new classes
     // loading a classifier should not change the measurement!
-    bool prevChanged = mData->changed();
+    bool prevChanged = mData->isChanged();
 
     // loading classifier successfull
     // add classifier classes to mData
@@ -1181,7 +1226,7 @@ void MainWindow::updateFuncGraph()
 {
     auto data = mData->getRelativeData();
     auto fails = mData->getSensorFailures();
-    auto funcs = mData->getFunctionalities();
+    auto funcs = mData->getFunctionalisation();
 
     // get number of funcs
     auto funcMap = mData->getFuncMap();
@@ -1290,7 +1335,7 @@ void MainWindow::classifyMeasurement()
     // classify
     for (uint timestamp : measDataMap.keys())
     {
-        auto funcVector = measDataMap[timestamp].getFuncVector(mData->getFunctionalities(), mData->getSensorFailures());
+        auto funcVector = measDataMap[timestamp].getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures());
         try {
             Annotation annotation = classifier->getAnnotation(funcVector.getVector());
             mData->setDetectedAnnotation(annotation, timestamp);

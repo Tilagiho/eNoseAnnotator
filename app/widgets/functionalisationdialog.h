@@ -26,6 +26,8 @@ public:
     QString presetName = "None";
 
 
+    bool getDialogAccepted() const;
+
 private slots:
     void on_comboBox_currentTextChanged(const QString &arg1);
 
@@ -37,11 +39,15 @@ private slots:
 
     void valueChanged(int);
 
+    void on_buttonBox_accepted();
+
 private:
     Ui::FunctionalisationDialog *ui;
 
     // stores spinboxes
     std::vector<QSpinBox*> spinBoxes;
+
+    bool dialogAccepted = false;
 
     void loadPresets();
 };

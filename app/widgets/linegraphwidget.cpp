@@ -205,9 +205,28 @@ void LineGraphWidget::resetColors()
     ui->chart->replot();
 }
 
+
+
 int LineGraphWidget::getNChannels() const
 {
     return nChannels;
+}
+
+void LineGraphWidget::resetGraph(int channels)
+{
+    clearGraph(false);
+
+    if (channels != nChannels)
+    {
+        // remove graphs
+        int graphCount = ui->chart->graphCount();
+        for (int i=0; i<graphCount; i++)
+            ui->chart->removeGraph(ui->chart->graph(0));
+
+        // add graphs
+        nChannels = channels;
+        setupGraph();
+    }
 }
 
 void LineGraphWidget::setMaxVal(double val)
@@ -719,7 +738,7 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
     if (!measurement.userAnnotation.isEmpty())
         setLabel(xpos, measurement.userAnnotation, true);
     if (!measurement.detectedAnnotation.isEmpty())
-        setLabel(xpos, measurement.detectedAnnotation, true);
+        setLabel(xpos, measurement.detectedAnnotation, false);
 
     // if last measurement was one second ago (normally 2 seconds):
     // redraw x bounds of both labels, so they don't overlap

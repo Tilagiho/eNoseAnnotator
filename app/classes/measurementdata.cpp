@@ -29,6 +29,14 @@ MeasurementData::MeasurementData(QObject *parent) :
     // zero init info
     setComment("");
     setSensorId("");
+
+    // init class list
+    classList = aClass::staticClassSet.toList();
+}
+
+MeasurementData::~MeasurementData()
+{
+    clear();
 }
 
 /*!
@@ -79,14 +87,22 @@ const QMap<uint, MVector> MeasurementData::getSelectionMap()
     return selectedData;
 }
 
+int MeasurementData::getNFuncs() const
+{
+    return getFuncMap().size();
+}
+
 /*!
  * \brief MeasurementData::clear deletes all data from MeasurementData
  */
 void MeasurementData::clear()
 {
-    baseLevelMap.clear();
     clearSelection();
+
+    baseLevelMap.clear();
     data.clear();
+
+
     std::vector<bool> zeroFailures;
     for (int i=0; i<MVector::nChannels; i++)
         zeroFailures.push_back(false);
@@ -126,6 +142,15 @@ void MeasurementData::clearSelection()
  */
 void MeasurementData::addMeasurement(uint timestamp, MVector vector)
 {
+    // sync sensor attributes
+    for (QString attributeName : vector.sensorAttributes.keys())
+        if (!sensorAttributes.contains(attributeName))
+            addAttributes(QSet<QString>{attributeName});
+
+    for (QString attributeName : sensorAttributes)
+        if (!vector.sensorAttributes.keys().contains(attributeName))
+            vector.sensorAttributes[attributeName] = 0.0;
+
     //  double usage of timestamps:
     if (data.contains(timestamp))
     {
@@ -176,6 +201,47 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector, MVector bas
 
     // add vector to data
     addMeasurement(timestamp, vector);
+}
+
+void MeasurementData::setData(QMap<uint, MVector> absoluteData, QMap<uint, MVector> baseVectors)
+{
+    // clear data
+    data.clear();
+    baseLevelMap.clear();
+
+    // set baseVectors
+    baseLevelMap = baseVectors;
+
+    // add vectors
+    emit setReplotStatus(false);
+    for (uint timestamp : absoluteData.keys())
+        addMeasurement(timestamp, absoluteData[timestamp]);
+
+    emit setReplotStatus(true);
+}
+
+void MeasurementData::setClasslist(QList<aClass> newClassList)
+{
+    classList.clear();
+    aClass::staticClassSet.clear();
+
+    for (aClass aclass : newClassList)
+        addClass(aclass);
+}
+
+void MeasurementData::setSensorAttributes(QSet<QString> newSensorAttributes)
+{
+    sensorAttributes.clear();
+
+    addAttributes(newSensorAttributes);
+}
+
+void MeasurementData::setSaveFilename(QString newSaveFilename)
+{
+    if (newSaveFilename != saveFilename)
+    {
+        saveFilename = newSaveFilename;
+    }
 }
 
 MVector MeasurementData::getMeasurement(uint timestamp)
@@ -265,7 +331,7 @@ QList<aClass> MeasurementData::getClassList() const
     return classList;
 }
 
-std::vector<int> MeasurementData::getFunctionalities() const
+std::vector<int> MeasurementData::getFunctionalisation() const
 {
     return functionalisation;
 }
@@ -309,7 +375,7 @@ QMap<int, int> MeasurementData::getFuncMap(const std::vector<int> &funcs, std::v
     return funcMap;
 }
 
-QMap<int, int> MeasurementData::getFuncMap()
+QMap<int, int> MeasurementData::getFuncMap() const
 {
     return getFuncMap(functionalisation, sensorFailures);
 }
@@ -319,7 +385,7 @@ QMap<int, int> MeasurementData::getFuncMap()
  * Is \c true if any data was changed since loading or saving the measurement
  *
  */
-bool MeasurementData::changed() const
+bool MeasurementData::isChanged() const
 {
     return dataChanged;
 }
@@ -523,6 +589,9 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
     for (int i=0; i<MVector::nChannels; i++)
         headerList << "ch" + QString::number(i+1);
 
+    for (QString sensorAttribute : sensorAttributes)
+        headerList << sensorAttribute;
+
     headerList << "user defined class";
     headerList << "detected class";
 
@@ -539,6 +608,10 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
         // vector
         for (int i=0; i<MVector::nChannels; i++)
             valueList << QString::number(iter.value()[i], 'g', 10);
+        // sensor attributes
+        for (QString attribute : iter.value().sensorAttributes.keys())
+            valueList << QString::number(iter.value().sensorAttributes[attribute], 'g', 10);
+
         // classes
         valueList << iter.value().userAnnotation.toString() << iter.value().detectedAnnotation.toString();
         out <<  valueList.join(";") << "\n";
@@ -646,328 +719,22 @@ bool MeasurementData::saveAverageSelectionFuncVector(QWidget *widget, QString fi
     return true;
 }
 
-/*!
- * \brief MeasurementData::loadData loads file determined by QFileDialog::getOpenFileName.
- */
-bool MeasurementData::loadData(QWidget* widget)
+void MeasurementData::copyFrom(MeasurementData *otherMData)
 {
-    bool dataSaved = true;
+    // clear local data
+    clear();
 
-    // ask to save old data
-    if (!data.isEmpty() && dataChanged)
-    {
-        if (QMessageBox::question(widget, tr("Save data"),
-            "Do you want to save the current measurement before loading data?\t") == QMessageBox::Ok)
-            dataSaved=saveData(widget);
-    }
-    if (!dataSaved)
-        return false;
+    // meta data
+    setClasslist(otherMData->getClassList());
+    setSensorAttributes(otherMData->getSensorAttributes());
+    setSaveFilename(otherMData->getSaveFilename());
+    setComment(otherMData->getComment());
+    setSensorId(otherMData->sensorId);
+    setSensorFailures(otherMData->getSensorFailures());
 
-    // make data directory
-    if (!QDir("data").exists())
-        QDir().mkdir("data");
-
-    QString path = (saveFilename != "") ? saveFilename : "./data";
-    QString fileName = QFileDialog::getOpenFileName(widget, "Open data file", path, "Data files (*.csv)");
-
-    if (fileName.isEmpty())
-    {
-        return false;
-    } else
-    {
-        QFile file(fileName);
-        if (!file.open(QIODevice::ReadOnly))
-        {
-            QMessageBox::information(widget, "Unable to open file",
-                file.errorString());
-            return false;
-        }
-
-        // clear data
-        clear();
-        emit lgClearSelection();
-        setComment("");
-        setSensorId("");
-        setFailures("0000000000000000000000000000000000000000000000000000000000000000");
-        emit dataReset();
-
-        // read data from file
-        QTextStream in(&file);
-        QString line, comment;
-        QRegExp rx("\\;");
-
-        // first line: check for version
-        QString firstLine = in.readLine();
-//        qDebug() << firstLine;
-
-        if (!firstLine.startsWith("#measurement data"))
-        {
-            QMessageBox::warning(widget, "Can not read file", "The selected file is not a measurement file!");
-            return false;
-        }
-        if (firstLine.startsWith("#measurement data v"))
-        {
-            savefileFormatVersion = firstLine.right(firstLine.length()-QString("#measurement data v").length());
-            savefileFormatVersion = savefileFormatVersion.split(";").join("");
-        } else
-            savefileFormatVersion = "0.1";
-
-
-        bool readOk = true;
-        bool replotStatusSet = false;
-        while (readOk && in.readLineInto(&line))
-        {
-//            qDebug() << line;
-            if (line == "")
-                continue;   // ignore
-            if (line[0] == '~') // file help
-                continue; // ignore
-            else if (line[0] == '#') // meta info
-                readOk = getMetaData(line);
-            else  // data
-            {
-                if (!replotStatusSet)
-                {
-                    replotStatusSet = true;
-                    emit setReplotStatus(false);
-                }
-                readOk = getData(line);
-            }
-        }
-
-        emit setReplotStatus (true);
-
-        // catch errors reading files
-        if (!readOk)
-        {
-            QMessageBox::critical(widget, "Error reading file", "Error in line:\n" + line);
-            clear();
-            clearSelection();
-            return false;
-        }
-
-        setDataChanged(false);
-
-        // set filename
-        saveFilename = fileName;
-
-        emit labelsUpdated(data);   // reset labels
-
-        return true;
-    }
-}
-
-/*!
- * \brief MeasurementData::getMetaData is a helper function for extracting meta data from save files.
- */
-bool MeasurementData::getMetaData(QString line)
-{
-    bool  readOk = true;
-
-    if (line.startsWith("#sensorId:"))
-    {
-        QString sensorId = line.right(line.length()-QString("#sensorId:").length());
-        sensorId = sensorId.split(";").join("");
-        setSensorId(sensorId);
-    }
-    else if (line.startsWith("#failures:"))
-    {
-        QString failureString = line.right(line.length()-QString("#failures:").length());
-        failureString=failureString.split(";").join("");
-        if (failureString.size() != MVector::nChannels)
-        {
-            qWarning() << "Failure string not valid. Using empty failure string.";
-            failureString = "0000000000000000000000000000000000000000000000000000000000000000";
-        }
-        setFailures(failureString);
-    }
-    else if (line.startsWith("#funcName:"))
-    {
-        funcName = line.split(":")[1];
-        emit funcNameSet(funcName);
-    }
-    else if (line.startsWith("#functionalisation:"))
-    {
-        QString rawString = line.right(line.length()-QString("#functionalisation:").length());
-        QStringList funcList = rawString.split(";");
-
-        std::vector<int> newFunc;
-        for (int i=0; i<MVector::nChannels; i++)
-            newFunc.push_back(funcList[i].toInt());
-        setFunctionalities(newFunc);
-
-        // funcName not stored in file?!
-        // -> emit Custom
-        if (funcName == "Custom")
-        {
-            for (int i=0; i<functionalisation.size(); i++)
-            {
-                if (functionalisation[i] != 0)
-                {
-                    emit funcNameSet("Custom");
-                    break;
-                }
-            }
-        }
-    }
-    else if (line.startsWith("#baseLevel:"))
-    {
-
-        line = line.right(line.length()-QString("#baseLevel:").size());
-        QStringList valueList = line.split(";");
-
-        // get timestamp: uint or string
-        uint timestamp;
-        bool isInt;
-        timestamp = valueList[0].toUInt(&isInt);
-
-        if (!isInt)
-            timestamp = getTimestampUIntfromString(valueList[0]);
-
-        // get base level vector
-        MVector baseLevel;
-        for (int i=0; i<MVector::nChannels; i++)
-            baseLevel[i] = valueList[i+1].toDouble();
-
-        setBaseLevel(timestamp, baseLevel);
-    }
-    else if (line.startsWith("#classes:"))
-    {
-        QStringList classStringList =  line.right(line.length()-QString("#classes:").length()).split(";");
-        for (QString classString : classStringList)
-        {
-            if (classString == "")
-                continue;   // ignore empty classStrings
-
-            if (!aClass::isClassString(classString))
-            {
-                QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Invalid class name: " + classString, "The class name is invalid!");
-                readOk = false;
-                break;
-            }
-            aClass c = aClass::fromString(classString);
-
-            if (!classList.contains(c))
-                addClass(c);
-        }
-    }
-    else if (line.startsWith("#header:"))
-        ;   // ignore
-    else    // comment
-        setComment(dataComment + line.right(line.length()-1) + "\n");
-
-    return readOk;
-}
-
-/*!
- * \brief MeasurementData::getData is a helper function for extracting vectors from save files.
- */
-bool MeasurementData::getData(QString line)
-{
-    uint timestamp;
-    MVector vector;
-    bool readOk = true;
-
-    if (line == "") // ignore empty lines
-        return true;
-
-    // support old format:
-    // - measurement values stored as relative vectors
-    if (savefileFormatVersion == "0.1")
-    {
-        QStringList query = line.split(";");
-
-        // line has to contain vector + [user defined and detected class]
-        if ((query.size() < MVector::nChannels+1) || (query.size() > MVector::nChannels+3))
-        {
-            QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "Data format is not compatible (len=" + QString::number(query.size()) + "):\n" + line);
-            return false;
-        } else if (baseLevelMap.isEmpty())
-        {
-            QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "No baseLevel in data");
-            return false;
-        }
-        // prepare vector
-        timestamp = query[0].toUInt(&readOk);
-        vector;
-        for (int i=0; i<MVector::nChannels; i++)
-        {
-            vector[i] = query[i+1].toDouble(&readOk);
-        }
-        if (query.size() > MVector::nChannels+1)
-        {
-            if (Annotation::isAnnotationString(query[MVector::nChannels+1]))
-                vector.userAnnotation = Annotation::fromString(query[MVector::nChannels+1]);
-            else
-            {
-                return false;
-            }
-        }
-        if (query.size() > MVector::nChannels+2)
-        {
-            if (Annotation::isAnnotationString(query[MVector::nChannels+2]))
-                vector.detectedAnnotation = Annotation::fromString(query[MVector::nChannels+2]);
-            else
-            {
-                return false;
-            }
-        }
-        vector = vector.getAbsoluteVector(getBaseLevel(timestamp));
-    }
-    else //if (version == "1.0")   // current version -> default
-    {
-        QStringList query = line.split(";");
-
-        // line has to contain vector + [user defined and detected class]
-        if ((query.size() < MVector::nChannels+1) || (query.size() > MVector::nChannels+3))
-        {
-            QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "Data format is not compatible (len=" + QString::number(query.size()) + "):\n" + line);
-            return false;
-        } else if (baseLevelMap.isEmpty())
-        {
-            QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Error loading measurement data", "No baseLevel in data");
-            return false;
-        }
-        // prepare vector
-        // get timestamp: uint or string
-        bool isInt;
-        timestamp = query[0].toUInt(&isInt);
-
-        if(!isInt)
-            timestamp = getTimestampUIntfromString(query[0]);
-
-        for (int i=0; i<MVector::nChannels; i++)
-        {
-            vector[i] = query[i+1].toDouble(&readOk);
-        }
-        if (query.size() > MVector::nChannels+1)
-        {
-            QString userString = query[MVector::nChannels+1];
-            if (Annotation::isAnnotationString(userString))
-                vector.userAnnotation = Annotation::fromString(userString);
-            else
-            {
-                qWarning() << "Warning: User defined class invalid: \"" << userString << "\"";
-            }
-        }
-        if (query.size() > MVector::nChannels+2)
-        {
-            QString classString = query[MVector::nChannels+2];
-            if (Annotation::isAnnotationString(classString))
-                vector.detectedAnnotation = Annotation::fromString(classString);
-            else
-            {
-                qWarning() << "Warning: Detected class invalid: \"" << classString << "\"";
-            }
-        }
-
-    }
-
-    // ignore zero vectors
-    if (vector != MVector::zeroes())
-        addMeasurement(timestamp, vector, getBaseLevel(timestamp));
-
-    return readOk;
+    // data
+    setData(otherMData->getAbsoluteData(), otherMData->getBaseLevelMap());
+    setDataChanged(false);
 }
 
 void MeasurementData::setSelection(int lower, int upper)
@@ -1040,38 +807,6 @@ void MeasurementData::setSelection(int lower, int upper)
 
     emit selectionVectorChanged(vector, sensorFailures, functionalisation);
 }
-
-//const MVector MeasurementData::getSelectionVector(QMap<uint, MVector>::iterator begin, QMap<uint, MVector>::iterator end, uint endTimestamp, MultiMode mode)
-//{
-//    // init vector
-//    MVector vector;
-//    for (int i=0; i<MVector::nChannels; i++)
-//        vector[i] = 0.0;
-
-//    if (mode == MultiMode::Average)
-//    {
-//    auto iter = begin;
-//    int n = 0;
-
-//    // iterate until end; if endTimestamp was set (!= 0) also check for endTimestamp
-//    while (iter != end && (endTimestamp==0 || iter.key() <= endTimestamp))
-//    {
-//        for (int i=0; i<MVector::nChannels; i++)
-//            vector[i] += iter.value()[i];
-
-//        iter++;
-//        n++;
-//    }
-
-
-//    for (int i=0; i<MVector::nChannels; i++)
-//        vector[i] = vector[i] / n;
-//    }
-//    else
-//        Q_ASSERT ("Error: Invalid MultiMode." && false);
-
-//    return vector;
-//}
 
 const MVector MeasurementData::getSelectionVector(MultiMode mode)
 {
@@ -1309,5 +1044,435 @@ uint MeasurementData::getTimestampUIntfromString(QString string)
 
 void MeasurementData::setFuncName(QString name)
 {
-    funcName = name;
+    if (name != funcName)
+    {
+        funcName = name;
+        emit funcNameSet(name);
+    }
+}
+
+void MeasurementData::addAttributes(QSet<QString> attributeNames)
+{
+    for (QString attributeName : attributeNames)
+        Q_ASSERT(!sensorAttributes.contains(attributeName));
+
+    // add attributes to sensorAttributes
+    sensorAttributes.unite(attributeNames);
+
+    // add to vectors
+    for (MVector vector : data)
+        for (QString attributeName : attributeNames)
+            vector.sensorAttributes[attributeName] = 0.0;
+}
+
+void MeasurementData::deleteAttributes(QSet<QString> attributeNames)
+{
+    for (QString attributeName : attributeNames)
+        Q_ASSERT(sensorAttributes.contains(attributeName));
+
+    // delete attributes from sensorAttributes
+    sensorAttributes.intersect(attributeNames);
+
+    // delete from vectors
+    for (MVector vector : data)
+        for (QString attributeName : attributeNames)
+            vector.sensorAttributes.remove(attributeName);
+}
+
+void MeasurementData::renameAttribute(QString oldName, QString newName)
+{
+    Q_ASSERT(sensorAttributes.contains(oldName));
+    Q_ASSERT(!sensorAttributes.contains(newName));
+    Q_ASSERT(oldName != newName);
+
+    // rename in sensorAttributes
+    sensorAttributes.insert(newName);
+    sensorAttributes.remove(oldName);
+
+    // rename in vectors
+    for (MVector vector : data)
+    {
+        vector.sensorAttributes[newName] = vector.sensorAttributes[oldName];
+        vector.sensorAttributes.remove(oldName);
+    }
+}
+
+QMap<uint, MVector> MeasurementData::getBaseLevelMap() const
+{
+    return baseLevelMap;
+}
+
+QSet<QString> MeasurementData::getSensorAttributes() const
+{
+    return sensorAttributes;
+}
+
+FileReader::FileReader(QString filePath, QObject* parentWidget):
+    file(filePath)
+{
+    Q_ASSERT(!filePath.isEmpty());
+
+    data = new MeasurementData(parentWidget);
+
+    if (!file.open(QIODevice::ReadOnly))
+        throw std::runtime_error("Can not open " + filePath.toStdString());
+
+    in.setDevice(&file);
+}
+
+FileReader* FileReader::getSpecificReader()
+{
+    // read first line
+    QString line;
+    if (!in.readLineInto(&line))
+        throw  std::runtime_error(file.fileName().toStdString() + " is empty!");
+
+    if (line.startsWith("#measurement data"))
+        return new AnnotatorFileReader(file.fileName());
+    else
+        return new LeifFileReader(file.fileName());
+}
+
+MeasurementData* FileReader::getMeasurementData()
+{
+    // reset dataChanged
+    data->setDataChanged(false);
+    return data;
+}
+
+FileReader::~FileReader()
+{
+    if (file.isOpen())
+        file.close();
+
+    delete data;
+
+}
+
+AnnotatorFileReader::AnnotatorFileReader(QString filePath):
+    FileReader(filePath)
+{
+    // read data
+    QString line;
+    while(in.readLineInto(&line))
+    {
+        lineCount++;
+        if (line.startsWith("#"))
+            parseHeader(line);
+        else
+            parseValues(line);
+    }
+}
+
+void AnnotatorFileReader::parseHeader(QString line)
+{
+    if (line.startsWith("#measurement data v"))
+    {
+        formatVersion = line.right(line.length()-QString("#measurement data v").length());
+        formatVersion = formatVersion.split(";").join("");
+    }
+    else if (line.startsWith("#measurement data"))
+    {
+        formatVersion = "0.1";
+    }
+    else if (line.startsWith("#sensorId:"))
+    {
+        QString sensorId = line.right(line.length()-QString("#sensorId:").length());
+        sensorId = sensorId.split(";").join("");
+        data->setSensorId(sensorId);
+    }
+    else if (line.startsWith("#failures:"))
+    {
+        QString failureString = line.right(line.length()-QString("#failures:").length());
+        failureString=failureString.split(";").join("");
+        if (failureString.size() != MVector::nChannels)
+        {
+            qWarning() << "Failure string not valid. Using empty failure string.";
+            failureString = "0000000000000000000000000000000000000000000000000000000000000000";
+        }
+        data->setFailures(failureString);
+    }
+    else if (line.startsWith("#funcName:"))
+    {
+        QString funcName = line.split(":")[1];
+        data->setFuncName(funcName);
+    }
+    else if (line.startsWith("#functionalisation:"))
+    {
+        QString rawString = line.right(line.length()-QString("#functionalisation:").length());
+        QStringList funcList = rawString.split(";");
+
+        std::vector<int> newFunc;
+        for (int i=0; i<MVector::nChannels; i++)
+            newFunc.push_back(funcList[i].toInt());
+        data->setFunctionalities(newFunc);
+
+        // funcName not stored in file?!
+        // -> emit Custom
+        if (data->funcName == "None")
+        {
+            auto functionalisation = data->getFunctionalisation();
+            for (int i=0; i<functionalisation.size(); i++)
+            {
+                if (functionalisation[i] != 0)
+                {
+                    data->setFuncName("Custom");
+                    break;
+                }
+            }
+        }
+    }
+    else if (line.startsWith("#baseLevel:"))
+    {
+
+        line = line.right(line.length()-QString("#baseLevel:").size());
+        QStringList valueList = line.split(";");
+
+        // get timestamp: uint or string
+        uint timestamp;
+        bool isInt;
+        timestamp = valueList[0].toUInt(&isInt);
+
+        if (!isInt)
+            timestamp = data->getTimestampUIntfromString(valueList[0]);
+
+        // get base level vector
+        MVector baseLevel;
+        for (int i=0; i<MVector::nChannels; i++)
+            baseLevel[i] = valueList[i+1].toDouble();
+
+        data->setBaseLevel(timestamp, baseLevel);
+    }
+    else if (line.startsWith("#classes:"))
+    {
+        QStringList classStringList =  line.right(line.length()-QString("#classes:").length()).split(";");
+        for (QString classString : classStringList)
+        {
+            if (classString == "")
+                continue;   // ignore empty classStrings
+
+            if (!aClass::isClassString(classString))
+                throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\n" + classString.toStdString() + " is not a class string!");
+            aClass c = aClass::fromString(classString);
+
+            if (!data->getClassList().contains(c))
+                data->addClass(c);
+        }
+    }
+    else if (line.startsWith("#header:"))
+    {
+        // get indexes
+        QRegularExpression rTimestamp ("^timestamp$");
+        QRegularExpression rResistance ("^ch(\\d*)$");
+        QRegularExpression rUserAnnotation ("^user defined class$");
+        QRegularExpression rDetectedAnnotation ("^detected class$");
+
+        QString headerLine = line.split(":")[1];
+        QStringList headerItems =  headerLine.split(";");
+
+        for (int i=0; i<headerItems.size(); i++)
+        {
+            QString headerItem = headerItems[i];
+
+            auto timestampMatch = rTimestamp.match(headerItem);
+            auto resistanceMatch = rResistance.match(headerItem);
+            auto userAnnoMatch = rUserAnnotation.match(headerItem);
+            auto detectedAnnoMatch = rDetectedAnnotation.match(headerItem);
+
+            if (timestampMatch.hasMatch())
+                timestampIndex = i;
+            else if (resistanceMatch.hasMatch())
+                resistanceIndexMap[resistanceMatch.captured(1).toInt()] = i;
+            else if (userAnnoMatch.hasMatch())
+                userAnnotationIndex = i;
+            else if (detectedAnnoMatch.hasMatch())
+                detectedAnnotationIndex = i;
+            else    // attribute
+                sensorAttributeMap[headerItem] = i;
+        }
+    }
+    else    // comment
+        data->setComment(data->getComment() + line.right(line.length()-1) + "\n");
+}
+
+void AnnotatorFileReader::parseValues(QString line)
+{
+    uint timestamp;
+    MVector vector;
+
+    if (line == "") // ignore empty lines
+        return;
+
+    // support old format:
+    // - measurement values stored as relative vectors
+
+    QStringList query = line.split(";");
+
+    // line normally contains timestamp + vector + sensor attributes + user defined & detected class
+    // lines without user defined & detected class are accepted
+    int minSize = MVector::nChannels + data->getSensorAttributes().size() + 1;
+    if ((query.size() < minSize) || (query.size() > minSize+2))
+        throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nData format is not compatible (len=" + QString::number(query.size()).toStdString() + "):\n" + line.toStdString());
+    else if (data->getBaseLevelMap().isEmpty())
+        throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nNo baseLevel in data");
+
+    // get timestamp
+    bool isInt;
+    timestamp = query[timestampIndex].toUInt(&isInt);
+
+    if(!isInt)
+        timestamp = data->getTimestampUIntfromString(query[timestampIndex]);
+
+    //              //
+    // get vector   //
+    //              //
+    bool readOk = true;
+    // resistances
+    for (int i : resistanceIndexMap.keys())
+    {
+        int rIndex = resistanceIndexMap[i];
+        vector[i-1] = query[rIndex].toDouble(&readOk);
+    }
+    // annotations
+    if (userAnnotationIndex != -1)  // user annotation detected
+    {
+        if (Annotation::isAnnotationString(query[userAnnotationIndex]))
+            vector.userAnnotation = Annotation::fromString(query[userAnnotationIndex]);
+        else
+            throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nInvalid annotation string:\n" + query[userAnnotationIndex].toStdString());
+    }
+    if (detectedAnnotationIndex != -1)
+    {
+        if (Annotation::isAnnotationString(query[detectedAnnotationIndex]))
+            vector.detectedAnnotation = Annotation::fromString(query[detectedAnnotationIndex]);
+        else
+            throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nInvalid annotation string:\n" + query[detectedAnnotationIndex].toStdString());
+    }
+    // sensor attributes
+    for (QString attribute : sensorAttributeMap.keys())
+    {
+        int index = sensorAttributeMap[attribute];
+        vector.sensorAttributes[attribute] = query[index].toDouble(&readOk);
+        data->addAttributes(QSet<QString>{attribute});
+    }
+
+    // formatVersion 0.1: values are relative
+    if (formatVersion == "0.1")
+        vector = vector.getAbsoluteVector(data->getBaseLevel(timestamp));
+
+    if (!readOk)
+        throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\n");
+
+    // ignore zero vectors
+    if (vector != MVector::zeroes())
+        data->addMeasurement(timestamp, vector, data->getBaseLevel(timestamp));
+}
+
+LeifFileReader::LeifFileReader(QString filePath):
+    FileReader(filePath)
+{
+    // set start_time
+    start_time = file.fileTime(QFileDevice::FileTime::FileBirthTime).toTime_t();
+
+    // read header line
+    QString line;
+    if (!in.readLineInto(&line))
+        throw  std::runtime_error(file.fileName().toStdString() + " is empty!");
+    lineCount++;
+
+    parseHeader(line);
+
+    // read data
+    while(in.readLineInto(&line))
+    {
+        // ignore empty lines
+        if (line == "")
+            continue;
+
+        lineCount++;
+        parseValues(line);
+    }
+}
+
+void LeifFileReader::parseHeader(QString line)
+{
+    QStringList attributeNames = line.split(" ");
+
+    // save names & indexes of attributes
+    QRegularExpression r_reg("^R(\\d*)$");
+    QRegularExpression t_reg("^t(\\d*)$");
+
+    for (int i=0; i<attributeNames.size(); i++)
+    {
+        QString attribute = attributeNames[i];
+
+        // ignore empty strings
+        if (attribute == "")
+            continue;
+
+        auto r_match = r_reg.match(attribute);
+        auto t_match = t_reg.match(attribute);
+
+        // resistance value?
+        if (r_match.hasMatch())
+            resistanceIndexes[r_match.captured(1).toInt()-1] = i;
+        // time?
+        else if (t_match.hasMatch())
+        {
+            if (t_match.captured(1) == "1")
+                t_index = i;
+        }
+        // attribute of additional sensor
+        else
+            sensorAttributeIndexMap[attribute] = i;
+    }
+
+    // prepare MVector class:
+    // MVector default size is number of resistance values
+    MVector::nChannels = resistanceIndexes.size();
+    data->addAttributes(sensorAttributeIndexMap.keys().toSet());
+}
+
+void LeifFileReader::parseValues(QString line)
+{
+    QStringList values = line.split(" ");
+
+    double time;
+    MVector vector;
+
+    // get time of measurement
+    bool conversionOk = false;
+    time = values[t_index].toDouble(&conversionOk);
+
+    if (!conversionOk || time<0)
+        throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nIncompatible time value.\n\"" + values[t_index].toStdString() + "\" can not be converted into a double!");
+
+    // read resistance values
+    for (int channel : resistanceIndexes.keys())
+    {
+        int index = resistanceIndexes[channel];
+        bool conversionOk;
+        vector[channel] = values[index].toDouble(&conversionOk);
+
+        if (!conversionOk)
+            throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nIncompatible resistance value.\n\"" + values[index].toStdString() + "\" can not be converted into a double!");
+    }
+
+    // read attributes
+    for (QString attribute : sensorAttributeIndexMap.keys())
+    {
+        int index = sensorAttributeIndexMap[attribute];
+        bool conversionOk;
+        vector.sensorAttributes[attribute] = values[index].toDouble(&conversionOk);
+
+        if (!conversionOk)
+            throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nIncompatible attribute value.\n\"" + values[index].toStdString() + "\" can not be converted into a double!");
+    }
+
+    int timestamp = start_time+qRound(time);
+    // base vector is first vector
+    if (data->getAbsoluteData().isEmpty())
+        data->setBaseLevel(timestamp, vector);
+
+    data->addMeasurement(timestamp, vector);
 }

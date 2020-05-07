@@ -226,3 +226,13 @@ void FunctionalisationDialog::valueChanged(int)
     presetName = "None";
 
 }
+
+void FunctionalisationDialog::on_buttonBox_accepted()
+{
+    dialogAccepted = true;
+}
+
+bool FunctionalisationDialog::getDialogAccepted() const
+{
+    return dialogAccepted;
+}
