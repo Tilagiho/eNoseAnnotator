@@ -135,11 +135,18 @@
     </property>
     <addaction name="separator"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionConverter"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAnnotation"/>
    <addaction name="menuClassifier"/>
    <addaction name="menuConnection"/>
    <addaction name="menuView"/>
+   <addaction name="menuTools"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -415,6 +422,11 @@
   <action name="actionCloseClassifier">
    <property name="text">
     <string>Close</string>
+   </property>
+  </action>
+  <action name="actionConverter">
+   <property name="text">
+    <string>Converter...</string>
    </property>
   </action>
  </widget>

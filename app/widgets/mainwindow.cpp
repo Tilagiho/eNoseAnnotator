@@ -11,6 +11,7 @@
 #include "classselector.h"
 #include "linegraphwidget.h"
 #include "sourcedialog.h"
+#include "convertwizard.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -301,7 +302,7 @@ MainWindow::MainWindow(QWidget *parent)
 
         if (dialog.exec())
         {
-            mData->setFunctionalities(dialog.getFunctionalities());
+            mData->setFunctionalities(dialog.getFunctionalisations());
             measInfoWidget->setFuncLabel(dialog.presetName);
             mData->setFuncName(dialog.presetName);
         }
@@ -806,7 +807,7 @@ void MainWindow::on_actionStart_triggered()
 
                 if (dialog.exec())
                 {
-                    mData->setFunctionalities(dialog.getFunctionalities());
+                    mData->setFunctionalities(dialog.getFunctionalisations());
                     measInfoWidget->setFuncLabel(dialog.presetName);
                 }
             }
@@ -1384,4 +1385,10 @@ void MainWindow::closeClassifier()
 void MainWindow::on_actionCloseClassifier_triggered()
 {
     closeClassifier();
+}
+
+void MainWindow::on_actionConverter_triggered()
+{
+    ConvertWizard* convertWizard = new ConvertWizard(this);
+    convertWizard->exec();
 }

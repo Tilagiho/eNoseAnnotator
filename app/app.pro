@@ -64,6 +64,7 @@ SOURCES += \
     widgets/classifierwidget.cpp \
     widgets/classinputdialog.cpp \
     widgets/classselector.cpp \
+    widgets/convertwizard.cpp \
     widgets/functionalisationdialog.cpp \
     widgets/generalsettings.cpp \
     widgets/infowidget.cpp \
@@ -93,6 +94,7 @@ HEADERS += \
     widgets/classifierwidget.h \
     widgets/classinputdialog.h \
     widgets/classselector.h \
+    widgets/convertwizard.h \
     widgets/functionalisationdialog.h \
     widgets/generalsettings.h \
     widgets/infowidget.h \

@@ -21,7 +21,7 @@ public:
 
     void setFunctionalities(std::vector<int> funcs);
 
-    std::vector<int> getFunctionalities();
+    std::vector<int> getFunctionalisations();
 
     QString presetName = "None";
 

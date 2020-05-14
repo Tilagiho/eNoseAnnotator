@@ -12,7 +12,7 @@ class MeasurementData : public QObject
     Q_OBJECT
 
 public:
-    explicit MeasurementData(QObject *parent);
+    explicit MeasurementData(QObject *parent, int nChannels = MVector::nChannels);
     /*
      * enumeration MultiMode can be used to define how the result of a selection of multiple vectors should be calculated
      */
@@ -214,7 +214,6 @@ public:
     static QString funcName;
     static std::vector<int> functionalisation;
 
-
 public slots:
     /*
      * clears selectedData and adds all vectors with timestamp between lower and upper to selectedData
@@ -279,6 +278,8 @@ private:
     QString saveFilename = "./data/";
 
     QSet<QString> sensorAttributes;
+
+    int nChannels = MVector::nChannels;
 };
 
 /*!
@@ -287,11 +288,15 @@ private:
 class FileReader
 {
 public:
+    enum FileReaderType {General, Annotator, Leif};
+
     FileReader(QString filePath, QObject *parent=nullptr);
-    ~FileReader();
+    virtual ~FileReader();
 
     MeasurementData* getMeasurementData();
     FileReader* getSpecificReader();
+
+    virtual FileReaderType getType();
 
 private:
 
@@ -307,6 +312,8 @@ class AnnotatorFileReader : public FileReader
 {
 public:
     AnnotatorFileReader(QString filePath);
+
+    FileReaderType getType() override;
 
 private:
     void parseHeader(QString line);
@@ -327,13 +334,15 @@ class LeifFileReader : public FileReader
 public:
     LeifFileReader(QString filePath);
 
+    FileReaderType getType() override;
+
 private:
     void parseHeader(QString line);
     void parseValues(QString line);
 
     QMap<QString, int> sensorAttributeIndexMap;
     QMap<int, int> resistanceIndexes;
-    int t_index;
+    int t_index = -1;
     uint start_time = 0;
 };
 

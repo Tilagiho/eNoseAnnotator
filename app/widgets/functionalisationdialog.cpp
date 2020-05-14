@@ -102,7 +102,7 @@ void FunctionalisationDialog::setFunctionalities(std::vector<int> funcs)
         spinBoxes[i]->setValue(funcs[i]);
 }
 
-std::vector<int> FunctionalisationDialog::getFunctionalities()
+std::vector<int> FunctionalisationDialog::getFunctionalisations()
 {
     std::vector<int> funcs (MVector::nChannels, 0);
 

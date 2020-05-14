@@ -22,7 +22,7 @@ QString MeasurementData::funcName = "Custom";
 std::vector<int> MeasurementData::functionalisation(MVector::nChannels, 0);
 
 
-MeasurementData::MeasurementData(QObject *parent) :
+MeasurementData::MeasurementData(QObject *parent, int nChannels) :
     QObject(parent),
     sensorFailures(MVector::nChannels, false)
 {
@@ -1125,12 +1125,23 @@ FileReader* FileReader::getSpecificReader()
     // read first line
     QString line;
     if (!in.readLineInto(&line))
+    {
         throw  std::runtime_error(file.fileName().toStdString() + " is empty!");
+    }
 
     if (line.startsWith("#measurement data"))
+    {
         return new AnnotatorFileReader(file.fileName());
+    }
     else
+    {
         return new LeifFileReader(file.fileName());
+    }
+}
+
+FileReader::FileReaderType FileReader::getType()
+{
+    return FileReaderType::General;
 }
 
 MeasurementData* FileReader::getMeasurementData()
@@ -1146,7 +1157,6 @@ FileReader::~FileReader()
         file.close();
 
     delete data;
-
 }
 
 AnnotatorFileReader::AnnotatorFileReader(QString filePath):
@@ -1162,6 +1172,11 @@ AnnotatorFileReader::AnnotatorFileReader(QString filePath):
         else
             parseValues(line);
     }
+}
+
+FileReader::FileReaderType AnnotatorFileReader::getType()
+{
+    return FileReaderType::Annotator;
 }
 
 void AnnotatorFileReader::parseHeader(QString line)
@@ -1252,7 +1267,7 @@ void AnnotatorFileReader::parseHeader(QString line)
                 continue;   // ignore empty classStrings
 
             if (!aClass::isClassString(classString))
-                throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\n" + classString.toStdString() + " is not a class string!");
+                throw std::runtime_error("Error in line " + std::to_string(lineCount+1) + ".\n" + classString.toStdString() + " is not a class string!");
             aClass c = aClass::fromString(classString);
 
             if (!data->getClassList().contains(c))
@@ -1288,7 +1303,10 @@ void AnnotatorFileReader::parseHeader(QString line)
             else if (detectedAnnoMatch.hasMatch())
                 detectedAnnotationIndex = i;
             else    // attribute
+            {
                 sensorAttributeMap[headerItem] = i;
+                data->addAttributes(QSet<QString>{headerItem});
+            }
         }
     }
     else    // comment
@@ -1312,7 +1330,7 @@ void AnnotatorFileReader::parseValues(QString line)
     // lines without user defined & detected class are accepted
     int minSize = MVector::nChannels + data->getSensorAttributes().size() + 1;
     if ((query.size() < minSize) || (query.size() > minSize+2))
-        throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nData format is not compatible (len=" + QString::number(query.size()).toStdString() + "):\n" + line.toStdString());
+        throw std::runtime_error("Error in line " + std::to_string(lineCount+1) + ".\nData format is not compatible.\nlen(expected)=" + QString::number(minSize+2).toStdString() + "\nlen(retrieved)=" + QString::number(query.size()).toStdString() + ")");
     else if (data->getBaseLevelMap().isEmpty())
         throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nNo baseLevel in data");
 
@@ -1353,7 +1371,6 @@ void AnnotatorFileReader::parseValues(QString line)
     {
         int index = sensorAttributeMap[attribute];
         vector.sensorAttributes[attribute] = query[index].toDouble(&readOk);
-        data->addAttributes(QSet<QString>{attribute});
     }
 
     // formatVersion 0.1: values are relative
@@ -1394,6 +1411,11 @@ LeifFileReader::LeifFileReader(QString filePath):
     }
 }
 
+FileReader::FileReaderType LeifFileReader::getType()
+{
+    return FileReaderType::Leif;
+}
+
 void LeifFileReader::parseHeader(QString line)
 {
     QStringList attributeNames = line.split(" ");
@@ -1427,6 +1449,23 @@ void LeifFileReader::parseHeader(QString line)
             sensorAttributeIndexMap[attribute] = i;
     }
 
+    // check header info
+    bool headerOk = true;
+    QString errorString = "Incompatible header format:\n";
+    if (resistanceIndexes.size() == 0)
+    {
+        headerOk = false;
+        errorString += "No resistance attributes.\n";
+    }
+    if (t_index == -1)
+    {
+        headerOk = false;
+        errorString += "No measurement time attribute.\n";
+    }
+
+    if (!headerOk)
+        throw std::runtime_error(errorString.toStdString());
+
     // prepare MVector class:
     // MVector default size is number of resistance values
     MVector::nChannels = resistanceIndexes.size();
@@ -1437,6 +1476,18 @@ void LeifFileReader::parseValues(QString line)
 {
     QStringList values = line.split(" ");
 
+    int resMaxIndex = *std::max_element(resistanceIndexes.begin(), resistanceIndexes.end());
+    QList<int> sensorAttributeIndexes = sensorAttributeIndexMap.values();
+    int sensAttrMaxIndex = *std::max_element(sensorAttributeIndexMap.begin(), sensorAttributeIndexMap.end());
+
+    // get max index needed
+    int max = qMax(t_index, resMaxIndex);
+    max = qMax(max, sensAttrMaxIndex);
+
+    // check size of line
+    if (values.size() <=max)
+        throw std::runtime_error("Error in line " + QString::number(lineCount+1).toStdString()+ ".\nLine has to contain at least " + QString::number(max).toStdString() + " values!");
+
     double time;
     MVector vector;
 
@@ -1445,7 +1496,7 @@ void LeifFileReader::parseValues(QString line)
     time = values[t_index].toDouble(&conversionOk);
 
     if (!conversionOk || time<0)
-        throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nIncompatible time value.\n\"" + values[t_index].toStdString() + "\" can not be converted into a double!");
+        throw std::runtime_error("Error in line " + std::to_string(lineCount+1) + ".\nIncompatible time value.\n\"" + values[t_index].toStdString() + "\" can not be converted into a double!");
 
     // read resistance values
     for (int channel : resistanceIndexes.keys())
@@ -1455,7 +1506,7 @@ void LeifFileReader::parseValues(QString line)
         vector[channel] = values[index].toDouble(&conversionOk);
 
         if (!conversionOk)
-            throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nIncompatible resistance value.\n\"" + values[index].toStdString() + "\" can not be converted into a double!");
+            throw std::runtime_error("Error in line " + std::to_string(lineCount+1) + ".\nIncompatible resistance value.\n\"" + values[index].toStdString() + "\" can not be converted into a double!");
     }
 
     // read attributes
@@ -1466,7 +1517,7 @@ void LeifFileReader::parseValues(QString line)
         vector.sensorAttributes[attribute] = values[index].toDouble(&conversionOk);
 
         if (!conversionOk)
-            throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\nIncompatible attribute value.\n\"" + values[index].toStdString() + "\" can not be converted into a double!");
+            throw std::runtime_error("Error in line " + std::to_string(lineCount+1) + ".\nIncompatible attribute value.\n\"" + values[index].toStdString() + "\" can not be converted into a double!");
     }
 
     int timestamp = start_time+qRound(time);

@@ -66,6 +66,8 @@ private slots:
 
     void on_actionCloseClassifier_triggered();
 
+    void on_actionConverter_triggered();
+
 private:
     Ui::MainWindow *ui;
 
