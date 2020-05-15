@@ -27,7 +27,7 @@ SetSensorFailuresDialog::SetSensorFailuresDialog(QWidget *parent, ulong nChannel
         gridLayout->setColumnStretch(2*i+1, 1);
 
     // set failure states
-    for (int i=0; i<nChannels; i++)
+    for (uint i=0; i<nChannels; i++)
     {
         if (failures[i])
         {
@@ -64,7 +64,7 @@ std::vector<bool> SetSensorFailuresDialog::getSensorFailures()
 {
     std::vector<bool> sensorFailures;
 
-    for (int i=0; i<checkBoxes.size(); i++)
+    for (uint i=0; i<checkBoxes.size(); i++)
         sensorFailures.push_back(checkBoxes[i]->checkState() == Qt::CheckState::Checked);
 
     return sensorFailures;
@@ -72,7 +72,7 @@ std::vector<bool> SetSensorFailuresDialog::getSensorFailures()
 
 void SetSensorFailuresDialog::resetCheckboxes()
 {
-    for (int i=0; i<MVector::nChannels; i++)
+    for (uint i=0; i<nChannels; i++)
         checkBoxes[i]->setCheckState(Qt::CheckState::Unchecked);
 }
 

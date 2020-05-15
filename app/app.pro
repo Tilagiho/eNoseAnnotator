@@ -133,11 +133,11 @@ DISTFILES += \
 RESOURCES += \
     eNoseAnnotator.qrc
 
+# libtorch
 win32: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10
 unix:!macx: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10
 unix:!macx: QMAKE_RPATHDIR += $$PWD/lib/libtorch/lib
 
-# libtorch
 INCLUDEPATH += $$PWD/lib/libtorch/include
 DEPENDPATH += $$PWD/lib/libtorch/include
 

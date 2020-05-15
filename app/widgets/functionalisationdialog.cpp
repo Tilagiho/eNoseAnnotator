@@ -94,7 +94,7 @@ void FunctionalisationDialog::setFunctionalisation(std::vector<int> funcs)
 {
     Q_ASSERT(funcs.size() == nChannels);
 
-    for (int i=0; i<nChannels; i++)
+    for (uint i=0; i<nChannels; i++)
         spinBoxes[i]->setValue(funcs[i]);
 }
 
@@ -102,7 +102,7 @@ std::vector<int> FunctionalisationDialog::getFunctionalisations()
 {
     std::vector<int> funcs (nChannels, 0);
 
-    for (int i=0; i<nChannels; i++)
+    for (uint i=0; i<nChannels; i++)
         funcs[i] = spinBoxes[i]->value();
 
     return funcs;
@@ -135,7 +135,7 @@ void FunctionalisationDialog::loadPresets()
             continue;
         }
         // preset has wrong nChannels
-        if (line.split(" ").size() != nChannels)
+        if (static_cast<ulong>(line.split(" ").size()) != nChannels)
         {
             file.close();
             continue;
@@ -188,7 +188,7 @@ void FunctionalisationDialog::loadSelectedPreset()
         QString line;
         std::vector<int> presetArray (nChannels, 0);
         bool readOk = true;
-        for (int i = 0; i<spinBoxes.size(); i++)
+        for (uint i = 0; i<spinBoxes.size(); i++)
         {
             // load line & convert to integer
             readOk = in.readLineInto(&line);
@@ -204,7 +204,7 @@ void FunctionalisationDialog::loadSelectedPreset()
 
         if (readOk)
         {
-            for (int i = 0; i<spinBoxes.size(); i++)
+            for (uint i = 0; i<spinBoxes.size(); i++)
                 spinBoxes[i]->setValue(presetArray[i]);
 
             presetName = presetFileName;
@@ -214,7 +214,7 @@ void FunctionalisationDialog::loadSelectedPreset()
 
 void FunctionalisationDialog::resetSpinBoxes()
 {
-    for (int i=0; i<spinBoxes.size(); i++)
+    for (uint i=0; i<spinBoxes.size(); i++)
         spinBoxes[i]->setValue(0);
 }
 
@@ -244,7 +244,7 @@ void FunctionalisationDialog::savePreset()
     {
         QTextStream out(&file);
 
-        for (int i = 0; i<spinBoxes.size(); i++)
+        for (uint i = 0; i<spinBoxes.size(); i++)
             out << QString::number(spinBoxes[i]->value()) << "\n";
     }
     // update preset combo box
@@ -256,7 +256,7 @@ void FunctionalisationDialog::valueChanged(int)
     presetName = "Custom";
 
     // check if no functionalisation  was set
-    for (int i=0; i<spinBoxes.size(); i++)
+    for (uint i=0; i<spinBoxes.size(); i++)
         if (spinBoxes[i]->value() != 0)
             return;
     presetName = "None";

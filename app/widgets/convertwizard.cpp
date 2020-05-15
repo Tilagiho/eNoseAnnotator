@@ -344,7 +344,7 @@ void ConvertWorker::convert(const QStringList sourceFilenames, const QString tar
         }
         Q_EMIT progressChanged(i);
     }
-    qDebug()<< __PRETTY_FUNCTION__ << "finished";
+//    qDebug()<< __PRETTY_FUNCTION__ << "finished";
     Q_EMIT finished();
 }
 
