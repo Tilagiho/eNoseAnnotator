@@ -175,8 +175,7 @@ void BarGraphWidget::setBars(MVector new_vector, std::vector<bool> sensorFailure
         // ignore funcSize == 0 (no functionalisation set)
         if (maxFunc != funcBarVector.size())
         {
-            clearBars();
-            funcBarVector.clear();
+            deleteBars();
 
             for (int i=0; i<=maxFunc; i++)
             {
@@ -258,6 +257,15 @@ void BarGraphWidget::clearBars()
 
     ui->funcBarGraph->yAxis->rescale();
     ui->funcBarGraph->replot();
+}
+
+void BarGraphWidget::deleteBars()
+{
+    while (ui->barGraph->plottableCount() > 0)
+        ui->barGraph->removePlottable(ui->barGraph->plottable(0));
+
+    sensorBarVector.clear();
+    funcBarVector.clear();
 }
 
 BarGraphWidget::Mode BarGraphWidget::getMode() const
@@ -347,4 +355,10 @@ void BarGraphWidget::resetColors()
     }
 
     ui->barGraph->replot();
+}
+
+void BarGraphWidget::resetNChannels()
+{
+    deleteBars();
+    initGraph();
 }

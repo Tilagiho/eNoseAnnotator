@@ -7,7 +7,7 @@
 class FakeDatasource : public DataSource
 {
 public:
-    FakeDatasource();
+    FakeDatasource(int timeout, int sensorNChannels);
 
     void reconnect();
 

@@ -18,7 +18,7 @@ public:
         QSerialPort::FlowControl flowControl = QSerialPort::FlowControl::NoFlowControl;
     };
 
-    USBDataSource(Settings settings);
+    USBDataSource(Settings settings, int sensorTimeout, int sensorNChannels);
     ~USBDataSource();
 
     Status status();

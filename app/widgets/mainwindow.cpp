@@ -298,11 +298,11 @@ MainWindow::MainWindow(QWidget *parent)
         FunctionalisationDialog dialog;
         dialog.presetName = measInfoWidget->getFuncLabel();
 
-        dialog.setFunctionalities(mData->getFunctionalisation());
+        dialog.setFunctionalisation(mData->getFunctionalisation());
 
         if (dialog.exec())
         {
-            mData->setFunctionalities(dialog.getFunctionalisations());
+            mData->setFunctionalisation(dialog.getFunctionalisations());
             measInfoWidget->setFuncLabel(dialog.presetName);
             mData->setFuncName(dialog.presetName);
         }
@@ -586,7 +586,11 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
     if (source != nullptr)
     {
         // set previous settings
-        dialog->setSensorId(mData->getSensorId());
+        if (!mData->getSensorId().isEmpty())
+            dialog->setSensorId(mData->getSensorId());
+
+        dialog->setNChannels(MVector::nChannels);
+        dialog->setTimeout(source->getTimeout());
 
         // usb specific
         if (source->sourceType() == DataSource::SourceType::USB)
@@ -614,47 +618,48 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
         // source was set before
         if (source != nullptr)
         {
-            // if new source type or identifier:
-            if (identifier != source->identifier() || sourceType != source->sourceType())
+            // if new source type, identifier, new nChannels or timeout :
+            if (identifier != source->identifier() || sourceType != source->sourceType() || dialog->getNChannels() != MVector::nChannels)
             {
                 // measurement running:
-                // -> ask if measurement should be stopped
-                if (source->status() == DataSource::Status::RECEIVING_DATA)
-                {
-                    QMessageBox::StandardButton answer = QMessageBox::question(this, "Stop Measurement", "You selected a new connection while a measurement is running.\nDo you want to stop the measurement in order to use the new connection?");
+               // -> ask if measurement should be stopped
+               if (source->status() == DataSource::Status::RECEIVING_DATA)
+               {
+                   QMessageBox::StandardButton answer = QMessageBox::question(this, "Stop Measurement", "You selected a new connection while a measurement is running.\nDo you want to stop the measurement in order to use the new connection?");
 
-                    if (answer != QMessageBox::StandardButton::Yes)
-                        return; // keep current data source
+                   if (answer != QMessageBox::StandardButton::Yes)
+                       return; // keep current data source
 
-                    source->stop();
+                   source->stop();
                 }
                 // delete old source
                 delete source;
                 source = nullptr;
             }
-            // only sensor Id was changed
-            else if (sensorId != mData->getSensorId())
+            // sensor Id was changed
+            else if (sensorId != mData->getSensorId() || dialog->getTimeout() != source->getTimeout())
             {
                 mData->setSensorId(sensorId);
+                source->setTimeout(dialog->getTimeout());
             }
         }
 
         // source not set before or just deleted:
         // -> init new source
-        // usb source:
         if (source == nullptr)
         {
+            // usb source:
             if (sourceType == DataSource::SourceType::USB)
             {
                 USBDataSource::Settings settings;
                 settings.portName = identifier;
 
-                source = new USBDataSource(settings);
+                source = new USBDataSource(settings, dialog->getTimeout(), dialog->getNChannels());
             }
-
+            // fake source:
             else if (sourceType == DataSource::SourceType::FAKE)
             {
-                source = new FakeDatasource();
+                source = new FakeDatasource(dialog->getTimeout(), dialog->getNChannels());
             }
 
             // make connections
@@ -662,8 +667,13 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
 
             // update ui
             sensorConnected(sensorId);
+        } else if (source->status() == DataSource::Status::CONNECTION_ERROR)
+        {
+            source->reconnect();
         }
     }
+
+    dialog->deleteLater();
 }
 
 void MainWindow::on_actionSettings_triggered()
@@ -793,7 +803,23 @@ void MainWindow::on_actionStart_triggered()
                 mData->saveData(this);
         }
 
-        // set functionalisation if not set
+        // if nChannels has to be changed
+        if (source->getNChannels() != MVector::nChannels)
+        {
+            // change nChannels
+            MVector::nChannels = source->getNChannels();
+
+            // reset mData
+            mData->resetNChannels();
+
+            // reset graphs
+            // funcLineGraph will be updated anyways
+            relLineGraph->setNChannels(MVector::nChannels);
+            absLineGraph->setNChannels(MVector::nChannels);
+            vectorBarGraph->resetNChannels();
+            funcBarGraph->resetNChannels();
+        }
+        // no func set: set functionalisation?
         if (mData->getFuncMap().size() == 1)
         {
             auto answer = QMessageBox::question(this, "Set Functionalisation", "The sensor functionalisation was not set.\nDo you want to set it before starting a new measurement?");
@@ -803,15 +829,18 @@ void MainWindow::on_actionStart_triggered()
                 FunctionalisationDialog dialog;
                 dialog.presetName = measInfoWidget->getFuncLabel();
 
-                dialog.setFunctionalities(mData->getFunctionalisation());
+                dialog.setFunctionalisation(mData->getFunctionalisation());
 
                 if (dialog.exec())
                 {
-                    mData->setFunctionalities(dialog.getFunctionalisations());
+                    mData->setFunctionalisation(dialog.getFunctionalisations());
                     measInfoWidget->setFuncLabel(dialog.presetName);
                 }
             }
         }
+
+        // update funcLineGraph
+        updateFuncGraph();
 
         // clear data, init with sensor id, set dataChanged to false
         QString sensorId = mData->getSensorId();
@@ -827,7 +856,6 @@ void MainWindow::on_actionStart_triggered()
     default:
         Q_ASSERT("Error: Cannot start or pause non-active  connection!" && source->status() != DataSource::Status::CONNECTING && source->status() != DataSource::Status::NOT_CONNECTED && source->status() != DataSource::Status::CONNECTION_ERROR);
     }
-
 }
 
 void MainWindow::on_actionStop_triggered()
@@ -1151,7 +1179,6 @@ void MainWindow::createGraphWidgets()
     int dockWidth = 0.7 * window()->size().width();
     for (auto dock : leftDocks)
         dock->resize(dockWidth, dock->size().height());
-
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
@@ -1236,31 +1263,26 @@ void MainWindow::updateFuncGraph()
 
     // no funcs set:
     // use normal graph
-    if (mData->getFuncMap().size() == 1)
+    if (funcMap.size() == 1)
     {
-        if (maxFunc != funcLineGraph->getNChannels())
+        if (funcLineGraph->getNChannels() != MVector::nChannels)
         {
-            delete funcLineGraph;
-            funcLineGraph = new LineGraphWidget(this);
-            leftDocks[0]->setWidget(funcLineGraph);
-            connectFLGraph();   // reconnect funcLineGraph
+            funcLineGraph->clearGraph();
+            funcLineGraph->setNChannels(MVector::nChannels);
         }
-
         funcLineGraph->setData(data);
     }
     // else: reset graph
     else
     {
-        if (maxFunc != funcLineGraph->getNChannels()-1)
+        if (funcLineGraph->getNChannels() != maxFunc+1)
         {
             // store xAxis range
             auto oldRange = funcLineGraph->getXRange();
 
-            // init new funcLineGraph
-            delete funcLineGraph;
-            funcLineGraph = new LineGraphWidget(this, maxFunc+1);
-            leftDocks[0]->setWidget(funcLineGraph);
-            connectFLGraph();   // reconnect funcLineGraph
+            // reset funcLineGraph
+            funcLineGraph->clearGraph();
+            funcLineGraph->resetGraph(maxFunc+1);
 
             // restore xAxis range
             funcLineGraph->setXRange(oldRange);

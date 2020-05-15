@@ -55,6 +55,8 @@ public:
     static double maxVal;
     static double minVal;
 
+    void setNChannels(int value);
+
 public slots:
     void addMeasurement(MVector measurement, uint timestamp, bool rescale=true);   // add single measurement; rescale y-axis if rescale==true
 //    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements

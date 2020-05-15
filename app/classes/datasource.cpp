@@ -10,7 +10,9 @@
  * \endlist
  */
 
-DataSource::DataSource()
+DataSource::DataSource(int sensorTimeout, int sensorNChannels):
+    timeout(sensorTimeout),
+    nChannels(sensorNChannels)
 {}
 
 /*!
@@ -22,6 +24,21 @@ const uint DataSource::nBaseVectors = 3;
 DataSource::Status DataSource::status()
 {
     return connectionStatus;
+}
+
+int DataSource::getNChannels() const
+{
+    return nChannels;
+}
+
+int DataSource::getTimeout() const
+{
+    return timeout;
+}
+
+void DataSource::setTimeout(int value)
+{
+    timeout = value;
 }
 
 /*!

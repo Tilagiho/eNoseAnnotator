@@ -31,8 +31,10 @@ public:
 public slots:
     void setBars(MVector, std::vector<bool> sensorFailures, std::vector<int> functionalisation);
     void clearBars();
+    void deleteBars();
     bool saveImage(const QString &filename);
     void resetColors();
+    void resetNChannels();
 
 signals:
     void imageSaveRequested();
@@ -43,7 +45,6 @@ private:
     QVector<QCPBars*> funcBarVector;
 
     Mode mode = Mode::showFunc;
-
 
     void initGraph();
     void replot();

@@ -6,11 +6,13 @@
  * \class USBDataSource
  * \brief implements the DataSource interface for USB connections.
  */
-USBDataSource::USBDataSource(USBDataSource::Settings settings):
+USBDataSource::USBDataSource(USBDataSource::Settings settings, int sensorTimeout, int sensorNChannels):
+    DataSource(sensorTimeout, sensorNChannels),
     settings(settings)
 {
     Q_ASSERT("Invalid settings. Serial port name has to be specified!" && settings.portName != "");
 
+    timeout = sensorTimeout;
     serial = new QSerialPort();
 
     makeConnections();
@@ -89,7 +91,7 @@ void USBDataSource::openSerialPort()
 
         // set timer for timeout errors
         timer.setSingleShot(true);
-        timer.start(5000);
+        timer.start(timeout*1000);
     } else
     {
         emit error("Cannot open USB connection on port " + settings.portName);
@@ -183,7 +185,7 @@ void USBDataSource::processLine(const QByteArray &data)
             setStatus(DataSource::Status::CONNECTED);
     }
     // reset timer
-    timer.start(5000);
+    timer.start(timeout*1000);
 
     if (!emitData)
         return;
@@ -261,6 +263,7 @@ void USBDataSource::start()
     // start new measurement
     if (status() != Status::PAUSED && !baselevelVectorMap.isEmpty())
     {
+        // start meas
         startCount = 0;
         setStatus(Status::SET_BASEVECTOR);
     }

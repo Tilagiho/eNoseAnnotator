@@ -336,7 +336,7 @@ std::vector<int> MeasurementData::getFunctionalisation() const
     return functionalisation;
 }
 
-void MeasurementData::setFunctionalities(const std::vector<int> &value)
+void MeasurementData::setFunctionalisation(const std::vector<int> &value)
 {
     Q_ASSERT(value.size() == MVector::nChannels);
 
@@ -1097,6 +1097,12 @@ void MeasurementData::renameAttribute(QString oldName, QString newName)
     }
 }
 
+void MeasurementData::resetNChannels()
+{
+    sensorFailures = std::vector<bool>(MVector::nChannels, false);
+    functionalisation = std::vector<int>(MVector::nChannels, 0);
+}
+
 QMap<uint, MVector> MeasurementData::getBaseLevelMap() const
 {
     return baseLevelMap;
@@ -1220,7 +1226,7 @@ void AnnotatorFileReader::parseHeader(QString line)
         std::vector<int> newFunc;
         for (int i=0; i<MVector::nChannels; i++)
             newFunc.push_back(funcList[i].toInt());
-        data->setFunctionalities(newFunc);
+        data->setFunctionalisation(newFunc);
 
         // funcName not stored in file?!
         // -> emit Custom

@@ -205,6 +205,20 @@ void LineGraphWidget::resetColors()
     ui->chart->replot();
 }
 
+void LineGraphWidget::setNChannels(int value)
+{
+    // delete old graphs
+    for (int i=0; i<nChannels; i++)
+    {
+        ui->chart->removeGraph(ui->chart->graph(0));
+    }
+
+    nChannels = value;
+
+    // setup new graphs
+    setupGraph();
+}
+
 
 
 int LineGraphWidget::getNChannels() const

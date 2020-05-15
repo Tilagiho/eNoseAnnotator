@@ -10,8 +10,6 @@ SourceDialog::SourceDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->applyButton->setEnabled(false);
-
     // input validator for sensorId line edit
     QRegExp rx("[\\w| ]*");
     ui->sensorIdLineEdit->setValidator(new QRegExpValidator(rx, this));
@@ -23,7 +21,6 @@ SourceDialog::SourceDialog(QWidget *parent) :
 
     #ifdef QT_DEBUG
     ui->comboBox->addItem("Debug: Fake Data Source");
-    ui->stackedWidget->setHidden(false);
     #endif
 }
 
@@ -31,6 +28,7 @@ SourceDialog::~SourceDialog()
 {
     delete ui;
     delete usbWidget;
+    delete fakeWidget;
 }
 
 QString SourceDialog::getIdentifier()
@@ -112,6 +110,26 @@ void SourceDialog::on_comboBox_currentTextChanged(const QString &text)
     }
     else
         Q_ASSERT("Unknown source type selected!" && false);
+}
+
+int SourceDialog::getTimeout() const
+{
+    return ui->timeoutSpinBox->value();
+}
+
+void SourceDialog::setTimeout(int value)
+{
+    ui->timeoutSpinBox->setValue(value);
+}
+
+int SourceDialog::getNChannels() const
+{
+    return ui->nChannelsSpinBox->value();
+}
+
+void SourceDialog::setNChannels(int value)
+{
+    ui->nChannelsSpinBox->setValue(value);
 }
 
 QString SourceDialog::getSensorId() const

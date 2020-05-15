@@ -169,7 +169,7 @@ public:
     MVector getBaseLevel (uint timestamp);
 
     std::vector<int> getFunctionalisation() const;
-    void setFunctionalities(const std::vector<int> &value);
+    void setFunctionalisation(const std::vector<int> &value);
 
     static QMap<int, int> getFuncMap(const std::vector<int> &funcs, const std::vector<bool> sensorFailures);
 
@@ -232,6 +232,7 @@ public slots:
     void addAttributes(QSet<QString> attributes);
     void deleteAttributes(QSet<QString> attributes);
     void renameAttribute(QString oldName, QString newName);
+    void resetNChannels();
 
 signals:
     void selectionVectorChanged(MVector vector, std::vector<bool> sensorFailures, std::vector<int>);  // emits new vector when dataSelected is changed

@@ -30,7 +30,7 @@ public:
     // constants
     static const uint nBaseVectors;
 
-    DataSource();
+    DataSource(int sensorTimeout, int sensorNChannels);
 
     virtual Status status();
 
@@ -38,6 +38,12 @@ public:
 
     virtual SourceType sourceType() = 0;
     virtual QString identifier() = 0;
+
+
+    int getNChannels() const;
+
+    int getTimeout() const;
+    void setTimeout(int value);
 
 signals:
     /*! \fn void DataSource::vectorReceived(uint timestamp, MVector vector)
@@ -77,6 +83,10 @@ protected:
     uint startCount = 0;
 
     Status connectionStatus = Status::NOT_CONNECTED;
+
+    int timeout;
+
+    int nChannels;
 
     /*!
      * \brief timer triggers error handling when timed out.

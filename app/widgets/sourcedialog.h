@@ -30,6 +30,12 @@ public:
     QString getSensorId() const;
     void setSensorId(const QString &value);
 
+    int getNChannels() const;
+    void setNChannels(int value);
+
+    int getTimeout() const;
+    void setTimeout(int value);
+
 private slots:
     void on_cancelButton_clicked();
 
