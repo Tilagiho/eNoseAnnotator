@@ -98,7 +98,7 @@ void InfoWidget::on_pushButton_clicked()
     if (failureString == "None")
         sfDialog = new SetSensorFailuresDialog(this);
     else
-        sfDialog = new SetSensorFailuresDialog(this, failureString);
+        sfDialog = new SetSensorFailuresDialog(this, MVector::nChannels, failureString);
 
     sfDialog->setWindowTitle("Sensor failure flags");
 

@@ -112,12 +112,10 @@ FORMS += \
     widgets/bargraphwidget.ui \
     widgets/classifierwidget.ui \
     widgets/classselector.ui \
-    widgets/functionalisationdialog.ui \
     widgets/generalsettings.ui \
     widgets/infowidget.ui \
     widgets/linegraphwidget.ui \
     widgets/mainwindow.ui \
-    widgets/setsensorfailuresdialog.ui \
     widgets/sourcedialog.ui \
     widgets/usbsettingswidget.ui
 

@@ -1,112 +1,108 @@
 #include "functionalisationdialog.h"
-#include "ui_functionalisationdialog.h"
 
 #include "QInputDialog"
 #include <QMessageBox>
 #include <QObject>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QPushButton>
 
-FunctionalisationDialog::FunctionalisationDialog(QWidget *parent) :
+FunctionalisationDialog::FunctionalisationDialog(QWidget *parent, ulong nChannels) :
     QDialog(parent),
-    ui(new Ui::FunctionalisationDialog),
-    spinBoxes(64, nullptr)
+    funcLabels(nChannels, nullptr),
+    spinBoxes(nChannels, nullptr),
+    nChannels(nChannels)
 {
-    ui->setupUi(this);
-
     // window title
     this->setWindowTitle("Set Functionalization");
 
-    // setup spArray
-    spinBoxes[0] = ui->sp1;
-    spinBoxes[1] = ui->sp2;
-    spinBoxes[2] = ui->sp3;
-    spinBoxes[3] = ui->sp4;
-    spinBoxes[4] = ui->sp5;
-    spinBoxes[5] = ui->sp6;
-    spinBoxes[6] = ui->sp7;
-    spinBoxes[7] = ui->sp8;
-    spinBoxes[8] = ui->sp9;
-    spinBoxes[9] = ui->sp10;
-    spinBoxes[10] = ui->sp11;
-    spinBoxes[11] = ui->sp12;
-    spinBoxes[12] = ui->sp13;
-    spinBoxes[13] = ui->sp14;
-    spinBoxes[14] = ui->sp15;
-    spinBoxes[15] = ui->sp16;
-    spinBoxes[16] = ui->sp17;
-    spinBoxes[17] = ui->sp18;
-    spinBoxes[18] = ui->sp19;
-    spinBoxes[19] = ui->sp20;
-    spinBoxes[20] = ui->sp21;
-    spinBoxes[21] = ui->sp22;
-    spinBoxes[22] = ui->sp23;
-    spinBoxes[23] = ui->sp24;
-    spinBoxes[24] = ui->sp25;
-    spinBoxes[25] = ui->sp26;
-    spinBoxes[26] = ui->sp27;
-    spinBoxes[27] = ui->sp28;
-    spinBoxes[28] = ui->sp29;
-    spinBoxes[29] = ui->sp30;
-    spinBoxes[30] = ui->sp31;
-    spinBoxes[31] = ui->sp32;
-    spinBoxes[32] = ui->sp33;
-    spinBoxes[33] = ui->sp34;
-    spinBoxes[34] = ui->sp35;
-    spinBoxes[35] = ui->sp36;
-    spinBoxes[36] = ui->sp37;
-    spinBoxes[37] = ui->sp38;
-    spinBoxes[38] = ui->sp39;
-    spinBoxes[39] = ui->sp40;
-    spinBoxes[40] = ui->sp41;
-    spinBoxes[41] = ui->sp42;
-    spinBoxes[42] = ui->sp43;
-    spinBoxes[43] = ui->sp44;
-    spinBoxes[44] = ui->sp45;
-    spinBoxes[45] = ui->sp46;
-    spinBoxes[46] = ui->sp47;
-    spinBoxes[47] = ui->sp48;
-    spinBoxes[48] = ui->sp49;
-    spinBoxes[49] = ui->sp50;
-    spinBoxes[50] = ui->sp51;
-    spinBoxes[51] = ui->sp52;
-    spinBoxes[52] = ui->sp53;
-    spinBoxes[53] = ui->sp54;
-    spinBoxes[54] = ui->sp55;
-    spinBoxes[55] = ui->sp56;
-    spinBoxes[56] = ui->sp57;
-    spinBoxes[57] = ui->sp58;
-    spinBoxes[58] = ui->sp59;
-    spinBoxes[59] = ui->sp60;
-    spinBoxes[60] = ui->sp61;
-    spinBoxes[61] = ui->sp62;
-    spinBoxes[62] = ui->sp63;
-    spinBoxes[63] = ui->sp64;
+    // presetLayout
+    presetComboBox = new QComboBox();
+    presetLabel = new QLabel("Presets:");
+    loadPresetButton = new QPushButton("Load");
+    savePresetButton = new QPushButton("Save");
 
+    QHBoxLayout* presetButtonsLayout = new QHBoxLayout();
+    presetButtonsLayout->addWidget(loadPresetButton);
+    presetButtonsLayout->addWidget(savePresetButton);
 
-    for (QSpinBox* spinBox : spinBoxes)
-        QObject::connect(spinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &FunctionalisationDialog::valueChanged);
+    QHBoxLayout* presetHeaderLayout = new QHBoxLayout();
+    presetHeaderLayout->addWidget(presetLabel);
+    presetHeaderLayout->addWidget(presetComboBox);
 
-    // presets
+    QVBoxLayout* presetLayout = new QVBoxLayout();
+    presetLayout->addLayout(presetHeaderLayout);
+    presetLayout->addLayout(presetButtonsLayout);
+
+    QHBoxLayout* topLayout = new QHBoxLayout();
+    topLayout->addStretch(1);
+    topLayout->addLayout(presetLayout);
+
+    // set gridLayout
+    QGridLayout* gridLayout = new QGridLayout();
+
+    // setup funcLabels & spinBoxes
+    for (uint i=0; i<spinBoxes.size(); i++)
+    {
+        funcLabels[i] = new QLabel("ch" + QString::number(i));
+        spinBoxes[i] = new QSpinBox();
+        // gridLayout looks like this
+        // | label | spinBox | empty  | label | spinBox | empty | ... (spinBoxes.size() / 16 columns; end on spinBox)
+        // | label | spinBox | empty  | label | spinBox | empty | ...
+        // ... (16 rows)
+        gridLayout->addWidget(funcLabels[i], i%16, 3 * (i/16));
+        gridLayout->addWidget(spinBoxes[i], i%16, 3 * (i/16) + 1);
+
+        QObject::connect(spinBoxes[i], QOverload<int>::of(&QSpinBox::valueChanged), this, &FunctionalisationDialog::valueChanged);
+    }
+    // add stretch to empty columns (every third colums is empty)
+    for (uint i=0; i<=spinBoxes.size()/16; i++)
+        gridLayout->setColumnStretch(3*i + 2, 1);
+
+    buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
+                                        | QDialogButtonBox::Cancel
+                                        | QDialogButtonBox::Reset);
+    resetButton = buttonBox->button(QDialogButtonBox::Reset);
+
+    QVBoxLayout* dialogLayout = new QVBoxLayout();
+    dialogLayout->addLayout(topLayout);
+    dialogLayout->addLayout(gridLayout);
+    dialogLayout->addWidget(buttonBox);
+
+    setLayout(dialogLayout);
+
     loadPresets();
+    makeConnections();
 }
 
 FunctionalisationDialog::~FunctionalisationDialog()
 {
-    delete ui;
+    for (QLabel* label : funcLabels)
+        label->deleteLater();
+    for (QSpinBox* spinBox : spinBoxes)
+        spinBox->deleteLater();
+
+    presetLabel->deleteLater();
+    loadPresetButton->deleteLater();
+    savePresetButton->deleteLater();
+    presetComboBox->deleteLater();
+    buttonBox->deleteLater();
 }
 
-void FunctionalisationDialog::setFunctionalities(std::vector<int> funcs)
+void FunctionalisationDialog::setFunctionalisation(std::vector<int> funcs)
 {
-    Q_ASSERT(funcs.size() == MVector::nChannels);
+    Q_ASSERT(funcs.size() == nChannels);
 
-    for (int i=0; i<64; i++)
+    for (int i=0; i<nChannels; i++)
         spinBoxes[i]->setValue(funcs[i]);
 }
 
 std::vector<int> FunctionalisationDialog::getFunctionalisations()
 {
-    std::vector<int> funcs (MVector::nChannels, 0);
+    std::vector<int> funcs (nChannels, 0);
 
-    for (int i=0; i<MVector::nChannels; i++)
+    for (int i=0; i<nChannels; i++)
         funcs[i] = spinBoxes[i]->value();
 
     return funcs;
@@ -117,27 +113,41 @@ void FunctionalisationDialog::loadPresets()
     QDir directory("./presets");
     QStringList presets = directory.entryList(QStringList() << "*.preset",QDir::Files);
 
+    // defult: no preset
+    presetComboBox->addItem("");
+
     for (QString presetFileName : presets)
     {
         auto list = presetFileName.split(".");
         list.removeLast();
         QString preset = list.join(".");
 
-        ui->comboBox->addItem(preset);
+        presetComboBox->addItem(preset);
     }
 }
 
-void FunctionalisationDialog::on_comboBox_currentTextChanged(const QString &arg1)
+void FunctionalisationDialog::makeConnections()
 {
-    if (arg1 == "")
-        ui->pushButton->setEnabled(false);
-    else
-        ui->pushButton->setEnabled(true);
+    connect(presetComboBox, &QComboBox::currentTextChanged, this, [this](QString){
+       updateLoadPresetButton();
+    }); // update ok button when selected preset changes
+
+    connect(buttonBox, &QDialogButtonBox::accepted, this, &FunctionalisationDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, this, &FunctionalisationDialog::reject);
+    connect(resetButton, &QPushButton::released, this, &FunctionalisationDialog::resetSpinBoxes);   // reset spinBoxes
+    connect(loadPresetButton, &QPushButton::released, this, &FunctionalisationDialog::loadSelectedPreset);   // load preset
+    connect(savePresetButton, &QPushButton::released, this, &FunctionalisationDialog::savePreset);   // save preset
 }
 
-void FunctionalisationDialog::on_pushButton_clicked()
+void FunctionalisationDialog::updateLoadPresetButton()
 {
-    QString preset = ui->comboBox->currentText();
+    bool presetSelected = presetComboBox->currentText() != "";
+    loadPresetButton->setEnabled(presetSelected);
+}
+
+void FunctionalisationDialog::loadSelectedPreset()
+{
+    QString preset = presetComboBox->currentText();
     QString presetFileName = preset + ".preset";
 
     QFile file("./presets/" + presetFileName);
@@ -150,7 +160,7 @@ void FunctionalisationDialog::on_pushButton_clicked()
         QTextStream in(&file);
 
         QString line;
-        std::vector<int> presetArray (MVector::nChannels, 0);
+        std::vector<int> presetArray (nChannels, 0);
         bool readOk = true;
         for (int i = 0; i<spinBoxes.size(); i++)
         {
@@ -176,13 +186,13 @@ void FunctionalisationDialog::on_pushButton_clicked()
     }
 }
 
-void FunctionalisationDialog::on_pushButton_2_clicked()
+void FunctionalisationDialog::resetSpinBoxes()
 {
     for (int i=0; i<spinBoxes.size(); i++)
         spinBoxes[i]->setValue(0);
 }
 
-void FunctionalisationDialog::on_pushButton_3_clicked()
+void FunctionalisationDialog::savePreset()
 {
     // create preset folder
     if(!QDir ("./presets").exists())
@@ -212,7 +222,7 @@ void FunctionalisationDialog::on_pushButton_3_clicked()
             out << QString::number(spinBoxes[i]->value()) << "\n";
     }
     // update preset combo box
-    ui->comboBox->addItem(input);
+    presetComboBox->addItem(input);
 }
 
 void FunctionalisationDialog::valueChanged(int)
@@ -224,15 +234,4 @@ void FunctionalisationDialog::valueChanged(int)
         if (spinBoxes[i]->value() != 0)
             return;
     presetName = "None";
-
-}
-
-void FunctionalisationDialog::on_buttonBox_accepted()
-{
-    dialogAccepted = true;
-}
-
-bool FunctionalisationDialog::getDialogAccepted() const
-{
-    return dialogAccepted;
 }

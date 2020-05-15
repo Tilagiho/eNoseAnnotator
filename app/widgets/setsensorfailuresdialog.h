@@ -4,9 +4,12 @@
 #include <QtCore>
 #include <QtGui>
 #include <QCheckBox>
+#include <QLabel>
 #include <QDialog>
-#include <array>
+#include <QDialogButtonBox>
 #include <vector>
+
+#include "../classes/mvector.h"
 
 namespace Ui {
 class SetSensorFailuresDialog;
@@ -17,19 +20,20 @@ class SetSensorFailuresDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit SetSensorFailuresDialog(QWidget *parent = nullptr, QString failureString="");
+    explicit SetSensorFailuresDialog(QWidget *parent = nullptr, ulong nChannels = MVector::nChannels, QString failureString="");
     ~SetSensorFailuresDialog();
     std::vector<bool> getSensorFailures();
 
 private slots:
-    void on_buttonBox_accepted();
-
-    void on_ResetButton_clicked();
+    void resetCheckboxes();
 
 private:
-    Ui::SetSensorFailuresDialog *ui;
+    ulong nChannels;
     std::vector<QCheckBox*> checkBoxes;
-    std::vector<bool> sensorFailures;
+    QDialogButtonBox* buttonBox;
+    QPushButton* resetButton;
+
+    void makeConnections();
 };
 
 #endif // SETSENSORFAILURESDIALOG_H
