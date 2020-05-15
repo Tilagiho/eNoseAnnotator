@@ -510,18 +510,12 @@ void MainWindow::on_actionsave_selection_triggered()
 void MainWindow::on_actionLoad_triggered()
 {
     // load data
-    bool dataSaved = false;
-
-    while (!dataSaved)
+    // ask to save old data
+    if (!mData->getAbsoluteData().isEmpty() && mData->isChanged())
     {
-        // ask to save old data
-        if (!mData->getAbsoluteData().isEmpty() && mData->isChanged())
-        {
-            if (QMessageBox::question(this, tr("Save data"),
-                "Do you want to save the current measurement before loading data?\t") == QMessageBox::Ok)
-                dataSaved=mData->saveData(this);
-        } else
-            dataSaved = true;
+        if (QMessageBox::question(this, tr("Save data"),
+            "Do you want to save the current measurement before loading data?\t") == QMessageBox::Ok)
+            mData->saveData(this);
     }
 
     // make data directory
