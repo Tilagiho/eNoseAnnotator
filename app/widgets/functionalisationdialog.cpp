@@ -118,6 +118,32 @@ void FunctionalisationDialog::loadPresets()
 
     for (QString presetFileName : presets)
     {
+        //check if preset can be read & is compatible to nChannels
+        QFile file(presetFileName);
+        // preset cannot be opened
+        if (!file.open(QIODevice::ReadOnly))
+            continue;
+
+        QTextStream in(&file);
+        QString line;
+        bool readOk = in.readLineInto(&line);
+
+        // preset cannot be read
+        if (!readOk)
+        {
+            file.close();
+            continue;
+        }
+        // preset has wrong nChannels
+        if (line.split(" ").size() != nChannels)
+        {
+            file.close();
+            continue;
+        }
+        file.close();
+
+        // all checks passed:
+        // add preset to presetComboBox
         auto list = presetFileName.split(".");
         list.removeLast();
         QString preset = list.join(".");
