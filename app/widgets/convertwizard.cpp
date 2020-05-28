@@ -324,6 +324,7 @@ void ConversionPage::onError(QString errorMessage)
         break;
     case QMessageBox::StandardButton::Abort:
         worker.cancel();
+        label->setText("Conversion aborted.");
         break;
     }
 }

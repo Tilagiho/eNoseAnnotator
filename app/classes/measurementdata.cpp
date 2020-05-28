@@ -1434,6 +1434,7 @@ void LeifFileReader::parseHeader(QString line)
     // prepare MVector class:
     // MVector default size is number of resistance values
     emit resetNChannels(resistanceIndexes.size());
+    data->resetNChannels();
     data->addAttributes(sensorAttributeIndexMap.keys().toSet());
 }
 
