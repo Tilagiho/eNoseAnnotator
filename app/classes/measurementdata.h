@@ -280,14 +280,16 @@ private:
 
     QSet<QString> sensorAttributes;
 
-    int nChannels = MVector::nChannels;
+//    int nChannels = MVector::nChannels;
 };
 
 /*!
  * \brief The fileParser class parses file & returns Measurementdata with the information contained within it.
  */
-class FileReader
+class FileReader : public QObject
 {
+    Q_OBJECT
+
 public:
     enum FileReaderType {General, Annotator, Leif};
 
@@ -297,7 +299,12 @@ public:
     MeasurementData* getMeasurementData();
     FileReader* getSpecificReader();
 
+    virtual void readFile(){};
+
     virtual FileReaderType getType();
+
+signals:
+    void resetNChannels(uint nChannels);
 
 private:
 
@@ -316,6 +323,8 @@ public:
 
     FileReaderType getType() override;
 
+    void readFile() override;
+
 private:
     void parseHeader(QString line);
     void parseValues(QString line);
@@ -328,6 +337,11 @@ private:
 
     QMap<uint, uint> resistanceIndexMap;
     QMap<QString, uint> sensorAttributeMap;
+
+    // meas meta attributes
+    QString failureString;
+    std::vector<int> functionalistation;
+    QMap<uint, MVector> baseLevelMap;
 };
 
 class LeifFileReader : public FileReader
@@ -336,6 +350,8 @@ public:
     LeifFileReader(QString filePath);
 
     FileReaderType getType() override;
+
+    void readFile() override;
 
 private:
     void parseHeader(QString line);

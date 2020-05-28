@@ -133,6 +133,8 @@ private:
 
     void loadSettings();
 
+    void resetNChannels(uint newNChannels);
+
 
 
 protected:

@@ -578,6 +578,9 @@ void MainWindow::loadData(QString fileName)
         FileReader generalFileReader(fileName, this);
         specificReader = generalFileReader.getSpecificReader();
 
+        connect(specificReader, &FileReader::resetNChannels, this, &MainWindow::resetNChannels);
+        specificReader->readFile();
+
         MeasurementData* newData = specificReader->getMeasurementData();
 
         int nFuncs = newData->getNFuncs();
@@ -676,6 +679,22 @@ void MainWindow::loadSettings()
         if (line != "")
             mData->setSaveFilename(line.split(":")[1]);
     }
+}
+
+void MainWindow::resetNChannels(uint newNChannels)
+{
+    // change nChannels
+    MVector::nChannels = newNChannels;
+
+    // reset mData
+    mData->resetNChannels();
+
+    // reset graphs
+    // funcLineGraph will be updated anyways
+    relLineGraph->setNChannels(MVector::nChannels);
+    absLineGraph->setNChannels(MVector::nChannels);
+    vectorBarGraph->resetNChannels();
+    funcBarGraph->resetNChannels();
 }
 
 void MainWindow::on_actionLoad_triggered()
@@ -928,21 +947,14 @@ void MainWindow::on_actionStart_triggered()
                 saveData();
         }
 
+        // clear data for new measurement
+        clearData();
+
+
         // if nChannels has to be changed
         if (source->getNChannels() != MVector::nChannels)
         {
-            // change nChannels
-            MVector::nChannels = source->getNChannels();
-
-            // reset mData
-            mData->resetNChannels();
-
-            // reset graphs
-            // funcLineGraph will be updated anyways
-            relLineGraph->setNChannels(MVector::nChannels);
-            absLineGraph->setNChannels(MVector::nChannels);
-            vectorBarGraph->resetNChannels();
-            funcBarGraph->resetNChannels();
+            resetNChannels(source->getNChannels());
         }
         // no func set: set functionalisation?
         if (mData->getFuncMap().size() == 1)
@@ -1545,6 +1557,9 @@ void MainWindow::updateAutosave()
     {
         try {
             mData->saveData(settingsFolder + "/" + autosaveName);
+
+            // reset dataChanged (is unset by saveData)
+            mData->setDataChanged(true);
         } catch (std::runtime_error e) {
             QMessageBox::warning(this, "Error creating autosave", e.what());
         }

@@ -89,7 +89,9 @@ const QMap<uint, MVector> MeasurementData::getSelectionMap()
 
 int MeasurementData::getNFuncs() const
 {
-    return getFuncMap().size();
+    QList<int> funcKeys = getFuncMap().keys();
+    double maxFunc = *std::max_element(funcKeys.begin(), funcKeys.end());
+    return maxFunc + 1;
 }
 
 /*!
@@ -1113,6 +1115,10 @@ FileReader::~FileReader()
 AnnotatorFileReader::AnnotatorFileReader(QString filePath):
     FileReader(filePath)
 {
+}
+
+void AnnotatorFileReader::readFile()
+{
     // read data
     QString line;
     while(in.readLineInto(&line))
@@ -1149,14 +1155,8 @@ void AnnotatorFileReader::parseHeader(QString line)
     }
     else if (line.startsWith("#failures:"))
     {
-        QString failureString = line.right(line.length()-QString("#failures:").length());
-        failureString=failureString.split(";").join("");
-        if (failureString.size() != MVector::nChannels)
-        {
-            qWarning() << "Failure string not valid. Using empty failure string.";
-            failureString = "0000000000000000000000000000000000000000000000000000000000000000";
-        }
-        data->setFailures(failureString);
+        failureString = line.right(line.length()-QString("#failures:").length());
+        failureString = failureString.split(";").join("");
     }
     else if (line.startsWith("#funcName:"))
     {
@@ -1168,17 +1168,15 @@ void AnnotatorFileReader::parseHeader(QString line)
         QString rawString = line.right(line.length()-QString("#functionalisation:").length());
         QStringList funcList = rawString.split(";");
 
-        std::vector<int> newFunc;
-        for (int i=0; i<MVector::nChannels; i++)
-            newFunc.push_back(funcList[i].toInt());
-        data->setFunctionalisation(newFunc);
+        for (int i=0; i<funcList.size(); i++)
+            functionalistation.push_back(funcList[i].toInt());
 
         // funcName not stored in file?!
         // -> emit Custom
         if (data->funcName == "None")
         {
             auto functionalisation = data->getFunctionalisation();
-            for (int i=0; i<functionalisation.size(); i++)
+            for (uint i=0; i<functionalisation.size(); i++)
             {
                 if (functionalisation[i] != 0)
                 {
@@ -1203,11 +1201,11 @@ void AnnotatorFileReader::parseHeader(QString line)
             timestamp = data->getTimestampUIntfromString(valueList[0]);
 
         // get base level vector
-        MVector baseLevel;
-        for (int i=0; i<MVector::nChannels; i++)
+        MVector baseLevel(valueList.size()-1);
+        for (int i=0; i<valueList.size()-1; i++)
             baseLevel[i] = valueList[i+1].toDouble();
 
-        data->setBaseLevel(timestamp, baseLevel);
+        baseLevelMap[timestamp] = baseLevel;
     }
     else if (line.startsWith("#classes:"))
     {
@@ -1259,6 +1257,17 @@ void AnnotatorFileReader::parseHeader(QString line)
                 data->addAttributes(QSet<QString>{headerItem});
             }
         }
+        // after parsing the header:
+        // reset MVector::nChannels
+        emit resetNChannels(resistanceIndexMap.size());
+
+        // set data meta attributes
+        data->setFailures(failureString);
+        data->setFunctionalisation(functionalistation);
+
+        for (uint timestamp : baseLevelMap.keys())
+            data->setBaseLevel(timestamp, baseLevelMap[timestamp]);
+
     }
     else    // comment
         data->setComment(data->getComment() + line.right(line.length()-1) + "\n");
@@ -1338,6 +1347,11 @@ void AnnotatorFileReader::parseValues(QString line)
 
 LeifFileReader::LeifFileReader(QString filePath):
     FileReader(filePath)
+{
+
+}
+
+void LeifFileReader::readFile()
 {
     // set start_time
     start_time = file.fileTime(QFileDevice::FileTime::FileBirthTime).toTime_t();
@@ -1419,7 +1433,7 @@ void LeifFileReader::parseHeader(QString line)
 
     // prepare MVector class:
     // MVector default size is number of resistance values
-    MVector::nChannels = resistanceIndexes.size();
+    emit resetNChannels(resistanceIndexes.size());
     data->addAttributes(sensorAttributeIndexMap.keys().toSet());
 }
 
