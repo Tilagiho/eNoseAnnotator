@@ -45,7 +45,7 @@ FunctionalisationDialog::FunctionalisationDialog(QWidget *parent, ulong nChannel
     // setup funcLabels & spinBoxes
     for (uint i=0; i<spinBoxes.size(); i++)
     {
-        funcLabels[i] = new QLabel("ch" + QString::number(i));
+        funcLabels[i] = new QLabel("ch" + QString::number(i+1));
         spinBoxes[i] = new QSpinBox();
         // gridLayout looks like this
         // | label | spinBox | empty  | label | spinBox | empty | ... (spinBoxes.size() / 16 columns; end on spinBox)
@@ -118,31 +118,6 @@ void FunctionalisationDialog::loadPresets()
 
     for (QString presetFileName : presets)
     {
-        //check if preset can be read & is compatible to nChannels
-        QFile file(presetFileName);
-        // preset cannot be opened
-        if (!file.open(QIODevice::ReadOnly))
-            continue;
-
-        QTextStream in(&file);
-        QString line;
-        bool readOk = in.readLineInto(&line);
-
-        // preset cannot be read
-        if (!readOk)
-        {
-            file.close();
-            continue;
-        }
-        // preset has wrong nChannels
-        if (static_cast<ulong>(line.split(" ").size()) != nChannels)
-        {
-            file.close();
-            continue;
-        }
-        file.close();
-
-        // all checks passed:
         // add preset to presetComboBox
         auto list = presetFileName.split(".");
         list.removeLast();
@@ -179,35 +154,39 @@ void FunctionalisationDialog::loadSelectedPreset()
     QFile file("./presets/" + presetFileName);
     if (!file.open(QIODevice::ReadOnly))
     {
-        QMessageBox::information(this, "Unable to load preset " + presetFileName,
+        QMessageBox::information(this, "Unable to open preset " + presetFileName,
             file.errorString());
     } else
     {
         QTextStream in(&file);
 
         QString line;
-        std::vector<int> presetArray (nChannels, 0);
+        std::vector<int> presetFuncs;
         bool readOk = true;
-        for (uint i = 0; i<spinBoxes.size(); i++)
+        int i = 0;
+        while (true)
         {
             // load line & convert to integer
             readOk = in.readLineInto(&line);
             if (readOk)
-                presetArray[i] = line.toInt(&readOk);
-            if (!readOk)
-            {
-                QMessageBox::information(this, "Unable to load preset " + presetFileName,
-                    file.errorString());
+                presetFuncs.push_back(line.toInt(&readOk));
+            // EOF: leave loop
+            else
                 break;
-            }
+
+            i++;
         }
 
-        if (readOk)
+        if (presetFuncs.size() == nChannels)
         {
             for (uint i = 0; i<spinBoxes.size(); i++)
-                spinBoxes[i]->setValue(presetArray[i]);
+                spinBoxes[i]->setValue(presetFuncs[i]);
 
             presetName = presetFileName;
+        } else
+        {
+            QString message = presetFileName + " was created for " + QString::number(presetFuncs.size()) + " channels.\n" + QString::number(nChannels) + " channels expected.";
+            QMessageBox::warning(this, "Error loading Preset", message);
         }
     }
 }
