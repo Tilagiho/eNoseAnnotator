@@ -71,8 +71,17 @@ private slots:
 
     void on_actionConverter_triggered();
 
+    void updateAutosave();
+
+    void deleteAutosave();
+
 private:
     Ui::MainWindow *ui;
+
+    QString settingsFolder = ".settings";
+    QString autosaveName = "autosave.csv";
+    uint autosaveIntervall = 1;             // in minutes
+    QTimer autosaveTimer;
 
     LineGraphWidget* funcLineGraph;
     LineGraphWidget* absLineGraph;

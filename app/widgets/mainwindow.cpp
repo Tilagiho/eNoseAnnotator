@@ -456,6 +456,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     // functionalisation changed
     connect(mData, &MeasurementData::functionalisationChanged, this, &MainWindow::updateFuncGraph); // recalculate func line graph
+
+    // timer for autosaves
+    connect(&autosaveTimer, &QTimer::timeout, this, &MainWindow::updateAutosave);
+    autosaveTimer.setSingleShot(false);
+    autosaveTimer.start(static_cast<int>(autosaveIntervall * 60 * 1000));
 }
 
 MainWindow::~MainWindow()
@@ -507,11 +512,26 @@ void MainWindow::initialize()
 
     if (arguments.size() > 2)
         QMessageBox::warning(this, "Launch error", "The application can only be launched with one argument!");
+
+    QFile autosaveFile(settingsFolder + "/" + autosaveName);
+    if (autosaveFile.exists())
+    {
+        QString question = "The program was terminated without saving changes in the last measurement.\nDo you want to load the autosave of the measurement?";
+        auto ans = QMessageBox::question(this, "Load autosave", question);
+
+        if (ans == QMessageBox::StandardButton::Yes)
+            loadData(autosaveFile.fileName());
+    }
 }
 
 void MainWindow::on_actionSave_Data_triggered()
 {
     mData->saveData(this);
+
+    // if saving successfull:
+    // delete autosave
+    if (!mData->isChanged())
+        deleteAutosave();
 }
 
 void MainWindow::on_actionsave_selection_triggered()
@@ -1419,4 +1439,22 @@ void MainWindow::on_actionConverter_triggered()
 {
     ConvertWizard* convertWizard = new ConvertWizard(this);
     convertWizard->exec();
+}
+
+void MainWindow::updateAutosave()
+{
+    QDir(settingsFolder).exists();
+    QDir().mkdir(settingsFolder);
+
+    if (mData->isChanged())
+        mData->saveData(this, settingsFolder + "/" + autosaveName);
+    else
+        deleteAutosave();
+}
+
+void MainWindow::deleteAutosave()
+{
+    QFile file (settingsFolder + "/" + autosaveName);
+    if (file.exists())
+        file.remove();
 }
