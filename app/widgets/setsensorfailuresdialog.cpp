@@ -19,7 +19,7 @@ SetSensorFailuresDialog::SetSensorFailuresDialog(QWidget *parent, ulong nChannel
     QGridLayout* gridLayout = new QGridLayout();
     for (uint i=0; i<nChannels; i++)
     {
-        checkBoxes[i] = new QCheckBox("ch" + QString::number(i) + 1);
+        checkBoxes[i] = new QCheckBox("ch" + QString::number(i+1));
         gridLayout->addWidget(checkBoxes[i], i % 16, 2* i / 16);
     }
     // set stretch of empty columns
