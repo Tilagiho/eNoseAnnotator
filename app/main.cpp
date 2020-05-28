@@ -18,6 +18,10 @@ int main(int argc, char *argv[])
 
     // start application
     MainWindow w;
+
+    // timer to check aarguments
+    QTimer::singleShot(0, &w, SLOT(initialize()));
+
     w.show();
     return a.exec();
 }

@@ -29,6 +29,9 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void initialize();
+
 private slots:
     void on_actionSave_Data_triggered();
 

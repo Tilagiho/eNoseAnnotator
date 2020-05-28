@@ -14,8 +14,9 @@
 #include "convertwizard.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow)
+
 {
     ui->setupUi(this);
     this->setWindowIcon(QIcon(":/icons/icon"));
@@ -52,7 +53,6 @@ MainWindow::MainWindow(QWidget *parent)
     #ifdef QT_NO_DEBUG
     ui->actionSet_detected_class_of_selection->setVisible(false);
     #endif
-
 
     mData = new MeasurementData(this);
 
@@ -495,6 +495,18 @@ void MainWindow::setTitle(bool dataChanged)
        title = "eNoseAnnotator";
    }
    this->setWindowTitle(title + titleExtension);
+}
+
+void MainWindow::initialize()
+{
+    QStringList arguments = QCoreApplication::arguments();
+    qDebug() << "Launched with args: " << arguments;
+
+    if (arguments.size() > 1)
+        loadData(arguments[1]);
+
+    if (arguments.size() > 2)
+        QMessageBox::warning(this, "Launch error", "The application can only be launched with one argument!");
 }
 
 void MainWindow::on_actionSave_Data_triggered()
