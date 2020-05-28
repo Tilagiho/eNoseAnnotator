@@ -4,8 +4,12 @@
 #include <QtWidgets>
 #include <QFileDialog>
 
+#include <QMetaType>
+
 #include "../classes/measurementdata.h"
 #include "functionalisationdialog.h"
+
+std::vector<int> ConvertWizard::functionalisations = std::vector<int>();
 
 ConvertWizard::ConvertWizard(QWidget* parent):
     QWizard(parent)
@@ -93,7 +97,6 @@ FileSelectionPage::FileSelectionPage(QWidget *parent):
     // store values for other pages
     registerField("sourceFilenames", sourceFilesLineEdit);
     registerField("targetDir", targetDirLineEdit);
-    registerField("functionalisation", this, "functionalisations");
     registerField("nChannels", nChannelsSpinBox);
     registerField("sensorId", sensorIDLineEdit);
 
@@ -155,11 +158,11 @@ void FileSelectionPage::getTargetDir()
  */
 void FileSelectionPage::getFuncs()
 {
-    FunctionalisationDialog dialog;
+    FunctionalisationDialog dialog(this, static_cast<ulong>(nChannelsSpinBox->value()));
 
     if (dialog.exec())
     {
-        functionalisations = dialog.getFunctionalisations();
+        ConvertWizard::functionalisations = dialog.getFunctionalisations();
         funcLabel->setText(dialog.presetName);
     }
 }
@@ -199,9 +202,9 @@ bool FileSelectionPage::validatePage()
         isValid = false;
     }
 
-    if (functionalisations.empty())
-        functionalisations = std::vector<int> (nChannelsSpinBox->value(), 0);
-    else if (functionalisations.size() != nChannelsSpinBox->value())
+    if (ConvertWizard::functionalisations.empty())
+        ConvertWizard::functionalisations = std::vector<int> (nChannelsSpinBox->value(), 0);
+    else if (ConvertWizard::functionalisations.size() != nChannelsSpinBox->value())
     {
         isValid = false;
         nChannelsInfoLabel->setStyleSheet("QLabel {color: red}");
@@ -272,9 +275,8 @@ void ConversionPage::startConversion()
     filenames.removeAll("");
 
     targetDir = qvariant_cast<QString> (field("targetDir"));
-    functionalisation = qvariant_cast<std::vector<int>>(field("functionalisation"));
 
-    QMetaObject::invokeMethod(&worker, "convert", Qt::QueuedConnection, Q_ARG(QStringList, filenames), Q_ARG(QString, targetDir), Q_ARG(std::vector<int>, functionalisation));
+    QMetaObject::invokeMethod(&worker, "convert", Qt::QueuedConnection, Q_ARG(QStringList, filenames), Q_ARG(QString, targetDir));
 }
 
 void ConversionPage::onStarted()
@@ -286,6 +288,9 @@ void ConversionPage::onStarted()
 
 void ConversionPage::onFinished()
 {
+    progressbar->setValue(100);
+    label->setText(QFileInfo(filenames.last()).fileName() + " converted.");
+
     for(QWizard::WizardButton which: {QWizard::NextButton})
         if(QAbstractButton * button = wizard()->button(which))
             button->setEnabled(true);
@@ -297,7 +302,7 @@ void ConversionPage::onFinished()
 void ConversionPage::onProgressChanged(int value)
 {
     progressbar->setValue(qRound((100.0 / filenames.size()) * (value + 1)));
-    label->setText(QFileInfo(filenames[value]).fileName());
+    label->setText(QFileInfo(filenames[value]).fileName() + " converted.");
 }
 
 void ConversionPage::onError(QString errorMessage)
@@ -323,8 +328,11 @@ void ConversionPage::onError(QString errorMessage)
     }
 }
 
-void ConvertWorker::convert(const QStringList sourceFilenames, const QString targetDir, const std::vector<int> functionalisation)
+void ConvertWorker::convert(const QStringList sourceFilenames, const QString targetDir)
 {
+    // store MVector::nChannels
+    int nChannels = MVector::nChannels;
+
     Q_EMIT started();
     for(int i=0; i<sourceFilenames.size(); i++)
     {
@@ -332,7 +340,7 @@ void ConvertWorker::convert(const QStringList sourceFilenames, const QString tar
         // convert file
         try
         {
-            convertFile(filename, targetDir, functionalisation);
+            convertFile(filename, targetDir);
         }
         // on error: emit error and wait until resume() slot is called
         catch (std::runtime_error e)
@@ -344,14 +352,18 @@ void ConvertWorker::convert(const QStringList sourceFilenames, const QString tar
         }
         Q_EMIT progressChanged(i);
     }
-//    qDebug()<< __PRETTY_FUNCTION__ << "finished";
     Q_EMIT finished();
+
+    // restore MVector::nChannels
+    MVector::nChannels = nChannels;
 }
 
-void ConvertWorker::convertFile(QString filename, QString targetDir, std::vector<int> functionalisation)
+void ConvertWorker::convertFile(QString filename, QString targetDir)
 {
     FileReader generalReader(filename);
     FileReader* specificReader = generalReader.getSpecificReader();
+
+    std::vector<int> functionalisation = ConvertWizard::functionalisations;
 
     // check type of specificFileReader
     switch (specificReader->getType()) {
@@ -361,7 +373,13 @@ void ConvertWorker::convertFile(QString filename, QString targetDir, std::vector
         throw std::runtime_error("Cannot convert " + QFileInfo(filename).fileName().toStdString());
     }
 
+    connect(specificReader, &FileReader::resetNChannels, this, [this](uint nChannels){
+       MVector::nChannels = nChannels;
+    });
+    specificReader->readFile();
+
     MeasurementData* data = specificReader->getMeasurementData();
+
 
     if (MVector::nChannels != functionalisation.size())
         throw std::runtime_error("Error converting file " + QFileInfo(filename).fileName().toStdString() + "\nFunctionalisation incompatible with number of channels!");
@@ -370,11 +388,8 @@ void ConvertWorker::convertFile(QString filename, QString targetDir, std::vector
 
     QFileInfo fileInfo(filename);
     QString targetFilename = targetDir + "/" + fileInfo.fileName();
-    try {
-        data->saveData(targetFilename);
-    } catch (std::runtime_error e) {
-        emit error(e.what());
-    }
+
+    data->saveData(targetFilename);
 
     delete specificReader;
 }

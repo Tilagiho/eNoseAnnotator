@@ -12,6 +12,8 @@ class ConvertWizard : public QWizard
     Q_OBJECT
 
 public:
+    static std::vector<int> functionalisations;
+
     explicit ConvertWizard(QWidget* parent = nullptr);
     ~ConvertWizard();
 
@@ -49,8 +51,6 @@ private:
     QLabel* nChannelsInfoLabel;
     QSpinBox *nChannelsSpinBox;
 
-    std::vector<int> functionalisations;
-
     void getSourceFiles();
     void getTargetDir();
     void getFuncs();
@@ -65,7 +65,7 @@ public:
     {}
 
 public Q_SLOTS:
-    void convert(const QStringList sourceFilenames, const QString targetDir, const std::vector<int> functionalisation);
+    void convert(const QStringList sourceFilenames, const QString targetDir);
     void resume();
     void cancel();
 
@@ -79,7 +79,7 @@ private:
     QMutex sync;
     QWaitCondition pauseCond;
 
-    void convertFile(QString filename, QString targetDir, std::vector<int> functionalisation);
+    void convertFile(QString filename, QString targetDir);
 };
 
 class ConversionPage : public QWizardPage

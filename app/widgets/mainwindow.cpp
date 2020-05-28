@@ -518,6 +518,8 @@ void MainWindow::initialize()
         QMessageBox::warning(this, "Launch error", "The application can only be launched with one argument!");
 
     // check for autosave
+    if (!QDir(settingsFolder).exists())
+        QDir().mkdir(settingsFolder);
     QFile autosaveFile(settingsFolder + "/" + autosaveName);
     if (autosaveFile.exists())
     {
@@ -526,9 +528,11 @@ void MainWindow::initialize()
 
         if (ans == QMessageBox::StandardButton::Yes)
         {
+            QString prevSaveFile = mData->getSaveFilename();
             loadData(autosaveFile.fileName());
 
             // override changed flag, so the autosave can be saved
+            mData->setSaveFilename(prevSaveFile);
             mData->setDataChanged(true);
         }
     }
