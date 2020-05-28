@@ -78,6 +78,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
+    QString dataFolder = "data";
     QString settingsFolder = ".settings";
     QString autosaveName = "autosave.csv";
     uint autosaveIntervall = 1;             // in minutes
@@ -123,6 +124,16 @@ private:
     void setIsLiveClassificationState(bool isLive);
 
     void closeClassifier();
+
+    void loadData(QString filename);
+
+    void saveData();
+
+    void saveSettings();
+
+    void loadSettings();
+
+
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);

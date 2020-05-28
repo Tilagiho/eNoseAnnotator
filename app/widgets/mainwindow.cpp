@@ -412,7 +412,7 @@ MainWindow::MainWindow(QWidget *parent)
 
             if (answer == QMessageBox::StandardButton::Yes)
             {
-                mData->saveAverageSelectionMeasVector(this, dataFilePathName);
+                mData->saveAverageSelectionMeasVector(dataFilePathName);
             }
 
             vectorBarGraph->saveImage(filename);
@@ -447,7 +447,7 @@ MainWindow::MainWindow(QWidget *parent)
             if (answer == QMessageBox::StandardButton::Yes)
             {
                 // dataFilemame = filename - image extension + ".csv"
-                mData->saveAverageSelectionFuncVector(this, dataFilePathName);
+                mData->saveAverageSelectionFuncVector(dataFilePathName);
             }
 
             funcBarGraph->saveImage(filename);
@@ -461,6 +461,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&autosaveTimer, &QTimer::timeout, this, &MainWindow::updateAutosave);
     autosaveTimer.setSingleShot(false);
     autosaveTimer.start(static_cast<int>(autosaveIntervall * 60 * 1000));
+
+    // storing settings
+    connect(mData, &MeasurementData::saveFilenameSet, this, &MainWindow::saveSettings);
 }
 
 MainWindow::~MainWindow()
@@ -481,7 +484,7 @@ void MainWindow::setTitle(bool dataChanged)
 
     if (filename != "")
     {
-        QDir dataDir{"./data"};
+        QDir dataDir{"./" + dataFolder};
         QFileInfo fileInfo(filename);
         QString extension;
         if (fileInfo.absolutePath().startsWith(dataDir.absolutePath()))
@@ -504,6 +507,7 @@ void MainWindow::setTitle(bool dataChanged)
 
 void MainWindow::initialize()
 {
+    // parse launch arguments & load file in first arg (if it exists)
     QStringList arguments = QCoreApplication::arguments();
     qDebug() << "Launched with args: " << arguments;
 
@@ -513,6 +517,7 @@ void MainWindow::initialize()
     if (arguments.size() > 2)
         QMessageBox::warning(this, "Launch error", "The application can only be launched with one argument!");
 
+    // check for autosave
     QFile autosaveFile(settingsFolder + "/" + autosaveName);
     if (autosaveFile.exists())
     {
@@ -520,13 +525,21 @@ void MainWindow::initialize()
         auto ans = QMessageBox::question(this, "Load autosave", question);
 
         if (ans == QMessageBox::StandardButton::Yes)
+        {
             loadData(autosaveFile.fileName());
+
+            // override changed flag, so the autosave can be saved
+            mData->setDataChanged(true);
+        }
     }
+
+    // load settings
+    loadSettings();
 }
 
 void MainWindow::on_actionSave_Data_triggered()
 {
-    mData->saveData(this);
+    saveData();
 
     // if saving successfull:
     // delete autosave
@@ -536,31 +549,29 @@ void MainWindow::on_actionSave_Data_triggered()
 
 void MainWindow::on_actionsave_selection_triggered()
 {
-    mData->saveSelection(this);
-}
+    QString filepath = mData->getSaveFilename();
 
-void MainWindow::on_actionLoad_triggered()
-{
-    // load data
-    // ask to save old data
-    if (!mData->getAbsoluteData().isEmpty() && mData->isChanged())
-    {
-        if (QMessageBox::question(this, tr("Save data"),
-            "Do you want to save the current measurement before loading data?\t") == QMessageBox::Ok)
-            mData->saveData(this);
-    }
+    QString defaultPath = "./" + dataFolder + "/";
+    QString path = (filepath != defaultPath) ? filepath : defaultPath;
+    QString fileName = QFileDialog::getSaveFileName(this, QString("Save selected data"), path, "Data files (*.csv)");
 
-    // make data directory
-    if (!QDir("data").exists())
-        QDir().mkdir("data");
-
-    QString saveFilename = mData->getSaveFilename();
-    QString path = (saveFilename != "") ? saveFilename : "./data";
-    QString fileName = QFileDialog::getOpenFileName(this, "Open data file", path, "Data files (*.csv)");
-
-    if (fileName.isEmpty())
+    // no file selected
+    if (fileName.isEmpty() || fileName.endsWith("/"))
         return;
 
+    if (fileName.split(".").last() != "csv")
+        fileName += ".csv";
+
+    try {
+        mData->saveSelection(fileName);
+
+    } catch (std::runtime_error e) {
+        QMessageBox::critical(this, "Error saving selection", e.what());
+    }
+}
+
+void MainWindow::loadData(QString fileName)
+{
     FileReader* specificReader = nullptr;
     try {
         // use general reader to get specific reader for the format of filename
@@ -581,7 +592,12 @@ void MainWindow::on_actionLoad_triggered()
         relLineGraph->resetColors();
         absLineGraph->resetColors();
 
-//        setTitle(false);
+        // update saveFileName of mData & title of MainWindow
+        mData->setSaveFilename(fileName);
+        setTitle(false);
+
+        // delete autosave
+        deleteAutosave();
 
         // check compability to loaded classifier
         if (classifier != nullptr)
@@ -602,6 +618,89 @@ void MainWindow::on_actionLoad_triggered()
 
     if (specificReader != nullptr)
         delete specificReader;
+}
+
+void MainWindow::saveData()
+{
+    QString path = mData->getSaveFilename();
+
+    QString fileName;
+    if (path.endsWith(".csv"))
+        fileName = path;
+    else
+        fileName = QFileDialog::getSaveFileName(this, QString("Save data"), path, "Data files (*.csv)");
+
+    // no file selected
+    if (fileName.isEmpty() || fileName.endsWith("/"))
+        return;
+
+    if (fileName.split(".").last() != "csv")
+        fileName += ".csv";
+
+    try {
+        mData->saveData(fileName);
+        // update saveFilename
+        mData->setSaveFilename(fileName);
+    } catch (std::runtime_error e) {
+        QMessageBox::critical(this, "Error saving measurement", e.what());
+    }
+}
+
+void MainWindow::saveSettings()
+{
+    QFile file(settingsFolder + "/settings");
+    if (!file.open(QIODevice::WriteOnly))
+        QMessageBox::critical(this, "Error", "Unable to save settings");
+
+    QTextStream out(&file);
+
+    QStringList pathList = mData->getSaveFilename().split("/");
+    QString saveFolder = pathList.mid(0, pathList.size()-1).join("/") + "/";
+
+    out << "saveFolder:" << saveFolder << "\n";
+}
+
+void MainWindow::loadSettings()
+{
+    QFile file(settingsFolder + "/settings");
+
+    if (file.exists())
+    {
+        if (!file.open(QIODevice::ReadOnly))
+            QMessageBox::critical(this, "Error", "Unable to load settings");
+
+        QTextStream in(&file);
+
+        QString line = in.readLine();
+
+        if (line != "")
+            mData->setSaveFilename(line.split(":")[1]);
+    }
+}
+
+void MainWindow::on_actionLoad_triggered()
+{
+    // load data
+    // ask to save old data
+    if (!mData->getAbsoluteData().isEmpty() && mData->isChanged())
+    {
+        if (QMessageBox::question(this, tr("Save data"),
+            "Do you want to save the current measurement before loading data?\t") == QMessageBox::Ok)
+            saveData();
+    }
+
+    // make data directory
+    if (!QDir(dataFolder).exists())
+        QDir().mkdir(dataFolder);
+
+    QString saveFilename = mData->getSaveFilename();
+    QString path = (saveFilename != "") ? saveFilename : "./" + dataFolder;
+    QString fileName = QFileDialog::getOpenFileName(this, "Open data file", path, "Data files (*.csv)");
+
+    if (fileName.isEmpty())
+        return;
+
+    loadData(fileName);
 }
 
 void MainWindow::on_actionSet_USB_Connection_triggered()
@@ -826,7 +925,7 @@ void MainWindow::on_actionStart_triggered()
         {
             auto answer = QMessageBox::question(this, "Save measurement data", "Do you want to save the current data before starting a new measurement?");
             if (answer == QMessageBox::StandardButton::Yes)
-                mData->saveData(this);
+                saveData();
         }
 
         // if nChannels has to be changed
@@ -963,7 +1062,7 @@ void MainWindow::closeEvent (QCloseEvent *event)
                                                                    QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes, QMessageBox::Yes);
         if (resBtn == QMessageBox::Yes)
         {
-            mData->saveData(this);
+            saveData();
             event->accept();
         } else if (resBtn == QMessageBox::Cancel)
         {
@@ -982,11 +1081,7 @@ void MainWindow::createStatusBar()
 
 void MainWindow::on_actionSave_triggered()
 {
-    QString filename = mData->getSaveFilename();
-    if (filename == "")
-        mData->saveData(this);
-    else
-        mData->saveData(this, filename);
+    saveData();
 }
 
 void MainWindow::on_actionAbout_triggered()
@@ -1447,7 +1542,13 @@ void MainWindow::updateAutosave()
     QDir().mkdir(settingsFolder);
 
     if (mData->isChanged())
-        mData->saveData(this, settingsFolder + "/" + autosaveName);
+    {
+        try {
+            mData->saveData(settingsFolder + "/" + autosaveName);
+        } catch (std::runtime_error e) {
+            QMessageBox::warning(this, "Error creating autosave", e.what());
+        }
+    }
     else
         deleteAutosave();
 }

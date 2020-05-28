@@ -370,7 +370,11 @@ void ConvertWorker::convertFile(QString filename, QString targetDir, std::vector
 
     QFileInfo fileInfo(filename);
     QString targetFilename = targetDir + "/" + fileInfo.fileName();
-    data->saveData(nullptr, targetFilename);
+    try {
+        data->saveData(targetFilename);
+    } catch (std::runtime_error e) {
+        emit error(e.what());
+    }
 
     delete specificReader;
 }

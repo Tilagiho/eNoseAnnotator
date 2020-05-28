@@ -117,9 +117,7 @@ void MeasurementData::clear()
         QStringList pathList = saveFilename.split("/");
         if (!pathList.isEmpty())
             pathList.removeLast();
-        else
-            saveFilename = "data";
-        saveFilename = pathList.join("/") + "/";
+        setSaveFilename(pathList.join("/") + "/");
     }
 
     setDataChanged(false);
@@ -241,6 +239,7 @@ void MeasurementData::setSaveFilename(QString newSaveFilename)
     if (newSaveFilename != saveFilename)
     {
         saveFilename = newSaveFilename;
+        emit saveFilenameSet();
     }
 }
 
@@ -356,8 +355,8 @@ void MeasurementData::setFunctionalisation(const std::vector<int> &value)
  */
 QMap<int, int> MeasurementData::getFuncMap(const std::vector<int> &funcs, std::vector<bool> fails)
 {
-    Q_ASSERT(funcs.size() == MVector::nChannels);
-    Q_ASSERT(fails.size() == MVector::nChannels);
+//    Q_ASSERT(funcs.size() == MVector::nChannels);
+//    Q_ASSERT(fails.size() == MVector::nChannels);
 
     // get number of functionalisations, ignore channels with sensor failures
     QMap<int, int> funcMap;
@@ -483,59 +482,21 @@ bool MeasurementData::contains(uint timestamp)
     return data.contains(timestamp);
 }
 
-/*!
- * \brief MeasurementData::saveData saves all vectors added & meta info.
- * The save path & filename is determined by a QFileDialog::getSaveFileName
- */
-bool MeasurementData::saveData(QWidget *widget)
+bool MeasurementData::saveData(QString filename)
 {
-    return saveData(widget, data);
-}
+    Q_ASSERT(!data.isEmpty());
 
-/*!
- * \brief MeasurementData::saveData saves all vectors added & meta info in \a filename
- */
-bool MeasurementData::saveData(QWidget *widget, QString filename)
-{
-    return  saveData(widget, filename, data);
-}
-
-/*!
- * \brief MeasurementData::saveData saves all vectors in \a map & meta info.
- */
-bool MeasurementData::saveData(QWidget* widget, QMap<uint, MVector> map)
-{
-    QString path = (saveFilename != "./data/") ? saveFilename : "./data/";
-    QString fileName = QFileDialog::getSaveFileName(widget, QString("Save data"), path, "Data files (*.csv)");
-
-    // no file selected
-    if (fileName.isEmpty() || fileName.endsWith("/"))
-        return false;
-
-    if (fileName.split(".").last() != "csv")
-        fileName += ".csv";
-
-    // update saveFilename
-    saveFilename = fileName;
-    return saveData(widget, fileName, map);
+    return saveData(filename, data);
 }
 
 /*!
  * \brief MeasurementData::saveData saves all vectors in \a map & meta info in \a filename.
  */
-bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVector> map)
+bool MeasurementData::saveData(QString filename, QMap<uint, MVector> map)
 {
-    // filename is directory & based on saveFilename
-    if (filename.endsWith("/") && filename == saveFilename)
-        return saveData(widget, map);
-
     QFile file(filename);
     if (!file.open(QIODevice::WriteOnly))
-    {
-        QMessageBox::information(widget, tr("Unable to open file"),
-            file.errorString());
-        return false;
-    }
+        throw std::runtime_error("Unable to open file: file.errorString()");
 
     QTextStream out(&file);
     // write info
@@ -623,22 +584,12 @@ bool MeasurementData::saveData(QWidget* widget, QString filename, QMap<uint, MVe
 }
 
 /*!
- * \brief MeasurementData::saveSelection saves current selection. Uses QFileDialog::saveFileDialog to determine save filename.
-
- */
-bool MeasurementData::saveSelection(QWidget *widget)
-{
-    Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
-    return saveData(widget, selectedData);
-}
-
-/*!
  * \brief MeasurementData::saveSelection  saves current selection in \a filename.
  */
-bool MeasurementData::saveSelection(QWidget *widget, QString filename)
+bool MeasurementData::saveSelection(QString filename)
 {
     Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
-    return saveData(widget, filename, selectedData);
+    return saveData(filename, selectedData);
 }
 
 /*!
@@ -647,7 +598,7 @@ bool MeasurementData::saveSelection(QWidget *widget, QString filename)
  * \param filename
  * \return
  */
-bool MeasurementData::saveAverageSelectionMeasVector(QWidget *widget, QString filename)
+bool MeasurementData::saveAverageSelectionMeasVector(QString filename)
 {
     Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
 
@@ -656,12 +607,9 @@ bool MeasurementData::saveAverageSelectionMeasVector(QWidget *widget, QString fi
 
     // save average vector in file
     QFile file(filename);
+
     if (!file.open(QIODevice::WriteOnly))
-    {
-        QMessageBox::information(widget, tr("Unable to open file"),
-            file.errorString());
-        return false;
-    }
+        throw std::runtime_error("Unable to open file: file.errorString()");
 
     QTextStream out(&file);
 
@@ -685,7 +633,7 @@ bool MeasurementData::saveAverageSelectionMeasVector(QWidget *widget, QString fi
  * \param filename
  * \return
  */
-bool MeasurementData::saveAverageSelectionFuncVector(QWidget *widget, QString filename)
+bool MeasurementData::saveAverageSelectionFuncVector(QString filename)
 {
     Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
 
@@ -695,12 +643,9 @@ bool MeasurementData::saveAverageSelectionFuncVector(QWidget *widget, QString fi
 
     // save average vector in file
     QFile file(filename);
+
     if (!file.open(QIODevice::WriteOnly))
-    {
-        QMessageBox::information(widget, tr("Unable to open file"),
-            file.errorString());
-        return false;
-    }
+        throw std::runtime_error("Unable to open file: file.errorString()");
 
     QTextStream out(&file);
 

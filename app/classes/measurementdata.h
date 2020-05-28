@@ -117,25 +117,23 @@ public:
      * saves data
      * opens QFileDialog in order to get the save path
      */
-    bool saveData(QWidget* widget);
-    bool saveData(QWidget* widget, QString filename);
+    bool saveData(QString filename);
 
 
     /*
      * saves the content of map
      * opens QFileDialog in order to get the save path
      */
-    bool saveData(QWidget* widget, QMap<uint, MVector> map);
-    bool saveData(QWidget* widget, QString filename, QMap<uint, MVector> map);
+    bool saveData(QString filename, QMap<uint, MVector> map);
 
     /*
      *  saves current selection
      * opens QFileDialog in order to get the save path
      */
-    bool saveSelection(QWidget* widget);
-    bool saveSelection(QWidget* widget, QString filename);
-    bool saveAverageSelectionMeasVector(QWidget* widget, QString filename);
-    bool saveAverageSelectionFuncVector(QWidget* widget, QString filename);
+    bool saveSelection();
+    bool saveSelection(QString filename);
+    bool saveAverageSelectionMeasVector(QString filename);
+    bool saveAverageSelectionFuncVector(QString filename);
 
 //    /*
 //     * calculates average of vectors in range from iterator begin until, but not including, iterator end
@@ -259,6 +257,8 @@ signals:
     void setReplotStatus(bool status);
 
     void dataChangedSet(bool);
+
+    void saveFilenameSet();
 
     void functionalisationChanged();
 
