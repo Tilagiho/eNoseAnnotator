@@ -6,6 +6,8 @@
 #include "../classes/enosecolor.h"
 #include <QTime>
 
+#include "../classes/measurementdata.h"
+
 // static limits
 double LineGraphWidget::maxVal = 90000.0;
 double LineGraphWidget::minVal = 300.0;
@@ -420,7 +422,7 @@ void LineGraphWidget::mouseMoved (QMouseEvent *  event)
                             break;
                         }
                 }
-                if (labelString == "" && detectedClassLabels.contains(xpos))
+                else if (detectedClassLabels.contains(xpos))
                 {
                     for (auto labelRect : detectedClassLabels[xpos].second)
                         if (focusedRect == labelRect)
@@ -458,7 +460,7 @@ void LineGraphWidget::mouseMoved (QMouseEvent *  event)
                 if (nChannels == MVector::nChannels)
                     QToolTip::showText(event->globalPos(), "ch" + QString::number(channel+1));
                 else
-                    QToolTip::showText(event->globalPos(), "f" + QString::number(channel+1));
+                    QToolTip::showText(event->globalPos(), "f" + QString::number(channel));
             }
 
         }
@@ -724,9 +726,21 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
         lastMeasKey = std::round(endIt->key);
     }
 
+    // check if graph is showing funcs or meas vectors
+    auto funcMap = MeasurementData::getFuncMap();
+    auto funcKeys = funcMap.keys();
+    int maxFunc = *std::max_element(funcKeys.begin(), funcKeys.end());
+    bool isFuncGraph = nChannels == maxFunc+1;
+
+    // add values to graph
     int xpos = timestamp-startTimestamp;
+    QList<uint> sensorFailureIndexes;
     for (int i=0; i<nChannels; i++)
     {
+        // if funcGaph: ignore funcs without active channels
+        if (isFuncGraph && funcMap[i] == 0)
+            continue;
+
         // add data point
         if (!isAbsolute)    // not isAbsolute: relative values / %
         {
@@ -745,8 +759,18 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
 
         // emit sensor failures (only for finite values)
         if (useLimits && qIsFinite(measurement[i]) && (measurement[i] < minVal || measurement[i] > maxVal))
-            emit sensorFailure(i);
+            sensorFailureIndexes.append(i);
     }
+
+    if (!sensorFailureIndexes.isEmpty())
+    {
+        std::vector<bool> sensorFailures(64, false);
+        for (uint i : sensorFailureIndexes)
+            sensorFailures[i] = true;
+        emit sensorFailure(sensorFailures);
+
+    }
+
 
     // add annotation labels
     if (!measurement.userAnnotation.isEmpty())

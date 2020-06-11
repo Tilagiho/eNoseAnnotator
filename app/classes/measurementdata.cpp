@@ -20,11 +20,10 @@
 
 QString MeasurementData::funcName = "Custom";
 std::vector<int> MeasurementData::functionalisation(MVector::nChannels, 0);
-
+std::vector<bool> MeasurementData::sensorFailures(MVector::nChannels, 0);
 
 MeasurementData::MeasurementData(QObject *parent, int nChannels) :
-    QObject(parent),
-    sensorFailures(MVector::nChannels, false)
+    QObject(parent)
 {
     // zero init info
     setComment("");
@@ -376,7 +375,7 @@ QMap<int, int> MeasurementData::getFuncMap(const std::vector<int> &funcs, std::v
     return funcMap;
 }
 
-QMap<int, int> MeasurementData::getFuncMap() const
+QMap<int, int> MeasurementData::getFuncMap()
 {
     return getFuncMap(functionalisation, sensorFailures);
 }

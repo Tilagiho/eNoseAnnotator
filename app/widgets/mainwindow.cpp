@@ -221,14 +221,19 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
     // sensor failures detected
-    connect(absLineGraph, &LineGraphWidget::sensorFailure, this, [this](int channel){
-        auto failures = mData->getSensorFailures();
-        if (!failures[channel])
+    connect(absLineGraph, &LineGraphWidget::sensorFailure, this, [this](std::vector<bool> newSensorFailures){
+        Q_ASSERT(newSensorFailures.size() == MVector::nChannels);
+
+        std::vector<bool> oldSensorFailures = mData->getSensorFailures();
+        std::vector<bool> mergedSensorFailures;
+
+        for (uint i=0; i<MVector::nChannels; i++)
+            mergedSensorFailures[i] = oldSensorFailures[i] || newSensorFailures[i];
+
+        if (mergedSensorFailures != oldSensorFailures)
         {
-            qDebug() << "sensor failure detected in channel " << QString::number(channel);
-            failures[channel] = true;
-            mData->setFailures(failures);
-            measInfoWidget->setFailures(failures);
+            mData->setFailures(mergedSensorFailures);
+            measInfoWidget->setFailures(mergedSensorFailures);
         }
     }); // absGraph -> mData
     connect(mData, &MeasurementData::sensorFailuresSet, relLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
@@ -850,7 +855,7 @@ void MainWindow::on_actionSettings_triggered()
         bool oldUseLimits = absLineGraph->getUseLimits();
 
         // recalc sensor failure flags if limits or useLimits changed
-        bool limitsChanged = (newMaxVal != oldMaxVal) || (newMaxVal != oldMinVal);
+        bool limitsChanged = newUseLimits && ((newMaxVal != oldMaxVal) || (newMaxVal != oldMinVal));
         bool useLimitsChanged = newUseLimits != oldUseLimits;
 
         auto sensorFailureFlags = mData->getSensorFailures();

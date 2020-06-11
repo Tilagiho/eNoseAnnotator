@@ -86,7 +86,7 @@ signals:
     void selectionChanged(int, int);
     void dataSelectionChanged(QCPDataSelection);
     void selectionCleared();
-    void sensorFailure(int i);
+    void sensorFailure(std::vector<bool>);
     void requestRedraw();
     void xRangeChanged(const QCPRange new_range);
     void ImageSaveRequested();
@@ -101,7 +101,7 @@ private:
     const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
     const double labelSpace = 0.3;
 
-    bool useLimits = true;
+    bool useLimits = false;
     bool isAbsolute = false;
 
     uint startTimestamp; // timestamp for start of graph
@@ -109,7 +109,7 @@ private:
     bool selectionFlag = false;     // used to avoid looping behaviour when selecting data
     bool replotStatus = true;   // replot() is only active if true
 
-
+    bool isFuncGraph;
 
     std::vector<bool> sensorFailureFlags;
     bool autoMoveGraph = true;

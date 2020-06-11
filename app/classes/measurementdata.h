@@ -171,7 +171,7 @@ public:
 
     static QMap<int, int> getFuncMap(const std::vector<int> &funcs, const std::vector<bool> sensorFailures);
 
-    QMap<int, int> getFuncMap() const;
+    static QMap<int, int> getFuncMap();
 
     bool getSaveRawInput() const;
     void setSaveRawInput(bool value);
@@ -211,6 +211,8 @@ public:
 
     static QString funcName;
     static std::vector<int> functionalisation;
+    static std::vector<bool> sensorFailures;
+
 
 public slots:
     /*
@@ -271,7 +273,6 @@ private:
     bool dataChanged = false;
     QString dataComment = "";
     QString sensorId = "";
-    std::vector<bool> sensorFailures;
     QList<aClass> classList;
 
     QString savefileFormatVersion = "1.0";
