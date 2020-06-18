@@ -256,7 +256,6 @@ ConversionPage::ConversionPage(QWidget *parent):
     connect(&worker, &ConvertWorker::error, this, &ConversionPage::onError);
     thread->start();
 
-
 }
 ConversionPage::~ConversionPage(){
     thread->quit();

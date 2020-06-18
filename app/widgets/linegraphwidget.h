@@ -11,6 +11,28 @@ namespace Ui {
 class LineGraphWidget;
 }
 
+class ReplotWorker: public QObject
+{
+    Q_OBJECT
+
+public:
+    explicit ReplotWorker(QObject *parent = nullptr): QObject(parent)
+    {}
+
+public Q_SLOTS:
+    void replot(Ui::LineGraphWidget *ui);
+
+Q_SIGNALS:
+    void finished(double, double);
+    void error(QString errorMessage);
+
+private:
+    const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
+    const double labelSpace = 0.3;
+
+    QMutex sync;
+};
+
 class LineGraphWidget : public QWidget
 {
     Q_OBJECT
@@ -28,6 +50,7 @@ public:
     void setStartTimestamp(uint timestamp);
     QPair<double, double> getXRange();
     void setXRange(QPair<double, double>);
+    void setYRange(double lower, double upper);
     void setLogXAxis(bool logOn);
     void setMaxVal(double val);
 
@@ -57,7 +80,7 @@ public:
 
     void setNChannels(int value);
 
-public slots:
+public Q_SLOTS:
     void addMeasurement(MVector measurement, uint timestamp, bool rescale=true);   // add single measurement; rescale y-axis if rescale==true
 //    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements
 //    void addMeasurement(QMap<uint, MVector>);
@@ -93,6 +116,8 @@ signals:
 
 private:
     Ui::LineGraphWidget *ui;
+    QThread *thread = nullptr;
+    ReplotWorker worker;
     int nChannels = MVector::nChannels;
 
     const double det_class_tresh = 0.001;   // only classes with values higher than this are shown in the detected class labels

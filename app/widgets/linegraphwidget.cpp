@@ -12,6 +12,9 @@
 double LineGraphWidget::maxVal = 90000.0;
 double LineGraphWidget::minVal = 300.0;
 
+// declare meta type for usage in ReplotWorker
+Q_DECLARE_METATYPE(Ui::LineGraphWidget *);
+
 LineGraphWidget::LineGraphWidget(QWidget *parent, int nChannels) :
     QWidget(parent),
     ui(new Ui::LineGraphWidget),
@@ -259,94 +262,29 @@ void LineGraphWidget::replot(uint timestamp)
     // get current xaxis.range
     auto xRange = ui->chart->xAxis->range();
 
-//    // last and current range are bigger than full graph range
-//    // -> no replot necessary
-//    bool foundRange;
-//    auto graphRange = ui->chart->graph(0)->data()->keyRange(foundRange);
-//    if (foundRange && graphRange.lower < xRange.lower && graphRange.upper > xRange.upper && graphRange.lower < lastRange.lower && graphRange.upper > lastRange.upper)
-//        return;
-
-    // set new y-range
-    double y_lower = 1000;
-    double y_upper = 0;
-
-    // iterate through all data points of first graph
-    QCPGraphDataContainer::const_iterator it = ui->chart->graph(0)->data()->constBegin();
-    QCPGraphDataContainer::const_iterator itEnd = ui->chart->graph(0)->data()->constEnd();
-
-    int index = 0;
-    while (it != itEnd)
-    {
-        // check if data point is in xRange,
-        // if checkAllPoints == false, check if point was NOT in last range
-        bool inXRange = it->key >= xRange.lower && it->key <= xRange.upper;
-        if (inXRange)
-        {
-            // loop through all graphs and check for new high/ low points at index (of it->key)
-            for (int i = 0; i < ui->chart->graphCount(); i++)
-            {
-                // ignore invisible graphs
-                if (!ui->chart->graph(i)->visible())
-                    continue;
-
-                 auto data  = ui->chart->graph(i)->data()->at(index);
-
-                 if (data->value < y_lower )
-                     y_lower = data->value;
-                 if (data->value > y_upper )
-                     y_upper = data->value;
-            }
-        }
-
-        it++;
-        index++;
-    }
-
-    // log plot for big y-intervals
-    if (y_upper-y_lower > 1000.0)
-    {
-        setLogXAxis(true);
-        y_upper *= 1.1;
-        if (y_lower > 0)
-            y_lower *= 0.9;
-        else
-            y_lower *= 1.1;
-    }
-    // normal plot for medium y-intervals
-    else if (y_lower > 100.0)
-    {
-        setLogXAxis(false);
-        y_upper *= 1.2;
-        if (y_lower > 0)
-            y_lower *= 0.8;
-        else
-            y_lower *= 1.1;
-    }
-    // plot around 0 for small y-intervals
-    else
-    {
-        if (y_lower > 0)
-            y_lower *= 0.8;
-        else
-            y_lower *= 1.1;
-        setLogXAxis(false);
-
-        // check for minimal y range
-        if (y_upper < yMin)
-            y_upper = yMin;
-        if (y_lower > -0.8*yMin)
-            y_lower = -yMin*0.8;
-
-        // make space for labels
-        y_upper += labelSpace * (y_upper - y_lower);
-    }
-
-    //set y-range
-    ui->chart->yAxis->setRange(y_lower, y_upper);
-
     // move x-range
     if (autoMoveGraph && timestamp != 0 && timestamp >= xRange.upper+startTimestamp-4 && timestamp <= xRange.upper+startTimestamp)
         ui->chart->xAxis->setRange(xRange.lower+2, xRange.upper+2);
+
+    // init worker thread
+    if (thread == nullptr)
+    {
+        thread = new QThread(this);
+        worker.moveToThread(thread);
+        connect(&worker, &ReplotWorker::finished, this, &LineGraphWidget::setYRange);
+        thread->start();
+
+        qRegisterMetaType<Ui::LineGraphWidget *>("Ui::LineGraphWidget *");
+    }
+
+    // invoke replot in thread
+    QMetaObject::invokeMethod(&worker, "replot",  Qt::AutoConnection, Q_ARG(Ui::LineGraphWidget *, ui));
+}
+
+void LineGraphWidget::setYRange(double y_lower, double y_upper)
+{
+    //set y-range
+    ui->chart->yAxis->setRange(y_lower, y_upper);
 
     redrawLabels();
 
@@ -1101,4 +1039,84 @@ QCPGraph* LineGraphWidget::firstVisibleGraph()
     }
 
     return  firstVisGraph;
+}
+
+void ReplotWorker::replot(Ui::LineGraphWidget *ui)
+{
+    sync.lock();
+    // get current xaxis.range
+    auto xRange = ui->chart->xAxis->range();
+
+//    // last and current range are bigger than full graph range
+//    // -> no replot necessary
+//    bool foundRange;
+//    auto graphRange = ui->chart->graph(0)->data()->keyRange(foundRange);
+//    if (foundRange && graphRange.lower < xRange.lower && graphRange.upper > xRange.upper && graphRange.lower < lastRange.lower && graphRange.upper > lastRange.upper)
+//        return;
+
+    // set new y-range
+    double y_lower = 1000;
+    double y_upper = 0;
+
+    // iterate through all data points of first graph
+    QCPGraphDataContainer::const_iterator it = ui->chart->graph(0)->data()->constBegin();
+    QCPGraphDataContainer::const_iterator itEnd = ui->chart->graph(0)->data()->constEnd();
+
+    int index = 0;
+    while (it != itEnd)
+    {
+        // check if data point is in xRange,
+        // if checkAllPoints == false, check if point was NOT in last range
+        bool inXRange = it->key >= xRange.lower && it->key <= xRange.upper;
+        if (inXRange)
+        {
+            // loop through all graphs and check for new high/ low points at index (of it->key)
+            for (int i = 0; i < ui->chart->graphCount(); i++)
+            {
+                // ignore invisible graphs
+                if (!ui->chart->graph(i)->visible())
+                    continue;
+
+                 auto data  = ui->chart->graph(i)->data()->at(index);
+
+                 if (data->value < y_lower )
+                     y_lower = data->value;
+                 if (data->value > y_upper )
+                     y_upper = data->value;
+            }
+        }
+
+        it++;
+        index++;
+    }
+
+    // normal plot for medium y-intervals
+    if (y_lower > 100.0)
+    {
+        y_upper *= 1.2;
+        if (y_lower > 0)
+            y_lower *= 0.8;
+        else
+            y_lower *= 1.1;
+    }
+    // plot around 0 for small y-intervals
+    else
+    {
+        if (y_lower > 0)
+            y_lower *= 0.8;
+        else
+            y_lower *= 1.1;
+
+        // check for minimal y range
+        if (y_upper < yMin)
+            y_upper = yMin;
+        if (y_lower > -0.8*yMin)
+            y_lower = -yMin*0.8;
+
+        // make space for labels
+        y_upper += labelSpace * (y_upper - y_lower);
+    }
+
+    Q_EMIT finished(y_lower, y_upper);
+    sync.unlock();
 }
