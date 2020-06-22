@@ -50,6 +50,10 @@ LineGraphWidget::LineGraphWidget(QWidget *parent, int nChannels) :
 
 LineGraphWidget::~LineGraphWidget()
 {
+    emit selectionCleared();
+
+    thread->deleteLater();
+    coordText->deleteLater();
     delete ui;
 }
 
@@ -233,6 +237,7 @@ int LineGraphWidget::getNChannels() const
 
 void LineGraphWidget::resetGraph(int channels)
 {
+    QCPDataSelection selection = ui->chart->graph(0)->selection();
     clearGraph(false);
 
     if (channels != nChannels)
@@ -241,6 +246,8 @@ void LineGraphWidget::resetGraph(int channels)
         int graphCount = ui->chart->graphCount();
         for (int i=0; i<graphCount; i++)
             ui->chart->removeGraph(ui->chart->graph(0));
+
+
 
         // add graphs
         nChannels = channels;
@@ -623,6 +630,9 @@ void LineGraphWidget::setUseLimits(bool value)
 
 void LineGraphWidget::clearGraph(bool replot)
 {
+    // signal changes
+    emit selectionCleared();
+
     // clear graphs
     for (int i=0; i<nChannels; i++)
     {

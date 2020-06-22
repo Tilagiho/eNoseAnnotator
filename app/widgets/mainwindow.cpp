@@ -251,6 +251,7 @@ MainWindow::MainWindow(QWidget *parent)
         // update func bar graphs:
         if (!mData->getSelectionMap().isEmpty())
         {
+            funcBarGraph->clearBars();
             MVector selectionVector = mData->getSelectionVector();
 
             funcBarGraph->setBars(selectionVector, failures, funcs);
