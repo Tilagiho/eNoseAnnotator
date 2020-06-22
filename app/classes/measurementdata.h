@@ -356,12 +356,15 @@ public:
 
 private:
     void parseHeader(QString line);
+    void parseFuncs(QString line);
     void parseValues(QString line);
 
     QMap<QString, int> sensorAttributeIndexMap;
     QMap<int, int> resistanceIndexes;
     int t_index = -1;
     uint start_time = 0;
+
+    std::vector<int> functionalistation;
 };
 
 #endif // MEASUREMENTDATA_H

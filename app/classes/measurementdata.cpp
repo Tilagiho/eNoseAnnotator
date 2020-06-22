@@ -18,7 +18,7 @@
  *
  */
 
-QString MeasurementData::funcName = "Custom";
+QString MeasurementData::funcName = "None";
 std::vector<int> MeasurementData::functionalisation(MVector::nChannels, 0);
 std::vector<bool> MeasurementData::sensorFailures(MVector::nChannels, 0);
 
@@ -342,6 +342,15 @@ void MeasurementData::setFunctionalisation(const std::vector<int> &value)
 
     if (value != functionalisation)
     {
+        // set func name
+        if (funcName == "None")
+        {
+            for (uint i=0; i<MVector::nChannels; i++)
+                if (functionalisation[i] != 0)
+                    setFuncName("Custom");
+        }
+
+        // set functionalisation
         functionalisation = value;
         setDataChanged(true);
         emit functionalisationChanged();
@@ -677,6 +686,7 @@ void MeasurementData::copyFrom(MeasurementData *otherMData)
     setComment(otherMData->getComment());
     setSensorId(otherMData->sensorId);
     setSensorFailures(otherMData->getSensorFailures());
+    setFuncName(otherMData->funcName);
 
     // data
     setData(otherMData->getAbsoluteData(), otherMData->getBaseLevelMap());
@@ -1363,6 +1373,13 @@ void LeifFileReader::readFile()
 
     parseHeader(line);
 
+    // read functionalisation
+    if (!in.readLineInto(&line))
+        throw  std::runtime_error(file.fileName().toStdString() + " is empty!");
+    lineCount++;
+    if (line.startsWith(" "));
+    parseFuncs(line);
+
     // read data
     while(in.readLineInto(&line))
     {
@@ -1435,6 +1452,26 @@ void LeifFileReader::parseHeader(QString line)
     emit resetNChannels(resistanceIndexes.size());
     data->resetNChannels();
     data->addAttributes(sensorAttributeIndexMap.keys().toSet());
+}
+
+void LeifFileReader::parseFuncs(QString line)
+{
+    auto resistanceKeys = resistanceIndexes.keys();
+    int maxResChannel = *std::max_element(resistanceKeys.begin(), resistanceKeys.end());
+
+    functionalistation = std::vector<int>(maxResChannel+1, 0);
+    QStringList funcValues = line.split(" ");
+
+    bool readOk = true;
+    for (int channel : resistanceIndexes.keys())
+    {
+        functionalistation[channel] = funcValues[resistanceIndexes[channel]].toInt(&readOk);
+
+        if (!readOk)
+            throw std::runtime_error("Error in line " + QString::number(lineCount+1).toStdString()+ ".\nExpected integer, got\"" + funcValues[channel].toStdString() + "\"!");
+    }
+
+    data->setFunctionalisation(functionalistation);
 }
 
 void LeifFileReader::parseValues(QString line)
