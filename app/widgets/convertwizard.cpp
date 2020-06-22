@@ -9,7 +9,7 @@
 #include "../classes/measurementdata.h"
 #include "functionalisationdialog.h"
 
-std::vector<int> ConvertWizard::functionalisations = std::vector<int>();
+//std::vector<int> ConvertWizard::functionalisations = std::vector<int>();
 
 ConvertWizard::ConvertWizard(QWidget* parent):
     QWizard(parent)
@@ -71,15 +71,15 @@ FileSelectionPage::FileSelectionPage(QWidget *parent):
     sensorIDLineEdit = new QLineEdit();
     sensorIDLineEdit->setText("default");
 
-    // row 4: nChannels
-    nChannelsInfoLabel = new QLabel("Number of channels:");
-    nChannelsSpinBox = new QSpinBox();
-    nChannelsSpinBox->setValue(MVector::nChannels);
+//    // row 4: nChannels
+//    nChannelsInfoLabel = new QLabel("Number of channels:");
+//    nChannelsSpinBox = new QSpinBox();
+//    nChannelsSpinBox->setValue(MVector::nChannels);
 
-    // row 4: functionalisation
-    funcInfoLabel = new QLabel("Functionalisation:");
-    funcLabel = new QLabel("None");
-    funcButton = new QPushButton("...");
+//    // row 4: functionalisation
+//    funcInfoLabel = new QLabel("Functionalisation:");
+//    funcLabel = new QLabel("None");
+//    funcButton = new QPushButton("...");
 
     // connect line edits to signal for checking isComplete()
     connect(sourceFilesLineEdit, &QLineEdit::textChanged, this, [this](QString){
@@ -92,12 +92,12 @@ FileSelectionPage::FileSelectionPage(QWidget *parent):
     // connect widgets to dialogs
     connect(sourceFilesButton, &QPushButton::clicked, this, &FileSelectionPage::getSourceFiles);
     connect(targetDirButton, &QPushButton::clicked, this, &FileSelectionPage::getTargetDir);
-    connect(funcButton, &QPushButton::clicked, this, &FileSelectionPage::getFuncs);
+//    connect(funcButton, &QPushButton::clicked, this, &FileSelectionPage::getFuncs);
 
     // store values for other pages
     registerField("sourceFilenames", sourceFilesLineEdit);
     registerField("targetDir", targetDirLineEdit);
-    registerField("nChannels", nChannelsSpinBox);
+//    registerField("nChannels", nChannelsSpinBox);
     registerField("sensorId", sensorIDLineEdit);
 
 
@@ -114,12 +114,12 @@ FileSelectionPage::FileSelectionPage(QWidget *parent):
     layout->addWidget(sensorInfoLabel, 2, 0);
     layout->addWidget(sensorIDLineEdit, 2, 1);
 
-    layout->addWidget(nChannelsInfoLabel, 3, 0);
-    layout->addWidget(nChannelsSpinBox, 3, 1);
+//    layout->addWidget(nChannelsInfoLabel, 3, 0);
+//    layout->addWidget(nChannelsSpinBox, 3, 1);
 
-    layout->addWidget(funcInfoLabel, 4, 0);
-    layout->addWidget(funcLabel, 4, 1);
-    layout->addWidget(funcButton, 4, 2);
+//    layout->addWidget(funcInfoLabel, 4, 0);
+//    layout->addWidget(funcLabel, 4, 1);
+//    layout->addWidget(funcButton, 4, 2);
 
     setLayout(layout);
 }
@@ -158,13 +158,13 @@ void FileSelectionPage::getTargetDir()
  */
 void FileSelectionPage::getFuncs()
 {
-    FunctionalisationDialog dialog(this, static_cast<ulong>(nChannelsSpinBox->value()));
+//    FunctionalisationDialog dialog(this, static_cast<ulong>(nChannelsSpinBox->value()));
 
-    if (dialog.exec())
-    {
-        ConvertWizard::functionalisations = dialog.getFunctionalisations();
-        funcLabel->setText(dialog.presetName);
-    }
+//    if (dialog.exec())
+//    {
+//        ConvertWizard::functionalisations = dialog.getFunctionalisations();
+//        funcLabel->setText(dialog.presetName);
+//    }
 }
 
 /*!
@@ -176,8 +176,8 @@ bool FileSelectionPage::validatePage()
     // reset label colors
     sourceFilesInfoLabel->setStyleSheet("QLabel {color: black}");
     targetDirInfoLabel->setStyleSheet("QLabel {color: black}");
-    nChannelsInfoLabel->setStyleSheet("QLabel {color: black}");
-    funcInfoLabel->setStyleSheet("QLabel {color: black}");
+//    nChannelsInfoLabel->setStyleSheet("QLabel {color: black}");
+//    funcInfoLabel->setStyleSheet("QLabel {color: black}");
     sensorInfoLabel->setStyleSheet("QLabel {color: black}");
 
     bool isValid = true;
@@ -202,14 +202,14 @@ bool FileSelectionPage::validatePage()
         isValid = false;
     }
 
-    if (ConvertWizard::functionalisations.empty())
-        ConvertWizard::functionalisations = std::vector<int> (nChannelsSpinBox->value(), 0);
-    else if (ConvertWizard::functionalisations.size() != nChannelsSpinBox->value())
-    {
-        isValid = false;
-        nChannelsInfoLabel->setStyleSheet("QLabel {color: red}");
-        funcInfoLabel->setStyleSheet("QLabel {color: red}");
-    }
+//    if (ConvertWizard::functionalisations.empty())
+//        ConvertWizard::functionalisations = std::vector<int> (nChannelsSpinBox->value(), 0);
+//    else if (ConvertWizard::functionalisations.size() != nChannelsSpinBox->value())
+//    {
+//        isValid = false;
+//        nChannelsInfoLabel->setStyleSheet("QLabel {color: red}");
+//        funcInfoLabel->setStyleSheet("QLabel {color: red}");
+//    }
 
     if (sensorIDLineEdit->text().isEmpty())
     {
@@ -363,7 +363,7 @@ void ConvertWorker::convertFile(QString filename, QString targetDir)
     FileReader generalReader(filename);
     FileReader* specificReader = generalReader.getSpecificReader();
 
-    std::vector<int> functionalisation = ConvertWizard::functionalisations;
+//    std::vector<int> functionalisation = ConvertWizard::functionalisations;
 
     // check type of specificFileReader
     switch (specificReader->getType()) {
@@ -381,12 +381,20 @@ void ConvertWorker::convertFile(QString filename, QString targetDir)
     MeasurementData* data = specificReader->getMeasurementData();
 
 
-    if (MVector::nChannels != functionalisation.size())
-        throw std::runtime_error("Error converting file " + QFileInfo(filename).fileName().toStdString() + "\nFunctionalisation incompatible with number of channels!");
+//    if (MVector::nChannels != functionalisation.size())
+//        throw std::runtime_error("Error converting file " + QFileInfo(filename).fileName().toStdString() + "\nFunctionalisation incompatible with number of channels!");
 
-    data->setFunctionalisation(functionalisation);
+//    data->setFunctionalisation(functionalisation);
+
+    if (!filename.endsWith(".csv"))
+    {
+        QStringList filenameList = filename.split(".");
+        filename = filenameList.mid(0, filenameList.size()-1).join(".") + ".csv";
+    }
 
     QFileInfo fileInfo(filename);
+
+
     QString targetFilename = targetDir + "/" + fileInfo.fileName();
 
     data->saveData(targetFilename);

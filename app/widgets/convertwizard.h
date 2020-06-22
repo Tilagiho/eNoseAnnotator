@@ -12,7 +12,7 @@ class ConvertWizard : public QWizard
     Q_OBJECT
 
 public:
-    static std::vector<int> functionalisations;
+//    static std::vector<int> functionalisations;
 
     explicit ConvertWizard(QWidget* parent = nullptr);
     ~ConvertWizard();
@@ -41,15 +41,15 @@ private:
     QLineEdit *targetDirLineEdit;
     QPushButton *targetDirButton;
 
-    QLabel* funcInfoLabel;
-    QLabel* funcLabel;
-    QPushButton* funcButton;
+//    QLabel* funcInfoLabel;
+//    QLabel* funcLabel;
+//    QPushButton* funcButton;
 
     QLabel* sensorInfoLabel;
     QLineEdit *sensorIDLineEdit;
 
-    QLabel* nChannelsInfoLabel;
-    QSpinBox *nChannelsSpinBox;
+//    QLabel* nChannelsInfoLabel;
+//    QSpinBox *nChannelsSpinBox;
 
     void getSourceFiles();
     void getTargetDir();
@@ -110,7 +110,7 @@ private:
 
     QStringList filenames;
     QString targetDir;
-    std::vector<int> functionalisation;
+//    std::vector<int> functionalisation;
     int nChannels = MVector::nChannels;
 };
 

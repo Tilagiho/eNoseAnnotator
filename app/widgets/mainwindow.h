@@ -101,6 +101,8 @@ private:
     DataSource *source = nullptr;
     TorchClassifier *classifier = nullptr;
 
+    bool converterRunning = false;
+
     void closeEvent (QCloseEvent *event);
 
     void createGraphWidgets();

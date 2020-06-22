@@ -1554,8 +1554,11 @@ void MainWindow::on_actionCloseClassifier_triggered()
 
 void MainWindow::on_actionConverter_triggered()
 {
+    // block autoSaving while the converter is running
+    converterRunning = true;
     ConvertWizard* convertWizard = new ConvertWizard(this);
     convertWizard->exec();
+    converterRunning = false;
 }
 
 void MainWindow::updateAutosave()
@@ -1563,7 +1566,7 @@ void MainWindow::updateAutosave()
     QDir(settingsFolder).exists();
     QDir().mkdir(settingsFolder);
 
-    if (mData->isChanged())
+    if (mData->isChanged() && !converterRunning)
     {
         try {
             mData->saveData(settingsFolder + "/" + autosaveName);
