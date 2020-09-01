@@ -474,11 +474,14 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    if (mData != nullptr)
+        delete mData;
+    if (source != nullptr)
+        delete source;
+    if (classifier != nullptr)
+        delete classifier;
 
-    delete mData;
-    delete source;
-    delete classifier;
+    delete ui;
 }
 
 void MainWindow::setTitle(bool dataChanged)

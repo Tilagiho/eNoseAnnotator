@@ -67,7 +67,6 @@ const QMap<uint, MVector> MeasurementData::getFuncData()
     return funcData;
 }
 
-
 /*!
  * \brief MeasurementData::getAbsoluteData returns a map of the vectors contained in the MeasurementData as absolute vectors
  * \return
@@ -135,7 +134,7 @@ void MeasurementData::clearSelection()
 
 /*!
  * \brief MeasurementData::addMeasurement adds \a vector at \a timestamp
- * if the vector map was preciously empty, set  \a vector as start timestamp of the measurement
+ * if the vector map was previously empty, set  \a vector as start timestamp of the measurement
  * \param timestamp
  * \param vector
  */
