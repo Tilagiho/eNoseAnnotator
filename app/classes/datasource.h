@@ -31,6 +31,7 @@ public:
     static const uint nBaseVectors;
 
     DataSource(int sensorTimeout, int sensorNChannels);
+    ~DataSource();
 
     virtual Status status();
 
@@ -71,10 +72,14 @@ signals:
     void statusSet(Status status);
 
 public slots:
+    virtual void init() = 0;
     virtual void start() = 0;
     virtual void pause() = 0;
     virtual void stop() = 0;
     virtual void reset() = 0;
+
+private slots:
+    void started();
 
 protected:
     /*!
@@ -92,11 +97,13 @@ protected:
      * \brief timer triggers error handling when timed out.
      * timer is reset every time a measurement was reveived. Times out when connection is broken.
      */
-    QTimer timer;
+    QTimer* timer = nullptr;
 
     QMap<uint, MVector> baselevelVectorMap; // used to store the first nBaseVectors vectors in order to calculate the base vector
 
     void setStatus(Status status);
 };
+
+Q_DECLARE_METATYPE(DataSource::Status);
 
 #endif // DATASOURCE_H

@@ -75,4 +75,6 @@ private:
     std::vector<double> vector;
 };
 
+Q_DECLARE_METATYPE(MVector);
+
 #endif // MVECTOR_H

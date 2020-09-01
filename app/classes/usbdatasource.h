@@ -32,6 +32,7 @@ public:
     void reconnect();
 
 public slots:
+    void init();
     void start();
     void pause();
     void stop();

@@ -13,6 +13,8 @@
 #include "sourcedialog.h"
 #include "convertwizard.h"
 
+#include <QMetaObject>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow)
@@ -21,6 +23,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     this->setWindowIcon(QIcon(":/icons/icon"));
 
+    // init graph widgets
     createGraphWidgets();
 
     // init statusbar
@@ -474,9 +477,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+
     if (mData != nullptr)
         delete mData;
     if (source != nullptr)
+        if (sourceThread.isRunning())
+            sourceThread.quit();
         delete source;
     if (classifier != nullptr)
         delete classifier;
@@ -787,16 +793,18 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
                    if (answer != QMessageBox::StandardButton::Yes)
                        return; // keep current data source
 
-                   source->stop();
+                   QMetaObject::invokeMethod(source, "stop", Qt::QueuedConnection);
+
                 }
                 // delete old source
+                sourceThread.quit();
                 delete source;
                 source = nullptr;
             }
             // sensor Id was changed
             else if (sensorId != mData->getSensorId() || dialog->getTimeout() != source->getTimeout())
             {
-                mData->setSensorId(sensorId);
+                mData->setSensorId(sensorId);              
                 source->setTimeout(dialog->getTimeout());
             }
         }
@@ -819,6 +827,11 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
                 source = new FakeDatasource(dialog->getTimeout(), dialog->getNChannels());
             }
 
+            // run source in separate thread
+            source->moveToThread(&sourceThread);
+            connect(&sourceThread, SIGNAL(started()), source, SLOT(started()));
+            sourceThread.start();
+
             // make connections
             makeSourceConnections();
 
@@ -826,7 +839,7 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
             sensorConnected(sensorId);
         } else if (source->status() == DataSource::Status::CONNECTION_ERROR)
         {
-            source->reconnect();
+            QMetaObject::invokeMethod(source, "reconnect", Qt::QueuedConnection);
         }
     }
 
@@ -916,7 +929,6 @@ void MainWindow::on_actionSettings_triggered()
                                     sensorFailureFlags[i] = true;
                         }
                     }
-
                 }
             }
 
@@ -939,13 +951,13 @@ void MainWindow::on_actionStart_triggered()
     // -> pause connection
     case DataSource::Status::RECEIVING_DATA:
     case DataSource::Status::SET_BASEVECTOR:
-        source->pause();
+        QMetaObject::invokeMethod(source, "pause", Qt::QueuedConnection);
         break;
 
     // measurement paused
     // -> resume measurement
     case DataSource::Status::PAUSED:
-        source->start();
+        QMetaObject::invokeMethod(source, "start", Qt::QueuedConnection);
         break;
 
     // no measurement running
@@ -998,8 +1010,7 @@ void MainWindow::on_actionStart_triggered()
         mData->setSensorId(sensorId);
         mData->setDataChanged(false);
 
-        source->start();
-
+        QMetaObject::invokeMethod(source, "start", Qt::QueuedConnection);
         qDebug() << "New measurement started!";
         break;
     }
@@ -1015,7 +1026,7 @@ void MainWindow::on_actionStop_triggered()
     if (source->sourceType() == DataSource::SourceType::USB)
         Q_ASSERT("Error: Connection is not open!" && static_cast<USBDataSource*>(source)->getSerial()->isOpen());
 
-    source->stop();
+    QMetaObject::invokeMethod(source, "stop", Qt::QueuedConnection);
 }
 
 void MainWindow::on_actionReset_triggered()
@@ -1025,7 +1036,8 @@ void MainWindow::on_actionReset_triggered()
     if (source->sourceType() == DataSource::SourceType::USB)
         Q_ASSERT("Error: Connection is not open!" && static_cast<USBDataSource*>(source)->getSerial()->isOpen());
 
-    source->reset();
+    QMetaObject::invokeMethod(source, "reset", Qt::QueuedConnection);
+
 }
 
 void MainWindow::on_actionAnnotate_selection_triggered()
@@ -1489,7 +1501,8 @@ void MainWindow::on_actionReconnect_triggered()
     Q_ASSERT(source->status() == DataSource::Status::CONNECTION_ERROR);
     // reconnect sensor
     qDebug() << "Reconnecting Sensor \"" << source->identifier() << "\"";
-    source->reconnect();
+
+    QMetaObject::invokeMethod(source, "reconnect", Qt::QueuedConnection);
 }
 
 void MainWindow::classifyMeasurement()

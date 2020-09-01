@@ -8,17 +8,19 @@ class FakeDatasource : public DataSource
 {
 public:
     FakeDatasource(int timeout, int sensorNChannels);
+    ~FakeDatasource();
 
-    void reconnect();
+    void reconnect() override;
 
-    SourceType sourceType();
-    QString identifier();
+    SourceType sourceType() override;
+    QString identifier() override;
 
 public slots:
-    void start();
-    void pause();
-    void stop();
-     void reset();
+    void init() override;
+    void start() override;
+    void pause() override;
+    void stop() override;
+    void reset() override;
 
 
 private slots:
@@ -27,7 +29,8 @@ private slots:
 
 private:
     Status nextStatus;
-    QTimer statusTimer{}, measTimer{};
+    QTimer* statusTimer = nullptr;
+    QTimer* measTimer = nullptr;
 
     MVector generateMeasurement(double randRange=300.0);
 };

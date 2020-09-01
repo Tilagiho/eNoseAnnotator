@@ -99,6 +99,7 @@ private:
 
     MeasurementData *mData = nullptr;
     DataSource *source = nullptr;
+    QThread sourceThread;
     TorchClassifier *classifier = nullptr;
 
     bool converterRunning = false;

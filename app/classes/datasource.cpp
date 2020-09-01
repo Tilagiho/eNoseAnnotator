@@ -13,7 +13,15 @@
 DataSource::DataSource(int sensorTimeout, int sensorNChannels):
     timeout(sensorTimeout),
     nChannels(sensorNChannels)
-{}
+{
+    qRegisterMetaType<Status>("Status");
+    qRegisterMetaType<MVector>("MVector");
+}
+
+DataSource::~DataSource()
+{
+    timer->deleteLater();
+}
 
 /*!
  * \brief DataSource::nBaseVectors defines how many vectors are used to calculate the base vector (R0).
@@ -53,4 +61,10 @@ void DataSource::setStatus(DataSource::Status newStatus)
         connectionStatus = newStatus;
         emit statusSet(newStatus);
     }
+}
+
+void DataSource::started()
+{
+    timer = new QTimer();
+    init();
 }

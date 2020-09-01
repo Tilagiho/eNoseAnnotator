@@ -13,10 +13,6 @@ USBDataSource::USBDataSource(USBDataSource::Settings settings, int sensorTimeout
     Q_ASSERT("Invalid settings. Serial port name has to be specified!" && settings.portName != "");
 
     timeout = sensorTimeout;
-    serial = new QSerialPort();
-
-    makeConnections();
-    openSerialPort();
 }
 
 USBDataSource::~USBDataSource()
@@ -25,6 +21,14 @@ USBDataSource::~USBDataSource()
     closeSerialPort();
     delete serial;
 }
+
+void USBDataSource::init()
+{
+    serial = new QSerialPort();
+    makeConnections();
+    openSerialPort();
+}
+
 
 DataSource::Status USBDataSource::status()
 {
@@ -53,7 +57,7 @@ void USBDataSource::makeConnections()
 {
     connect(serial, &QSerialPort::readyRead, this, &USBDataSource::handleReadyRead);
     connect(serial, &QSerialPort::errorOccurred, this, &USBDataSource::handleError);
-    connect(&timer, &QTimer::timeout, this, &USBDataSource::handleTimeout);
+    connect(timer, &QTimer::timeout, this, &USBDataSource::handleTimeout);
 }
 
 /*!
@@ -63,7 +67,7 @@ void USBDataSource::closeConnections()
 {
     disconnect(serial, &QSerialPort::readyRead, this, &USBDataSource::handleReadyRead);
     disconnect(serial, &QSerialPort::errorOccurred, this, &USBDataSource::handleError);
-    disconnect(&timer, &QTimer::timeout, this, &USBDataSource::handleTimeout);
+    disconnect(timer, &QTimer::timeout, this, &USBDataSource::handleTimeout);
 }
 
 QSerialPort *USBDataSource::getSerial() const
@@ -90,8 +94,8 @@ void USBDataSource::openSerialPort()
         emitData = false;
 
         // set timer for timeout errors
-        timer.setSingleShot(true);
-        timer.start(timeout*1000);
+        timer->setSingleShot(true);
+        timer->start(timeout*1000);
     } else
     {
         emit error("Cannot open USB connection on port " + settings.portName);
@@ -125,7 +129,7 @@ void USBDataSource::closeSerialPort()
 
         setStatus (Status::NOT_CONNECTED);
 
-        timer.stop();
+        timer->stop();
     }
 }
 
@@ -185,7 +189,7 @@ void USBDataSource::processLine(const QByteArray &data)
             setStatus(DataSource::Status::CONNECTED);
     }
     // reset timer
-    timer.start(timeout*1000);
+    timer->start(timeout*1000);
 
     if (!emitData)
         return;

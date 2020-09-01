@@ -8,15 +8,28 @@
 FakeDatasource::FakeDatasource(int sensorTimeout, int sensorNChannels):
     DataSource(sensorTimeout, sensorNChannels)
 {
-    connect(&statusTimer, &QTimer::timeout, this, &FakeDatasource::setNextStatus);
-    connect(&measTimer, &QTimer::timeout, this, &FakeDatasource::emitMeasurement);
+}
+
+FakeDatasource::~FakeDatasource()
+{
+    statusTimer->deleteLater();
+    measTimer->deleteLater();
+}
+
+void FakeDatasource::init()
+{
+    statusTimer = new QTimer();
+    measTimer = new QTimer();
+
+    connect(statusTimer, &QTimer::timeout, this, &FakeDatasource::setNextStatus);
+    connect(measTimer, &QTimer::timeout, this, &FakeDatasource::emitMeasurement);
 
     setStatus(Status::CONNECTING);
     nextStatus = Status::CONNECTED;
 
     // set timer
-    statusTimer.setSingleShot(true);
-    statusTimer.start(timeout*1000);
+    statusTimer->setSingleShot(true);
+    statusTimer->start(timeout*1000);
 }
 
 void FakeDatasource::setNextStatus()
@@ -34,7 +47,7 @@ void FakeDatasource::setNextStatus()
         if (nextStatus == Status::CONNECTING)
         {
             nextStatus = Status::CONNECTED;
-            statusTimer.start(timeout*1000);
+            statusTimer->start(timeout*1000);
         }
         break;
     case Status::CONNECTING:
@@ -45,15 +58,15 @@ void FakeDatasource::setNextStatus()
         else if (nextStatus == Status::RECEIVING_DATA)
         {
             nextStatus = Status::CONNECTION_ERROR;
-            statusTimer.start(30000);
-            measTimer.start(2000);
+            statusTimer->start(30000);
+            measTimer->start(2000);
         }
         break;
     case Status::CONNECTED:
         if (nextStatus == Status::SET_BASEVECTOR)
         {
             nextStatus = Status::RECEIVING_DATA;
-            statusTimer.start(timeout*1000);
+            statusTimer->start(timeout*1000);
         }
         break;
     case Status::SET_BASEVECTOR:
@@ -63,8 +76,8 @@ void FakeDatasource::setNextStatus()
         {
             emit baseVectorSet(QDateTime::currentDateTime().toTime_t(), generateMeasurement(50.0));
             nextStatus = Status::CONNECTION_ERROR;
-            statusTimer.start(30000);
-            measTimer.start(2000);
+            statusTimer->start(30000);
+            measTimer->start(2000);
         }
         break;
     case Status::RECEIVING_DATA:
@@ -72,11 +85,10 @@ void FakeDatasource::setNextStatus()
         //      stop measurement timer
         if (nextStatus == Status::CONNECTION_ERROR)
         {
-            measTimer.stop();
+            measTimer->stop();
         }
         break;
     }
-
 }
 
 MVector FakeDatasource::generateMeasurement(double randRange)
@@ -105,7 +117,7 @@ void FakeDatasource::start()
     {
         setStatus(Status::SET_BASEVECTOR);
     }
-    statusTimer.start(timeout*1000);
+    statusTimer->start(timeout*1000/2);
     nextStatus = Status::RECEIVING_DATA;
 }
 
@@ -113,7 +125,7 @@ void FakeDatasource::pause()
 {
     Q_ASSERT(status() == Status::RECEIVING_DATA);
 
-    measTimer.stop();
+    measTimer->stop();
     setStatus(Status::PAUSED);
 }
 
@@ -122,19 +134,19 @@ void FakeDatasource::reset()
     Q_ASSERT(status() == Status::RECEIVING_DATA || status() == Status::PAUSED);
 
     if (status() == Status::RECEIVING_DATA)
-        measTimer.stop();
+        measTimer->stop();
 
     setStatus(Status::SET_BASEVECTOR);
     nextStatus = Status::RECEIVING_DATA;
-    statusTimer.start(timeout*1000);
+    statusTimer->start(timeout*1000/2);
 }
 
 void FakeDatasource::stop()
 {
     Q_ASSERT(status() == Status::RECEIVING_DATA || status() == Status::PAUSED);
 
-    measTimer.stop();
-    statusTimer.stop();
+    measTimer->stop();
+    statusTimer->stop();
     setStatus(Status::CONNECTED);
 }
 
@@ -144,7 +156,7 @@ void FakeDatasource::reconnect()
 
     setStatus(Status::CONNECTING);
     nextStatus = Status::RECEIVING_DATA;
-    statusTimer.start(timeout*1000);
+    statusTimer->start(timeout*1000);
 }
 
 QString FakeDatasource::identifier()
