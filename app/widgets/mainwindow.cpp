@@ -723,12 +723,21 @@ void MainWindow::resetNChannels(uint newNChannels)
 
 void MainWindow::on_actionLoad_triggered()
 {
+    // measurement is running: stop measurement?
+    if (source != nullptr && source->measIsRunning())
+    {
+        if (QMessageBox::question(this, tr("Stop measurement"),
+            "A measurement is currently running. Do you want to stop it?") == QMessageBox::Yes)
+            on_actionStop_triggered();
+        else
+            return;
+    }
     // load data
     // ask to save old data
     if (!mData->getAbsoluteData().isEmpty() && mData->isChanged())
     {
         if (QMessageBox::question(this, tr("Save data"),
-            "Do you want to save the current measurement before loading data?\t") == QMessageBox::Ok)
+            "Do you want to save the current measurement before loading data?\t") == QMessageBox::Yes)
             saveData();
     }
 
@@ -791,7 +800,7 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
             {
                 // measurement running:
                // -> ask if measurement should be stopped
-               if (source->status() == DataSource::Status::RECEIVING_DATA)
+               if (source->measIsRunning())
                {
                    QMessageBox::StandardButton answer = QMessageBox::question(this, "Stop Measurement", "You selected a new connection while a measurement is running.\nDo you want to stop the measurement in order to use the new connection?");
 
@@ -1039,7 +1048,7 @@ void MainWindow::on_actionStart_triggered()
 void MainWindow::on_actionStop_triggered()
 {
     Q_ASSERT("Error: No connection was specified!" && source!=nullptr);
-    Q_ASSERT("Error: Cannot stop non-active connection!" && (source->status() == DataSource::Status::RECEIVING_DATA || source->status() == DataSource::Status::SET_BASEVECTOR || source->status() == DataSource::Status::PAUSED));
+    Q_ASSERT("Error: Cannot stop non-active connection!" && source->measIsRunning());
     if (source->sourceType() == DataSource::SourceType::USB)
         Q_ASSERT("Error: Connection is not open!" && static_cast<USBDataSource*>(source)->getSerial()->isOpen());
 
@@ -1049,7 +1058,7 @@ void MainWindow::on_actionStop_triggered()
 void MainWindow::on_actionReset_triggered()
 {
     Q_ASSERT("Error: No connection was specified!" && source!=nullptr);
-    Q_ASSERT("Error: Cannot stop non-active connection!" && source->status() == DataSource::Status::RECEIVING_DATA || source->status() == DataSource::Status::PAUSED);
+    Q_ASSERT("Error: Cannot stop non-active connection!" && source->measIsRunning());
     if (source->sourceType() == DataSource::SourceType::USB)
         Q_ASSERT("Error: Connection is not open!" && static_cast<USBDataSource*>(source)->getSerial()->isOpen());
 

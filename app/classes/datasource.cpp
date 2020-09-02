@@ -34,6 +34,11 @@ DataSource::Status DataSource::status()
     return connectionStatus;
 }
 
+bool DataSource::measIsRunning()
+{
+    return connectionStatus == DataSource::Status::RECEIVING_DATA || connectionStatus == DataSource::Status::SET_BASEVECTOR || connectionStatus == DataSource::Status::PAUSED;
+}
+
 int DataSource::getNChannels() const
 {
     return nChannels;

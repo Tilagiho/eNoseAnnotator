@@ -34,6 +34,7 @@ public:
     ~DataSource();
 
     virtual Status status();
+    bool measIsRunning();
 
 
     virtual SourceType sourceType() = 0;
