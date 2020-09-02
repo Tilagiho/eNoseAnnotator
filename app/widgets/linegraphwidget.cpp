@@ -50,9 +50,10 @@ LineGraphWidget::LineGraphWidget(QWidget *parent, int nChannels) :
 
 LineGraphWidget::~LineGraphWidget()
 {
-    emit selectionCleared();
-
-    thread->deleteLater();
+    if (worker != nullptr)
+    {
+        worker->deleteLater();
+    }
     coordText->deleteLater();
     delete ui;
 }
@@ -276,16 +277,19 @@ void LineGraphWidget::replot(uint timestamp)
     // init worker thread
     if (thread == nullptr)
     {
-        thread = new QThread(this);
-        worker.moveToThread(thread);
-        connect(&worker, &ReplotWorker::finished, this, &LineGraphWidget::setYRange);
-        thread->start();
+        thread = new QThread;
+        worker = new ReplotWorker;
+        worker->moveToThread(thread);
+        connect(worker, &ReplotWorker::finished, this, &LineGraphWidget::setYRange);
+        connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));   // end thread when source is deleted
+        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater())); // delete thread when finishes
+        thread->start();      
 
         qRegisterMetaType<Ui::LineGraphWidget *>("Ui::LineGraphWidget *");
     }
 
     // invoke replot in thread
-    QMetaObject::invokeMethod(&worker, "replot",  Qt::AutoConnection, Q_ARG(Ui::LineGraphWidget *, ui));
+    QMetaObject::invokeMethod(worker, "replot",  Qt::AutoConnection, Q_ARG(Ui::LineGraphWidget *, ui));
 }
 
 void LineGraphWidget::setYRange(double y_lower, double y_upper)

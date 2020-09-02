@@ -22,6 +22,7 @@ public:
 public Q_SLOTS:
     void replot(Ui::LineGraphWidget *ui);
 
+
 Q_SIGNALS:
     void finished(double, double);
     void error(QString errorMessage);
@@ -117,7 +118,7 @@ signals:
 private:
     Ui::LineGraphWidget *ui;
     QThread *thread = nullptr;
-    ReplotWorker worker;
+    ReplotWorker* worker = nullptr;
     int nChannels = MVector::nChannels;
 
     const double det_class_tresh = 0.001;   // only classes with values higher than this are shown in the detected class labels
