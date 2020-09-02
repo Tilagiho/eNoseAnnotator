@@ -359,6 +359,7 @@ void BarGraphWidget::resetColors()
 
 void BarGraphWidget::resetNChannels()
 {
+    clearBars();
     deleteBars();
     initGraph();
 }

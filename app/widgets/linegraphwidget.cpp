@@ -248,8 +248,6 @@ void LineGraphWidget::resetGraph(int channels)
         for (int i=0; i<graphCount; i++)
             ui->chart->removeGraph(ui->chart->graph(0));
 
-
-
         // add graphs
         nChannels = channels;
         setupGraph();
