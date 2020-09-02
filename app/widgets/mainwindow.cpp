@@ -593,6 +593,8 @@ void MainWindow::on_actionsave_selection_triggered()
 
 void MainWindow::loadData(QString fileName)
 {
+    auto graphRange = funcLineGraph->getXRange();
+
     FileReader* specificReader = nullptr;
     try {
         // use general reader to get specific reader for the format of filename
@@ -637,6 +639,7 @@ void MainWindow::loadData(QString fileName)
     }
     catch (std::runtime_error e)
     {
+        funcLineGraph->setXRange(graphRange);
         QMessageBox::critical(this, "Error loading measurement", e.what());
     }
 
