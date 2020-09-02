@@ -196,12 +196,12 @@ void USBDataSource::processLine(const QByteArray &data)
 
     QString line(data);
 
-    qDebug() << line;
+//    qDebug() << line;
     if (line.startsWith("count"))
     {
         uint timestamp = QDateTime::currentDateTime().toTime_t();
 
-        qDebug() << timestamp << ": Received new vector";
+//        qDebug() << timestamp << ": Received new vector";
 
         // line looks like: count=___,var1=____._,var2=____._,....
         QStringList dataList = line.split(',');
@@ -214,7 +214,7 @@ void USBDataSource::processLine(const QByteArray &data)
         int count = valueList[0].toInt();
         MVector vector = getVector(valueList);
 
-        qDebug() << vector.toString();
+//        qDebug() << vector.toString();
 
         if (startCount == 0)    // first count
         {

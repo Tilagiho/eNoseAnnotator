@@ -134,8 +134,6 @@ private:
     bool selectionFlag = false;     // used to avoid looping behaviour when selecting data
     bool replotStatus = true;   // replot() is only active if true
 
-    bool isFuncGraph;
-
     std::vector<bool> sensorFailureFlags;
     bool autoMoveGraph = true;
 

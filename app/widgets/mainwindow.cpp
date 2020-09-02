@@ -231,7 +231,7 @@ MainWindow::MainWindow(QWidget *parent)
         std::vector<bool> mergedSensorFailures;
 
         for (uint i=0; i<MVector::nChannels; i++)
-            mergedSensorFailures[i] = oldSensorFailures[i] || newSensorFailures[i];
+            mergedSensorFailures.push_back(oldSensorFailures[i] || newSensorFailures[i]);
 
         if (mergedSensorFailures != oldSensorFailures)
         {
@@ -242,23 +242,27 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::sensorFailuresSet, relLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
     connect(mData, &MeasurementData::sensorFailuresSet, absLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
     connect(mData, &MeasurementData::sensorFailuresSet, this, [this](std::vector<bool>){
-        // update func line graph:
-        funcLineGraph->clearGraph();
-
-        auto data = mData->getRelativeData();
-        auto funcs = mData->getFunctionalisation();
-        auto failures = mData->getSensorFailures();
-
-        funcLineGraph->setData(mData->getFuncData());
-
-        // update func bar graphs:
-        if (!mData->getSelectionMap().isEmpty())
+        if (mData->getFuncMap().size() > 1)
         {
-            funcBarGraph->clearBars();
-            MVector selectionVector = mData->getSelectionVector();
+            // update func line graph:
+            funcLineGraph->clearGraph();
 
-            funcBarGraph->setBars(selectionVector, failures, funcs);
-        }
+            auto data = mData->getRelativeData();
+            auto funcs = mData->getFunctionalisation();
+            auto failures = mData->getSensorFailures();
+
+            funcLineGraph->setData(mData->getFuncData());
+
+            // update func bar graphs:
+            if (!mData->getSelectionMap().isEmpty())
+            {
+                funcBarGraph->clearBars();
+                MVector selectionVector = mData->getSelectionVector();
+
+                funcBarGraph->setBars(selectionVector, failures, funcs);
+            }
+        } else
+            funcLineGraph->setSensorFailureFlags(mData->getSensorFailures());
     });     // update functionalisation graphs
 
 
