@@ -35,7 +35,6 @@ public:
 
     virtual Status status();
 
-    virtual void reconnect() = 0;
 
     virtual SourceType sourceType() = 0;
     virtual QString identifier() = 0;
@@ -77,6 +76,7 @@ public slots:
     virtual void pause() = 0;
     virtual void stop() = 0;
     virtual void reset() = 0;
+    virtual void reconnect() = 0;
 
 private slots:
     void started();

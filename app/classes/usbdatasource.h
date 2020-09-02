@@ -29,14 +29,13 @@ public:
 
     QSerialPort *getSerial() const;
 
-    void reconnect();
-
 public slots:
     void init();
     void start();
     void pause();
     void stop();
     void reset();
+    void reconnect();
 
 private slots:
     void handleReadyRead();

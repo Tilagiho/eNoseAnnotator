@@ -477,13 +477,11 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-
     if (mData != nullptr)
         delete mData;
     if (source != nullptr)
-        if (sourceThread.isRunning())
-            sourceThread.quit();
-        delete source;
+        source->deleteLater();
+
     if (classifier != nullptr)
         delete classifier;
 
@@ -797,10 +795,11 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
 
                 }
                 // delete old source
-                sourceThread.quit();
-                delete source;
+                source->deleteLater();
                 source = nullptr;
+                sourceThread = nullptr;
             }
+
             // sensor Id was changed
             else if (sensorId != mData->getSensorId() || dialog->getTimeout() != source->getTimeout())
             {
@@ -813,6 +812,7 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
         // -> init new source
         if (source == nullptr)
         {
+            sourceThread = new QThread();
             // usb source:
             if (sourceType == DataSource::SourceType::USB)
             {
@@ -828,9 +828,13 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
             }
 
             // run source in separate thread
-            source->moveToThread(&sourceThread);
-            connect(&sourceThread, SIGNAL(started()), source, SLOT(started()));
-            sourceThread.start();
+            source->moveToThread(sourceThread);
+
+            connect(sourceThread, SIGNAL(started()), source, SLOT(started())); // init source when thread was started
+            connect(source, SIGNAL(destroyed()), sourceThread, SLOT(quit()));   // end thread when source is deleted
+            connect(sourceThread, SIGNAL(finished()), sourceThread, SLOT(deleteLater())); // delete thread when finishes
+
+            sourceThread->start();
 
             // make connections
             makeSourceConnections();
@@ -973,7 +977,7 @@ void MainWindow::on_actionStart_triggered()
         }
 
         // clear data for new measurement
-        clearData();
+//        clearData();
 
 
         // if nChannels has to be changed
@@ -1004,10 +1008,16 @@ void MainWindow::on_actionStart_triggered()
         // update funcLineGraph
         updateFuncGraph();
 
-        // clear data, init with sensor id, set dataChanged to false
+        // clear data, init with sensor id, comment & sensor failures, set dataChanged to false
         QString sensorId = mData->getSensorId();
+        QString comment = mData->getComment();
+        auto sensorFailures = mData->getSensorFailures();
+
         clearData();
+
         mData->setSensorId(sensorId);
+        mData->setComment(comment);
+        mData->setSensorFailures(sensorFailures);
         mData->setDataChanged(false);
 
         QMetaObject::invokeMethod(source, "start", Qt::QueuedConnection);
