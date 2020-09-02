@@ -15,16 +15,17 @@ BASE_GIT_COMMAND = git
 GIT_VERSION = $$system($$BASE_GIT_COMMAND describe 2> $$NULL_DEVICE)
 
 # add commit count since last annotated tag
-GIT_COMMIT_COUNT = $$system($$BASE_GIT_COMMAND rev-list $(git describe --abbrev=0)..HEAD --count 2> $$NULL_DEVICE)
-GIT_VERSION = "$${GIT_VERSION}_$${GIT_COMMIT_COUNT}"
+# GIT_COMMIT_COUNT = $$system($$BASE_GIT_COMMAND rev-list $(git describe --abbrev=0)..HEAD --count 2> $$NULL_DEVICE)
+# GIT_VERSION = "$${GIT_VERSION}_$${GIT_COMMIT_COUNT}"
 
 # Now we are ready to pass parsed version to Qt
-VERSION = $$GIT_VERSION
-win32 { # On windows version can only be numerical so remove commit hash, the prefix "v" & _ in front of the commit count
-    VERSION ~= s/\.\d+\.[a-f0-9]{6,}//
-    VERSION ~= s/v//
-    VERSION ~= s/_/"."/
-}
+# VERSION = $$GIT_VERSION
+# win32 { # On windows version can only be numerical so remove commit hash, the prefix "v" & _ in front of the commit count
+#    VERSION ~= s/\.\d+\.[a-f0-9]{6,}//
+#    VERSION ~= s/v//
+#    VERSION ~= s/_/"."/
+#    VERSION ~= s/[a-z0-9]{8}//
+# }
 
 # Adding C preprocessor #DEFINE so we can use it in C++ code
 # also here we want full version on every system so using GIT_VERSION
