@@ -493,8 +493,6 @@ bool MeasurementData::contains(uint timestamp)
 
 bool MeasurementData::saveData(QString filename)
 {
-    Q_ASSERT(!data.isEmpty());
-
     return saveData(filename, data);
 }
 

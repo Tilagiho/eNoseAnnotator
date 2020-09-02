@@ -540,9 +540,20 @@ void MainWindow::initialize()
     QFile autosaveFile(settingsFolder + "/" + autosaveName);
     if (autosaveFile.exists())
     {
-        QString question = "The program was terminated without saving changes in the last measurement.\nDo you want to load the autosave of the measurement?";
-        auto ans = QMessageBox::question(this, "Load autosave", question);
+        QMessageBox mBox;
+        mBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        QString infoText = "The program was terminated without saving changes in the last measurement.\nDo you want to load the autosave of the measurement?";
+        mBox.setText(infoText);
+        mBox.setWindowTitle("Restore autosave");
+        mBox.setIcon(QMessageBox::Question);
 
+
+        QFileInfo info(autosaveFile);
+        QLocale locale = this->locale();
+        QString sizeText = locale.formattedDataSize(info.size());
+        mBox.setDetailedText("Autosave: " + info.lastModified().toString() + " - " + sizeText);
+
+        auto ans = mBox.exec();
         if (ans == QMessageBox::StandardButton::Yes)
         {
             QString prevSaveFile = mData->getSaveFilename();
