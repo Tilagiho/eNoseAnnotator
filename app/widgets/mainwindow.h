@@ -77,10 +77,10 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QSettings settings;
 
-    QString dataFolder = "data";
-    QString settingsFolder = ".settings";
     QString autosaveName = "autosave.csv";
+    QString autosavePath;
     uint autosaveIntervall = 1;             // in minutes
     QTimer autosaveTimer;
 
@@ -132,13 +132,15 @@ private:
 
     void saveData(bool forceDialog = false);
 
-    void saveSettings();
-
     void loadSettings();
+
+    void initSettings();
 
     void resetNChannels(uint newNChannels);
 
+    void saveDataDir();
 
+    void setFunctionalisation();
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);

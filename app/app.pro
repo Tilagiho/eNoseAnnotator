@@ -79,6 +79,7 @@ HEADERS += \
     classes/aclass.h \
     classes/annotation.h \
     classes/datasource.h \
+    classes/defaultSettings.h \
     classes/enosecolor.h \
     classes/fakedatasource.h \
     classes/measurementdata.h \

@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "../classes/defaultSettings.h"
 #include "../classes/datasource.h"
 #include "../classes/usbdatasource.h"
 #include "../classes/fakedatasource.h"
@@ -22,6 +23,13 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     this->setWindowIcon(QIcon(":/icons/icon"));
+
+    // init application settings
+    QCoreApplication::setOrganizationName("smart nanotubes GmbH");
+//    QCoreApplication::setOrganizationDomain("mysoft.com");
+    QCoreApplication::setApplicationName("eNoseAnnotator");
+
+    autosavePath = QDir::tempPath() + "/" + QCoreApplication::applicationName() + "/" + autosaveName;
 
     // init graph widgets
     createGraphWidgets();
@@ -307,19 +315,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::sensorFailuresSet, measInfoWidget, &InfoWidget::setFailures);    // mData: failures changed -> InfoWidget: show new failures
 
     // set functionalities dialog
-    connect(measInfoWidget, &InfoWidget::setFunctionalities, this, [this](){
-        FunctionalisationDialog dialog;
-        dialog.presetName = measInfoWidget->getFuncLabel();
-
-        dialog.setFunctionalisation(mData->getFunctionalisation());
-
-        if (dialog.exec())
-        {
-            mData->setFunctionalisation(dialog.getFunctionalisations());
-            measInfoWidget->setFuncLabel(dialog.presetName);
-            mData->setFuncName(dialog.presetName);
-        }
-    });
+    connect(measInfoWidget, &InfoWidget::setFunctionalities, this, &MainWindow::setFunctionalisation);
     connect(mData, &MeasurementData::funcNameSet, this, [this](QString name){
         measInfoWidget->setFuncLabel(name);
         mData->setFuncName(name);
@@ -476,7 +472,7 @@ MainWindow::MainWindow(QWidget *parent)
     autosaveTimer.start(static_cast<int>(autosaveIntervall * 60 * 1000));
 
     // storing settings
-    connect(mData, &MeasurementData::saveFilenameSet, this, &MainWindow::saveSettings);
+    connect(mData, &MeasurementData::saveFilenameSet, this, &MainWindow::saveDataDir);
 }
 
 MainWindow::~MainWindow()
@@ -501,7 +497,7 @@ void MainWindow::setTitle(bool dataChanged)
 
     if (filename != "")
     {
-        QDir dataDir{"./" + dataFolder};
+        QDir dataDir{DEFAULT_DATA_DIR};
         QFileInfo fileInfo(filename);
         QString extension;
         if (fileInfo.absolutePath().startsWith(dataDir.absolutePath()))
@@ -535,9 +531,7 @@ void MainWindow::initialize()
         QMessageBox::warning(this, "Launch error", "The application can only be launched with one argument!");
 
     // check for autosave
-    if (!QDir(settingsFolder).exists())
-        QDir().mkdir(settingsFolder);
-    QFile autosaveFile(settingsFolder + "/" + autosaveName);
+    QFile autosaveFile(autosavePath + "/" + autosaveName);
     if (autosaveFile.exists())
     {
         QMessageBox mBox;
@@ -547,7 +541,6 @@ void MainWindow::initialize()
         mBox.setWindowTitle("Restore autosave");
         mBox.setIcon(QMessageBox::Question);
 
-
         QFileInfo info(autosaveFile);
         QLocale locale = this->locale();
         QString sizeText = locale.formattedDataSize(info.size());
@@ -556,11 +549,9 @@ void MainWindow::initialize()
         auto ans = mBox.exec();
         if (ans == QMessageBox::StandardButton::Yes)
         {
-            QString prevSaveFile = mData->getSaveFilename();
             loadData(autosaveFile.fileName());
 
             // override changed flag, so the autosave can be saved
-            mData->setSaveFilename(prevSaveFile);
             mData->setDataChanged(true);
         }
     }
@@ -583,7 +574,7 @@ void MainWindow::on_actionsave_selection_triggered()
 {
     QString filepath = mData->getSaveFilename();
 
-    QString defaultPath = "./" + dataFolder + "/";
+    QString defaultPath = settings.value(DATA_DIR_KEY, DEFAULT_DATA_DIR).toString();
     QString path = (filepath != defaultPath) ? filepath : defaultPath;
     QString fileName = QFileDialog::getSaveFileName(this, QString("Save selected data"), path, "Data files (*.csv)");
 
@@ -679,41 +670,40 @@ void MainWindow::saveData(bool forceDialog)
         mData->saveData(fileName);
         // update saveFilename
         mData->setSaveFilename(fileName);
+
+        // save dataDir
+        saveDataDir();
     } catch (std::runtime_error e) {
         QMessageBox::critical(this, "Error saving measurement", e.what());
     }
 }
 
-void MainWindow::saveSettings()
-{
-    QFile file(settingsFolder + "/settings");
-    if (!file.open(QIODevice::WriteOnly))
-        QMessageBox::critical(this, "Error", "Unable to save settings");
-
-    QTextStream out(&file);
-
-    QStringList pathList = mData->getSaveFilename().split("/");
-    QString saveFolder = pathList.mid(0, pathList.size()-1).join("/") + "/";
-
-    out << "saveFolder:" << saveFolder << "\n";
-}
-
 void MainWindow::loadSettings()
 {
-    QFile file(settingsFolder + "/settings");
+    #ifdef QT_DEBUG
+    if (CLEAR_SETTINGS)
+        settings.clear();
+    #endif
 
-    if (file.exists())
-    {
-        if (!file.open(QIODevice::ReadOnly))
-            QMessageBox::critical(this, "Error", "Unable to load settings");
+    qDebug() << "Settings keys before loading:\n" << settings.allKeys().join("; ");
 
-        QTextStream in(&file);
+    if (!settings.contains("settingsInitialised"))
+        initSettings();
 
-        QString line = in.readLine();
+    // load directory paths
+    QString dataDir = settings.value(DATA_DIR_KEY, DEFAULT_DATA_DIR).value<QString>();
+    mData->setSaveFilename(dataDir);
 
-        if (line != "")
-            mData->setSaveFilename(line.split(":")[1]);
-    }
+    // load general settings
+    bool useLimits = settings.value(USE_LIMITS_KEY, DEFAULT_USE_LIMITS).toBool();
+    int lowerLimit = settings.value(LOWER_LIMIT_KEY, DEFAULT_LOWER_LIMIT).toInt();
+    int upperLimit = settings.value(UPPER_LIMIT_KEY, DEFAULT_UPPER_LIMIT).toInt();
+
+    absLineGraph->setMinVal(lowerLimit);
+    absLineGraph->setMaxVal(upperLimit);
+    absLineGraph->setUseLimits(useLimits);
+
+    qDebug() << "Settings keys after loading:\n" << settings.allKeys().join("; ");
 }
 
 void MainWindow::resetNChannels(uint newNChannels)
@@ -732,6 +722,13 @@ void MainWindow::resetNChannels(uint newNChannels)
     funcBarGraph->resetNChannels();
 }
 
+void MainWindow::initSettings()
+{
+    on_actionSettings_triggered();
+
+    settings.setValue("settingsInitialised", true);
+}
+
 void MainWindow::on_actionLoad_triggered()
 {
     // measurement is running: stop measurement?
@@ -743,7 +740,6 @@ void MainWindow::on_actionLoad_triggered()
         else
             return;
     }
-    // load data
     // ask to save old data
     if (!mData->getAbsoluteData().isEmpty() && mData->isChanged())
     {
@@ -753,11 +749,13 @@ void MainWindow::on_actionLoad_triggered()
     }
 
     // make data directory
-    if (!QDir(dataFolder).exists())
-        QDir().mkdir(dataFolder);
+    QString dataDir = settings.value(DATA_DIR_KEY, DEFAULT_DATA_DIR).toString();
+    if (!QDir(dataDir).exists())
+        QDir().mkdir(dataDir);
 
+    // load data
     QString saveFilename = mData->getSaveFilename();
-    QString path = (saveFilename != "") ? saveFilename : "./" + dataFolder;
+    QString path = (saveFilename != "") ? saveFilename : DEFAULT_DATA_DIR;
     QString fileName = QFileDialog::getOpenFileName(this, "Open data file", path, "Data files (*.csv)");
 
     if (fileName.isEmpty())
@@ -879,13 +877,21 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
 
 void MainWindow::on_actionSettings_triggered()
 {
+//    qDebug() << "Keys before general settings dialog:\n"  << settings.allKeys().join("; ");
+
     GeneralSettings dialog;
 
-    // set current settings
-    dialog.setMaxVal(absLineGraph->getMaxVal());   // max value for absolute values
-    dialog.setMinVal(absLineGraph->getMinVal());   // min value for absolute values
-    dialog.setUseLimits(absLineGraph->getUseLimits());
+    // load current settings
+    bool useLimits = settings.value(USE_LIMITS_KEY, DEFAULT_USE_LIMITS).toBool();
+    double lowerLimit = settings.value(LOWER_LIMIT_KEY, DEFAULT_LOWER_LIMIT).toDouble();
+    double upperLimit = settings.value(UPPER_LIMIT_KEY, DEFAULT_UPPER_LIMIT).toDouble();
+    QString presetDir = settings.value(PRESET_DIR_KEY, DEFAULT_PRESET_DIR).value<QString>();
 
+    // set current settings
+    dialog.setMaxVal(upperLimit);   // max value for absolute values
+    dialog.setMinVal(lowerLimit);   // min value for absolute values
+    dialog.setUseLimits(useLimits);
+    dialog.setPresetDir(presetDir);
 
     if (dialog.exec())
     {
@@ -893,17 +899,20 @@ void MainWindow::on_actionSettings_triggered()
 
         // --- limits ---
         // get limits
-        int newMaxVal = dialog.getMaxVal();
-        int newMinVal = dialog.getMinVal();
-        int oldMaxVal = absLineGraph->getMaxVal();
-        int oldMinVal = absLineGraph->getMinVal();
+        int newUpperLimit = dialog.getMaxVal();
+        int newLowerLimit = dialog.getMinVal();
+        int oldUpperLimit = upperLimit;
+        int oldLowerLimit = lowerLimit;
 
         // get useLimits
         bool newUseLimits = dialog.getUseLimits();
-        bool oldUseLimits = absLineGraph->getUseLimits();
+        bool oldUseLimits = useLimits;
+
+        // get preset dir
+        QString newPresetDir = dialog.getPresetDir();
 
         // recalc sensor failure flags if limits or useLimits changed
-        bool limitsChanged = newUseLimits && ((newMaxVal != oldMaxVal) || (newMaxVal != oldMinVal));
+        bool limitsChanged = newUseLimits && ((newUpperLimit != oldUpperLimit) || (newUpperLimit != oldLowerLimit));
         bool useLimitsChanged = newUseLimits != oldUseLimits;
 
         auto sensorFailureFlags = mData->getSensorFailures();
@@ -928,47 +937,54 @@ void MainWindow::on_actionSettings_triggered()
                     // case 1+2
                     if (useLimitsChanged)
                     {
-                        if (vector[i] < newMinVal || vector[i] > newMaxVal)
+                        if (vector[i] < newLowerLimit || vector[i] > newUpperLimit)
                             sensorFailureFlags[i] = newUseLimits;   // useLimits == true -> set flags, else delete them
                     }
                     // case 3+4
                     else    // limitsChanged
                     {
                         // minVal changed
-                        if (newMinVal < oldMinVal)  // case 4
+                        if (newLowerLimit < oldLowerLimit)  // case 4
                         {
                             for (int i=0; i<MVector::nChannels; i++)
-                                if (vector[i] >= newMinVal && vector[i] < oldMinVal)
+                                if (vector[i] >= newLowerLimit && vector[i] < oldLowerLimit)
                                     sensorFailureFlags[i] = false;
-                        } else if (newMinVal > oldMinVal)   // case 3
+                        } else if (newLowerLimit > oldLowerLimit)   // case 3
                         {
                             for (int i=0; i<MVector::nChannels; i++)
-                                if (vector[i] < newMinVal && vector[i] >= oldMinVal)
+                                if (vector[i] < newLowerLimit && vector[i] >= oldLowerLimit)
                                     sensorFailureFlags[i] = true;
                         }
 
                         // maxVal changed
-                        if (newMaxVal > oldMaxVal)  // case 4
+                        if (newUpperLimit > oldUpperLimit)  // case 4
                         {
                             for (int i=0; i<MVector::nChannels; i++)
-                                if (vector[i] <= newMaxVal && vector[i] > oldMaxVal)
+                                if (vector[i] <= newUpperLimit && vector[i] > oldUpperLimit)
                                     sensorFailureFlags[i] = false;
-                        } else if (newMaxVal < oldMaxVal)   // case 3
+                        } else if (newUpperLimit < oldUpperLimit)   // case 3
                         {
                             for (int i=0; i<MVector::nChannels; i++)
-                                if (vector[i] > newMaxVal && vector[i] <= oldMaxVal)
+                                if (vector[i] > newUpperLimit && vector[i] <= oldUpperLimit)
                                     sensorFailureFlags[i] = true;
                         }
                     }
                 }
             }
+//            qDebug() << "Keys after general settings dialog:\n"  << settings.allKeys().join("; ");
 
             // set new values
-            absLineGraph->setMaxVal(newMaxVal);
-            absLineGraph->setMinVal(newMinVal);
+            absLineGraph->setMaxVal(newUpperLimit);
+            absLineGraph->setMinVal(newLowerLimit);
             mData->setSensorFailures(sensorFailureFlags);
             absLineGraph->setUseLimits(newUseLimits);
         }
+        // save settings
+        settings.setValue(PRESET_DIR_KEY, newPresetDir);
+        settings.setValue(USE_LIMITS_KEY, newUseLimits);
+        settings.setValue(LOWER_LIMIT_KEY, newUpperLimit);
+        settings.setValue(UPPER_LIMIT_KEY, newLowerLimit);
+        settings.sync();
     }
 }
 
@@ -1018,18 +1034,7 @@ void MainWindow::on_actionStart_triggered()
             auto answer = QMessageBox::question(this, "Set Functionalisation", "The sensor functionalisation was not set.\nDo you want to set it before starting a new measurement?");
 
             if (answer == QMessageBox::StandardButton::Yes)
-            {
-                FunctionalisationDialog dialog;
-                dialog.presetName = measInfoWidget->getFuncLabel();
-
-                dialog.setFunctionalisation(mData->getFunctionalisation());
-
-                if (dialog.exec())
-                {
-                    mData->setFunctionalisation(dialog.getFunctionalisations());
-                    measInfoWidget->setFuncLabel(dialog.presetName);
-                }
-            }
+                setFunctionalisation();
         }
 
         // update funcLineGraph
@@ -1048,7 +1053,7 @@ void MainWindow::on_actionStart_triggered()
         mData->setDataChanged(false);
 
         QMetaObject::invokeMethod(source, "start", Qt::QueuedConnection);
-        qDebug() << "New measurement started!";
+//        qDebug() << "New measurement started!";
         break;
     }
     default:
@@ -1537,7 +1542,7 @@ void MainWindow::on_actionReconnect_triggered()
 {
     Q_ASSERT(source->status() == DataSource::Status::CONNECTION_ERROR);
     // reconnect sensor
-    qDebug() << "Reconnecting Sensor \"" << source->identifier() << "\"";
+//    qDebug() << "Reconnecting Sensor \"" << source->identifier() << "\"";
 
     QMetaObject::invokeMethod(source, "reconnect", Qt::QueuedConnection);
 }
@@ -1616,13 +1621,10 @@ void MainWindow::on_actionConverter_triggered()
 
 void MainWindow::updateAutosave()
 {
-    QDir(settingsFolder).exists();
-    QDir().mkdir(settingsFolder);
-
     if (mData->isChanged() && !converterRunning)
     {
         try {
-            mData->saveData(settingsFolder + "/" + autosaveName);
+            mData->saveData(autosavePath + "/" + autosaveName);
 
             // reset dataChanged (is unset by saveData)
             mData->setDataChanged(true);
@@ -1636,7 +1638,37 @@ void MainWindow::updateAutosave()
 
 void MainWindow::deleteAutosave()
 {
-    QFile file (settingsFolder + "/" + autosaveName);
+    QFile file (autosavePath + "/" + autosaveName);
     if (file.exists())
         file.remove();
 }
+
+void MainWindow::saveDataDir()
+{
+    QString saveFilename =  mData->getSaveFilename();
+
+    if (saveFilename.endsWith(".csv"))
+    {
+        QStringList pathList = saveFilename.split("/");
+        pathList.removeLast();
+        saveFilename = pathList.join("/");
+    }
+
+    settings.setValue(DATA_DIR_KEY, saveFilename);
+    settings.sync();
+}
+
+void MainWindow::setFunctionalisation()
+{
+        FunctionalisationDialog dialog(this, settings.value(PRESET_DIR_KEY, DEFAULT_PRESET_DIR).toString());
+        dialog.presetName = measInfoWidget->getFuncLabel();
+
+        dialog.setFunctionalisation(mData->getFunctionalisation());
+
+        if (dialog.exec())
+        {
+            mData->setFunctionalisation(dialog.getFunctionalisations());
+            measInfoWidget->setFuncLabel(dialog.presetName);
+            mData->setFuncName(dialog.presetName);
+        }
+    }

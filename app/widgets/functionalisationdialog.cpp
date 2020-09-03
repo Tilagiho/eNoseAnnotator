@@ -8,8 +8,9 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 
-FunctionalisationDialog::FunctionalisationDialog(QWidget *parent, ulong nChannels) :
+FunctionalisationDialog::FunctionalisationDialog(QWidget *parent, QString presetDir, ulong nChannels) :
     QDialog(parent),
+    presetDir(presetDir),
     funcLabels(nChannels, nullptr),
     spinBoxes(nChannels, nullptr),
     nChannels(nChannels)
@@ -110,7 +111,7 @@ std::vector<int> FunctionalisationDialog::getFunctionalisations()
 
 void FunctionalisationDialog::loadPresets()
 {
-    QDir directory("./presets");
+    QDir directory(presetDir);
     QStringList presets = directory.entryList(QStringList() << "*.preset",QDir::Files);
 
     // defult: no preset

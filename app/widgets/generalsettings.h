@@ -28,11 +28,16 @@ public:
     bool getUseLimits() const;
     void setUseLimits(bool value);
 
-
+    QString getPresetDir() const;
+    void setPresetDir(QString presetDir);
 
 private slots:
     void on_buttonBox_accepted();
 
+
+    void on_presetDirPushButton_clicked();
+
+    void on_defaultPushButton_clicked();
 
 private:
     Ui::GeneralSettings *ui;

@@ -9,13 +9,14 @@
 #include <QDialogButtonBox>
 
 #include "../classes/mvector.h"
+#include "../classes/defaultSettings.h"
 
 class FunctionalisationDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit FunctionalisationDialog(QWidget *parent = nullptr, ulong nChannels=MVector::nChannels);
+    explicit FunctionalisationDialog(QWidget *parent = nullptr, QString presetDir=DEFAULT_PRESET_DIR, ulong nChannels=MVector::nChannels);
     ~FunctionalisationDialog();
 
     void setFunctionalisation(std::vector<int> funcs);
@@ -23,6 +24,7 @@ public:
     std::vector<int> getFunctionalisations();
 
     QString presetName = "None";
+    QString presetDir;
 
 private slots:
     void valueChanged(int);
