@@ -33,7 +33,7 @@ public slots:
     void initialize();
 
 private slots:
-    void on_actionSave_Data_triggered();
+    void on_actionSave_Data_As_triggered();
 
     void on_actionsave_selection_triggered();
 

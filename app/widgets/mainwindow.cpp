@@ -569,7 +569,7 @@ void MainWindow::initialize()
     loadSettings();
 }
 
-void MainWindow::on_actionSave_Data_triggered()
+void MainWindow::on_actionSave_Data_As_triggered()
 {
     saveData(true);
 
