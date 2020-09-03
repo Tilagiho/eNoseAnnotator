@@ -571,7 +571,7 @@ void MainWindow::initialize()
 
 void MainWindow::on_actionSave_Data_triggered()
 {
-    saveData();
+    saveData(true);
 
     // if saving successfull:
     // delete autosave
@@ -658,12 +658,12 @@ void MainWindow::loadData(QString fileName)
         delete specificReader;
 }
 
-void MainWindow::saveData()
+void MainWindow::saveData(bool forceDialog)
 {
     QString path = mData->getSaveFilename();
 
     QString fileName;
-    if (path.endsWith(".csv"))
+    if (path.endsWith(".csv") && !forceDialog)
         fileName = path;
     else
         fileName = QFileDialog::getSaveFileName(this, QString("Save data"), path, "Data files (*.csv)");

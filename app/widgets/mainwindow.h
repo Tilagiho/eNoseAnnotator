@@ -130,7 +130,7 @@ private:
 
     void loadData(QString filename);
 
-    void saveData();
+    void saveData(bool forceDialog = false);
 
     void saveSettings();
 
