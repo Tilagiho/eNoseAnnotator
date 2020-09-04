@@ -1629,7 +1629,7 @@ void MainWindow::updateAutosave()
             // reset dataChanged (is unset by saveData)
             mData->setDataChanged(true);
         } catch (std::runtime_error e) {
-            QMessageBox::warning(this, "Error creating autosave", e.what());
+//            QMessageBox::warning(this, "Error creating autosave", e.what());
         }
     }
     else
