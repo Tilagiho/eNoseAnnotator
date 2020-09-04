@@ -18,7 +18,8 @@ Q_DECLARE_METATYPE(Ui::LineGraphWidget *);
 LineGraphWidget::LineGraphWidget(QWidget *parent, int nChannels) :
     QWidget(parent),
     ui(new Ui::LineGraphWidget),
-    nChannels(nChannels)
+    nChannels(nChannels),
+    graphMutex(new QMutex)
 {
     ui->setupUi(this);
 
@@ -55,6 +56,7 @@ LineGraphWidget::~LineGraphWidget()
         worker->deleteLater();
     }
     coordText->deleteLater();
+    delete graphMutex;
     delete ui;
 }
 
@@ -166,7 +168,9 @@ void LineGraphWidget::setXRange(QPair<double, double> xRange)
 {
     double x1 = xRange.first;
     double x2 = xRange.second;
+    graphMutex->lock();
     ui->chart->xAxis->setRange(x1, x2);
+    graphMutex->unlock();
 }
 
 void LineGraphWidget::setLogXAxis(bool logOn)
@@ -190,7 +194,9 @@ void LineGraphWidget::setXRange(QCPRange range)
 {
     if (range != ui->chart->xAxis->range())
     {
+        graphMutex->lock();
         ui->chart->xAxis->setRange(range);
+        graphMutex->unlock();
         replot();
         emit xRangeChanged(range);
     }
@@ -243,10 +249,12 @@ void LineGraphWidget::resetGraph(int channels)
 
     if (channels != nChannels)
     {
+        graphMutex->lock();
         // remove graphs
         int graphCount = ui->chart->graphCount();
         for (int i=0; i<graphCount; i++)
             ui->chart->removeGraph(ui->chart->graph(0));
+        graphMutex->unlock();
 
         // add graphs
         nChannels = channels;
@@ -270,13 +278,18 @@ void LineGraphWidget::replot(uint timestamp)
 
     // move x-range
     if (autoMoveGraph && timestamp != 0 && timestamp >= xRange.upper+startTimestamp-4 && timestamp <= xRange.upper+startTimestamp)
+    {
+        graphMutex->lock();
         ui->chart->xAxis->setRange(xRange.lower+2, xRange.upper+2);
+        graphMutex->unlock();
+
+    }
 
     // init worker thread
     if (thread == nullptr)
     {
         thread = new QThread;
-        worker = new ReplotWorker;
+        worker = new ReplotWorker(graphMutex);
         worker->moveToThread(thread);
         connect(worker, &ReplotWorker::finished, this, &LineGraphWidget::setYRange);
         connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));   // end thread when source is deleted
@@ -293,7 +306,9 @@ void LineGraphWidget::replot(uint timestamp)
 void LineGraphWidget::setYRange(double y_lower, double y_upper)
 {
     //set y-range
+    graphMutex->lock();
     ui->chart->yAxis->setRange(y_lower, y_upper);
+    graphMutex->unlock();
 
     redrawLabels();
 
@@ -635,6 +650,7 @@ void LineGraphWidget::clearGraph(bool replot)
     // signal changes
     emit selectionCleared();
 
+    graphMutex->lock();
     // clear graphs
     for (int i=0; i<nChannels; i++)
     {
@@ -648,6 +664,7 @@ void LineGraphWidget::clearGraph(bool replot)
     for (auto label : detectedClassLabels)
         for (auto rectangle : label.second)
             ui->chart->removeItem(rectangle);
+    graphMutex->unlock();
 
     userDefinedClassLabels.clear();
     detectedClassLabels.clear();
@@ -691,6 +708,8 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
         if (isFuncGraph && funcMap[i] == 0)
             continue;
 
+        // secure adding data
+        graphMutex->lock();
         // add data point
         if (!isAbsolute)    // not isAbsolute: relative values / %
         {
@@ -706,6 +725,7 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
             else    // infinte value: use maxVal
                 ui->chart->graph(i)->addData(xpos, maxVal / 1000);
         }
+        graphMutex->unlock();
 
         // emit sensor failures (only for finite values)
         if (useLimits && qIsFinite(measurement[i]) && (measurement[i] < minVal || measurement[i] > maxVal))
@@ -1055,6 +1075,11 @@ QCPGraph* LineGraphWidget::firstVisibleGraph()
 
 void ReplotWorker::replot(Ui::LineGraphWidget *ui)
 {
+    replot_counter++;
+    // ignore 2nd ... (replot_counter-1)th replots
+    if (replot_counter > 1 && replot_counter % replot_steps > 1)
+        return;
+
     sync.lock();
     // get current xaxis.range
     auto xRange = ui->chart->xAxis->range();
@@ -1071,8 +1096,10 @@ void ReplotWorker::replot(Ui::LineGraphWidget *ui)
     double y_upper = 0;
 
     // iterate through all data points of first graph
+    graphMutex->lock();
     QCPGraphDataContainer::const_iterator it = ui->chart->graph(0)->data()->constBegin();
     QCPGraphDataContainer::const_iterator itEnd = ui->chart->graph(0)->data()->constEnd();
+    graphMutex->unlock();
 
     int index = 0;
     while (it != itEnd)
@@ -1082,6 +1109,7 @@ void ReplotWorker::replot(Ui::LineGraphWidget *ui)
         bool inXRange = it->key >= xRange.lower && it->key <= xRange.upper;
         if (inXRange)
         {
+            graphMutex->lock();
             // loop through all graphs and check for new high/ low points at index (of it->key)
             for (int i = 0; i < ui->chart->graphCount(); i++)
             {
@@ -1096,6 +1124,7 @@ void ReplotWorker::replot(Ui::LineGraphWidget *ui)
                  if (data->value > y_upper )
                      y_upper = data->value;
             }
+            graphMutex->unlock();
         }
 
         it++;
@@ -1131,4 +1160,6 @@ void ReplotWorker::replot(Ui::LineGraphWidget *ui)
 
     Q_EMIT finished(y_lower, y_upper);
     sync.unlock();
+
+    replot_counter -= replot_steps;
 }

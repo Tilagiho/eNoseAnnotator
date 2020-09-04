@@ -16,22 +16,27 @@ class ReplotWorker: public QObject
     Q_OBJECT
 
 public:
-    explicit ReplotWorker(QObject *parent = nullptr): QObject(parent)
+    ReplotWorker(QMutex* graphMutex, QObject *parent = nullptr):
+        QObject(parent),
+        graphMutex(graphMutex)
     {}
 
 public Q_SLOTS:
     void replot(Ui::LineGraphWidget *ui);
-
 
 Q_SIGNALS:
     void finished(double, double);
     void error(QString errorMessage);
 
 private:
+    int replot_counter = 0;
+    const int replot_steps = 1;
+
     const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
     const double labelSpace = 0.3;
 
     QMutex sync;
+    QMutex *graphMutex;
 };
 
 class LineGraphWidget : public QWidget
@@ -120,6 +125,8 @@ private:
     QThread *thread = nullptr;
     ReplotWorker* worker = nullptr;
     int nChannels = MVector::nChannels;
+
+    QMutex* graphMutex;
 
     const double det_class_tresh = 0.001;   // only classes with values higher than this are shown in the detected class labels
 
