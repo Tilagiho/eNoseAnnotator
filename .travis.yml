@@ -39,9 +39,9 @@ matrix:
       # curl --upload-file eNoseAnnotator*.AppImage https://transfer.sh/eNoseAnnotator-git.$(git rev-parse --short HEAD)-x86_64.AppImage
       - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh; fi'
       # upload continuous pre-release
-      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" == "" ]; then bash upload.sh eNoseAnnotator-continuous-linux.zip "symbols_${TRAVIS_COMMIT}_linux.zip"; fi'
+      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" == "" ]; then bash upload.sh eNoseAnnotator*.AppImage "symbols_${TRAVIS_COMMIT}_linux.zip"; fi'
       # upload release
-      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" != "" ]; then UPLOADTOOL_SUFFIX="${TRAVIS_TAG}"; bash upload.sh "eNoseAnnotator-${TRAVIS_TAG}-linux.zip" "symbols_${TRAVIS_COMMIT}_linux.zip"; fi'
+      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" != "" ]; then UPLOADTOOL_SUFFIX="${TRAVIS_TAG}"; bash upload.sh "eNoseAnnotator*.AppImage" "symbols_${TRAVIS_COMMIT}_linux.zip"; fi'
       
       # upload debug symbols
 

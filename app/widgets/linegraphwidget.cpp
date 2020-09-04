@@ -1075,11 +1075,6 @@ QCPGraph* LineGraphWidget::firstVisibleGraph()
 
 void ReplotWorker::replot(Ui::LineGraphWidget *ui)
 {
-    replot_counter++;
-    // ignore 2nd ... (replot_counter-1)th replots
-    if (replot_counter > 1 && replot_counter % replot_steps > 1)
-        return;
-
     sync.lock();
     // get current xaxis.range
     auto xRange = ui->chart->xAxis->range();
@@ -1099,7 +1094,6 @@ void ReplotWorker::replot(Ui::LineGraphWidget *ui)
     graphMutex->lock();
     QCPGraphDataContainer::const_iterator it = ui->chart->graph(0)->data()->constBegin();
     QCPGraphDataContainer::const_iterator itEnd = ui->chart->graph(0)->data()->constEnd();
-    graphMutex->unlock();
 
     int index = 0;
     while (it != itEnd)
@@ -1109,7 +1103,6 @@ void ReplotWorker::replot(Ui::LineGraphWidget *ui)
         bool inXRange = it->key >= xRange.lower && it->key <= xRange.upper;
         if (inXRange)
         {
-            graphMutex->lock();
             // loop through all graphs and check for new high/ low points at index (of it->key)
             for (int i = 0; i < ui->chart->graphCount(); i++)
             {
@@ -1124,12 +1117,12 @@ void ReplotWorker::replot(Ui::LineGraphWidget *ui)
                  if (data->value > y_upper )
                      y_upper = data->value;
             }
-            graphMutex->unlock();
         }
 
         it++;
         index++;
     }
+    graphMutex->unlock();
 
     // normal plot for medium y-intervals
     if (y_lower > 100.0)
@@ -1160,6 +1153,4 @@ void ReplotWorker::replot(Ui::LineGraphWidget *ui)
 
     Q_EMIT finished(y_lower, y_upper);
     sync.unlock();
-
-    replot_counter -= replot_steps;
 }

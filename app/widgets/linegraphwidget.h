@@ -29,7 +29,6 @@ Q_SIGNALS:
     void error(QString errorMessage);
 
 private:
-    int replot_counter = 0;
     const int replot_steps = 1;
 
     const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)

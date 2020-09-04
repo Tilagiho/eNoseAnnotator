@@ -144,3 +144,4 @@ DEPENDPATH += $$PWD/lib/libtorch/include
 
 INCLUDEPATH += $$PWD/lib/libtorch/include/torch/csrc/api/include
 DEPENDPATH += $$PWD/lib/libtorch/include/torch/csrc/api/include
+

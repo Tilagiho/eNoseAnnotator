@@ -1001,6 +1001,23 @@ void MainWindow::on_actionSettings_triggered()
         settings->setValue(LOWER_LIMIT_KEY, newUpperLimit);
         settings->setValue(UPPER_LIMIT_KEY, newLowerLimit);
         settings->sync();
+
+        // copy presets into new preset dir
+        if (!settings->contains(PRESET_DIR_KEY) || newPresetDir != presetDir)
+        {
+            if (!QDir(newPresetDir).exists())
+                QDir().mkdir(newPresetDir);
+
+            QString presetSourcePath = QCoreApplication::applicationDirPath() + "/" + PRESET_SOURCE;
+            QDirIterator it(presetSourcePath);
+
+            while(it.hasNext())
+            {
+                QString filePath = it.next();
+                QString fileName = filePath.split("/").last();
+                QFile::copy(filePath, newPresetDir + "/" + fileName);
+            }
+        }
     }
 }
 
