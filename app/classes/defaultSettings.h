@@ -8,7 +8,7 @@
 #define DATA_DIR_KEY "directories/dataDir"
 #define DEFAULT_DATA_DIR "./data/"
 #define PRESET_DIR_KEY "directories/presetDir"
-#define DEFAULT_PRESET_DIR "./presets/"
+#define DEFAULT_PRESET_DIR "presets/"
 
 // limits
 #define USE_LIMITS_KEY "settings/useLimits"
