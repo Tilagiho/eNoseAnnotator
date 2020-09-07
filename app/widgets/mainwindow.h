@@ -77,7 +77,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QSettings settings;
+    QSettings* settings = nullptr;
 
     QString autosaveName = "autosave.csv";
     QString autosavePath;

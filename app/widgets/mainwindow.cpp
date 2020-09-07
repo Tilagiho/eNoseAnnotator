@@ -29,6 +29,8 @@ MainWindow::MainWindow(QWidget *parent)
 //    QCoreApplication::setOrganizationDomain("mysoft.com");
     QCoreApplication::setApplicationName("eNoseAnnotator");
 
+    settings = new QSettings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+
     QDir temp = QDir::temp();
     QFileInfo tempInfo(temp.absolutePath());
 
@@ -486,8 +488,10 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    if (settings != nullptr)
+        settings->deleteLater();
     if (mData != nullptr)
-        delete mData;
+        mData->deleteLater();
     if (source != nullptr)
         source->deleteLater();
 
@@ -586,7 +590,7 @@ void MainWindow::on_actionsave_selection_triggered()
 {
     QString filepath = mData->getSaveFilename();
 
-    QString defaultPath = settings.value(DATA_DIR_KEY, DEFAULT_DATA_DIR).toString();
+    QString defaultPath = settings->value(DATA_DIR_KEY, DEFAULT_DATA_DIR).toString();
     QString path = (filepath != defaultPath) ? filepath : defaultPath;
     QString fileName = QFileDialog::getSaveFileName(this, QString("Save selected data"), path, "Data files (*.csv)");
 
@@ -696,28 +700,28 @@ void MainWindow::loadSettings()
 {
     #ifdef QT_DEBUG
     if (CLEAR_SETTINGS)
-        settings.clear();
+        settings->clear();
     #endif
 
-//    qDebug() << "Settings keys before loading:\n" << settings.allKeys().join("; ");
+//    qDebug() << "Settings keys before loading:\n" << settings->allKeys().join("; ");
 
-    if (!settings.contains("settingsInitialised"))
+    if (!settings->contains("settingsInitialised"))
         initSettings();
 
     // load directory paths
-    QString dataDir = settings.value(DATA_DIR_KEY, DEFAULT_DATA_DIR).value<QString>();
+    QString dataDir = settings->value(DATA_DIR_KEY, DEFAULT_DATA_DIR).value<QString>();
     mData->setSaveFilename(dataDir);
 
     // load general settings
-    bool useLimits = settings.value(USE_LIMITS_KEY, DEFAULT_USE_LIMITS).toBool();
-    int lowerLimit = settings.value(LOWER_LIMIT_KEY, DEFAULT_LOWER_LIMIT).toInt();
-    int upperLimit = settings.value(UPPER_LIMIT_KEY, DEFAULT_UPPER_LIMIT).toInt();
+    bool useLimits = settings->value(USE_LIMITS_KEY, DEFAULT_USE_LIMITS).toBool();
+    int lowerLimit = settings->value(LOWER_LIMIT_KEY, DEFAULT_LOWER_LIMIT).toInt();
+    int upperLimit = settings->value(UPPER_LIMIT_KEY, DEFAULT_UPPER_LIMIT).toInt();
 
     absLineGraph->setMinVal(lowerLimit);
     absLineGraph->setMaxVal(upperLimit);
     absLineGraph->setUseLimits(useLimits);
 
-//    qDebug() << "Settings keys after loading:\n" << settings.allKeys().join("; ");
+//    qDebug() << "Settings keys after loading:\n" << settings->allKeys().join("; ");
 }
 
 void MainWindow::resetNChannels(uint newNChannels)
@@ -740,7 +744,7 @@ void MainWindow::initSettings()
 {
     on_actionSettings_triggered();
 
-    settings.setValue("settingsInitialised", true);
+    settings->setValue("settingsInitialised", true);
 }
 
 void MainWindow::on_actionLoad_triggered()
@@ -763,7 +767,7 @@ void MainWindow::on_actionLoad_triggered()
     }
 
     // make data directory
-    QString dataDir = settings.value(DATA_DIR_KEY, DEFAULT_DATA_DIR).toString();
+    QString dataDir = settings->value(DATA_DIR_KEY, DEFAULT_DATA_DIR).toString();
     if (!QDir(dataDir).exists())
         QDir().mkdir(dataDir);
 
@@ -855,10 +859,10 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
             // usb source:
             if (sourceType == DataSource::SourceType::USB)
             {
-                USBDataSource::Settings settings;
-                settings.portName = identifier;
+                USBDataSource::Settings usbSettings;
+                usbSettings.portName = identifier;
 
-                source = new USBDataSource(settings, dialog->getTimeout(), dialog->getNChannels());
+                source = new USBDataSource(usbSettings, dialog->getTimeout(), dialog->getNChannels());
             }
             // fake source:
             else if (sourceType == DataSource::SourceType::FAKE)
@@ -891,15 +895,15 @@ void MainWindow::on_actionSet_USB_Connection_triggered()
 
 void MainWindow::on_actionSettings_triggered()
 {
-//    qDebug() << "Keys before general settings dialog:\n"  << settings.allKeys().join("; ");
+//    qDebug() << "Keys before general settings dialog:\n"  << settings->allKeys().join("; ");
 
     GeneralSettings dialog;
 
     // load current settings
-    bool useLimits = settings.value(USE_LIMITS_KEY, DEFAULT_USE_LIMITS).toBool();
-    double lowerLimit = settings.value(LOWER_LIMIT_KEY, DEFAULT_LOWER_LIMIT).toDouble();
-    double upperLimit = settings.value(UPPER_LIMIT_KEY, DEFAULT_UPPER_LIMIT).toDouble();
-    QString presetDir = settings.value(PRESET_DIR_KEY, DEFAULT_PRESET_DIR).value<QString>();
+    bool useLimits = settings->value(USE_LIMITS_KEY, DEFAULT_USE_LIMITS).toBool();
+    double lowerLimit = settings->value(LOWER_LIMIT_KEY, DEFAULT_LOWER_LIMIT).toDouble();
+    double upperLimit = settings->value(UPPER_LIMIT_KEY, DEFAULT_UPPER_LIMIT).toDouble();
+    QString presetDir = settings->value(PRESET_DIR_KEY, DEFAULT_PRESET_DIR).value<QString>();
 
     // set current settings
     dialog.setMaxVal(upperLimit);   // max value for absolute values
@@ -985,7 +989,7 @@ void MainWindow::on_actionSettings_triggered()
                     }
                 }
             }
-//            qDebug() << "Keys after general settings dialog:\n"  << settings.allKeys().join("; ");
+//            qDebug() << "Keys after general settings dialog:\n"  << settings->allKeys().join("; ");
 
             // set new values
             absLineGraph->setMaxVal(newUpperLimit);
@@ -994,11 +998,11 @@ void MainWindow::on_actionSettings_triggered()
             absLineGraph->setUseLimits(newUseLimits);
         }
         // save settings
-        settings.setValue(PRESET_DIR_KEY, newPresetDir);
-        settings.setValue(USE_LIMITS_KEY, newUseLimits);
-        settings.setValue(LOWER_LIMIT_KEY, newUpperLimit);
-        settings.setValue(UPPER_LIMIT_KEY, newLowerLimit);
-        settings.sync();
+        settings->setValue(PRESET_DIR_KEY, newPresetDir);
+        settings->setValue(USE_LIMITS_KEY, newUseLimits);
+        settings->setValue(LOWER_LIMIT_KEY, newUpperLimit);
+        settings->setValue(UPPER_LIMIT_KEY, newLowerLimit);
+        settings->sync();
     }
 }
 
@@ -1666,13 +1670,13 @@ void MainWindow::saveDataDir()
         saveFilename = pathList.join("/");
     }
 
-    settings.setValue(DATA_DIR_KEY, saveFilename);
-    settings.sync();
+    settings->setValue(DATA_DIR_KEY, saveFilename);
+    settings->sync();
 }
 
 void MainWindow::setFunctionalisation()
 {
-    FunctionalisationDialog dialog(this, settings.value(PRESET_DIR_KEY, DEFAULT_PRESET_DIR).toString());
+    FunctionalisationDialog dialog(this, settings->value(PRESET_DIR_KEY, DEFAULT_PRESET_DIR).toString());
     dialog.presetName = measInfoWidget->getFuncLabel();
 
     dialog.setFunctionalisation(mData->getFunctionalisation());
