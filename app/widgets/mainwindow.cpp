@@ -29,7 +29,16 @@ MainWindow::MainWindow(QWidget *parent)
 //    QCoreApplication::setOrganizationDomain("mysoft.com");
     QCoreApplication::setApplicationName("eNoseAnnotator");
 
-    autosavePath = QDir::tempPath() + "/" + QCoreApplication::applicationName() + "/" + autosaveName;
+    QDir temp = QDir::temp();
+    QFileInfo tempInfo(temp.absolutePath());
+
+    if (temp.exists() && tempInfo.isDir() && dirIsWriteable(temp))
+        autosavePath = QDir::tempPath() + "/" + QCoreApplication::applicationName();
+    else
+        autosavePath = "./.settings";
+
+    if (!QDir(autosavePath).exists())
+        QDir().mkdir(autosavePath);
 
     // init graph widgets
     createGraphWidgets();
@@ -534,22 +543,30 @@ void MainWindow::initialize()
     QFile autosaveFile(autosavePath + "/" + autosaveName);
     if (autosaveFile.exists())
     {
+        // create message box
         QMessageBox mBox;
-        mBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        QString infoText = "The program was terminated without saving changes in the last measurement.\nDo you want to load the autosave of the measurement?";
+        QString infoText = "The program was terminated without saving changes in the measurement.\nDo you want to restore the autosave?";
         mBox.setText(infoText);
         mBox.setWindowTitle("Restore autosave");
         mBox.setIcon(QMessageBox::Question);
 
+        // add buttons
+        mBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        mBox.button(QMessageBox::Yes)->setText("Restore");
+        mBox.button(QMessageBox::No)->setText("Discard");
+
+        // add additional file info
         QFileInfo info(autosaveFile);
         QLocale locale = this->locale();
         QString sizeText = locale.formattedDataSize(info.size());
         mBox.setDetailedText("Autosave: " + info.lastModified().toString() + " - " + sizeText);
 
+        // execute mBox & retrieve answer
         auto ans = mBox.exec();
         if (ans == QMessageBox::StandardButton::Yes)
         {
             loadData(autosaveFile.fileName());
+            deleteAutosave();
 
             // override changed flag, so the autosave can be saved
             mData->setDataChanged(true);
@@ -563,11 +580,6 @@ void MainWindow::initialize()
 void MainWindow::on_actionSave_Data_As_triggered()
 {
     saveData(true);
-
-    // if saving successfull:
-    // delete autosave
-    if (!mData->isChanged())
-        deleteAutosave();
 }
 
 void MainWindow::on_actionsave_selection_triggered()
@@ -624,9 +636,6 @@ void MainWindow::loadData(QString fileName)
         mData->setSaveFilename(fileName);
         setTitle(false);
 
-        // delete autosave
-        deleteAutosave();
-
         // check compability to loaded classifier
         if (classifier != nullptr)
         {
@@ -647,6 +656,11 @@ void MainWindow::loadData(QString fileName)
 
     if (specificReader != nullptr)
         delete specificReader;
+
+    // if saving successfull:
+    // delete autosave
+    if (!mData->isChanged())
+        deleteAutosave();
 }
 
 void MainWindow::saveData(bool forceDialog)
@@ -685,7 +699,7 @@ void MainWindow::loadSettings()
         settings.clear();
     #endif
 
-    qDebug() << "Settings keys before loading:\n" << settings.allKeys().join("; ");
+//    qDebug() << "Settings keys before loading:\n" << settings.allKeys().join("; ");
 
     if (!settings.contains("settingsInitialised"))
         initSettings();
@@ -703,7 +717,7 @@ void MainWindow::loadSettings()
     absLineGraph->setMaxVal(upperLimit);
     absLineGraph->setUseLimits(useLimits);
 
-    qDebug() << "Settings keys after loading:\n" << settings.allKeys().join("; ");
+//    qDebug() << "Settings keys after loading:\n" << settings.allKeys().join("; ");
 }
 
 void MainWindow::resetNChannels(uint newNChannels)
@@ -1621,7 +1635,7 @@ void MainWindow::on_actionConverter_triggered()
 
 void MainWindow::updateAutosave()
 {
-    if (mData->isChanged() && !converterRunning)
+    if (mData->isChanged() && !mData->getAbsoluteData().isEmpty() && !converterRunning)
     {
         try {
             mData->saveData(autosavePath + "/" + autosaveName);
@@ -1629,11 +1643,9 @@ void MainWindow::updateAutosave()
             // reset dataChanged (is unset by saveData)
             mData->setDataChanged(true);
         } catch (std::runtime_error e) {
-//            QMessageBox::warning(this, "Error creating autosave", e.what());
+            QMessageBox::warning(this, "Error creating autosave", e.what());
         }
     }
-    else
-        deleteAutosave();
 }
 
 void MainWindow::deleteAutosave()
@@ -1660,15 +1672,36 @@ void MainWindow::saveDataDir()
 
 void MainWindow::setFunctionalisation()
 {
-        FunctionalisationDialog dialog(this, settings.value(PRESET_DIR_KEY, DEFAULT_PRESET_DIR).toString());
-        dialog.presetName = measInfoWidget->getFuncLabel();
+    FunctionalisationDialog dialog(this, settings.value(PRESET_DIR_KEY, DEFAULT_PRESET_DIR).toString());
+    dialog.presetName = measInfoWidget->getFuncLabel();
 
-        dialog.setFunctionalisation(mData->getFunctionalisation());
+    dialog.setFunctionalisation(mData->getFunctionalisation());
 
-        if (dialog.exec())
-        {
-            mData->setFunctionalisation(dialog.getFunctionalisations());
-            measInfoWidget->setFuncLabel(dialog.presetName);
-            mData->setFuncName(dialog.presetName);
-        }
+    if (dialog.exec())
+    {
+        mData->setFunctionalisation(dialog.getFunctionalisations());
+        measInfoWidget->setFuncLabel(dialog.presetName);
+        mData->setFuncName(dialog.presetName);
     }
+}
+
+/*!
+ * \brief MainWindow::dirIsWriteable checks if files can be created in the directory by trying to create a dummy file.
+ * Necessary, because built-in Qt checks are inconsistent on Windows.
+ * \param dir
+ * \return
+ */
+bool MainWindow::dirIsWriteable(QDir dir)
+{
+    if (!dir.exists())
+        return false;
+
+    // check if dummy file can be created
+    QFile file (dir.absolutePath() + "/dummy");
+    bool fileCreated = file.open(QIODevice::WriteOnly);
+
+    // clean up
+    file.remove();
+
+    return fileCreated;
+}

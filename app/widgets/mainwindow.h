@@ -142,6 +142,8 @@ private:
 
     void setFunctionalisation();
 
+    bool dirIsWriteable(QDir dir);
+
 protected:
   bool eventFilter(QObject *obj, QEvent *event);
 };
