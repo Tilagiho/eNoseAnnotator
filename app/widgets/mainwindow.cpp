@@ -488,13 +488,12 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
-    if (settings != nullptr)
-        settings->deleteLater();
     if (mData != nullptr)
-        mData->deleteLater();
+        delete mData;
     if (source != nullptr)
-        source->deleteLater();
-
+        delete source;
+    if (settings != nullptr)
+        delete settings;
     if (classifier != nullptr)
         delete classifier;
 
@@ -636,8 +635,7 @@ void MainWindow::loadData(QString fileName)
         relLineGraph->resetColors();
         absLineGraph->resetColors();
 
-        // update saveFileName of mData & title of MainWindow
-        mData->setSaveFilename(fileName);
+        // update title of MainWindow
         setTitle(false);
 
         // check compability to loaded classifier

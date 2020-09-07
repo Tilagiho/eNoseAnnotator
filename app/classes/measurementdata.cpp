@@ -18,7 +18,6 @@
  *
  */
 
-QString MeasurementData::funcName = "None";
 std::vector<int> MeasurementData::functionalisation(MVector::nChannels, 0);
 std::vector<bool> MeasurementData::sensorFailures(MVector::nChannels, 0);
 
@@ -101,7 +100,6 @@ void MeasurementData::clear()
 
     baseLevelMap.clear();
     data.clear();
-
 
     std::vector<bool> zeroFailures;
     for (int i=0; i<MVector::nChannels; i++)
@@ -1072,6 +1070,7 @@ FileReader::FileReader(QString filePath, QObject* parentWidget):
     Q_ASSERT(!filePath.isEmpty());
 
     data = new MeasurementData(parentWidget);
+    data->setSaveFilename(filePath);
 
     if (!file.open(QIODevice::ReadOnly))
         throw std::runtime_error("Can not open " + filePath.toStdString());

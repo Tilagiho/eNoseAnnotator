@@ -209,7 +209,7 @@ public:
 
     QMap<uint, MVector> getBaseLevelMap() const;
 
-    static QString funcName;
+    QString funcName = "None";
     static std::vector<int> functionalisation;
     static std::vector<bool> sensorFailures;
 
