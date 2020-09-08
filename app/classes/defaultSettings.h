@@ -6,10 +6,17 @@
 
 // directories
 #define DATA_DIR_KEY "directories/dataDir"
-#define DEFAULT_DATA_DIR "./data/"
+#define DEFAULT_DATA_DIR "."
+
+#define EXPORT_DIR_KEY "directories/exportDir"
+#define DEFAULT_EXPORT_DIR "."
+
+#define CLASSIFIER_DIR_KEY "directories/classifierDir"
+#define DEFAULT_CLASSIFIER_DIR "."
+
 #define PRESET_DIR_KEY "directories/presetDir"
 #define DEFAULT_PRESET_DIR "./presets/"
-#define PRESET_SOURCE "../usr/share/presets/"
+#define PRESET_SOURCE "../share/presets/"
 
 // limits
 #define USE_LIMITS_KEY "settings/useLimits"

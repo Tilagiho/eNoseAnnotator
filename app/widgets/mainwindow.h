@@ -132,6 +132,11 @@ private:
 
     void saveData(bool forceDialog = false);
 
+    void saveLineGraph(LineGraphWidget* graph);
+
+    void saveBarGraph(BarGraphWidget* graph);
+
+
     void loadSettings();
 
     void initSettings();

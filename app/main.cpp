@@ -8,11 +8,18 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     a.setApplicationName("eNoseAnnotator");
 
+    // init application settings
+    QCoreApplication::setOrganizationName("smart nanotubes GmbH");
+//    QCoreApplication::setOrganizationDomain("mysoft.com");
+    QCoreApplication::setApplicationName("eNoseAnnotator");
+
     // setup breakpad crash handler:
     // save crash minidumps in reports
-    QDir reportDir ("crash reports/");
+    QString gitCommit(GIT_VERSION);
+    QString reportPath = QDir::tempPath() + "/" + QCoreApplication::applicationName() + "/crash_reports/" + gitCommit;
+    QDir reportDir(reportPath);
     if (!reportDir.exists()) // create reportPath if necessary
-        QDir().mkdir(reportDir.absolutePath());
+        QDir().mkpath(reportDir.absolutePath());
 
     Breakpad::CrashHandler::instance()->Init(reportDir.absolutePath());
 

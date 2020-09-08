@@ -8,7 +8,7 @@ linux-g++{
     # local build
     isEmpty(CI) {
         presets.files += $$PWD/usr/share/presets/*
-        presets.path = $$OUT_PWD/usr/share/presets
+        presets.path = $$OUT_PWD/share/presets
 
         INSTALLS += presets
     }

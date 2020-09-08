@@ -24,11 +24,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     this->setWindowIcon(QIcon(":/icons/icon"));
 
-    // init application settings
-    QCoreApplication::setOrganizationName("smart nanotubes GmbH");
-//    QCoreApplication::setOrganizationDomain("mysoft.com");
-    QCoreApplication::setApplicationName("eNoseAnnotator");
-
     settings = new QSettings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
 
     QDir temp = QDir::temp();
@@ -334,144 +329,23 @@ MainWindow::MainWindow(QWidget *parent)
 
     // saving images of the graphs
     connect(relLineGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
-        // create export folder
-        if(!QDir ("./export").exists())
-            QDir().mkdir("./export");
-
-        // save file dialog
-        QString selectedExtension;
-        QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
-
-        // save image
-        if (!filename.isEmpty())
-        {
-            // add extension if none was set
-            QStringList splitList = filename.split(".");
-            if (splitList.size() < 2)
-                filename += ".jpg";
-            // unknown file extension
-            else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
-                filename += ".jpg";
-
-            relLineGraph->saveImage(filename);
-        }
+        saveLineGraph(relLineGraph);
     });
 
     connect(funcLineGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
-        // create export folder
-        if(!QDir ("./export").exists())
-            QDir().mkdir("./export");
-
-        // save file dialog
-        QString selectedExtension;
-        QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
-
-        // save image
-        if (!filename.isEmpty())
-        {
-            // add extension if none was set
-            QStringList splitList = filename.split(".");
-            if (splitList.size() < 2)
-                filename += ".jpg";
-            // unknown file extension
-            else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
-                filename += ".jpg";
-
-            funcLineGraph->saveImage(filename);
-        }
+        saveLineGraph(funcLineGraph);
     });
 
     connect(absLineGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
-        // create export folder
-        if(!QDir ("./export").exists())
-            QDir().mkdir("./export");
-
-        // save file dialog
-        QString selectedExtension;
-        QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
-
-        // save image
-        if (!filename.isEmpty())
-        {
-            // add extension if none was set
-            QStringList splitList = filename.split(".");
-            if (splitList.size() < 2)
-                filename += ".jpg";
-            // unknown file extension
-            else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
-                filename += ".jpg";
-
-            absLineGraph->saveImage(filename);
-        }
+        saveLineGraph(absLineGraph);
     });
 
     connect(vectorBarGraph, &BarGraphWidget::imageSaveRequested, this, [this](){
-        // create export folder
-        if(!QDir ("./export").exists())
-            QDir().mkdir("./export");
-
-        // save file dialog
-        QString selectedExtension;
-        QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
-
-        // save image
-        if (!filename.isEmpty())
-        {
-            // add extension if none was set
-            QStringList splitList = filename.split(".");
-            if (splitList.size() < 2)
-                filename += ".jpg";
-            // unknown file extension
-            else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
-                filename += ".jpg";
-
-            // save data?
-            QStringList list = filename.split(".");
-            QString dataFilePathName = list.mid(0, list.length()-1).join(".") + ".csv";
-            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the values of the bar graph in \"" + dataFilePathName + "\"?");
-
-            if (answer == QMessageBox::StandardButton::Yes)
-            {
-                mData->saveAverageSelectionMeasVector(dataFilePathName);
-            }
-
-            vectorBarGraph->saveImage(filename);
-        }
+        saveBarGraph(vectorBarGraph);
     });
 
     connect(funcBarGraph, &BarGraphWidget::imageSaveRequested, this, [this](){
-        // create export folder
-        if(!QDir ("./export").exists())
-            QDir().mkdir("./export");
-
-        // save file dialog
-        QString selectedExtension;
-        QString filename = QFileDialog::getSaveFileName(this, tr("Save Line Graph Image"), "./export", "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
-
-        // save image
-        if (!filename.isEmpty())
-        {
-            // add extension if none was set
-            QStringList splitList = filename.split(".");
-            if (splitList.size() < 2)
-                filename += ".jpg";
-            // unknown file extension
-            else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
-                filename += ".jpg";
-
-            // save data?
-            QStringList list = filename.split(".");
-            QString dataFilePathName = list.mid(0, list.length()-1).join(".") + ".csv";
-            QMessageBox::StandardButton answer = QMessageBox::question(this, "Save Data", "Do you want to save the values of the bar graph in \"" + dataFilePathName + "\"?");
-
-            if (answer == QMessageBox::StandardButton::Yes)
-            {
-                // dataFilemame = filename - image extension + ".csv"
-                mData->saveAverageSelectionFuncVector(dataFilePathName);
-            }
-
-            funcBarGraph->saveImage(filename);
-        }
+        saveBarGraph(funcBarGraph);
     });
 
     // functionalisation changed
@@ -568,11 +442,19 @@ void MainWindow::initialize()
         auto ans = mBox.exec();
         if (ans == QMessageBox::StandardButton::Yes)
         {
+            // dataDir is changed to temp dir when loading autosave
+            // -> remember dataDir
+            QString dataDir = settings->value(DATA_DIR_KEY, DEFAULT_DATA_DIR).toString();
+
             loadData(autosaveFile.fileName());
             deleteAutosave();
 
             // override changed flag, so the autosave can be saved
             mData->setDataChanged(true);
+
+            // restore dataDir
+            settings->setValue(DATA_DIR_KEY, dataDir);
+            settings->sync();
         }
     }
 
@@ -691,6 +573,74 @@ void MainWindow::saveData(bool forceDialog)
         saveDataDir();
     } catch (std::runtime_error e) {
         QMessageBox::critical(this, "Error saving measurement", e.what());
+    }
+}
+
+void MainWindow::saveLineGraph(LineGraphWidget *graph)
+{
+    // load export directory
+    QString exportDir = settings->value(EXPORT_DIR_KEY, DEFAULT_EXPORT_DIR).toString();
+
+    // save file dialog
+    QString selectedExtension;
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Graph Image"), exportDir, "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
+
+    // save image
+    if (!filename.isEmpty())
+    {
+        // add extension if none was set
+        QStringList splitList = filename.split(".");
+        if (splitList.size() < 2)
+            filename += ".jpg";
+        // unknown file extension
+        else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
+            filename += ".jpg";
+
+        graph->saveImage(filename);
+
+        // save export dir
+        QStringList filePathList = filename.split("/");
+        filePathList.removeLast();
+        QString newExportDir = filePathList.join("/");
+        if (newExportDir != exportDir)
+        {
+            settings->setValue(EXPORT_DIR_KEY, newExportDir);
+            settings->sync();
+        }
+    }
+}
+
+void MainWindow::saveBarGraph(BarGraphWidget *graph)
+{
+    // load export directory
+    QString exportDir = settings->value(EXPORT_DIR_KEY, DEFAULT_EXPORT_DIR).toString();
+
+    // save file dialog
+    QString selectedExtension;
+    QString filename = QFileDialog::getSaveFileName(this, tr("Save Graph Image"), exportDir, "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
+
+    // save image
+    if (!filename.isEmpty())
+    {
+        // add extension if none was set
+        QStringList splitList = filename.split(".");
+        if (splitList.size() < 2)
+            filename += ".jpg";
+        // unknown file extension
+        else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
+            filename += ".jpg";
+
+        graph->saveImage(filename);
+
+        // save export dir
+        QStringList filePathList = filename.split("/");
+        filePathList.removeLast();
+        QString newExportDir = filePathList.join("/");
+        if (newExportDir != exportDir)
+        {
+            settings->setValue(EXPORT_DIR_KEY, newExportDir);
+            settings->sync();
+        }
     }
 }
 
@@ -1430,18 +1380,25 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
 void MainWindow::on_actionLoadClassifier_triggered()
 {
-    // make data directory
-    if (!QDir("classifiers").exists())
-        QDir().mkdir("classifiers");
+    // load classifier dir
+    QString classiferPath = settings->value(CLASSIFIER_DIR_KEY, DEFAULT_CLASSIFIER_DIR).toString();
 
     // get path to classifier
-    QString filename = QFileDialog::getOpenFileName(this, tr("Load smell classifier"), "./classifiers/", "TorchScript Files (*.pt)");
+    QString filename = QFileDialog::getOpenFileName(this, tr("Load smell classifier"), classiferPath, "TorchScript Files (*.pt)");
     if (filename == "")
         return;
 
+    // save classifier path
+    QStringList filePath = filename.split("/");
+    filePath.removeLast();
+    settings->setValue(CLASSIFIER_DIR_KEY, filePath.join("/"));
+    settings->sync();
+
+    // close previous classifier
     if (classifier != nullptr)
         closeClassifier();
 
+    // load new classifier
     bool loadOk;
     QString errorString;
     classifier = new TorchClassifier(this, filename, &loadOk, &errorString);
