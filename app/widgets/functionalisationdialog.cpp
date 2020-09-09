@@ -152,7 +152,7 @@ void FunctionalisationDialog::loadSelectedPreset()
     QString preset = presetComboBox->currentText();
     QString presetFileName = preset + ".preset";
 
-    QFile file("./presets/" + presetFileName);
+    QFile file(presetDir + "/" + presetFileName);
     if (!file.open(QIODevice::ReadOnly))
     {
         QMessageBox::information(this, "Unable to open preset " + presetFileName,

@@ -2,7 +2,7 @@
 #define DEFAULTVALUES_H
 
 // debug settings
-#define CLEAR_SETTINGS true
+#define CLEAR_SETTINGS false
 
 // directories
 #define DATA_DIR_KEY "directories/dataDir"

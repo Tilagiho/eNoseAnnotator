@@ -671,8 +671,19 @@ bool MeasurementData::saveAverageSelectionFuncVector(QString filename)
 
 void MeasurementData::copyFrom(MeasurementData *otherMData)
 {
+    // sensorFailures and functionalisation are static
+    // -> deleted when clear() is called
+    // --> remember sensorFailures and functionalisation
+    // TODO: introduce non-static sensorFailures and functionalisation
+    auto failures = otherMData->getSensorFailures();
+    auto func = otherMData->getFunctionalisation();
+
     // clear local data
     clear();
+
+    // restore sensorFailures and functionalisation
+    setSensorFailures(failures);
+    setFunctionalisation(func);
 
     // meta data
     setClasslist(otherMData->getClassList());
@@ -680,7 +691,6 @@ void MeasurementData::copyFrom(MeasurementData *otherMData)
     setSaveFilename(otherMData->getSaveFilename());
     setComment(otherMData->getComment());
     setSensorId(otherMData->sensorId);
-    setSensorFailures(otherMData->getSensorFailures());
     setFuncName(otherMData->funcName);
 
     // data
