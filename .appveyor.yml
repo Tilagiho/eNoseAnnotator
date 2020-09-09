@@ -44,16 +44,11 @@ after_build:
   - cp app/lib/libtorch/lib/*.dll "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
   - cp -r app/release/* "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
   - cp -r usr/share/presets "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/share/"
-  # create shortcut
-  - ps: C:\projects\enoseannotator\scripts\set-shortcut.ps1 "C:\projects\enoseannotator\eNoseAnnotator-$env:APPVEYOR_REPO_TAG_NAME-Windows\eNoseAnnotator-$env:APPVEYOR_REPO_TAG_NAME-Windows\bin\eNoseAnnotator.exe" "C:\projects\enoseannotator\eNoseAnnotator-$env:APPVEYOR_REPO_TAG_NAME-Windows\eNoseAnnotator-$env:APPVEYOR_REPO_TAG_NAME-Windows\eNoseAnnotator.lnk"
-  - dir
 
   #				#
   # 	generate symbol file	#
   # 				#
-  - dir
   - cd app
-  - dir
   # setup environment
   - ren "release\eNoseAnnotator.exe" "app.exe"
   - set SYMBOL_DIR="symbols_%APPVEYOR_REPO_COMMIT%_win"
