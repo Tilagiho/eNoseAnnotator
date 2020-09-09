@@ -59,6 +59,14 @@ chmod a+x linuxdeployqt-continuous-x86_64.AppImage
 prefix="eNoseAnnotator/usr"
 ./linuxdeployqt-continuous-x86_64.AppImage ${prefix}/share/applications/*.desktop -appimage -executable="${prefix}/lib/"
 
+# release build: rename AppImage
+if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" != "" ]
+then 
+mv eNoseAnnotator*.AppImage eNoseAnnotator-${TRAVIS_TAG}-x86_64.AppImage
+mv eNoseAnnotator*.AppImage.zsync eNoseAnnotator-${TRAVIS_TAG}-x86_64.AppImage.zsync
+fi
+
+
 # create debug symbol archive
 zip -r "${symbol_dir}.zip" "${symbol_dir}"
 
