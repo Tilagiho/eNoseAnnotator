@@ -50,18 +50,21 @@ The vectors of a measurement can be classified using [TorchScript(.pt)](https://
 
 ### Training own classfiers
 
-You can train your own models using pyTorch and convert it into TorchScript. The following information should be considered when doing so.
+You can train your own classifier using pyTorch and convert it into TorchScript. The following information should be considered when doing so.
 
-The output of the model is assumed to be a vector of the class logits. In order to interpret the model in the right way, some variables have to be part the model, while others are optional.
+The output of the classifier can either be a vector of the class logits or class probabilities. In order to interpret the model in the right way, some variables have to be part the model, while others are optional.
 
-Necessary variables:
-- classList (list of strings): list of the class name strings, has to be in the same order as the output vector
+| Variable        | Optional |Type             | Description                                                                            | Default value |
+| --------------- | :-------:|:--------------: | -------------------------------------------------------------------------------------- | ------------- |
+| classList       |          | list of strings | list of the class names, has to be in the same order as the output vector              | -             |
+| name            | x        | string          | name of the classifier                                                                 | -             |
+| N               | x        |integer          | number of inputs of the classifier                                                     | -             |
+| M               | x        |integer          | number of outputs of the classifier                                                    | -             |
+| input_function  | x        |string           | function applied before the input ("average", "median_average" or "None")              | "average"     |
+| output_function | x        |string           | function applied to the output ("logsoftmax", "sigmoid" or "None")                     | "logsoftmax"  |
+| isInputAbsolute | x        |bool             | true if absolute vectors should be used, otherwise relative vectors are used as input  | false         |
+| mean            | x        |list of doubles  | mean for each input, should be set if the classifier's training set was normalised     | -             |
+| variance        | x        |list of doubles  | variance for each input, should be set if the classifier's training set was normalised | -             |
+| preset_name     | x        |string           | name of the sensor's functionalisation preset                                          | -             |
 
-Optional:
-- name (string): name of the model
-- N (integer): number of inputs of the model
-- M (integer): number of outputs of the model
-- isInputAbsolute (bool): true if absolute vectors should be used, otherwise relative vectors are used as input. Assumed to be false if not set.
-- mean (list of doubles): mean for each input, should be set if the model's training set was normalised
-- variance (list of doubles): variance for each input, should be set if the model's training set was normalised
-- preset_name (string): name of the sensor's functionalisation preset 
+
