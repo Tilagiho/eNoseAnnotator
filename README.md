@@ -7,16 +7,15 @@ eNoseAnnotator is a program used to view, annotate and store measurements of the
 ### Windows:
 First, install the [sensor drivers](https://www.silabs.com/products/development-tools/software/usb-to-uart-bridge-vcp-drivers).
 Then download the eNoseAnnotator windows archive from the assets of the latest release (green label).
-Unpack the zip file where you want to use the program. Go into the the directory created and double-click "eNoseAnnotator.exe" in order to run the program.
-
-If you encounter an error message about missing .dll files, you need install the vc redistributable package by running "vc_redist.x64.exe", which is located in the same directory.
+Unpack the zip file where you want to use the program. Install the vc redistributable package by running "vc_redist.x64.exe" in the directory "bin".
+Finally, double-click "eNoseAnnotator.exe" in the directory "bin" to run the program.
 
 
 ### Linux:
-Download the linux archive from the assets of the latest release (green label). Extract the zip file where you want to use the program.
+Download the AppImage from the assets of the latest release (green label) and put it where you want to run the program.
 
 Make the AppImage in the extracted directory executable: 
-- In Nautilus (default ubuntu file browser): Right-click on the "eNoseAnnotator-\*.AppImage" and select "Properties". Under "Permissions" check "Allow executing file as program".
+- In Nautilus (default ubuntu file browser): Right-click on the "eNoseAnnotator-\*.AppImage" and select "Properties". In the "Permissions" tab check the "Allow executing file as program" checkbox.
 - In terminal: Open terminal in the directory of the AppImage. Execute `chmod +x eNoseAnnotator-*.AppImage`.
 
 You can now run eNoseAnnotator by double-clicking the AppImage or executing `./eNoseAnnotator-*.AppImage` in the terminal.
@@ -25,19 +24,19 @@ You can now run eNoseAnnotator by double-clicking the AppImage or executing `./e
 
 ### Connecting a sensor
 
-Plug in a eNose sensor. In the tool bar click the USB connection symbol and select the usb-port of the sensor. 
+Plug in a eNose sensor. In the tool bar click the USB connection symbol, select the usb-port of the sensor and hit apply. 
 
 To start the measurement press start symbol in the tool bar. If you have not set the functionalisation of the sensor, you will be promted to do so. After calculating the base vector of the sensor the measurement will be started. The base vector is the average vector of the first few measurements.
 
-You can pause and stop the measurement. After stopping you can start a new measurement by pressing the start icon again. If an error occurs during a measurement, you can reconnect the sensor by clicking the reconnect symbol in order to resume the measurement. 
+You can pause and stop the measurement. After stopping you can start a new measurement by pressing the start icon again. If an error occurs during a measurement, you can click the reconnect symbol in order to resume the measurement. 
 
 ### Annotating data
 
 The graph in the top left shows the the relative deviation of the measurements to the base vector. You can changing the range of the x-axis of the graph by dragging & dropping the graph left and right. It is also possible to zoom in and out using the mouse wheel. 
 
-You can select data by pressing "Ctrl" and drawing a selection rectangle in the graph. After selection data the graph on the bottom left will show the average vector of the selection. 
+You can select data by pressing "Ctrl" and drawing a selection rectangle in the graph. After selecting data the graph on the bottom left will show the average vector of the selection. 
 
-In order to select a class for the selected data press "Annotation->Set class of selection...". The class of a selection always consists of a class name and its abreviation. The abreviation is used to label the data in the measurement graph and should therefore be as short as possible.
+In order to select a class for the selected data press "Annotation->Set class of selection...".
 
 ### Loading/ Saving data
 
