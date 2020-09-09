@@ -428,9 +428,10 @@ void MainWindow::initialize()
         mBox.setIcon(QMessageBox::Question);
 
         // add buttons
-        mBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        mBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No | QMessageBox::Abort);
         mBox.button(QMessageBox::Yes)->setText("Restore");
         mBox.button(QMessageBox::No)->setText("Discard");
+        mBox.button(QMessageBox::Abort)->setText("Cancel");
 
         // add additional file info
         QFileInfo info(autosaveFile);
@@ -455,6 +456,9 @@ void MainWindow::initialize()
             // restore dataDir
             settings->setValue(DATA_DIR_KEY, dataDir);
             settings->sync();
+        } else if (ans == QMessageBox::StandardButton::No)
+        {
+            deleteAutosave();
         }
     }
 
