@@ -164,20 +164,19 @@ void BarGraphWidget::setBars(MVector new_vector, std::vector<bool> sensorFailure
         QMap<int, int> funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
 
         auto keyList = funcMap.keys();
-        int maxFunc = *std::max_element(keyList.begin(), keyList.end());
-
+        int funcSize = funcMap.size();
         // no func set: plot channels
-        if (maxFunc <= 1)
-            maxFunc = MVector::nChannels-1;
+        if (funcSize == 1)
+            funcSize = MVector::nChannels;
 
         // new number of functionalisations:
         // reinit funcBarVector
         // ignore funcSize == 0 (no functionalisation set)
-        if (maxFunc != funcBarVector.size())
+        if (funcSize != funcBarVector.size())
         {
             deleteBars();
 
-            for (int i=0; i<=maxFunc; i++)
+            for (int i=0; i<funcSize; i++)
             {
                 // init bar
                 funcBarVector << new QCPBars(ui->funcBarGraph->xAxis, ui->funcBarGraph->yAxis);
@@ -185,7 +184,7 @@ void BarGraphWidget::setBars(MVector new_vector, std::vector<bool> sensorFailure
 
                 // set color
                 QColor color;
-                if (maxFunc == MVector::nChannels-1)
+                if (funcSize == MVector::nChannels)
                     color = ENoseColor::getSensorColor(i);
                 else
                     color = ENoseColor::getFuncColor(i);
@@ -197,27 +196,23 @@ void BarGraphWidget::setBars(MVector new_vector, std::vector<bool> sensorFailure
         // set funcBarVector data
         // update fullBarVector
         QVector<double> funcTicks;
-        for (int i=0; i<=maxFunc; i++)
-            funcTicks << i;
+        for (int i=0; i<funcSize; i++)
+            funcTicks << funcMap.keys()[i];
 
         // get func vector
-        MVector funcVector;
-        if (maxFunc == MVector::nChannels-1)
-            funcVector = new_vector;
-        else
-            funcVector = new_vector.getFuncVector(functionalisation, sensorFailures);
+        MVector funcVector = new_vector.getFuncVector(functionalisation, sensorFailures);
 
         // assign funcVector values to funcData
         QMap<int, QVector<double>> funcDataMap;
-        for (int i=0; i<=maxFunc; i++)
-            for (int j=0;j<=maxFunc; j++)
+        for (int i=0; i<funcSize; i++)
+            for (int j=0;j<funcSize; j++)
                 if (i==j)
                     funcDataMap [i] << funcVector[i];
                 else
                     funcDataMap [i] << 0.0;
 
         // set funcData
-        for (int i=0; i<=maxFunc; i++)
+        for (int i=0; i<funcSize; i++)
             funcBarVector[i]->setData(funcTicks, funcDataMap[i]);
     }
     else

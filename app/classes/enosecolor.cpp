@@ -43,45 +43,42 @@ QColor ENoseColor::getSensorColor(int ch)
 
     // get
     auto functionalisation = MeasurementData::functionalisation;
-    int maxFunc = 0;
-    for (int i=0; i<MVector::nChannels; i++)
-        if (functionalisation[i] > maxFunc)
-            maxFunc = functionalisation[i];
+    auto funcMap = MeasurementData::getFuncMap();
+    int funcSize = funcMap.size();
+
+    int func = functionalisation[ch];
 
     // pick color from list
-    if (maxFunc < smallColorList.size())
-        color = smallColorList[functionalisation[ch]];
-    else if (maxFunc < bigColorList.size())
-        color = bigColorList[functionalisation[ch]];
+    if (funcSize < smallColorList.size())
+        color = smallColorList[funcMap.keys().indexOf(func)];
+    else if (funcSize < bigColorList.size())
+        color = bigColorList[funcMap.keys().indexOf(func)];
     // too many funcs: pick equally spaced color
     else
     {
-        float hue = fmod(360/maxFunc * functionalisation[ch], 360.0);
+        float hue = fmod(360/funcSize * funcMap.keys().indexOf(func), 360.0);
         color.setHsv(hue, 200, 120);
     }
 
     return color;
 }
 
-QColor ENoseColor::getFuncColor(int func)
+QColor ENoseColor::getFuncColor(int index)
 {
     QColor color;
 
     auto functionalisation = MeasurementData::functionalisation;
-    int maxFunc = 0;
-    for (int i=0; i<MVector::nChannels; i++)
-        if (functionalisation[i] > maxFunc)
-            maxFunc = functionalisation[i];
+    int funcSize = MeasurementData::getFuncMap().size();
 
     // pick color from list
-    if (maxFunc < smallColorList.size())
-        color = smallColorList[func];
-    else if (maxFunc < bigColorList.size())
-        color = bigColorList[func];
+    if (funcSize < smallColorList.size())
+        color = smallColorList[index];
+    else if (funcSize < bigColorList.size())
+        color = bigColorList[index];
     // too many funcs: pick equally spaced color
     else
     {
-        float hue = fmod(360/maxFunc * func, 360.0);
+        float hue = fmod(360/funcSize * index, 360.0);
         color.setHsv(hue, 250, 150);
     }
 
@@ -99,6 +96,5 @@ QColor ENoseColor::getClassColor(int i, int size)
     if (size < bigColorList.size())
         return bigColorList[i];
     else
-        return
-                getFuncColor(i);
+        return getFuncColor(i);
 }

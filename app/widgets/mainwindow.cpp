@@ -1452,8 +1452,7 @@ void MainWindow::updateFuncGraph()
 
     // get number of funcs
     auto funcMap = mData->getFuncMap();
-    auto keyList = funcMap.keys();
-    int maxFunc = *std::max_element(keyList.begin(), keyList.end());
+    int funcSize = funcMap.size();
 
     // no funcs set:
     // use normal graph
@@ -1469,14 +1468,14 @@ void MainWindow::updateFuncGraph()
     // else: reset graph
     else
     {
-        if (funcLineGraph->getNChannels() != maxFunc+1)
+        if (funcLineGraph->getNChannels() != funcSize)
         {
             // store xAxis range
             auto oldRange = funcLineGraph->getXRange();
 
             // reset funcLineGraph
             funcLineGraph->clearGraph();
-            funcLineGraph->resetGraph(maxFunc+1);
+            funcLineGraph->resetGraph(funcSize);
 
             // restore xAxis range
             funcLineGraph->setXRange(oldRange);

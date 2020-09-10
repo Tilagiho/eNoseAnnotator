@@ -200,9 +200,7 @@ MVector MVector::getFuncVector(std::vector<int> functionalisation, std::vector<b
     auto funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
 
     // init func vector
-    auto keyList = funcMap.keys();
-    int maxFunc = *std::max_element(keyList.begin(), keyList.end());
-    MVector funcVector(maxFunc+1);
+    MVector funcVector(funcMap.size());
 
     // copy atributes
     funcVector.userAnnotation = userAnnotation;
@@ -214,7 +212,8 @@ MVector MVector::getFuncVector(std::vector<int> functionalisation, std::vector<b
         if (!sensorFailures[i])
         {
             int func = functionalisation[i];
-            funcVector[func] += vector[i] / funcMap[func];
+            int vectorIndex = funcMap.keys().indexOf(func);
+            funcVector[vectorIndex] += vector[i] / funcMap[func];
         }
     }
 

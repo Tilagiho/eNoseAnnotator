@@ -86,9 +86,7 @@ const QMap<uint, MVector> MeasurementData::getSelectionMap()
 
 int MeasurementData::getNFuncs() const
 {
-    QList<int> funcKeys = getFuncMap().keys();
-    double maxFunc = *std::max_element(funcKeys.begin(), funcKeys.end());
-    return maxFunc + 1;
+    return getFuncMap().size();
 }
 
 /*!

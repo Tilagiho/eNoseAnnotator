@@ -14,7 +14,7 @@ class TorchClassifier : public QObject
 {
     Q_OBJECT
 
-public:
+public:  
     explicit TorchClassifier(QObject *parent= nullptr, QString filename = "", bool* loadOk = nullptr, QString *errorString = nullptr, int nInputs=8);
 
     Annotation getAnnotation (std::vector<double> input);

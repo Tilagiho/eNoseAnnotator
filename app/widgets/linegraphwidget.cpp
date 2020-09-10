@@ -695,9 +695,7 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
 
     // check if graph is showing funcs or meas vectors
     auto funcMap = MeasurementData::getFuncMap();
-    auto funcKeys = funcMap.keys();
-    int maxFunc = *std::max_element(funcKeys.begin(), funcKeys.end());
-    bool isFuncGraph = nChannels == maxFunc+1;
+    bool isFuncGraph = nChannels == funcMap.size();
 
     // add values to graph
     int xpos = timestamp-startTimestamp;
