@@ -26,6 +26,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     settings = new QSettings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
 
+    // init autosave dir
     QDir temp = QDir::temp();
     QFileInfo tempInfo(temp.absolutePath());
 
@@ -454,8 +455,7 @@ void MainWindow::initialize()
             mData->setDataChanged(true);
 
             // restore dataDir
-            settings->setValue(DATA_DIR_KEY, dataDir);
-            settings->sync();
+            mData->setSaveFilename(dataDir);
         } else if (ans == QMessageBox::StandardButton::No)
         {
             deleteAutosave();
