@@ -9,15 +9,17 @@
 class Annotation
 {
 public:
-    Annotation(const QSet<aClass>& classSet = QSet<aClass>{});
+    Annotation(const QSet<aClass>& classSet = QSet<aClass>{}, const QSet<aClass>& predClasses = QSet<aClass>{});
 
     bool isEmpty() const;
 
-    void set(const QList<aClass>& annotationMap);
+    void setClassList(const QList<aClass>& annotationMap);
 
     const QString toString() const;
 
     const QString getProbString() const;
+
+    const QString getPredString() const;
 
     static Annotation fromString(QString string);
 
@@ -39,9 +41,12 @@ public:
 
     aClass::Type getType() const;
 
+    QSet<aClass> getPredClasses() const;
+
 private:
     aClass::Type type;
-    QSet<aClass> classSet;
+    QSet<aClass> classSet;     // contains all detected classes with raw probabilities
+    QSet<aClass> predClasses;  // contains predicted classes
 };
 
 #endif // CLASSIFICATION_H

@@ -6,6 +6,7 @@
 #include <QMap>
 
 #include "mvector.h"
+#include "classifier_definitions.h"
 
 class MeasurementData : public QObject
 {
@@ -214,6 +215,8 @@ public:
     static std::vector<bool> sensorFailures;
 
 
+    void setInputFunctionType(const InputFunctionType &value);
+
 public slots:
     /*
      * clears selectedData and adds all vectors with timestamp between lower and upper to selectedData
@@ -270,6 +273,7 @@ private:
     QMap<uint, MVector> data;  // map containing vectors of measurements with timestamps as keys
     QMap<uint, MVector> selectedData;
     QMap<uint, MVector> baseLevelMap;
+
     bool dataChanged = false;
     QString dataComment = "";
     QString sensorId = "";
@@ -280,6 +284,8 @@ private:
     QString saveFilename = "./data/";
 
     QSet<QString> sensorAttributes;
+
+    InputFunctionType inputFunctionType = InputFunctionType::medianAverage;
 
 //    int nChannels = MVector::nChannels;
 };

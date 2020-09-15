@@ -3,6 +3,8 @@
 
 #include<QPainter>
 
+#include "../classes/classifier_definitions.h"
+
 ACircleWidget::ACircleWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ACircleWidget)
@@ -25,13 +27,20 @@ void ACircleWidget::paintEvent(QPaintEvent *)
     painter.drawEllipse(circlePos,15,15);
 }
 
-void ACircleWidget::set(aClass detectedClass)
+void ACircleWidget::set(Annotation annotation)
 {
     // first class in classlist has highest value
     // -> detected class
     pen = QPen(Qt::black);
-    brush = QBrush(aClass::getColor(detectedClass));
-    ui->label->setText(detectedClass.toString());
+
+    aClass maxLikelyClass(NO_SMELL_STRING, 0.);
+    for (aClass aclass : annotation.getClasses())
+        if (aclass.getValue() > maxLikelyClass.getValue())
+            maxLikelyClass = aClass(aclass);
+
+    // set color of class with highest probability
+    brush = QBrush(aClass::getColor(maxLikelyClass));
+    ui->label->setText(maxLikelyClass.toString());
     repaint();
 }
 

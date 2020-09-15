@@ -73,6 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
     #endif
 
     mData = new MeasurementData(this);
+    mData->setInputFunctionType(inputFunctionType);
 
     // this->setStyleSheet("QSplitter::handle{background: black;}"); // make splitter visible
 
@@ -116,7 +117,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector selectionVector){
         if (classifier != nullptr)
         {
-            auto funcVector = selectionVector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures());
+            auto funcVector = selectionVector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures(), inputFunctionType);
 
             try {
                 Annotation annotation = classifier->getAnnotation(funcVector.getVector());
@@ -176,7 +177,7 @@ MainWindow::MainWindow(QWidget *parent)
             funcLineGraph->addMeasurement(vector, timestamp);
         else
         {
-            MVector funcVector = vector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures());
+            MVector funcVector = vector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures(), inputFunctionType);
             funcLineGraph->addMeasurement(funcVector, timestamp, yRescale);
         }
     });    // add new data to func line graph
@@ -189,7 +190,7 @@ MainWindow::MainWindow(QWidget *parent)
         // add recalculated functionalitisation averages to cleared funcLineGraph
         QMap<uint, MVector> funcData;
         for (int timestamp : data.keys())
-            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures);
+            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures, inputFunctionType);
 
         funcLineGraph->setData(funcData);
     });     // set loaded data in lGraph
@@ -206,7 +207,7 @@ MainWindow::MainWindow(QWidget *parent)
             return;
 
         // get annotation from the classifier
-        auto funcVector = vector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures());
+        auto funcVector = vector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures(), inputFunctionType);
 
         try {
             Annotation annotation = classifier->getAnnotation(funcVector.getVector());
@@ -1332,6 +1333,7 @@ void MainWindow::createGraphWidgets()
     QDockWidget *vbgdock = ui->dock2;
     vectorBarGraph = new BarGraphWidget;
     vectorBarGraph->setMode(BarGraphWidget::Mode::showAll);
+    vectorBarGraph->setInputFunctionType(inputFunctionType);
     vbgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
     vbgdock->setWidget(vectorBarGraph);
     addDockWidget(Qt::LeftDockWidgetArea, vbgdock);
@@ -1342,6 +1344,7 @@ void MainWindow::createGraphWidgets()
     QDockWidget *fbgdock = new QDockWidget(tr("Functionalisation Bar Graph"), this);
     funcBarGraph = new BarGraphWidget;
     funcBarGraph->setMode(BarGraphWidget::Mode::showFunc);
+    funcBarGraph->setInputFunctionType(inputFunctionType);
     fbgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
     fbgdock->setWidget(funcBarGraph);
     addDockWidget(Qt::LeftDockWidgetArea, fbgdock);
@@ -1552,7 +1555,7 @@ void MainWindow::classifyMeasurement()
     // classify
     for (uint timestamp : measDataMap.keys())
     {
-        auto funcVector = measDataMap[timestamp].getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures());
+        auto funcVector = measDataMap[timestamp].getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures(), classifier->getInputFunctionType());
         try {
             Annotation annotation = classifier->getAnnotation(funcVector.getVector());
             mData->setDetectedAnnotation(annotation, timestamp);

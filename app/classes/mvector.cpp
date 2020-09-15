@@ -5,6 +5,8 @@
 
 #include <QtCore>
 
+#include <stdexcept>
+
 int MVector::nChannels = 64;
 
 /*!
@@ -191,7 +193,7 @@ MVector MVector::getAbsoluteVector(MVector baseVector)
  * \param sensorFailures
  * \return
  */
-MVector MVector::getFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures)
+MVector MVector::getAverageFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures)
 {
     Q_ASSERT(functionalisation.size() == this->size);
     Q_ASSERT(sensorFailures.size() == this->size);
@@ -218,6 +220,81 @@ MVector MVector::getFuncVector(std::vector<int> functionalisation, std::vector<b
     }
 
     return funcVector;
+}
+
+MVector MVector::getMedianAverageFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures, int nMedian)
+{
+    Q_ASSERT(functionalisation.size() == this->size);
+    Q_ASSERT(sensorFailures.size() == this->size);
+
+    // get func map
+    auto funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
+
+    // init func vector
+    MVector medianAverageVector(funcMap.size());
+
+    // copy atributes
+    medianAverageVector.userAnnotation = userAnnotation;
+    medianAverageVector.detectedAnnotation = detectedAnnotation;
+
+    // create list of functionalisation values
+    QMap<int, QList<double>> funcValueMap;
+    for (int i=0; i<MVector::nChannels; i++)
+    {
+        if (!sensorFailures[i])
+        {
+            int func = functionalisation[i];
+            funcValueMap[func].append(vector[i]);
+        }
+    }
+
+    // calculate values of medianAverage Vector
+    for (int func : funcValueMap.keys())
+    {
+        if (funcValueMap[func].size() > nMedian)
+        {
+            // sort value list
+            std::sort(funcValueMap[func].begin(), funcValueMap[func].end());
+
+            // remove non-median values
+            // -> nMedian values remain in list
+            bool removeLast = false;
+            while(funcValueMap[func].size() > nMedian)
+            {
+                if (removeLast)
+                    funcValueMap[func].removeLast();
+                else
+                    funcValueMap[func].removeFirst();
+
+                removeLast = !removeLast;
+            }
+        }
+
+        // calculate averages of median values
+        int vectorIndex = funcMap.keys().indexOf(func);
+
+        for (int i=0; i<funcValueMap[func].size(); i++)
+            medianAverageVector[vectorIndex] += funcValueMap[func][i] / funcValueMap[func].size();
+    }
+
+    return medianAverageVector;
+}
+
+MVector MVector::getFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures, InputFunctionType inputFunction)
+{
+    Q_ASSERT(functionalisation.size() == this->size);
+    Q_ASSERT(sensorFailures.size() == this->size);
+
+    switch (inputFunction) {
+    case InputFunctionType::none:
+        return *this;
+    case InputFunctionType::average:
+        return getAverageFuncVector(functionalisation, sensorFailures);
+    case InputFunctionType::medianAverage:
+        return getMedianAverageFuncVector(functionalisation, sensorFailures);
+    default:
+        throw std::invalid_argument("Unhandled InputFunctionType!");
+    }
 }
 
 std::vector<double> MVector::getVector() const

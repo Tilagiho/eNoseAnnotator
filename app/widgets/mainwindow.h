@@ -16,6 +16,7 @@
 #include "bargraphwidget.h"
 #include "infowidget.h"
 #include "classifierwidget.h"
+#include "../classes/classifier_definitions.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -103,6 +104,8 @@ private:
     TorchClassifier *classifier = nullptr;
 
     bool converterRunning = false;
+
+    InputFunctionType inputFunctionType = InputFunctionType::medianAverage;
 
     void closeEvent (QCloseEvent *event);
 

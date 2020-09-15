@@ -269,7 +269,7 @@ aClass::Type aClass::getClassType(QString typeName)
 
 QColor aClass::getColor(aClass aclass)
 {
-    Q_ASSERT("Class is unknown!" && staticClassSet.contains(aClass(aclass.getName(), -1.0)));
+    Q_ASSERT("Class is unknown!" && staticClassSet.contains(aClass(aclass.getName())));
     // get number of classes known & position of aclass
     int n_classes = staticClassSet.size();
     int i_aclass = staticClassSet.toList().indexOf(aClass(aclass.getName(), -1.0));

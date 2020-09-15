@@ -85,7 +85,7 @@ void ClassSelector::on_okButton_clicked()
         selectedClasses << aclass;
     }
 
-    selectedAnnotation.set(selectedClasses);
+    selectedAnnotation.setClassList(selectedClasses);
 
     this->accept();
 }

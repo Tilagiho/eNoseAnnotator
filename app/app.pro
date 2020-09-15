@@ -3,7 +3,8 @@ QT       += core gui serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
-CONFIG += c++11
+CONFIG += c++14
+QMAKE_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
 
 # QMAKE_LFLAGS += -no-pie
 
@@ -78,6 +79,7 @@ SOURCES += \
 HEADERS += \
     classes/aclass.h \
     classes/annotation.h \
+    classes/classifier_definitions.h \
     classes/datasource.h \
     classes/defaultSettings.h \
     classes/enosecolor.h \
@@ -135,8 +137,8 @@ RESOURCES += \
     eNoseAnnotator.qrc
 
 # libtorch
-win32: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10
-unix:!macx: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10
+win32: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10 -ltorch_cpu
+unix:!macx: LIBS += -L$$PWD/lib/libtorch/lib -ltorch -lc10 -ltorch_cpu
 unix:!macx: QMAKE_RPATHDIR += $$PWD/lib/libtorch/lib
 
 INCLUDEPATH += $$PWD/lib/libtorch/include

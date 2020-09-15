@@ -131,6 +131,11 @@ void BarGraphWidget::replot()
     resetColors();
 }
 
+void BarGraphWidget::setInputFunctionType(const InputFunctionType &value)
+{
+    inputFunctionType = value;
+}
+
 void BarGraphWidget::setBars(MVector new_vector, std::vector<bool> sensorFailures, std::vector<int> functionalisation)
 {
     if (mode == Mode::showAll)
@@ -200,7 +205,7 @@ void BarGraphWidget::setBars(MVector new_vector, std::vector<bool> sensorFailure
             funcTicks << funcMap.keys()[i];
 
         // get func vector
-        MVector funcVector = new_vector.getFuncVector(functionalisation, sensorFailures);
+        MVector funcVector = new_vector.getFuncVector(functionalisation, sensorFailures, inputFunctionType);
 
         // assign funcVector values to funcData
         QMap<int, QVector<double>> funcDataMap;

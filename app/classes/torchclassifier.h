@@ -10,6 +10,8 @@
 
 #include "annotation.h"
 
+#include "classifier_definitions.h"
+
 class TorchClassifier : public QObject
 {
     Q_OBJECT
@@ -23,7 +25,6 @@ public:
 
     QString getFilename() const;
 
-
     bool getIsInputAbsolute() const;
 
     QStringList getClassNames() const;
@@ -33,6 +34,8 @@ public:
     int getM() const;
 
     QString getPresetName() const;
+
+    InputFunctionType getInputFunctionType() const;
 
 signals:
     void isInputAbsoluteSet (bool);
@@ -49,8 +52,13 @@ private:
     QString presetName = "None";
     int N, M;
     std::vector<double> mean_vector, stdev_vector;
+    InputFunctionType inputFunctionType = InputFunctionType::average;
+    OutputFunctionType outputFunctionType = OutputFunctionType::logsoftmax;
+    bool isMultiLabel = false;
+    bool isRegression = false;
+    double threshold = 0.3;
 
-    at::Tensor forward (std::vector<double> input, bool asChances=false);
+    at::Tensor forward (std::vector<double> input);
     std::vector<double> normalise(std::vector<double> input);
 };
 

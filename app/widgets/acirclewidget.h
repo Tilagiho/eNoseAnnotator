@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QtGui>
 
-#include "../classes/aclass.h"
+#include "../classes/annotation.h"
 
 namespace Ui {
 class ACircleWidget;
@@ -18,7 +18,7 @@ public:
     explicit ACircleWidget(QWidget *parent = nullptr);
     ~ACircleWidget();
 
-    void set(aClass detectedClass);
+    void set(Annotation annotation);
     void clear();
 
 private:

@@ -21,11 +21,7 @@ ClassifierWidget::~ClassifierWidget()
 
 void ClassifierWidget::setAnnotation(Annotation annotation)
 {
-    // first class in classList has highest value
-    // -> detected class
-    aClass detectedClass = annotation.getClasses().first();
-    ui->widget->set(detectedClass.getName());
-
+    ui->widget->set(annotation);
     ui->widget->setToolTip(annotation.getProbString());
 
     setHidden(false);

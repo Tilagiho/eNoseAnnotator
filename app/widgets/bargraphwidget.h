@@ -5,6 +5,7 @@
 #include <QWidget>
 
 #include "../classes/mvector.h"
+#include "../classes/classifier_definitions.h"
 #include "../qcustomplot/qcustomplot.h"
 
 
@@ -28,6 +29,8 @@ public:
     Mode getMode() const;
     void setMode(const Mode &value);
 
+    void setInputFunctionType(const InputFunctionType &value);
+
 public slots:
     void setBars(MVector, std::vector<bool> sensorFailures, std::vector<int> functionalisation);
     void clearBars();
@@ -48,6 +51,9 @@ private:
 
     void initGraph();
     void replot();
+
+    InputFunctionType inputFunctionType = InputFunctionType::medianAverage;
+
 
 private slots:
     void mousePressed(QMouseEvent*);

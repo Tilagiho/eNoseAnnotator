@@ -54,17 +54,19 @@ You can train your own classifier using pyTorch and convert it into TorchScript.
 
 The output of the classifier can either be a vector of the class logits or class probabilities. In order to interpret the model in the right way, some variables have to be part the model, while others are optional.
 
-| Variable        | Optional |Type             | Description                                                                            | Default value |
-| --------------- | :-------:|:--------------: | -------------------------------------------------------------------------------------- | ------------- |
-| classList       |          | list of strings | list of the class names, has to be in the same order as the output vector              | -             |
-| name            | x        | string          | name of the classifier                                                                 | -             |
-| N               | x        |integer          | number of inputs of the classifier                                                     | -             |
-| M               | x        |integer          | number of outputs of the classifier                                                    | -             |
-| input_function  | x        |string           | function applied before the input ("average", "median_average" or "None")              | "average"     |
-| output_function | x        |string           | function applied to the output ("logsoftmax", "sigmoid" or "None")                     | "logsoftmax"  |
-| isInputAbsolute | x        |bool             | true if absolute vectors should be used, otherwise relative vectors are used as input  | false         |
-| mean            | x        |list of doubles  | mean for each input, should be set if the classifier's training set was normalised     | -             |
-| variance        | x        |list of doubles  | variance for each input, should be set if the classifier's training set was normalised | -             |
-| preset_name     | x        |string           | name of the sensor's functionalisation preset                                          | -             |
+| Variable        | Optional |Type             | Description                                                                                                | Default value |
+| --------------- | :------: | :-------------: | ---------------------------------------------------------------------------------------------------------- | ------------- |
+| classList       |          | list of strings | list of the class names, has to be in the same order as the output vector                                  | -             |
+| name            | x        | string          | name of the classifier                                                                                     | -             |
+| N               | x        | integer         | number of inputs of the classifier                                                                         | -             |
+| M               | x        | integer         | number of outputs of the classifier                                                                        | -             |
+| input_function  | x        | string          | function applied before the input ("average", "median_average" or "None")                                  | "average"     |
+| output_function | x        | string          | function applied to the output ("logsoftmax", "sigmoid" or "None")                                         | "logsoftmax"  |
+| is_multi_label  | x        | bool            | If true, threshold is applied to obtain multi-label annotations. Otherwise the most likely class is picked | false         |
+| threshold       | x        | double          | threshold applied to the results of the output function                                                    | 0.3           |
+| isInputAbsolute | x        | bool            | true if absolute vectors should be used, otherwise relative vectors are used as input                      | false         |
+| mean            | x        | list of doubles | mean for each input, should be set if the classifier's training set was normalised                         | -             |
+| variance        | x        | list of doubles | variance for each input, should be set if the classifier's training set was normalised                     | -             |
+| preset_name     | x        | string          | name of the sensor's functionalisation preset                                                              | -             |
 
 

@@ -23,10 +23,8 @@ matrix:
       # qt version needed for linuxdeployqt
       - sudo apt-get -y install qt510base  qt510serialport libgl1-mesa-dev tree
       - source /opt/qt*/bin/qt*-env.sh   
-      # get libtorch
-      - wget -c -nv https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-1.4.0%2Bcpu.zip
+      - wget -c -nv https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-1.6.0%2Bcpu.zip
       - unzip -q -o libtorch-*.zip  -d app/lib/
-      # add linux syscall support needed for QCrashHandler
       - git clone https://chromium.googlesource.com/linux-syscall-support app/lib/QCrashHandler/deps/breakpad.git/src/third_party/lss
     compiler:
       - gcc-7
@@ -36,15 +34,7 @@ matrix:
     
     after_success:
       - ls
-      # find eNoseAnnotator -executable -type f -exec ldd {} \; | grep " => /usr" | cut -d " " -f 2-3 | sort | uniq # for debugging
-      # curl --upload-file eNoseAnnotator*.AppImage https://transfer.sh/eNoseAnnotator-git.$(git rev-parse --short HEAD)-x86_64.AppImage
-      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh; fi'
-      # upload continuous pre-release
-      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" == "" ]; then bash upload.sh eNoseAnnotator*.AppImage "symbols_${TRAVIS_COMMIT}_linux.zip"; fi'
-      # upload release
-      - 'if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" != "" ]; then UPLOADTOOL_SUFFIX="${TRAVIS_TAG}"; bash upload.sh eNoseAnnotator*.AppImage "symbols_${TRAVIS_COMMIT}_linux.zip"; fi'
-      
-      # upload debug symbols
+      - bash -xv scripts/upload.sh 
 
 # safelist
 branches:

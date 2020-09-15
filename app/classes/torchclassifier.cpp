@@ -14,6 +14,7 @@ TorchClassifier::TorchClassifier(QObject *parent, QString filename, bool* loadOk
 
     *loadOk = true;
 
+    // load mandatory attributes
     try
     {
     // Deserialize the ScriptModule from a file using torch::jit::load().
@@ -21,20 +22,24 @@ TorchClassifier::TorchClassifier(QObject *parent, QString filename, bool* loadOk
     }
     catch (const c10::Error& e)
     {
-        qDebug() << QString(e.msg().c_str());
+        *errorString += QString(e.msg().c_str());
         *loadOk = false;
         return;
     }
 
+    // required attributes
     // extract class list
     if (!module.hasattr("classList"))
     {
         *loadOk = false;
         *errorString += "No class list provided with model.\n";
+        return;
     }
-    QString classListsString = (module.attr("classList").toString().get()->string().c_str());
+
+    QString classListsString = module.attr("classList").toString().get()->string().c_str();
     classNames = classListsString.split(",");
 
+    // load optional attributes
     // get model name
     if (module.hasattr("name"))
         name = QString(module.attr("name").toString()->string().c_str());
@@ -57,6 +62,40 @@ TorchClassifier::TorchClassifier(QObject *parent, QString filename, bool* loadOk
         }
 
     M = classNames.size();
+
+    // input function
+    if (module.hasattr("input_function"))
+    {
+        QString input_function = module.attr("input_function").toString()->string().c_str();
+
+        if (input_function == "average")
+            inputFunctionType = InputFunctionType::average;
+        else if (input_function == "median_average")
+            inputFunctionType = InputFunctionType::medianAverage;
+        else if (input_function == "None")
+            inputFunctionType = InputFunctionType::none;
+    }
+
+    // output function
+    if (module.hasattr("output_function"))
+    {
+        QString output_function = module.attr("output_function").toString()->string().c_str();
+
+        if (output_function == "logsoftmax")
+            outputFunctionType = OutputFunctionType::logsoftmax;
+        else if (output_function == "sigmoid")
+            outputFunctionType = OutputFunctionType::sigmoid;
+        else if (output_function == "None")
+            outputFunctionType = OutputFunctionType::none;
+    }
+
+    // apply threshold
+    if (module.hasattr("is_multi_label"))
+        isMultiLabel = module.attr("is_multi_label").toBool();
+
+    // threshold
+    if (module.hasattr("threshold"))
+        threshold = module.attr("threshold").toDouble();
 
     // input type
     if (module.hasattr("isInputAbsolute"))
@@ -103,10 +142,10 @@ TorchClassifier::TorchClassifier(QObject *parent, QString filename, bool* loadOk
 //    qDebug() << classNames.join(", ");
 
     if (!(*loadOk))
-        *errorString += "See the <a href=\"https://github.com/Tilagiho/eNoseAnnotator/blob/master/README.md\">documentation</a> for more information.\n";
+        *errorString += "See the classifier section <a href=\"https://github.com/Tilagiho/eNoseAnnotator/blob/master/README.md\">documentation</a> for more information.\n";
 }
 
-at::Tensor TorchClassifier::forward(std::vector<double> rawInput, bool asChances)
+at::Tensor TorchClassifier::forward(std::vector<double> rawInput)
 {
     // create float vector
     std::vector<float> floatVector;
@@ -133,7 +172,6 @@ Annotation TorchClassifier::getAnnotation(std::vector<double> input)
     if (input.size() != N)
         throw std::invalid_argument("Input vector has wrong size.");
 
-
 //    std::cout << "input" << input << "\n";
     auto normalised_input = normalise(input);
 //    std::cout << "normalised input" << normalised_input << "\n";
@@ -143,19 +181,75 @@ Annotation TorchClassifier::getAnnotation(std::vector<double> input)
 
 //    std::cout << "output: " << output.slice(1,0,classNames.size()) << "\n";
 
-    auto probabilities = torch::softmax(output, 1);
+    // apply outputFunction
+    at::Tensor probabilities;
+    if (outputFunctionType == OutputFunctionType::logsoftmax)
+        probabilities = torch::softmax(output, 1);
+    else if (outputFunctionType == OutputFunctionType::sigmoid)
+        probabilities = torch::sigmoid(output);
+    else
+        probabilities = output;
 
 //    std::cout << "probabilities: " << probabilities.slice(1,0,classNames.size()) << "\n";
 
 
-    // extract classes from tensor
+    //                              //
+    // extract classes from tensor  //
+    //                              //
     QSet<aClass> classSet;
 
     float* ptr = (float*) probabilities.data_ptr();
     for (int i = 0; i < classNames.size(); ++i)
         classSet << aClass(classNames[i], *ptr++);
 
-    return Annotation(classSet);
+    //                                          //
+    // make predictions based on probabilities  //
+    //                                          //
+    QSet<aClass> predClasses;
+    // multi label classification:
+    if (isMultiLabel)
+    {
+        // apply threshold to get labels
+        for (aClass aclass : classSet)
+        {
+            if (aclass.getValue() > threshold)
+                predClasses << aClass(aclass);
+        }
+        // set prob of No Smell 1-maxProb
+        double maxProb = 0.;
+        for (aClass aclass : classSet)
+        {
+            if (aclass.getValue() > maxProb)
+                maxProb = aclass.getValue();
+        }
+        classSet << aClass(NO_SMELL_STRING, 1.-maxProb);
+
+        // set pred to No Smell if no label was detected
+        if (predClasses.isEmpty())
+            predClasses << aClass(NO_SMELL_STRING);
+    }
+    // multi-class classification:
+    // get class with highest probabillity
+    else
+    {
+        for (aClass aclass : classSet)
+            if (predClasses.isEmpty())
+                predClasses << aclass;
+            else if (aclass.getValue() > predClasses.begin()->getValue())
+            {
+                predClasses.clear();
+                predClasses << aClass(aclass);
+            }
+    }
+    // no regression:
+    // ignore value of predicted classes
+    if (!isRegression)
+    {
+        for (aClass aclass : predClasses)
+            aclass.setType(aClass::Type::CLASS_ONLY);
+    }
+
+    return Annotation(classSet, predClasses);
 }
 
 QString TorchClassifier::getName() const
@@ -191,6 +285,11 @@ int TorchClassifier::getM() const
 QString TorchClassifier::getPresetName() const
 {
     return presetName;
+}
+
+InputFunctionType TorchClassifier::getInputFunctionType() const
+{
+    return inputFunctionType;
 }
 
 std::vector<double> TorchClassifier::normalise(std::vector<double> input)

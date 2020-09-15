@@ -6,6 +6,7 @@
 
 #include "aclass.h"
 #include "annotation.h"
+#include "classifier_definitions.h"
 
 class MVector
 {
@@ -60,7 +61,11 @@ public:
      */
     MVector getAbsoluteVector(MVector baseVector);
 
-    MVector getFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures);
+    MVector getAverageFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures);
+
+    MVector getMedianAverageFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures, int nMedian = 4);
+
+    MVector getFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures, InputFunctionType inputFunction);
 
     int size = nChannels;    // number of sensor inputs
 

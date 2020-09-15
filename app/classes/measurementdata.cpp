@@ -61,7 +61,7 @@ const QMap<uint, MVector> MeasurementData::getFuncData()
     QMap<uint, MVector> relativeData = getRelativeData();
     QMap<uint, MVector> funcData;
     for (int timestamp : relativeData.keys())
-        funcData[timestamp] = relativeData[timestamp].getFuncVector(functionalisation, sensorFailures);
+        funcData[timestamp] = relativeData[timestamp].getFuncVector(functionalisation, sensorFailures, inputFunctionType);
 
     return funcData;
 }
@@ -642,7 +642,7 @@ bool MeasurementData::saveAverageSelectionFuncVector(QString filename)
 
     // calculate average selection vector
     MVector selectionVector = getSelectionVector();
-    MVector selectionFuncVector = selectionVector.getFuncVector(functionalisation, sensorFailures);
+    MVector selectionFuncVector = selectionVector.getFuncVector(functionalisation, sensorFailures, inputFunctionType);
 
     // save average vector in file
     QFile file(filename);
@@ -1060,6 +1060,11 @@ void MeasurementData::resetNChannels()
 {
     sensorFailures = std::vector<bool>(MVector::nChannels, false);
     functionalisation = std::vector<int>(MVector::nChannels, 0);
+}
+
+void MeasurementData::setInputFunctionType(const InputFunctionType &value)
+{
+    inputFunctionType = value;
 }
 
 QMap<uint, MVector> MeasurementData::getBaseLevelMap() const

@@ -1,7 +1,8 @@
 #include "annotation.h"
 
-Annotation::Annotation(const QSet<aClass>& classSet):
-    classSet{classSet}
+Annotation::Annotation(const QSet<aClass>& classSet, const QSet<aClass>& predClasses):
+    classSet{classSet},
+    predClasses{predClasses}
 {
     // assert consistent class type:
     if (classSet.size() > 0)
@@ -29,7 +30,12 @@ aClass::Type Annotation::getType() const
     return type;
 }
 
-void Annotation::set(const QList<aClass>& annotationList)
+QSet<aClass> Annotation::getPredClasses() const
+{
+    return predClasses;
+}
+
+void Annotation::setClassList(const QList<aClass>& annotationList)
 {
     // assert consistent class type:
     if (annotationList.size() > 0)
@@ -51,12 +57,23 @@ void Annotation::set(const QList<aClass>& annotationList)
  */
 Annotation Annotation::fromString(QString string)
 {
-    QSet<aClass> classes;
+    QSet<aClass> classSet;
+    QSet<aClass> predClasses;
 
-    for (QString classString : string.split(','))
-        classes << aClass::fromString(classString);
+    QStringList splitString = string.split('|');
+    if (splitString.size() > 1)
+    {
+        for (QString classString : splitString[1].split(','))
+            predClasses << aClass::fromString(classString);
 
-    return Annotation(classes);
+    }
+    if (splitString.size() > 0)
+    {
+        for (QString classString : splitString[0].split(','))
+            classSet << aClass::fromString(classString);
+    }
+
+    return Annotation(classSet, predClasses);
 }
 
 bool Annotation::isAnnotationString(QString string)
@@ -89,17 +106,50 @@ const QString Annotation::toString() const
     for (aClass aclass : getClasses())
         classStrings << aclass.toString();
 
-    return classStrings.join(',');
+    QString annotationString = classStrings.join(',');
+
+    if (predClasses.size() > 0)
+    {
+        QStringList predClassStrings;
+        for (aClass aclass : predClasses)
+            predClassStrings << aclass.toString();
+        annotationString += '|' + predClassStrings.join(',');
+    }
+
+    return annotationString;
 }
 
 const QString Annotation::getProbString() const
 {
    if (getType() != aClass::Type::NUMERIC)
-       return toString().split(",").join("\n");
+   {
+        QString probString = toString().split('|')[0];
+        return probString.split(",").join("\n");
+
+   }
 
    QList<QString> classStrings;
 
     for (aClass aclass : getClasses())
+    {
+        if (aclass.getValue() > 0.001)
+            classStrings << aclass.getName() + ": " + QString::number(100*aclass.getValue(), 'f', 1) + "%";
+    }
+
+    return classStrings.join('\n');
+}
+
+const QString Annotation::getPredString() const
+{
+   if (getType() != aClass::Type::NUMERIC)
+   {
+        QString probString = toString().split('|')[1];
+        return probString.split(",").join("\n");
+   }
+
+   QList<QString> classStrings;
+
+    for (aClass aclass : predClasses)
     {
         if (aclass.getValue() > 0.001)
             classStrings << aclass.getName() + ": " + QString::number(100*aclass.getValue(), 'f', 1) + "%";
