@@ -1,3 +1,6 @@
 [submodule "app/lib/QCrashHandler"]
 	path = app/lib/QCrashHandler
 	url = https://github.com/juangburgos/QCrashHandler.git
+[submodule "app/lib/dlib"]
+	path = app/lib/dlib
+	url = https://github.com/davisking/dlib.git
