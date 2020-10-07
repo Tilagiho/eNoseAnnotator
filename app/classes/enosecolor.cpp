@@ -4,46 +4,12 @@
 #include "measurementdata.h"
 #include "mvector.h"
 
-QList<QColor> ENoseColor::smallColorList {
-    QColor("#006400"),  // darkgreen
-    QColor("#1e90ff"),  // dodgerblue
-    QColor("#ff0000"),  // red
-    QColor("#ffd700"),  // gold
-    QColor("#c71585"),  // mediumvioletred
-    QColor("#00ff00"),  // lime
-    QColor("#0000ff"),  // blue
-    QColor("#7fffd4")   // aquamarine
-};
-
-QList<QColor> ENoseColor::bigColorList {
-    QColor("#2f4f4f"),  // darkslategray
-    QColor("#6b8e23"),  // olivedrab
-    QColor("#7f0000"),  // maroon2
-    QColor("#4b0082"),  // indigo
-    QColor("#ff0000"),  // red
-    QColor("#ffa500"),  // orange
-    QColor("#c71585"),  // mediumvioletred
-    QColor("#00ff00"),  // lime
-    QColor("#00fa9a"),  // mediumspringgreen
-    QColor("#e9967a"),  // darksalmon
-    QColor("#00ffff"),  // aqua
-    QColor("#0000ff"),  // blue
-    QColor("#b0c4de"),  // lightsteelblue
-    QColor("#ff00ff"),  // fuchsia
-    QColor("#1e90ff"),  // dodgerblue
-    QColor("#ffff54")   // laserlemon
-};
-
-ENoseColor::ENoseColor()
-{}
-
 QColor ENoseColor::getSensorColor(int ch)
 {
     QColor color;
 
     // get
-    auto functionalisation = MeasurementData::functionalisation;
-    auto funcMap = MeasurementData::getFuncMap();
+    auto funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
     int funcSize = funcMap.size();
 
     int func = functionalisation[ch];
@@ -67,8 +33,7 @@ QColor ENoseColor::getFuncColor(int index)
 {
     QColor color;
 
-    auto functionalisation = MeasurementData::functionalisation;
-    int funcSize = MeasurementData::getFuncMap().size();
+    int funcSize = MeasurementData::getFuncMap(functionalisation, sensorFailures).size();
 
     // pick color from list
     if (funcSize < smallColorList.size())
@@ -97,4 +62,14 @@ QColor ENoseColor::getClassColor(int i, int size)
         return bigColorList[i];
     else
         return getFuncColor(i);
+}
+
+void ENoseColor::setSensorFailures(const std::vector<bool> &value)
+{
+    sensorFailures = value;
+}
+
+void ENoseColor::setFunctionalisation(const std::vector<int> &value)
+{
+    functionalisation = value;
 }

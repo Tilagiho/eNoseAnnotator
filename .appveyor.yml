@@ -7,17 +7,19 @@ install:
   - git submodule update --init --recursive
 build_script:
   # debug
-  # - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
   #			#
   # 	prepare build	#
   #			#
   # get libtorch
-  - curl https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.6.0%2Bcpu.zip -o libtorch-win-shared-with-deps-1.4.0.zip
-  - ps: Expand-Archive -Force libtorch-win-shared-with-deps-1.4.0.zip app/lib/
+  - ps: Start-FileDownload 'https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.6.0%2Bcpu.zip' -FileName libtorch.zip
+  - 7z t libtorch.zip
+  - 7z x libtorch.zip -oapp/lib/
+  - dir "app/lib/"
+  - dir "app/lib/libtorch/"
 
   # setup build env
   - vcvars64.bat
-  
+
   #			#
   # 	build app	#
   #			#
@@ -27,19 +29,19 @@ build_script:
   - ren app.exe eNoseAnnotator.exe
   - cd ../..
 after_build:
-  - cd app   
   # 				# 
   # 	create executable	#
   #				#
+  - cd app   
   - windeployqt --compiler-runtime release/eNoseAnnotator.exe
 
   # remove unneeded files
   - rm release/*.obj
   - rm release/*.cpp
   - rm release/*.h
-  # create directories to be deployed
   - cd ..
-
+  
+  # create directories to be deployed
   - mkdir "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/data/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/export/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/share/presets/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/classifiers/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
   - cp app/lib/libtorch/lib/*.dll "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
   - cp -r app/release/* "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"

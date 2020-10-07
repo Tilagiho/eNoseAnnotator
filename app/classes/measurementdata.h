@@ -7,13 +7,14 @@
 
 #include "mvector.h"
 #include "classifier_definitions.h"
+#include "leastsquaresfitter.h"
 
 class MeasurementData : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit MeasurementData(QObject *parent, int nChannels = MVector::nChannels);
+    explicit MeasurementData(QObject *parent, size_t nChannels = MVector::nChannels);
     /*
      * enumeration MultiMode can be used to define how the result of a selection of multiple vectors should be calculated
      */
@@ -102,6 +103,8 @@ public:
      */
     MVector getMeasurement(uint timestamp);
 
+    uint getStartTimestamp();
+
     bool contains(uint timestamp);
 
     /*
@@ -150,7 +153,6 @@ public:
     QString getSensorId() const;
 
     std::vector<bool> getSensorFailures() const;
-    void setSensorFailures(const std::vector<bool> &value);
 
     static QString sensorFailureString(std::vector<bool>);
     static std::vector<bool> sensorFailureArray(QString);
@@ -171,8 +173,6 @@ public:
     void setFunctionalisation(const std::vector<int> &value);
 
     static QMap<int, int> getFuncMap(const std::vector<int> &funcs, const std::vector<bool> sensorFailures);
-
-    static QMap<int, int> getFuncMap();
 
     bool getSaveRawInput() const;
     void setSaveRawInput(bool value);
@@ -211,11 +211,12 @@ public:
     QMap<uint, MVector> getBaseLevelMap() const;
 
     QString funcName = "None";
-    static std::vector<int> functionalisation;
-    static std::vector<bool> sensorFailures;
-
 
     void setInputFunctionType(const InputFunctionType &value);
+
+    uint getNextTimestamp (uint timestamp);
+
+    uint getPreviousTimestamp (uint timestamp);
 
 public slots:
     /*
@@ -224,8 +225,8 @@ public slots:
     void setSelection(int lower, int upper);
 
     void setComment(QString comment);
-    void setFailures(std::vector<bool>);
-    void setFailures(QString failureString);
+    void setSensorFailures(std::vector<bool>);
+    void setSensorFailures(QString failureString);
     void setSensorId(QString sensorId);
     void setBaseLevel(uint timestamp, MVector baseLevel);
     void addClass(aClass newClass);
@@ -249,14 +250,14 @@ signals:
     void lgClearSelection();
 
     void dataReset();   // emitted when data is reset
-    void dataAdded(MVector vector, uint timestamp, bool yRescale);
-    void absoluteDataAdded(MVector vector, uint timestamp, bool yRescale);
-    void dataSet(QMap<uint, MVector>);
+    void dataAdded(MVector vector, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool yRescale);
+    void absoluteDataAdded(MVector vector, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool yRescale);
+//    void dataSet(QMap<uint, MVector> data, std::vector<int> functionalisation, std::vector<bool> sensorFailures);
     void absoluteDataSet(QMap<uint, MVector>);
     void sensorIdSet(QString sensorId);
     void startTimestempSet(uint timestamp);
     void commentSet(QString comment);
-    void sensorFailuresSet(std::vector<bool>);
+    void sensorFailuresSet(std::vector<bool> sensorFailures);
 
     // emitted when replotStatus in LinegraphWidgets should be set
     void setReplotStatus(bool status);
@@ -273,6 +274,9 @@ private:
     QMap<uint, MVector> data;  // map containing vectors of measurements with timestamps as keys
     QMap<uint, MVector> selectedData;
     QMap<uint, MVector> baseLevelMap;
+
+    std::vector<int> functionalisation;
+    std::vector<bool> sensorFailures;
 
     bool dataChanged = false;
     QString dataComment = "";

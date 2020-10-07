@@ -122,6 +122,7 @@
      <string>Connection</string>
     </property>
     <addaction name="actionSet_USB_Connection"/>
+    <addaction name="actionReconnect"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -140,6 +141,7 @@
      <string>Tools</string>
     </property>
     <addaction name="actionConverter"/>
+    <addaction name="actionFit_curve"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAnnotation"/>
@@ -426,7 +428,12 @@
   </action>
   <action name="actionConverter">
    <property name="text">
-    <string>Converter...</string>
+    <string>Converter</string>
+   </property>
+  </action>
+  <action name="actionFit_curve">
+   <property name="text">
+    <string>Curve fitter</string>
    </property>
   </action>
  </widget>

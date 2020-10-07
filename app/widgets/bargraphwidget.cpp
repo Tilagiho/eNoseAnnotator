@@ -39,7 +39,7 @@ void BarGraphWidget::initGraph()
         sensorBarVector[i]->setAntialiased(false);
 
         // set color
-        QColor color = ENoseColor::getSensorColor(i);
+        QColor color = ENoseColor::getInstance().getSensorColor(i);
         sensorBarVector[i]->setPen(QPen(color.lighter(170)));
         sensorBarVector[i]->setBrush(color);
 
@@ -190,9 +190,9 @@ void BarGraphWidget::setBars(MVector new_vector, std::vector<bool> sensorFailure
                 // set color
                 QColor color;
                 if (funcSize == MVector::nChannels)
-                    color = ENoseColor::getSensorColor(i);
+                    color = ENoseColor::getInstance().getSensorColor(i);
                 else
-                    color = ENoseColor::getFuncColor(i);
+                    color = ENoseColor::getInstance().getFuncColor(i);
                 funcBarVector[i]->setPen(QPen(color.lighter(170)));
                 funcBarVector[i]->setBrush(color);
             }
@@ -201,8 +201,14 @@ void BarGraphWidget::setBars(MVector new_vector, std::vector<bool> sensorFailure
         // set funcBarVector data
         // update fullBarVector
         QVector<double> funcTicks;
+        bool isFuncBarGraph = funcMap.size() > 1;
         for (int i=0; i<funcSize; i++)
-            funcTicks << funcMap.keys()[i];
+        {
+            if (isFuncBarGraph)
+                funcTicks << funcMap.keys()[i];
+            else
+                funcTicks << i;
+        }
 
         // get func vector
         MVector funcVector = new_vector.getFuncVector(functionalisation, sensorFailures, inputFunctionType);
@@ -329,7 +335,7 @@ void BarGraphWidget::resetColors()
     {
         for (int i=0; i<sensorBarVector.size(); i++)
         {
-            QColor color = ENoseColor::getSensorColor(i);
+            QColor color = ENoseColor::getInstance().getSensorColor(i);
             QPen pen;
             pen.setColor(color.lighter(170));
 
@@ -343,9 +349,9 @@ void BarGraphWidget::resetColors()
         {
             QColor color;
             if (funcBarVector.size() == MVector::nChannels)
-                color = ENoseColor::getSensorColor(i);
+                color = ENoseColor::getInstance().getSensorColor(i);
             else
-                color = ENoseColor::getFuncColor(i);
+                color = ENoseColor::getInstance().getFuncColor(i);
             QPen pen;
             pen.setColor(color.lighter(170));
 

@@ -21,5 +21,7 @@
         <file alias="reconnect">images/reconnect.png</file>
         <file alias="paused">images/paused.png</file>
         <file alias="start">images/play-button.png</file>
+        <file alias="add">images/add.png</file>
+        <file alias="minus">images/minus.png</file>
     </qresource>
 </RCC>

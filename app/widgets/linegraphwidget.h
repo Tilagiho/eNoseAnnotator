@@ -85,11 +85,9 @@ public:
 
     void setNChannels(int value);
 
-public Q_SLOTS:
-    void addMeasurement(MVector measurement, uint timestamp, bool rescale=true);   // add single measurement; rescale y-axis if rescale==true
-//    void addMeasurement(QVector<MVector> measurements, QVector<uint> timestamps);   // add multiple measurements
-//    void addMeasurement(QMap<uint, MVector>);
-    void setData(QMap<uint, MVector> map);
+public slots:
+    void addMeasurement(MVector measurement, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool rescale=true);   // add single measurement; rescale y-axis if rescale==true
+    void setData(QMap<uint, MVector> map, std::vector<int> functionalisation, std::vector<bool> sensorFailures);
     void setSensorFailureFlags(const std::vector<bool> sensorFailureFlags);
     void setAutoMoveGraph(bool value);
     void clearSelection();

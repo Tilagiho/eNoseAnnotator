@@ -80,9 +80,9 @@ void LineGraphWidget::setupGraph()
         // style of plotted lines
         QColor color;
         if (nChannels == MVector::nChannels)
-            color = ENoseColor::getSensorColor(i);
+            color = ENoseColor::getInstance().getSensorColor(i);
         else
-            color = ENoseColor::getFuncColor(i);
+            color = ENoseColor::getInstance().getFuncColor(i);
         ui->chart->graph(i)->setLineStyle(QCPGraph::lsLine);
         ui->chart->graph(i)->setPen(QPen(color));
         ui->chart->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 3));
@@ -208,9 +208,9 @@ void LineGraphWidget::resetColors()
     {
         QColor color;
         if (nChannels == MVector::nChannels)
-            color = ENoseColor::getSensorColor(i);
+            color = ENoseColor::getInstance().getSensorColor(i);
         else
-            color = ENoseColor::getFuncColor(i);
+            color = ENoseColor::getInstance().getFuncColor(i);
 
         QPen pen;
         pen.setColor(color);
@@ -673,7 +673,7 @@ void LineGraphWidget::clearGraph(bool replot)
         ui->chart->replot();
 }
 
-void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool rescale)
+void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool rescale)
 {
     Q_ASSERT(measurement.size == nChannels);
 
@@ -694,7 +694,7 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
     }
 
     // check if graph is showing funcs or meas vectors
-    auto funcMap = MeasurementData::getFuncMap();
+    auto funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
     bool isFuncGraph = nChannels == funcMap.size();
 
     // add values to graph
@@ -736,9 +736,7 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
         for (uint i : sensorFailureIndexes)
             sensorFailures[i] = true;
         emit sensorFailure(sensorFailures);
-
     }
-
 
     // add annotation labels
     if (!measurement.userAnnotation.isEmpty())
@@ -757,7 +755,7 @@ void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, bool r
         replot(timestamp);
 }
 
-void LineGraphWidget::setData(QMap<uint, MVector> map)
+void LineGraphWidget::setData(QMap<uint, MVector> map, std::vector<int> functionalisation, std::vector<bool> sensorFailures)
 {
     clearGraph(false);
 
@@ -768,9 +766,9 @@ void LineGraphWidget::setData(QMap<uint, MVector> map)
     }
 
     for (auto timestamp : map.keys())
-        addMeasurement(map[timestamp], timestamp, false);
+        addMeasurement(map[timestamp], timestamp, functionalisation, sensorFailures, false);
 
-//    setXAxis(-1, defaultXWidth);
+//    setXAxis(-1, defaultWidth);
     replot();
 }
 

@@ -12,9 +12,9 @@ class MVector
 {
 
 public:
-    static int nChannels;
+    static size_t nChannels;
 
-    MVector(int size=nChannels);
+    MVector(size_t size=nChannels);
     ~MVector();
 
     QString toString();
@@ -29,9 +29,12 @@ public:
     MVector operator /(const int denominator);
 
     MVector operator +(const MVector other);
+    MVector operator -(const MVector other);
 
     // Overloading [] operator to access elements in array style
     double &operator[] (int index);
+
+    double average(const std::vector<bool> &sensorFailures) const;
 
     /*
      * class annotated by the user
@@ -67,7 +70,7 @@ public:
 
     MVector getFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures, InputFunctionType inputFunction);
 
-    int size = nChannels;    // number of sensor inputs
+    size_t size;    // number of sensor inputs
 
     std::vector<double> getVector() const;
 

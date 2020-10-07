@@ -260,6 +260,10 @@ ConversionPage::ConversionPage(QWidget *parent):
 ConversionPage::~ConversionPage(){
     thread->quit();
     thread->wait();
+
+    thread->deleteLater();
+    label->deleteLater();
+    progressbar->deleteLater();
 }
 
 void ConversionPage::initializePage()

@@ -76,6 +76,8 @@ private slots:
 
     void deleteAutosave();
 
+    void on_actionFit_curve_triggered();
+
 private:
     Ui::MainWindow *ui;
     QSettings* settings = nullptr;
@@ -149,6 +151,8 @@ private:
     void saveDataDir();
 
     void setFunctionalisation();
+
+    void setSensorFailures();
 
     bool dirIsWriteable(QDir dir);
 

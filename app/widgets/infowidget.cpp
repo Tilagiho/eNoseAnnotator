@@ -3,7 +3,6 @@
 
 #include <QDateTime>
 
-#include "setsensorfailuresdialog.h"
 #include "../classes/measurementdata.h"
 
 InfoWidget::InfoWidget(QWidget *parent) :
@@ -92,25 +91,12 @@ void InfoWidget::on_commentTextEdit_textChanged()
 
 void InfoWidget::on_pushButton_clicked()
 {
-    SetSensorFailuresDialog *sfDialog;
-    QString failureString = ui->failureLabel->text();
-
-    if (failureString == "None")
-        sfDialog = new SetSensorFailuresDialog(this);
-    else
-        sfDialog = new SetSensorFailuresDialog(this, MVector::nChannels, failureString);
-
-    sfDialog->setWindowTitle("Sensor failure flags");
-
-    if(sfDialog->exec())
-    {
-        emit failuresChanged(sfDialog->getSensorFailures());
-    }
+    emit setSensorFailuresClicked();
 }
 
 void InfoWidget::on_pushButton_2_clicked()
 {
-    emit setFunctionalities();
+    emit setFunctionalitionClicked();
 }
 
 void InfoWidget::setFuncLabel(QString label)

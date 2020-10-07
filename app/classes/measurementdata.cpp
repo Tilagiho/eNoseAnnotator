@@ -18,11 +18,10 @@
  *
  */
 
-std::vector<int> MeasurementData::functionalisation(MVector::nChannels, 0);
-std::vector<bool> MeasurementData::sensorFailures(MVector::nChannels, 0);
-
-MeasurementData::MeasurementData(QObject *parent, int nChannels) :
-    QObject(parent)
+MeasurementData::MeasurementData(QObject *parent, size_t nChannels) :
+    QObject(parent),
+    functionalisation(nChannels, 0),
+    sensorFailures(nChannels, 0)
 {
     // zero init info
     setComment("");
@@ -55,7 +54,7 @@ const QMap<uint, MVector> MeasurementData::getFuncData()
 {
     // only one func set
     // -> return full relative data
-    if (getFuncMap().size() == 1)
+    if (getFuncMap(functionalisation, sensorFailures).size() == 1)
         return getRelativeData();
 
     QMap<uint, MVector> relativeData = getRelativeData();
@@ -86,7 +85,7 @@ const QMap<uint, MVector> MeasurementData::getSelectionMap()
 
 int MeasurementData::getNFuncs() const
 {
-    return getFuncMap().size();
+    return getFuncMap(functionalisation, sensorFailures).size();
 }
 
 /*!
@@ -177,8 +176,8 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
     if (!dataChanged)
         setDataChanged(true);
 
-    emit dataAdded(deviationVector, timestamp, true);
-    emit absoluteDataAdded(vector, timestamp, true);
+    emit dataAdded(deviationVector, timestamp, functionalisation, sensorFailures, true);
+    emit absoluteDataAdded(vector, timestamp, functionalisation, sensorFailures, true);
 }
 
 /*!
@@ -246,6 +245,11 @@ MVector MeasurementData::getMeasurement(uint timestamp)
     return data[timestamp];
 }
 
+uint MeasurementData::getStartTimestamp()
+{
+    return data.keys().first();
+}
+
 QString MeasurementData::getComment()
 {
     return dataComment;
@@ -261,7 +265,7 @@ void MeasurementData::setComment(QString new_comment)
     }
 }
 
-void MeasurementData::setFailures(const std::vector<bool> failures)
+void MeasurementData::setSensorFailures(const std::vector<bool> failures)
 {
     Q_ASSERT(failures.size() == MVector::nChannels);
 
@@ -277,7 +281,7 @@ void MeasurementData::setFailures(const std::vector<bool> failures)
  * \brief MeasurementData::setFailures sets sensor failures from a QString.
  * \param failureString is expected to be a numeric string of length MVector::nChannels.
  */
-void MeasurementData::setFailures(QString failureString)
+void MeasurementData::setSensorFailures(QString failureString)
 {
     Q_ASSERT(failureString.length()==MVector::nChannels);
 
@@ -289,7 +293,7 @@ void MeasurementData::setFailures(QString failureString)
         failures.push_back(failureString[i] == "1");
     }
 
-    setFailures(failures);
+    setSensorFailures(failures);
 }
 
 void MeasurementData::setSensorId(QString newSensorId)
@@ -379,11 +383,6 @@ QMap<int, int> MeasurementData::getFuncMap(const std::vector<int> &funcs, std::v
     return funcMap;
 }
 
-QMap<int, int> MeasurementData::getFuncMap()
-{
-    return getFuncMap(functionalisation, sensorFailures);
-}
-
 /*!
  * \brief MeasurementData::changed returns change status of MeasurementData.
  * Is \c true if any data was changed since loading or saving the measurement
@@ -446,18 +445,6 @@ MVector MeasurementData::getBaseLevel(uint timestamp)
 std::vector<bool> MeasurementData::getSensorFailures() const
 {
     return sensorFailures;
-}
-
-void MeasurementData::setSensorFailures(const std::vector<bool> &value)
-{
-    Q_ASSERT(value.size() == MVector::nChannels);
-
-    if (value != sensorFailures)
-    {
-        sensorFailures = value;
-        setDataChanged(true);
-        emit sensorFailuresSet(value);
-    }
 }
 
 QString MeasurementData::getSensorId() const
@@ -648,7 +635,7 @@ bool MeasurementData::saveAverageSelectionFuncVector(QString filename)
     QFile file(filename);
 
     if (!file.open(QIODevice::WriteOnly))
-        throw std::runtime_error("Unable to open file: file.errorString()");
+        throw std::runtime_error("Unable to open file:" + file.errorString().toStdString());
 
     QTextStream out(&file);
 
@@ -673,15 +660,9 @@ void MeasurementData::copyFrom(MeasurementData *otherMData)
     // -> deleted when clear() is called
     // --> remember sensorFailures and functionalisation
     // TODO: introduce non-static sensorFailures and functionalisation
-    auto failures = otherMData->getSensorFailures();
-    auto func = otherMData->getFunctionalisation();
 
     // clear local data
     clear();
-
-    // restore sensorFailures and functionalisation
-    setSensorFailures(failures);
-    setFunctionalisation(func);
 
     // meta data
     setClasslist(otherMData->getClassList());
@@ -690,6 +671,9 @@ void MeasurementData::copyFrom(MeasurementData *otherMData)
     setComment(otherMData->getComment());
     setSensorId(otherMData->sensorId);
     setFuncName(otherMData->funcName);
+
+    setSensorFailures(otherMData->getSensorFailures());
+    setFunctionalisation(otherMData->getFunctionalisation());
 
     // data
     setData(otherMData->getAbsoluteData(), otherMData->getBaseLevelMap());
@@ -1058,13 +1042,51 @@ void MeasurementData::renameAttribute(QString oldName, QString newName)
 
 void MeasurementData::resetNChannels()
 {
-    sensorFailures = std::vector<bool>(MVector::nChannels, false);
-    functionalisation = std::vector<int>(MVector::nChannels, 0);
+    setSensorFailures(std::vector<bool>(MVector::nChannels, false));
+    setFunctionalisation(std::vector<int>(MVector::nChannels, 0));
 }
 
 void MeasurementData::setInputFunctionType(const InputFunctionType &value)
 {
     inputFunctionType = value;
+}
+
+/*!
+ * \brief MeasurementData::getNextTimestamp returns next timestamp contained in data >= timestamp.
+ * Returns 0 if no timestamp in data >= timestamp.
+ * \param timestamp
+ * \return
+ */
+uint MeasurementData::getNextTimestamp(uint timestamp)
+{
+    uint nextTimestamp = timestamp;
+
+    while (nextTimestamp <= data.keys().last()) {
+        if (data.contains(nextTimestamp))
+            return nextTimestamp;
+
+        nextTimestamp++;
+    }
+    return 0;
+}
+
+/*!
+ * \brief MeasurementData::getPreviousTimestamp returns previous timestamp contained in data <= timestamp.
+ * Returns 0 if no timestamp in data <= timestamp.
+ * \param timestamp
+ * \return
+ */
+uint MeasurementData::getPreviousTimestamp(uint timestamp)
+{
+    uint previousTimestamp = timestamp;
+
+    while (previousTimestamp >= data.keys().first()) {
+        if (data.contains(previousTimestamp))
+            return previousTimestamp;
+
+        previousTimestamp--;
+    }
+    return 0;
 }
 
 QMap<uint, MVector> MeasurementData::getBaseLevelMap() const
@@ -1280,7 +1302,7 @@ void AnnotatorFileReader::parseHeader(QString line)
         emit resetNChannels(resistanceIndexMap.size());
 
         // set data meta attributes
-        data->setFailures(failureString);
+        data->setSensorFailures(failureString);
         data->setFunctionalisation(functionalistation);
 
         for (uint timestamp : baseLevelMap.keys())

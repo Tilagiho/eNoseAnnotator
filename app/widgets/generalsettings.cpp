@@ -63,7 +63,6 @@ double GeneralSettings::getMaxVal() const
 void GeneralSettings::setMaxVal(double value)
 {
     maxVal = value;
-
     ui->maxValSpinBox->setValue(value);
 }
 

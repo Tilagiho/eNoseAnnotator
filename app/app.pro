@@ -4,7 +4,7 @@ QT       += core gui serialport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++14
-QMAKE_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0
+QMAKE_CXXFLAGS += -D_GLIBCXX_USE_CXX11_ABI=0 -DDLIB_NO_GUI_SUPPORT
 
 # QMAKE_LFLAGS += -no-pie
 
@@ -51,11 +51,14 @@ SOURCES += \
     classes/datasource.cpp \
     classes/enosecolor.cpp \
     classes/fakedatasource.cpp \
+    classes/leastsquaresfitter.cpp \
     classes/measurementdata.cpp \
     classes/mvector.cpp \
     classes/torchclassifier.cpp \
     classes/usbdatasource.cpp \
     lib/comboboxitemdelegate.cpp \
+    lib/dlib/dlib/all/source.cpp \
+    lib/spoiler.cpp \
     main.cpp \
     qcustomplot/qcustomplot.cpp \
     widgets/acirclewidget.cpp \
@@ -66,6 +69,7 @@ SOURCES += \
     widgets/classinputdialog.cpp \
     widgets/classselector.cpp \
     widgets/convertwizard.cpp \
+    widgets/curvefitwizard.cpp \
     widgets/functionalisationdialog.cpp \
     widgets/generalsettings.cpp \
     widgets/infowidget.cpp \
@@ -73,8 +77,7 @@ SOURCES += \
     widgets/mainwindow.cpp \
     widgets/setsensorfailuresdialog.cpp \
     widgets/sourcedialog.cpp \
-    widgets/usbsettingswidget.cpp
-
+    widgets/usbsettingswidget.cpp \
 
 HEADERS += \
     classes/aclass.h \
@@ -84,11 +87,13 @@ HEADERS += \
     classes/defaultSettings.h \
     classes/enosecolor.h \
     classes/fakedatasource.h \
+    classes/leastsquaresfitter.h \
     classes/measurementdata.h \
     classes/mvector.h \
     classes/torchclassifier.h \
     classes/usbdatasource.h \
     lib/comboboxitemdelegate.h \
+    lib/spoiler.h \
     qcustomplot/qcustomplot.h \
     widgets/acirclewidget.h \
     widgets/addattributedialog.h \
@@ -98,6 +103,7 @@ HEADERS += \
     widgets/classinputdialog.h \
     widgets/classselector.h \
     widgets/convertwizard.h \
+    widgets/curvefitwizard.h \
     widgets/functionalisationdialog.h \
     widgets/generalsettings.h \
     widgets/infowidget.h \
@@ -143,6 +149,13 @@ unix:!macx: QMAKE_RPATHDIR += $$PWD/lib/libtorch/lib
 
 INCLUDEPATH += $$PWD/lib/libtorch/include
 DEPENDPATH += $$PWD/lib/libtorch/include
+
+# dlib
+# PKGCONFIG += dlib-1
+
+LIBS += -L$$PWD/lib/dlib
+INCLUDEPATH += $$PWD/lib/dlib
+DEPENDPATH += $$PWD/lib/dlib
 
 INCLUDEPATH += $$PWD/lib/libtorch/include/torch/csrc/api/include
 DEPENDPATH += $$PWD/lib/libtorch/include/torch/csrc/api/include

@@ -34,7 +34,8 @@ public slots:
 signals:
     void mCommentChanged(QString comment);
     void failuresChanged(std::vector<bool> failures);
-    void setFunctionalities();
+    void setFunctionalitionClicked();
+    void setSensorFailuresClicked();
 
 private slots:
     void on_commentTextEdit_textChanged();

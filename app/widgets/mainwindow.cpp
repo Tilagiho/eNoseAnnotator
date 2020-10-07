@@ -6,6 +6,7 @@
 #include "../classes/usbdatasource.h"
 #include "../classes/fakedatasource.h"
 #include "../classes/mvector.h"
+#include "../classes/enosecolor.h"
 
 #include "functionalisationdialog.h"
 #include "generalsettings.h"
@@ -13,14 +14,32 @@
 #include "linegraphwidget.h"
 #include "sourcedialog.h"
 #include "convertwizard.h"
+#include "setsensorfailuresdialog.h"
+#include "curvefitwizard.h"
 
 #include <QMetaObject>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
-      ui(new Ui::MainWindow)
+      ui(new Ui::MainWindow),
+      mData(new MeasurementData(this))
 
 {
+    mData->setInputFunctionType(inputFunctionType);
+
+    // eNoseColor singleton:
+    // keep sensorFailures and functionalisation updated
+    ENoseColor::getInstance().setFunctionalisation(mData->getFunctionalisation());
+    ENoseColor::getInstance().setSensorFailures(mData->getSensorFailures());
+
+    connect(mData, &MeasurementData::functionalisationChanged, this, [this](){
+        auto functionalisation = mData->getFunctionalisation();
+        ENoseColor::getInstance().setFunctionalisation(functionalisation);
+    });
+    connect(mData, &MeasurementData::sensorFailuresSet, this, [this](std::vector<bool> sensorFailures){
+        ENoseColor::getInstance().setSensorFailures(sensorFailures);
+    });
+
     ui->setupUi(this);
     this->setWindowIcon(QIcon(":/icons/icon"));
 
@@ -67,13 +86,14 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->actionCloseClassifier->setEnabled(false);
 
+    ui->actionFit_curve->setEnabled(false);
+
     // user can only set detected class in debug mode
     #ifdef QT_NO_DEBUG
     ui->actionSet_detected_class_of_selection->setVisible(false);
     #endif
 
-    mData = new MeasurementData(this);
-    mData->setInputFunctionType(inputFunctionType);
+
 
     // this->setStyleSheet("QSplitter::handle{background: black;}"); // make splitter visible
 
@@ -109,8 +129,17 @@ MainWindow::MainWindow(QWidget *parent)
     connect(relLineGraph, &LineGraphWidget::selectionCleared, funcBarGraph, &BarGraphWidget::clearBars);  // clear vector in funcBarGraph
     connect(mData, &MeasurementData::selectionVectorChanged, vectorBarGraph, &BarGraphWidget::setBars);   // plot vector in vectorBarGraph
     connect(mData, &MeasurementData::selectionVectorChanged, funcBarGraph, &BarGraphWidget::setBars);   // plot vector in funcBarGraph
+    connect(mData, &MeasurementData::selectionVectorChanged, this, [this](){
+        ui->actionFit_curve->setEnabled(true);
+    });   // activate curve fitting action
+
+
     connect(mData, &MeasurementData::selectionCleared, vectorBarGraph, &BarGraphWidget::clearBars); // clear vector in vectorBarGraph
     connect(mData, &MeasurementData::selectionCleared, funcBarGraph, &BarGraphWidget::clearBars); // clear vector in funcBarGraph
+    connect(mData, &MeasurementData::selectionCleared, this, [this](){
+        ui->actionFit_curve->setEnabled(false);
+    }); // deactivate curve fitting action
+
     connect(mData, &MeasurementData::lgClearSelection, relLineGraph, &LineGraphWidget::clearSelection);
     connect(mData, &MeasurementData::lgClearSelection, funcLineGraph, &LineGraphWidget::clearSelection);
 
@@ -162,10 +191,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     // new data
     connect(mData, &MeasurementData::dataAdded, relLineGraph, &LineGraphWidget::addMeasurement);    // add new data to lGraph
-    connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, bool yRescale){
+    connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool yRescale){
         // calculate funcVector, if necessary
         bool calcFuncVector = false;
-        for (int func : mData->functionalisation)
+        for (int func : mData->getFunctionalisation())
         {
             if (func != 0)
             {
@@ -174,31 +203,31 @@ MainWindow::MainWindow(QWidget *parent)
             }
         }
         if (!calcFuncVector)
-            funcLineGraph->addMeasurement(vector, timestamp);
+            funcLineGraph->addMeasurement(vector, timestamp, functionalisation, sensorFailures, yRescale);
         else
         {
             MVector funcVector = vector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures(), inputFunctionType);
-            funcLineGraph->addMeasurement(funcVector, timestamp, yRescale);
+            funcLineGraph->addMeasurement(funcVector, timestamp, functionalisation, sensorFailures, yRescale);
         }
     });    // add new data to func line graph
     connect(mData, &MeasurementData::absoluteDataAdded, absLineGraph, &LineGraphWidget::addMeasurement); // add new absolute measruement
-    connect(mData, &MeasurementData::dataSet, relLineGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
-    connect(mData, &MeasurementData::dataSet, this, [this](QMap<uint, MVector> data){
-        auto funcs = mData->getFunctionalisation();
-        auto failures = mData->getSensorFailures();
+//    connect(mData, &MeasurementData::dataSet, relLineGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
+//    connect(mData, &MeasurementData::dataSet, this, [this](QMap<uint, MVector> data, std::vector<int> functionalisation, std::vector<bool> sensorFailures){
+//        auto funcs = mData->getFunctionalisation();
+//        auto failures = mData->getSensorFailures();
 
-        // add recalculated functionalitisation averages to cleared funcLineGraph
-        QMap<uint, MVector> funcData;
-        for (int timestamp : data.keys())
-            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures, inputFunctionType);
+//        // add recalculated functionalitisation averages to cleared funcLineGraph
+//        QMap<uint, MVector> funcData;
+//        for (int timestamp : data.keys())
+//            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures, inputFunctionType);
 
-        funcLineGraph->setData(funcData);
-    });     // set loaded data in lGraph
+//        funcLineGraph->setData(funcData, functionalisation, sensorFailures);
+//    });     // set loaded data in lGraph
 
     connect(mData, &MeasurementData::setReplotStatus, funcLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
     connect(mData, &MeasurementData::setReplotStatus, relLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
     connect(mData, &MeasurementData::setReplotStatus, absLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
-    connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, bool){
+    connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool){
         // no classifier loaded or no live measurement running
         // -> don't classify
         bool measRunning = source != nullptr && source->status() == DataSource::Status::RECEIVING_DATA;
@@ -207,7 +236,7 @@ MainWindow::MainWindow(QWidget *parent)
             return;
 
         // get annotation from the classifier
-        auto funcVector = vector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures(), inputFunctionType);
+        auto funcVector = vector.getFuncVector(functionalisation, sensorFailures, inputFunctionType);
 
         try {
             Annotation annotation = classifier->getAnnotation(funcVector.getVector());
@@ -251,23 +280,24 @@ MainWindow::MainWindow(QWidget *parent)
 
         if (mergedSensorFailures != oldSensorFailures)
         {
-            mData->setFailures(mergedSensorFailures);
+            mData->setSensorFailures(mergedSensorFailures);
             measInfoWidget->setFailures(mergedSensorFailures);
         }
     }); // absGraph -> mData
     connect(mData, &MeasurementData::sensorFailuresSet, relLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
     connect(mData, &MeasurementData::sensorFailuresSet, absLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
     connect(mData, &MeasurementData::sensorFailuresSet, this, [this](std::vector<bool>){
-        if (mData->getFuncMap().size() > 1)
+        auto functionalisation = mData->getFunctionalisation();
+        auto sensorFailures = mData->getSensorFailures();
+
+        if (mData->getFuncMap(functionalisation, sensorFailures).size() > 1)
         {
             // update func line graph:
             funcLineGraph->clearGraph();
 
             auto data = mData->getRelativeData();
-            auto funcs = mData->getFunctionalisation();
-            auto failures = mData->getSensorFailures();
 
-            funcLineGraph->setData(mData->getFuncData());
+            funcLineGraph->setData(mData->getFuncData(), functionalisation, sensorFailures);
 
             // update func bar graphs:
             if (!mData->getSelectionMap().isEmpty())
@@ -275,7 +305,7 @@ MainWindow::MainWindow(QWidget *parent)
                 funcBarGraph->clearBars();
                 MVector selectionVector = mData->getSelectionVector();
 
-                funcBarGraph->setBars(selectionVector, failures, funcs);
+                funcBarGraph->setBars(selectionVector, sensorFailures, functionalisation);
             }
         } else
             funcLineGraph->setSensorFailureFlags(mData->getSensorFailures());
@@ -292,15 +322,19 @@ MainWindow::MainWindow(QWidget *parent)
         auto failures = mData->getSensorFailures();
 
         // add recalculated functionalitisation averages to cleared funcLineGraph
-        funcLineGraph->setData(mData->getFuncData());
+        funcLineGraph->setData(mData->getFuncData(), funcs, failures);
     }); // funcLineGraph requested redraw
     connect(relLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
+        auto funcs = mData->getFunctionalisation();
+        auto failures = mData->getSensorFailures();
         // re-add data to graph
-        relLineGraph->setData(mData->getRelativeData());
+        relLineGraph->setData(mData->getRelativeData(), funcs, failures);
     }); // relLineGraph requested redraw
     connect(absLineGraph, &LineGraphWidget::requestRedraw, this, [this]{
+        auto funcs = mData->getFunctionalisation();
+        auto failures = mData->getSensorFailures();
         // re-add data to graph
-        absLineGraph->setData(mData->getAbsoluteData());
+        absLineGraph->setData(mData->getAbsoluteData(), funcs, failures);
     }); // absLineGraph requested redraw
 
     // sensor failures changed
@@ -314,7 +348,7 @@ MainWindow::MainWindow(QWidget *parent)
     // measurement info
     // info -> mData
     connect(measInfoWidget, &InfoWidget::mCommentChanged, mData, &MeasurementData::setComment);    // comment changed in infoWidget: change comment in mData
-    connect(measInfoWidget, SIGNAL(failuresChanged(std::vector<bool>)), mData, SLOT(setFailures(std::vector<bool>)));   // failures changed in infoWidget: change failures in mData
+    connect(measInfoWidget, SIGNAL(failuresChanged(std::vector<bool>)), mData, SLOT(setSensorFailures(std::vector<bool>)));   // failures changed in infoWidget: change failures in mData
 
     // mData -> info
     connect(mData, &MeasurementData::sensorIdSet, measInfoWidget, &InfoWidget::setSensor);            // mData: sensorId changed -> InfoWidget: show new sensorId
@@ -323,7 +357,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(mData, &MeasurementData::sensorFailuresSet, measInfoWidget, &InfoWidget::setFailures);    // mData: failures changed -> InfoWidget: show new failures
 
     // set functionalities dialog
-    connect(measInfoWidget, &InfoWidget::setFunctionalities, this, &MainWindow::setFunctionalisation);
+    connect(measInfoWidget, &InfoWidget::setFunctionalitionClicked, this, &MainWindow::setFunctionalisation);
+    connect(measInfoWidget, &InfoWidget::setSensorFailuresClicked, this, &MainWindow::setSensorFailures);
+
     connect(mData, &MeasurementData::funcNameSet, this, [this](QString name){
         measInfoWidget->setFuncLabel(name);
         mData->setFuncName(name);
@@ -528,7 +564,10 @@ void MainWindow::loadData(QString fileName)
         // check compability to loaded classifier
         if (classifier != nullptr)
         {
-            auto funcMap = mData->getFuncMap();
+            auto functionalisation = mData->getFunctionalisation();
+            auto sensorFailures = mData->getSensorFailures();
+            auto funcMap = mData->getFuncMap(functionalisation, sensorFailures);
+
             // check func preset
             if (classifier->getN() != funcMap.size() || classifier->getPresetName() != measInfoWidget->getFuncLabel())
             {
@@ -953,8 +992,8 @@ void MainWindow::on_actionSettings_triggered()
         // save settings
         settings->setValue(PRESET_DIR_KEY, newPresetDir);
         settings->setValue(USE_LIMITS_KEY, newUseLimits);
-        settings->setValue(LOWER_LIMIT_KEY, newUpperLimit);
-        settings->setValue(UPPER_LIMIT_KEY, newLowerLimit);
+        settings->setValue(LOWER_LIMIT_KEY, newLowerLimit);
+        settings->setValue(UPPER_LIMIT_KEY, newUpperLimit);
         settings->sync();
 
         // copy presets into new preset dir
@@ -1017,7 +1056,10 @@ void MainWindow::on_actionStart_triggered()
             resetNChannels(source->getNChannels());
         }
         // no func set: set functionalisation?
-        if (mData->getFuncMap().size() == 1)
+        auto functionalisation = mData->getFunctionalisation();
+        auto sensorFailures = mData->getSensorFailures();
+        auto funcMap = mData->getFuncMap(functionalisation, sensorFailures);
+        if (funcMap.size() == 1)
         {
             auto answer = QMessageBox::question(this, "Set Functionalisation", "The sensor functionalisation was not set.\nDo you want to set it before starting a new measurement?");
 
@@ -1031,7 +1073,6 @@ void MainWindow::on_actionStart_triggered()
         // clear data, init with sensor id, comment & sensor failures, set dataChanged to false
         QString sensorId = mData->getSensorId();
         QString comment = mData->getComment();
-        auto sensorFailures = mData->getSensorFailures();
 
         clearData();
 
@@ -1438,7 +1479,9 @@ void MainWindow::on_actionLoadClassifier_triggered()
     ui->actionCloseClassifier->setEnabled(true);
 
     // check classifier func and the functionalisation set
-    auto funcMap = mData->getFuncMap();
+    auto functionalisation = mData->getFunctionalisation();
+    auto sensorFailures = mData->getSensorFailures();
+    auto funcMap = mData->getFuncMap(functionalisation, sensorFailures);
     if (classifier->getN() != funcMap.size() || classifier->getPresetName() != measInfoWidget->getFuncLabel())
     {
         QString error_message = "Functionalisation of the data loaded seems to be incompatible with the loaded classifier.\nWas the functionalisation set correctly? Is the classifier compatible with the sensor used?";
@@ -1450,11 +1493,11 @@ void MainWindow::on_actionLoadClassifier_triggered()
 void MainWindow::updateFuncGraph()
 {
     auto data = mData->getRelativeData();
-    auto fails = mData->getSensorFailures();
-    auto funcs = mData->getFunctionalisation();
+    auto sensorFailures = mData->getSensorFailures();
+    auto functionalisation = mData->getFunctionalisation();
 
     // get number of funcs
-    auto funcMap = mData->getFuncMap();
+    auto funcMap = mData->getFuncMap(functionalisation, sensorFailures);
     int funcSize = funcMap.size();
 
     // no funcs set:
@@ -1466,7 +1509,7 @@ void MainWindow::updateFuncGraph()
             funcLineGraph->clearGraph();
             funcLineGraph->setNChannels(MVector::nChannels);
         }
-        funcLineGraph->setData(data);
+        funcLineGraph->setData(data, functionalisation, sensorFailures);
     }
     // else: reset graph
     else
@@ -1484,7 +1527,7 @@ void MainWindow::updateFuncGraph()
             funcLineGraph->setXRange(oldRange);
         }
 
-        funcLineGraph->setData(mData->getFuncData());
+        funcLineGraph->setData(mData->getFuncData(), functionalisation, sensorFailures);
     }
 
     // update func bar graph
@@ -1492,7 +1535,7 @@ void MainWindow::updateFuncGraph()
     {
         MVector selectionVector = mData->getSelectionVector();
 
-        funcBarGraph->setBars(selectionVector, fails, funcs);
+        funcBarGraph->setBars(selectionVector, sensorFailures, functionalisation);
     }
 
     // reset graph pens
@@ -1667,6 +1710,25 @@ void MainWindow::setFunctionalisation()
     }
 }
 
+void MainWindow::setSensorFailures()
+{
+    SetSensorFailuresDialog *sfDialog;
+
+    auto sensorFailureString = MeasurementData::sensorFailureString(mData->getSensorFailures());
+
+    if (sensorFailureString == "None")
+        sfDialog = new SetSensorFailuresDialog(this);
+    else
+        sfDialog = new SetSensorFailuresDialog(this, MVector::nChannels, sensorFailureString);
+
+    sfDialog->setWindowTitle("Sensor failure flags");
+
+    if(sfDialog->exec())
+    {
+        mData->setSensorFailures(sfDialog->getSensorFailures());
+    }
+}
+
 /*!
  * \brief MainWindow::dirIsWriteable checks if files can be created in the directory by trying to create a dummy file.
  * Necessary, because built-in Qt checks are inconsistent on Windows.
@@ -1686,4 +1748,10 @@ bool MainWindow::dirIsWriteable(QDir dir)
     file.remove();
 
     return fileCreated;
+}
+
+void MainWindow::on_actionFit_curve_triggered()
+{
+    CurveFitWizard wizard(mData);
+    wizard.exec();
 }

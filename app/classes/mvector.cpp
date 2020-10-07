@@ -7,7 +7,7 @@
 
 #include <stdexcept>
 
-int MVector::nChannels = 64;
+size_t MVector::nChannels = 64;
 
 /*!
   \class MVector
@@ -16,7 +16,7 @@ int MVector::nChannels = 64;
   The size measurement values received every two seconds from the eNose sensor can be stored in MVectors.
   MVector can contain absolute resistance values, but also deviations relative to a base resistance (R0).
 */
-MVector::MVector(int size):
+MVector::MVector(size_t size):
     size(size),
     vector(size, 0.0)   // init array
 {
@@ -121,11 +121,45 @@ MVector MVector::operator+(const MVector other)
     return vector;
 }
 
+MVector MVector::operator-(const MVector other)
+{
+    Q_ASSERT(other.size == this->size);
+
+    MVector vector;
+
+    for (int i=0; i<size; i++)
+    {
+        if (qIsFinite(this->vector[i]) && qIsFinite(other.vector[i]))
+            vector[i] = this->vector[i] - other.vector[i];
+        else    // deal with infinte values
+            vector[i] = qInf();
+    }
+
+    return vector;
+}
+
+
 double &MVector::operator[](int index)
 {
     Q_ASSERT("index out of range!" && index >= 0 && index < size);
 
     return vector[index];
+}
+
+double MVector::average(const std::vector<bool> &sensorFailures) const
+{
+    double sum = 0.;
+    int count = 0;
+    for (size_t i=0; i<size; i++)
+    {
+        if (!sensorFailures[i])
+        {
+            sum += vector[i];
+            count++;
+        }
+    }
+
+    return sum / count;
 }
 
 /*!
@@ -201,6 +235,11 @@ MVector MVector::getAverageFuncVector(std::vector<int> functionalisation, std::v
     // get func map
     auto funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
 
+    // no funcs set:
+    // return relativevector
+    if (funcMap.size() == 1)
+        return *this;
+
     // init func vector
     MVector funcVector(funcMap.size());
 
@@ -229,6 +268,11 @@ MVector MVector::getMedianAverageFuncVector(std::vector<int> functionalisation, 
 
     // get func map
     auto funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
+
+    // no funcs set:
+    // return relativevector
+    if (funcMap.size() == 1)
+        return *this;
 
     // init func vector
     MVector medianAverageVector(funcMap.size());
