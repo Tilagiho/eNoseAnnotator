@@ -1,371 +1,240 @@
 #include "bargraphwidget.h"
-#include "ui_bargraphwidget.h"
 
 #include "../classes/enosecolor.h"
-#include "../classes/measurementdata.h"
+#include "../classes/defaultSettings.h"
 
-BarGraphWidget::BarGraphWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::BarGraphWidget)
+#include <qwt_column_symbol.h>
+#include <qwt_scale_draw.h>
+#include <qwt_scale_engine.h>
+#include <qwt_plot_grid.h>
+
+class FullTicksScaleEngine: public QwtLinearScaleEngine
 {
-    ui->setupUi(this);
+public:
+    FullTicksScaleEngine():
+        QwtLinearScaleEngine()
+    {}
 
-    ui->stackedWidget->setCurrentWidget(ui->funcBarGraph);
-    connect(ui->barGraph, &QCustomPlot::mousePress, this, &BarGraphWidget::mousePressed);
-    connect(ui->funcBarGraph, &QCustomPlot::mousePress, this, &BarGraphWidget::mousePressed);
-
-    initGraph();
-}
-
-BarGraphWidget::~BarGraphWidget()
-{
-    delete ui;
-}
-
-void BarGraphWidget::initGraph()
-{
-    // set light background gradient:
-    ui->barGraph->setBackground(QBrush(QColor(255,250,240)));
-    ui->funcBarGraph->setBackground(QBrush(QColor(255,250,240)));
-
-
-    // init bars & ticks
-    QVector<double> ticks;
-
-    for (uint i=0; i<MVector::nChannels; i++)
+    QwtScaleDiv divideScale (double x1, double x2, int maxMajorSteps, int maxMinorSteps, double stepSize=0.0) const override
     {
-        // init bar graphs
-        sensorBarVector << new QCPBars(ui->barGraph->xAxis, ui->barGraph->yAxis);
-        sensorBarVector[i]->setAntialiased(false);
+        int lowerBound = qRound(x1);
+        int upperBound = qRound(x2);
+        QList<double> minorTicks, mediumTicks, majorTicks;
+        for (int i = lowerBound; i<=upperBound; i++)
+            majorTicks << i;
 
-        // set color
-        QColor color = ENoseColor::getInstance().getSensorColor(i);
-        sensorBarVector[i]->setPen(QPen(color.lighter(170)));
-        sensorBarVector[i]->setBrush(color);
+        auto scaleDiv = QwtScaleDiv (x1, x2, minorTicks, mediumTicks, majorTicks);
 
-        // add tick + label
-        ticks.append(i+1);
+        if ( x1 > x2 )
+            scaleDiv.invert();
+
+        return scaleDiv;
     }
+};
 
-    QVector<double> data;
-    // set data:
-    // i-th element of i-th bar is initialized with vector[i]
-    for (int i=0; i<MVector::nChannels; i++)
+class LabelScaleDraw: public QwtScaleDraw
+{
+public:
+    LabelScaleDraw( Qt::Orientation orientation, const QStringList &labels ):
+        d_labels( labels )
     {
-        if (!data.isEmpty())
-            data.clear();
+        setTickLength( QwtScaleDiv::MinorTick, 0 );
+        setTickLength( QwtScaleDiv::MediumTick, 0 );
+        setTickLength( QwtScaleDiv::MajorTick, 1 );
 
-        for (int j=0; j<MVector::nChannels; j++)
+        enableComponent( QwtScaleDraw::Backbone, false );
+
+        if ( orientation == Qt::Vertical )
         {
-            if (i==j)
-                data << 0.0;
-            else
-                data << 0.0;
+            setLabelRotation( 0.0 );
+        }
+        else
+        {
+            setLabelRotation( -20.0 );
         }
 
-        sensorBarVector[i]->setData(ticks, data);
+        setLabelAlignment( Qt::AlignCenter );
     }
 
-    // prepare barGraph
-    ui->barGraph->xAxis->setTickLabelRotation(60);
-    ui->barGraph->xAxis->setSubTicks(false);
-    ui->barGraph->xAxis->setTickLength(0, 1);
-    ui->barGraph->xAxis->setRange(-1, 65);
-    ui->barGraph->xAxis->setBasePen(QPen(Qt::black));
-    ui->barGraph->xAxis->setTickPen(QPen(Qt::black));
-    ui->barGraph->xAxis->grid()->setVisible(true);
-    ui->barGraph->xAxis->grid()->setPen(QPen(Qt::black, 0, Qt::DotLine));
-    ui->barGraph->xAxis->setTickLabelColor(Qt::black);
-    ui->barGraph->xAxis->setLabelColor(Qt::black);
-    ui->barGraph->xAxis->setLabel("Sensor channel");
-
-    ui->barGraph->yAxis->setRange(-2, 2);
-    ui->barGraph->yAxis->setPadding(5); // a bit more space to the left border
-    ui->barGraph->yAxis->setBasePen(QPen(Qt::black));
-    ui->barGraph->yAxis->setTickPen(QPen(Qt::black));
-    ui->barGraph->yAxis->setSubTickPen(QPen(Qt::black));
-    ui->barGraph->yAxis->grid()->setSubGridVisible(true);
-    ui->barGraph->yAxis->setTickLabelColor(Qt::black);
-    ui->barGraph->yAxis->setLabelColor(Qt::black);
-    ui->barGraph->yAxis->grid()->setPen(QPen(Qt::black, 0, Qt::SolidLine));
-    ui->barGraph->yAxis->grid()->setSubGridPen(QPen(Qt::black, 0, Qt::DotLine));
-    ui->barGraph->yAxis->setLabel(QString(u8"\u0394") + " R / R0 [%]");
-
-    // prepare funcBarGraph
-    ui->funcBarGraph->xAxis->setTickLabelRotation(60);
-    ui->funcBarGraph->xAxis->setSubTicks(false);
-    ui->funcBarGraph->xAxis->setTickLength(0, 1);
-    ui->funcBarGraph->xAxis->setBasePen(QPen(Qt::black));
-    ui->funcBarGraph->xAxis->setTickPen(QPen(Qt::black));
-    ui->funcBarGraph->xAxis->grid()->setVisible(true);
-    ui->funcBarGraph->xAxis->grid()->setPen(QPen(Qt::black, 0, Qt::DotLine));
-    ui->funcBarGraph->xAxis->setTickLabelColor(Qt::black);
-    ui->funcBarGraph->xAxis->setLabelColor(Qt::black);
-    ui->funcBarGraph->xAxis->setLabel("Functionalisation");
-
-    ui->funcBarGraph->yAxis->setRange(-2, 2);
-    ui->funcBarGraph->yAxis->setPadding(5); // a bit more space to the left border
-    ui->funcBarGraph->yAxis->setBasePen(QPen(Qt::black));
-    ui->funcBarGraph->yAxis->setTickPen(QPen(Qt::black));
-    ui->funcBarGraph->yAxis->setSubTickPen(QPen(Qt::black));
-    ui->funcBarGraph->yAxis->grid()->setSubGridVisible(true);
-    ui->funcBarGraph->yAxis->setTickLabelColor(Qt::black);
-    ui->funcBarGraph->yAxis->setLabelColor(Qt::black);
-    ui->funcBarGraph->yAxis->grid()->setPen(QPen(Qt::black, 0, Qt::SolidLine));
-    ui->funcBarGraph->yAxis->grid()->setSubGridPen(QPen(Qt::black, 0, Qt::DotLine));
-    ui->funcBarGraph->yAxis->setLabel(QString(u8"\u0394") + " R / R0 [%]");
-
-    resetColors();
-}
-
-void BarGraphWidget::replot()
-{
-    // replot both graphs
-    ui->barGraph->yAxis->rescale();
-    ui->barGraph->replot();
-
-    ui->funcBarGraph->xAxis->setRange(-1, funcBarVector.size());
-    ui->funcBarGraph->yAxis->rescale();
-    ui->funcBarGraph->replot();
-
-    resetColors();
-}
-
-void BarGraphWidget::setInputFunctionType(const InputFunctionType &value)
-{
-    inputFunctionType = value;
-}
-
-void BarGraphWidget::setBars(MVector new_vector, std::vector<bool> sensorFailures, std::vector<int> functionalisation)
-{
-    if (mode == Mode::showAll)
+    virtual QwtText label( double value ) const override
     {
-        // update fullBarVector
-        QVector<double> ticks;
-        for (int i=0; i<MVector::nChannels; i++)
-            ticks << i+1;
+        QwtText lbl;
 
-        QMap<int, QVector<double>> data;
-
-        for (int i=0; i<MVector::nChannels; i++)
+        const int index = qRound( value );
+        if ( index >= 0 && index < d_labels.size() )
         {
-
-            for (int j=0; j<MVector::nChannels; j++)
-            {
-                if (i==j && !sensorFailures[i])
-                    data[i] << new_vector[i];
-                else
-                    data[i] << 0.0;
-            }
+            lbl = d_labels[ index ];
         }
 
-        for (int i=0; i<MVector::nChannels; i++)
-            sensorBarVector[i]->setData(ticks, data[i]);
+        return lbl;
     }
-    else if (mode == Mode::showFunc)
+
+private:
+    const QStringList d_labels;
+};
+
+
+BarChartItem::BarChartItem():
+    QwtPlotBarChart( "Page Hits" )
+{
+    setLayoutPolicy( AutoAdjustSamples );
+    setLayoutHint( 4.0 ); // minimum width for a single bar
+
+//    setSpacing( 5 ); // spacing between bars
+}
+
+void BarChartItem::setSamples( const QVector<double> &values, const QStringList &labels, const QList<QColor> &colors )
+{
+    setSamples(values);
+    d_colors = colors;
+    d_labels = labels;
+    itemChanged();
+}
+
+void BarChartItem::setSamples(const QVector<double> &values)
+{
+    QwtPlotBarChart::setSamples(values);
+}
+
+QwtColumnSymbol* BarChartItem::specialSymbol(
+    int index, const QPointF& ) const
+{
+    // we want to have individual colors for each bar
+
+    QwtColumnSymbol *symbol = new QwtColumnSymbol( QwtColumnSymbol::Box );
+    symbol->setLineWidth( 2 );
+    symbol->setFrameStyle( QwtColumnSymbol::FrameStyle::Raised );
+
+    QColor c( Qt::white );
+    if ( index >= 0 && index < d_colors.size() )
+        c = d_colors[ index ];
+
+    symbol->setPalette( c );
+
+    return symbol;
+}
+
+QwtText BarChartItem::barTitle( int sampleIndex ) const
+{
+    QwtText title;
+    if ( sampleIndex >= 0 && sampleIndex < d_labels.size() )
+        title = d_labels[ sampleIndex ];
+
+    return title;
+}
+
+AbstractBarGraphWidget::AbstractBarGraphWidget( QWidget *parent ) :
+    QwtPlot(parent),
+    d_barChartItem (new BarChartItem)
+{    
+    setCanvasBackground(QBrush(GRAPH_BACKGROUND_COLOR));
+
+    setAxisTitle( QwtPlot::yLeft, QString(u8"\u0394") + "R / R0 [%]" );
+
+    d_barChartItem->setLayoutPolicy( QwtPlotBarChart::AutoAdjustSamples );
+    d_barChartItem->setMargin( 3 );
+
+    d_barChartItem->attach( this );
+
+    QwtPlotGrid *grid = new QwtPlotGrid();
+    grid->setMajorPen(QPen(Qt::DotLine));
+    grid->attach( this );
+
+    axisScaleEngine(QwtPlot::xBottom)->setAttribute(QwtScaleEngine::Floating,true);
+    axisScaleEngine(QwtPlot::yLeft)->setMargins(1., 1.);
+}
+
+void AbstractBarGraphWidget::setVector( const MVector &vector, const std::vector<bool> sensorFailures, const Functionalisation &functionalisation )
+{
+    bool useFailures = vector.getSize() == sensorFailures.size();
+
+    QVector<double> values;
+    for ( int i = 0; i < vector.getSize(); i++ )
     {
-        // update funcBarVector:
-        // get number of functionalisations, ignore sensor failures
-        QMap<int, int> funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
-
-        auto keyList = funcMap.keys();
-        int funcSize = funcMap.size();
-        // no func set: plot channels
-        if (funcSize == 1)
-            funcSize = MVector::nChannels;
-
-        // new number of functionalisations:
-        // reinit funcBarVector
-        // ignore funcSize == 0 (no functionalisation set)
-        if (funcSize != funcBarVector.size())
-        {
-            deleteBars();
-
-            for (int i=0; i<funcSize; i++)
-            {
-                // init bar
-                funcBarVector << new QCPBars(ui->funcBarGraph->xAxis, ui->funcBarGraph->yAxis);
-                funcBarVector[i]->setAntialiased(false);
-
-                // set color
-                QColor color;
-                if (funcSize == MVector::nChannels)
-                    color = ENoseColor::getInstance().getSensorColor(i);
-                else
-                    color = ENoseColor::getInstance().getFuncColor(i);
-                funcBarVector[i]->setPen(QPen(color.lighter(170)));
-                funcBarVector[i]->setBrush(color);
-            }
-        }
-
-        // set funcBarVector data
-        // update fullBarVector
-        QVector<double> funcTicks;
-        bool isFuncBarGraph = funcMap.size() > 1;
-        for (int i=0; i<funcSize; i++)
-        {
-            if (isFuncBarGraph)
-                funcTicks << funcMap.keys()[i];
-            else
-                funcTicks << i;
-        }
-
-        // get func vector
-        MVector funcVector = new_vector.getFuncVector(functionalisation, sensorFailures, inputFunctionType);
-
-        // assign funcVector values to funcData
-        QMap<int, QVector<double>> funcDataMap;
-        for (int i=0; i<funcSize; i++)
-            for (int j=0;j<funcSize; j++)
-                if (i==j)
-                    funcDataMap [i] << funcVector[i];
-                else
-                    funcDataMap [i] << 0.0;
-
-        // set funcData
-        for (int i=0; i<funcSize; i++)
-            funcBarVector[i]->setData(funcTicks, funcDataMap[i]);
+        if (useFailures && sensorFailures[i])
+            values += 0.;
+        else
+            values += vector[i];
     }
-    else
-        Q_ASSERT("Unknown bar graph mode!" && false);
 
+    setValues(values, functionalisation);
+}
+
+void AbstractBarGraphWidget::clear()
+{
+    // set bars to zero
+    QVector<double> values;
+    for (size_t i=0; i<d_barChartItem->data()->size(); i++)
+        values += 0.;
+
+    d_barChartItem->setSamples(values);
     replot();
 }
 
-void BarGraphWidget::clearBars()
+RelVecBarGraphWidget::RelVecBarGraphWidget ( QWidget *parent ) :
+    AbstractBarGraphWidget(parent)
 {
-    QVector<double> data;
-    QVector<double> ticks;
+    setAxisTitle( QwtPlot::xBottom, "Channel" );
+    d_barChartItem->setSpacing( 7 );
 
-    // fullBarVector
-    for (int i=0; i<sensorBarVector.size(); i++)
+    // zero init
+    setVector(MVector(), std::vector<bool>(MVector::nChannels, false), Functionalisation(MVector::nChannels, 0));
+}
+
+QColor RelVecBarGraphWidget::getColor( uint channel, const Functionalisation &functionalisation ) const
+{
+    return ENoseColor::instance().getFuncColor(functionalisation[channel]);
+
+}
+
+void RelVecBarGraphWidget::setValues(const QVector<double> &values, const Functionalisation &functionalisation)
+{
+    QStringList labels;
+    QList<QColor> colors;
+    for (int i=0; i<functionalisation.size(); i++)
     {
-        data << 0.0;
-        ticks << i+1;
+        labels << QString::number(i);
+        colors << getColor(i, functionalisation);
     }
-    for (int i=0; i<sensorBarVector.size(); i++)
-        sensorBarVector[i]->setData(ticks, data);
-
-    // funcBarVector
-    data.clear();
-    ticks.clear();
-    for (int i=0; i<funcBarVector.size(); i++)
-    {
-        data << 0.0;
-        ticks << i;
-    }
-    for (int i=0; i<funcBarVector.size(); i++)
-        funcBarVector[i]->setData(ticks, data);
-
-    // replot
-    ui->barGraph->yAxis->rescale();
-    ui->barGraph->replot();
-
-    ui->funcBarGraph->yAxis->rescale();
-    ui->funcBarGraph->replot();
+    setAxisScaleDraw( QwtPlot::xBottom, new LabelScaleDraw( Qt::Vertical, labels ) );
+    d_barChartItem->setSamples(values, labels, colors);
+    replot();
 }
 
-void BarGraphWidget::deleteBars()
+FuncBarGraphWidget::FuncBarGraphWidget( QWidget *parent ) :
+    AbstractBarGraphWidget(parent)
 {
-    while (ui->barGraph->plottableCount() > 0)
-        ui->barGraph->removePlottable(ui->barGraph->plottable(0));
+    setAxisTitle( QwtPlot::xBottom, "Functionalisation" );
+    d_barChartItem->setSpacing( 20 );
 
-    sensorBarVector.clear();
-    funcBarVector.clear();
+    // zero init
+    setVector(MVector(nullptr, 1), std::vector<bool>(1, false), Functionalisation(1, 0));
+
+//    setAxisScaleEngine(QwtPlot::xBottom, new FullTicksScaleEngine());
 }
 
-BarGraphWidget::Mode BarGraphWidget::getMode() const
+QColor FuncBarGraphWidget::getColor( uint channel, const Functionalisation &functionalisation ) const
 {
-    return mode;
-}
+    auto funcs = functionalisation.getFuncMap().keys();
 
-void BarGraphWidget::setMode(const Mode &value)
-{
-    mode = value;
-
-    if (mode == Mode::showAll)
-        ui->stackedWidget->setCurrentWidget(ui->barGraph);
+    if (funcs.size() == 1)
+        return ENoseColor::instance().getFuncColor( funcs.first() );
     else
-        ui->stackedWidget->setCurrentWidget(ui->funcBarGraph);
+        return ENoseColor::instance().getFuncColor( funcs[channel] );
 }
 
-void BarGraphWidget::mousePressed(QMouseEvent* event)
+void FuncBarGraphWidget::setValues(const QVector<double> &values, const Functionalisation &functionalisation)
 {
-    if (event->button() == Qt::RightButton)
+    QStringList labels;
+    QList<QColor> colors;
+    auto funcList = functionalisation.getFuncMap().keys();
+    for (int i=0; i<funcList.size(); i++)
     {
-        QCustomPlot* plot = static_cast<QCustomPlot*> (ui->stackedWidget->currentWidget());
-
-        QMenu *menu = new QMenu(this);
-        menu->setAttribute(Qt::WA_DeleteOnClose);
-
-        menu->addAction("Save Graph...", this, [this](){
-            emit imageSaveRequested();
-        });
-
-        menu->popup(plot->mapToGlobal(event->pos()));
+        labels << QString::number(funcList[i]);
+        colors << getColor(i, functionalisation);
     }
-}
-
-bool BarGraphWidget::saveImage(const QString &filename)
-{
-    QStringList splitFilename = filename.split(".");
-    Q_ASSERT("No file extension set!" && splitFilename.size() > 1);
-
-    bool writeOk;
-    QString extension = splitFilename.last();
-    QCustomPlot* plot = static_cast<QCustomPlot*> (ui->stackedWidget->currentWidget());
-
-    if (extension == "pdf")
-        writeOk = plot->savePdf(filename);
-    else if (extension == "bmp")
-        writeOk = plot->saveBmp(filename);
-    else if (extension == "jpg" || extension == "jpeg")
-        writeOk = plot->saveJpg(filename);
-    else if (extension == "png")
-        writeOk = plot->savePng(filename);
-    else
-        Q_ASSERT("Unknown file extension!" && false);
-
-    return writeOk;
-}
-
-void BarGraphWidget::resetColors()
-{
-    if (mode == Mode::showAll)
-    {
-        for (int i=0; i<sensorBarVector.size(); i++)
-        {
-            QColor color = ENoseColor::getInstance().getSensorColor(i);
-            QPen pen;
-            pen.setColor(color.lighter(170));
-
-            sensorBarVector[i]->setPen(pen);
-            sensorBarVector[i]->setBrush(color);
-        }
-    }
-    else    // func vectors
-    {
-        for (int i=0; i<funcBarVector.size(); i++)
-        {
-            QColor color;
-            if (funcBarVector.size() == MVector::nChannels)
-                color = ENoseColor::getInstance().getSensorColor(i);
-            else
-                color = ENoseColor::getInstance().getFuncColor(i);
-            QPen pen;
-            pen.setColor(color.lighter(170));
-
-            funcBarVector[i]->setPen(pen);
-            funcBarVector[i]->setBrush(color);
-        }
-    }
-
-    ui->barGraph->replot();
-}
-
-void BarGraphWidget::resetNChannels()
-{
-    clearBars();
-    deleteBars();
-    initGraph();
+    setAxisScaleDraw( QwtPlot::xBottom, new LabelScaleDraw( Qt::Vertical, labels ) );
+    setAxisScaleEngine(QwtPlot::xBottom, new FullTicksScaleEngine);
+    d_barChartItem->setSamples(values, labels, colors);
+    replot();
 }

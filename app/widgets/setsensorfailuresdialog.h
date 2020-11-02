@@ -20,7 +20,7 @@ class SetSensorFailuresDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit SetSensorFailuresDialog(QWidget *parent = nullptr, ulong nChannels = MVector::nChannels, QString failureString="");
+    explicit SetSensorFailuresDialog(const std::vector<bool> &sensorFailures, QWidget *parent = nullptr);
     ~SetSensorFailuresDialog();
     std::vector<bool> getSensorFailures();
 

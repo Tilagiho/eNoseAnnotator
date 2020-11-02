@@ -19,23 +19,16 @@ public:
     explicit InfoWidget(QWidget *parent = nullptr);
     ~InfoWidget();
 
-    DataSource::Status statusSet = DataSource::Status::NOT_CONNECTED;
-
-    QString getFuncLabel();
-
 public slots:
-    void setSensor(QString sensor);
-    void setStatus(DataSource::Status status);
-    void setTimestamp(double timestamp);
-    void setMComment(QString comment);
-    void setFailures(std::vector<bool> failures);
-    void setFuncLabel(QString label);
+    void setSensorId(QString sensor);
+    void setComment(QString comment);
+    void setSensorFailures(std::vector<bool> failures);
+    void setFunctionalisation(Functionalisation &functionalisation);
 
 signals:
     void mCommentChanged(QString comment);
-    void failuresChanged(std::vector<bool> failures);
-    void setFunctionalitionClicked();
-    void setSensorFailuresClicked();
+    void setFunctionalitionRequested();
+    void setSensorFailuresRequested();
 
 private slots:
     void on_commentTextEdit_textChanged();

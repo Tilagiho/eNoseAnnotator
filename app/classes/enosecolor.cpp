@@ -9,7 +9,7 @@ QColor ENoseColor::getSensorColor(int ch)
     QColor color;
 
     // get
-    auto funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
+    auto funcMap = functionalisation.getFuncMap(sensorFailures);
     int funcSize = funcMap.size();
 
     int func = functionalisation[ch];
@@ -29,21 +29,22 @@ QColor ENoseColor::getSensorColor(int ch)
     return color;
 }
 
-QColor ENoseColor::getFuncColor(int index)
+QColor ENoseColor::getFuncColor(int func)
 {
     QColor color;
 
-    int funcSize = MeasurementData::getFuncMap(functionalisation, sensorFailures).size();
+    auto funcList = functionalisation.getFuncMap(sensorFailures).keys();
+    int funcSize = funcList.size();
 
     // pick color from list
     if (funcSize < smallColorList.size())
-        color = smallColorList[index];
+        color = smallColorList[funcList.indexOf(func)];
     else if (funcSize < bigColorList.size())
-        color = bigColorList[index];
+        color = bigColorList[funcList.indexOf(func)];
     // too many funcs: pick equally spaced color
     else
     {
-        float hue = fmod(360/funcSize * index, 360.0);
+        float hue = fmod(360/funcSize * funcList.indexOf(func), 360.0);
         color.setHsv(hue, 250, 150);
     }
 
@@ -69,7 +70,7 @@ void ENoseColor::setSensorFailures(const std::vector<bool> &value)
     sensorFailures = value;
 }
 
-void ENoseColor::setFunctionalisation(const std::vector<int> &value)
+void ENoseColor::setFunctionalisation(const Functionalisation &value)
 {
     functionalisation = value;
 }

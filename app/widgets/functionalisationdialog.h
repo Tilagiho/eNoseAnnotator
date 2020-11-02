@@ -10,18 +10,19 @@
 
 #include "../classes/mvector.h"
 #include "../classes/defaultSettings.h"
+#include "../classes/functionalisation.h"
 
 class FunctionalisationDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit FunctionalisationDialog(QWidget *parent = nullptr, QString presetDir=DEFAULT_PRESET_DIR, ulong nChannels=MVector::nChannels);
+    explicit FunctionalisationDialog(QString presetDir, ulong nChannels=MVector::nChannels, QWidget *parent = nullptr);
     ~FunctionalisationDialog();
 
-    void setFunctionalisation(std::vector<int> funcs);
+    void setFunctionalisation(const Functionalisation &functionalisation);
 
-    std::vector<int> getFunctionalisations();
+    Functionalisation getFunctionalisation();
 
     QString presetName = "None";
     QString presetDir;

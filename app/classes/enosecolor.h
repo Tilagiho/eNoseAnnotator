@@ -6,6 +6,8 @@
 #include <QtCore>
 #include <QColor>
 
+#include "functionalisation.h"
+#include "mvector.h"
 #include "annotation.h"
 
 /*!
@@ -17,7 +19,7 @@ public:
     //
     // singleton defenitions:
     //
-    static ENoseColor& getInstance()
+    static ENoseColor& instance()
     {
         static ENoseColor instance; // Guaranteed to be destroyed.
                                     // Instantiated on first use.
@@ -30,18 +32,21 @@ public:
     //
     //  functionality definitions
     //
-    void setFunctionalisation(const std::vector<int> &value);
+    void setFunctionalisation(const Functionalisation &value);
     void setSensorFailures(const std::vector<bool> &value);
 
     QColor getSensorColor(int i);
     QColor getFuncColor(int func);
     QColor getClassColor(int i, int n);
 
-    std::vector<int> functionalisation;
+    Functionalisation functionalisation;
     std::vector<bool> sensorFailures;
 
 private:
-    ENoseColor() {}
+    ENoseColor() :
+        functionalisation ( MVector::nChannels, false ),
+        sensorFailures ( MVector::nChannels, false )
+    {}
 
     QList<QColor> smallColorList {
         QColor("#006400"),  // darkgreen

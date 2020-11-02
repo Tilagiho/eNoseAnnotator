@@ -5,7 +5,7 @@
 
 #include <QFileDialog>
 
-GeneralSettings::GeneralSettings(QWidget *parent) :
+GeneralSettingsDialog::GeneralSettingsDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::GeneralSettings)
 {
@@ -14,14 +14,14 @@ GeneralSettings::GeneralSettings(QWidget *parent) :
 
 }
 
-GeneralSettings::~GeneralSettings()
+GeneralSettingsDialog::~GeneralSettingsDialog()
 {
     delete ui;
 }
 
 
 
-void GeneralSettings::on_buttonBox_accepted()
+void GeneralSettingsDialog::on_buttonBox_accepted()
 {
     maxVal = ui->maxValSpinBox->value();
     minVal = ui->minValSpinBox->value();
@@ -29,12 +29,12 @@ void GeneralSettings::on_buttonBox_accepted()
 }
 
 
-bool GeneralSettings::getUseLimits() const
+bool GeneralSettingsDialog::getUseLimits() const
 {
     return useLimits;
 }
 
-void GeneralSettings::setUseLimits(bool value)
+void GeneralSettingsDialog::setUseLimits(bool value)
 {
     if (value)
         ui->useLimitsCheckBox->setCheckState(Qt::CheckState::Checked);
@@ -44,29 +44,29 @@ void GeneralSettings::setUseLimits(bool value)
     useLimits = value;
 }
 
-double GeneralSettings::getMinVal() const
+double GeneralSettingsDialog::getMinVal() const
 {
     return minVal;
 }
 
-void GeneralSettings::setMinVal(double value)
+void GeneralSettingsDialog::setMinVal(double value)
 {
     ui->minValSpinBox->setValue(value);
     minVal = value;
 }
 
-double GeneralSettings::getMaxVal() const
+double GeneralSettingsDialog::getMaxVal() const
 {
     return maxVal;
 }
 
-void GeneralSettings::setMaxVal(double value)
+void GeneralSettingsDialog::setMaxVal(double value)
 {
     maxVal = value;
     ui->maxValSpinBox->setValue(value);
 }
 
-QString GeneralSettings::getPresetDir() const
+QString GeneralSettingsDialog::getPresetDir() const
 {
     QString presetDir = ui->presetDirlineEdit->text();
     if (!presetDir.endsWith("/"))
@@ -75,20 +75,20 @@ QString GeneralSettings::getPresetDir() const
     return presetDir;
 }
 
-void GeneralSettings::setPresetDir(QString presetDirPath)
+void GeneralSettingsDialog::setPresetDir(QString presetDirPath)
 {
     QFileInfo presetDir(presetDirPath);
     ui->presetDirlineEdit->setText(presetDir.absolutePath());
 }
 
-void GeneralSettings::on_presetDirPushButton_clicked()
+void GeneralSettingsDialog::on_presetDirPushButton_clicked()
 {
     QString presetDir = QFileDialog::getExistingDirectory(this, "Set preset folder", ui->presetDirlineEdit->text());
     if (presetDir != "")
         ui->presetDirlineEdit->setText(presetDir);
 }
 
-void GeneralSettings::on_defaultPushButton_clicked()
+void GeneralSettingsDialog::on_defaultPushButton_clicked()
 {
     ui->minValSpinBox->setValue(DEFAULT_LOWER_LIMIT);
     ui->maxValSpinBox->setValue(DEFAULT_UPPER_LIMIT);

@@ -49,7 +49,7 @@ private:
     void makeConnections();
     void closeConnections();
 
-     MVector getVector(QStringList);
+     AbsoluteMVector getVector(QStringList);
 
     QSerialPort *serial = nullptr;
     Settings settings;

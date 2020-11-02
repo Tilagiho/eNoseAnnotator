@@ -274,7 +274,7 @@ QColor aClass::getColor(aClass aclass)
     int n_classes = staticClassSet.size();
     int i_aclass = staticClassSet.toList().indexOf(aClass(aclass.getName(), -1.0));
 
-    return ENoseColor::getInstance().getClassColor(i_aclass, n_classes);
+    return ENoseColor::instance().getClassColor(i_aclass, n_classes);
 }
 
 /*!

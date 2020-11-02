@@ -8,18 +8,16 @@
 
 #include "../classes/measurementdata.h"
 
-SetSensorFailuresDialog::SetSensorFailuresDialog(QWidget *parent, ulong nChannels, QString failureString) :
+SetSensorFailuresDialog::SetSensorFailuresDialog(const std::vector<bool> &failures, QWidget *parent) :
     QDialog(parent),
-    nChannels(nChannels),
+    nChannels(failures.size()),
     checkBoxes(nChannels, nullptr)
 {
-    auto failures = MeasurementData::sensorFailureArray(failureString);
-
     // create checkBoxes & setup gridLayout
     QGridLayout* gridLayout = new QGridLayout();
     for (uint i=0; i<nChannels; i++)
     {
-        checkBoxes[i] = new QCheckBox("ch" + QString::number(i+1));
+        checkBoxes[i] = new QCheckBox("ch" + QString::number(i+1), this);
         gridLayout->addWidget(checkBoxes[i], i % 16, 2* i / 16);
     }
     // set stretch of empty columns
@@ -40,10 +38,10 @@ SetSensorFailuresDialog::SetSensorFailuresDialog(QWidget *parent, ulong nChannel
 
     buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok
                                      | QDialogButtonBox::Cancel
-                                     | QDialogButtonBox::Reset);
+                                     | QDialogButtonBox::Reset, this);
     resetButton = buttonBox->button(QDialogButtonBox::Reset);
 
-    QVBoxLayout* pageLayout = new QVBoxLayout();
+    QVBoxLayout* pageLayout = new QVBoxLayout(this);
     pageLayout->addLayout(gridLayout);
     pageLayout->addWidget(buttonBox);
 
@@ -54,10 +52,6 @@ SetSensorFailuresDialog::SetSensorFailuresDialog(QWidget *parent, ulong nChannel
 
 SetSensorFailuresDialog::~SetSensorFailuresDialog()
 {
-    for (QCheckBox* checkBox : checkBoxes)
-        checkBox->deleteLater();
-
-    buttonBox->deleteLater();
 }
 
 std::vector<bool> SetSensorFailuresDialog::getSensorFailures()
@@ -80,5 +74,5 @@ void SetSensorFailuresDialog::makeConnections()
 {
     connect(buttonBox, &QDialogButtonBox::accepted, this, &SetSensorFailuresDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &SetSensorFailuresDialog::reject);
-    connect(resetButton, &QPushButton::released, this, &SetSensorFailuresDialog::resetCheckboxes);
+    connect(resetButton, &QPushButton::clicked, this, &SetSensorFailuresDialog::resetCheckboxes);
 }

@@ -369,15 +369,15 @@ void FitWorker::determineChannelRanges()
         }
 
         // collect data
-        it = selectedData.find(x_start[channel]);
-        endIt = selectedData.constFind(x_end[channel]);
+        auto collectionIt = selectedData.find(x_start[channel]);
+        auto collectionEndIt = selectedData.constFind(x_end[channel]);
 
-        while(it.key() <= endIt.key() && it != selectedData.constEnd())
+        while(collectionIt.key() <= collectionEndIt.key() && collectionIt != selectedData.constEnd())
         {
-            double x = it.key() - x_start[channel];
-            double y = it.value()[channel] - y_offset[channel];
+            double x = collectionIt.key() - x_start[channel];
+            double y = collectionIt.value()[channel] - y_offset[channel];
             dataRange[channel].push_back(std::pair<double, double>(x, y));
-            it++;
+            collectionIt++;
         }
     }
 
@@ -810,7 +810,7 @@ ResultPage::ResultPage(MeasurementData *mData, QWidget *parent):
     // init range table
     selectedData = mData->getSelectionMap();
     for (auto timestamp : selectedData.keys())
-        selectedData[timestamp] = selectedData[timestamp].getRelativeVector(mData->getBaseLevel(timestamp));
+        selectedData[timestamp] = selectedData[timestamp].getRelativeVector();
     rangeTable->setRowCount(1);
     rangeTable->setColumnCount(selectedData.size());
     rangeTable->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);

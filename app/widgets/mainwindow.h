@@ -8,15 +8,10 @@
 #include <QCloseEvent>
 #include <QLabel>
 
-#include "../classes/measurementdata.h"
-#include "../classes/datasource.h"
-#include "../classes/mvector.h"
-#include "../classes/torchclassifier.h"
 #include "linegraphwidget.h"
 #include "bargraphwidget.h"
 #include "infowidget.h"
 #include "classifierwidget.h"
-#include "../classes/classifier_definitions.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -30,8 +25,76 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    bool getConverterRunning() const;
+
+signals:
+    void setConnectionRequested();
+    void startRequested();
+    void stopRequested();
+    void pauseRequested();
+    void resetRequested();
+    void reconnectRequested();
+
+    void selectionGroundTruthAnnotationRequested();
+    void selectionDetectionAnnotationRequested();
+    void deleteGroundTruthAnnotationRequested();
+
+    void loadMeasurementRequested();
+    void saveDataRequested();
+    void saveDataAsRequested();
+    void saveSelectionRequested();
+
+    void generalSettingsRequested();
+
+    void loadClassifierRequested();
+    void classifyMeasurementRequested();
+
+    void fitCurvesRequested();
+
+    void sensorFailuresSet(const std::vector<bool> &sensorFailures);
+    void functionalisationSet(const Functionalisation &functionalisation);
+
+    void sensorFailureDialogRequested();
+    void functionalisationDialogRequested();
+
+    void selectionMade(uint min, uint max);
+    void selectionCleared();
+
+    void startTimestempSet(uint);
+    void commentSet(QString);
+    void sensorIdSet(QString);
+
 public slots:
-    void initialize();
+
+    void addVector(uint timestamp, AbsoluteMVector absoluteVector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
+    void setData(const QMap<uint, AbsoluteMVector> &data, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
+    void clearGraphs();
+
+    void setStatus(DataSource::Status newStatus);
+
+    void sensorConnected(QString sensorId);
+
+    void setFunctionalisation(const QMap<uint, AbsoluteMVector> &data, Functionalisation &functionalisation, std::vector<bool> &sensorFailures);
+
+    void setSensorFailures(const QMap<uint, AbsoluteMVector> &data, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
+
+    void openSensorFailuresDialog(const std::vector<bool> &sensorFailures);
+
+    void setAbsoluteLimits(double lowerLimit, double upperLimit, bool useLimits);
+
+    void setDataChanged(bool dataIsChanged, QString filename);
+
+    void setClassifier(QString name, QStringList classNames, bool isInputAbsolute, QString presetName);
+
+    void closeClassifier();
+
+    void changeAnnotations( const QMap<uint, Annotation> annotations, bool isUserAnnotation );
+
+    void setSelectionVector ( const AbsoluteMVector &vector, const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation );
+
+    void clearSelectionVector ();
+
+    void setTitle( QString title, bool dataChanged );
 
 private slots:
     void on_actionSave_Data_As_triggered();
@@ -72,89 +135,51 @@ private slots:
 
     void on_actionConverter_triggered();
 
-    void updateAutosave();
-
-    void deleteAutosave();
-
     void on_actionFit_curve_triggered();
+
+    void redrawFuncGraph(const QMap<uint, AbsoluteMVector> &data, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
+
+    void setSelectionActionsEnabled(bool selectionMade);
 
 private:
     Ui::MainWindow *ui;
-    QSettings* settings = nullptr;
 
-    QString autosaveName = "autosave.csv";
-    QString autosavePath;
-    uint autosaveIntervall = 1;             // in minutes
-    QTimer autosaveTimer;
-
-    LineGraphWidget* funcLineGraph;
-    LineGraphWidget* absLineGraph;
-    LineGraphWidget* relLineGraph;
-    BarGraphWidget* vectorBarGraph;
-    BarGraphWidget* funcBarGraph;
+    FuncLineGraphWidget* funcLineGraph;
+    AbsoluteLineGraphWidget* absLineGraph;
+    RelativeLineGraphWidget* relLineGraph;
+    RelVecBarGraphWidget* vectorBarGraph;
+    FuncBarGraphWidget* funcBarGraph;
     InfoWidget* measInfoWidget;
     ClassifierWidget* classifierWidget;
+
     QList<QDockWidget*> leftDocks;
     QList<QDockWidget*> rightDocks;
 
     QLabel *statusTextLabel;
     QLabel *statusImageLabel;
 
-    MeasurementData *mData = nullptr;
-    DataSource *source = nullptr;
-    QThread* sourceThread = nullptr;
-    TorchClassifier *classifier = nullptr;
-
+    bool dataIsChanged = false;
     bool converterRunning = false;
-
-    InputFunctionType inputFunctionType = InputFunctionType::medianAverage;
 
     void closeEvent (QCloseEvent *event);
 
-    void createGraphWidgets();
+    void createDockWidgets();
 
     void createStatusBar();
 
-    void clearData();
-
     void makeSourceConnections();
-
-    void sensorConnected(QString sensorId);
-
-    void setTitle(bool);
 
     void updateFuncGraph();
 
     void connectFLGraph();
 
-    void classifyMeasurement();
-
     void setIsLiveClassificationState(bool isLive);
-
-    void closeClassifier();
-
-    void loadData(QString filename);
-
-    void saveData(bool forceDialog = false);
 
     void saveLineGraph(LineGraphWidget* graph);
 
-    void saveBarGraph(BarGraphWidget* graph);
-
-
-    void loadSettings();
-
-    void initSettings();
+    void saveBarGraph(AbstractBarGraphWidget* graph);
 
     void resetNChannels(uint newNChannels);
-
-    void saveDataDir();
-
-    void setFunctionalisation();
-
-    void setSensorFailures();
-
-    bool dirIsWriteable(QDir dir);
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);

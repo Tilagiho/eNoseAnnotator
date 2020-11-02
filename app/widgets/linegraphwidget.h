@@ -1,190 +1,316 @@
-#ifndef LINEGRAPH_H
-#define LINEGRAPH_H
+#ifndef LINEGRAPHWIDGET_H
+#define LINEGRAPHWIDGET_H
 
-#include <QtCore>
 #include <QWidget>
 
+#include <qwt_plot.h>
+
 #include "../classes/mvector.h"
-#include "../qcustomplot/qcustomplot.h"
+#include "../classes/functionalisation.h"
 
-namespace Ui {
-class LineGraphWidget;
-}
+#include <qwt_plot_zoomer.h>
+#include <qwt_plot_picker.h>
+#include <qwt_scale_widget.h>
+#include <qwt_plot_directpainter.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_zoneitem.h>
+#include <qwt_plot_textlabel.h>
+#include <qwt_plot_magnifier.h>
+#include <qwt_plot_picker.h>
+#include <qwt_plot_legenditem.h>
 
-class ReplotWorker: public QObject
+#define LGW_AUTO_MOVE_ZONE_SIZE 200
+#define LGW_AUTO_MOVE_ZONE_BORDER_MIN 5
+#define LGW_AUTO_MOVE_ZONE_BORDER_RATIO 0.15
+
+#define LGW_X_RELATIVE_MARGIN 0.1
+#define LGW_Y_RELATIVE_MARGIN 0.15
+
+#define LGW_DET_CLASS_TRESH 0.01
+
+class CurveData: public QwtArraySeriesData<QPointF>
 {
-    Q_OBJECT
-
 public:
-    ReplotWorker(QMutex* graphMutex, QObject *parent = nullptr):
-        QObject(parent),
-        graphMutex(graphMutex)
-    {}
+    CurveData();
 
-public Q_SLOTS:
-    void replot(Ui::LineGraphWidget *ui);
+    virtual QRectF boundingRect() const override;
 
-Q_SIGNALS:
-    void finished(double, double);
-    void error(QString errorMessage);
+    inline void append( const QPointF &point );
 
-private:
-    const int replot_steps = 1;
+    void clear();
 
-    const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
-    const double labelSpace = 0.3;
-
-    QMutex sync;
-    QMutex *graphMutex;
+    QVector<QPointF>* samples();
 };
 
-class LineGraphWidget : public QWidget
+class FixedPlotMagnifier: public QwtPlotMagnifier
+{
+    Q_OBJECT
+public:
+    explicit FixedPlotMagnifier( QWidget * parent):
+        QwtPlotMagnifier(parent)
+    {}
+
+protected:
+    virtual void rescale(double factor) override
+    {
+       if ( factor != 0.0 )
+           QwtPlotMagnifier::rescale(1 / factor);
+    }
+};
+
+/*!
+ * \brief FixedPlotZoomer subclasses QwtPlotZoomer in order fix the zoom base:
+ * - setZoomBase( const QRectF &base ) only sets the zoomBase based on base.
+ */
+class FixedPlotZoomer: public QwtPlotZoomer
+{
+    Q_OBJECT
+public:
+    explicit FixedPlotZoomer( int xAxis, int yAxis,
+                              QWidget *parent, bool doReplot = true):
+        QwtPlotZoomer(xAxis, yAxis, parent, doReplot)
+    {}
+
+    /*!
+     * \brief setZoomBase sets base as the new zoomBase
+     * (Original version unites base with scaleRect())
+     */
+    virtual void setZoomBase( const QRectF &base ) override
+    {
+        if(zoomBase() == base)
+            return ;
+
+        QStack<QRectF> stack = zoomStack() ; // get stack
+        stack.remove(0) ; // remove old base
+        stack.prepend(base) ; // add new base
+
+        // put stack in place and try to find current zoomRect in it
+        // (set index to current's index in new stack or top of stack
+        // if the current rectangle is not in the new stack)
+        setZoomStack(stack, -1) ;
+     }
+};
+
+/*!
+ * \brief The ToolTipPlotPicker class adds tooltips based on the graph items under/ close to the cursor
+ */
+class ToolTipPlotPicker: public QwtPlotPicker
 {
     Q_OBJECT
 
 public:
+    explicit ToolTipPlotPicker(QWidget *parent):
+        QwtPlotPicker(parent)
+    {}
 
+signals:
+    void mouseMoved(const QPointF &pos) const;
 
-    explicit LineGraphWidget(QWidget *parent = nullptr, int nChannels = MVector::nChannels);
+protected:
+    virtual QwtText trackerTextF (const QPointF &pos) const override;
+};
+
+class AClassRectItem: public QwtPlotItem
+{
+public:
+    AClassRectItem(QwtInterval interval, Annotation annotation, aClass aclass, bool isUserAnnotation);
+
+    void setInterval( QwtInterval& xValue );
+    double left();
+    void setLeft(const double &value);
+    double right();
+    void setRight(const double &value);
+
+    virtual void draw( QPainter *painter,
+        const QwtScaleMap &xMap, const QwtScaleMap &yMap,
+        const QRectF &canvasRect ) const override;
+
+    QRectF boundingRect();
+
+    int rtti() const override;
+
+    Annotation getAnnotation() const;
+
+    bool getIsUserAnnotation() const;
+
+protected:
+    QwtInterval xInterval;
+    Annotation annotation;
+    aClass aclass;
+    bool isUserAnnotation;
+    mutable QRectF b_rect;
+
+    QColor getColor() const;
+};
+
+class LineGraphWidget : public QwtPlot
+{
+    Q_OBJECT
+public:
+    explicit LineGraphWidget(QWidget *parent = nullptr);
     ~LineGraphWidget();
-    void clearGraph(bool replot = true);
-
-    bool selectionEmpty();
-
-    std::array<uint, 2> getSelection();  // returns start and end timestamp of selection
-    void setStartTimestamp(uint timestamp);
-    QPair<double, double> getXRange();
-    void setXRange(QPair<double, double>);
-    void setYRange(double lower, double upper);
-    void setLogXAxis(bool logOn);
-    void setMaxVal(double val);
-
-    double getMaxVal() const;
-
-    double getMinVal() const;
-    void setMinVal(double value);
-
-    // flag to determine if minVal and maxVal should be used when plotting data
-
-
-    bool getUseLimits() const;
-    void setUseLimits(bool value);
-
-
-    void setIsAbsolute(bool value);
-
-    int getNChannels() const;
-
-    void resetGraph(int channels = MVector::nChannels);
-
-    // static variables
-    // interval in which data is plotted: data > maxVal or < minVal is ignored
-    // can be ignored with useLimits
-    static double maxVal;
-    static double minVal;
-
-    void setNChannels(int value);
-
-public slots:
-    void addMeasurement(MVector measurement, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool rescale=true);   // add single measurement; rescale y-axis if rescale==true
-    void setData(QMap<uint, MVector> map, std::vector<int> functionalisation, std::vector<bool> sensorFailures);
-    void setSensorFailureFlags(const std::vector<bool> sensorFailureFlags);
-    void setAutoMoveGraph(bool value);
-    void clearSelection();
 
     void setReplotStatus(bool value);
 
-    void setSelection (QCPDataSelection selection);
+    QPair<double, double> getSelectionRange();
 
-    bool saveImage(const QString &filename);
-    QPixmap getPixmap();
+    void setMeasRunning(bool value);
 
-    /*
-     * draws selection and class rectangles
-     */
-    void labelSelection(QMap<uint, MVector> selectionMap);
+    QRectF boundingRect() const;
 
-    void setXRange(QCPRange range);
+    double getT(double timestamp);
 
-    void resetColors();
+    double getT(uint timestamp);
+
+    double getT(QDateTime datetime);
+
+    uint getTimestamp(double t);
 
 signals:
-    void selectionChanged(int, int);
-    void dataSelectionChanged(QCPDataSelection);
+    void axisIntvSet(QwtInterval intv, QwtPlot::Axis axis);
+
+    void selectionMade(uint min, uint max);
+
     void selectionCleared();
-    void sensorFailure(std::vector<bool>);
-    void requestRedraw();
-    void xRangeChanged(const QCPRange new_range);
-    void ImageSaveRequested();
 
-private:
-    Ui::LineGraphWidget *ui;
-    QThread *thread = nullptr;
-    ReplotWorker* worker = nullptr;
-    int nChannels = MVector::nChannels;
+public slots:
+    virtual void addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
 
-    QMutex* graphMutex;
+    void clearGraph();
 
-    const double det_class_tresh = 0.001;   // only classes with values higher than this are shown in the detected class labels
+    void zoomToData();
 
-    const int defaultXWidth = 30; // defines default range of xAxis: (-1; defaultXWidth)
-    const double yMin = 2.5;    // defines minimum range of yAxis: (-yMin;yMin)
-    const double labelSpace = 0.3;
+    void autoScale(bool xAxis = true, bool yAxis = true);
 
-    bool useLimits = false;
-    bool isAbsolute = false;
+    void setAxisIntv(QwtInterval intv, QwtPlot::Axis axis);
 
-    uint startTimestamp; // timestamp for start of graph
-    QCPDataSelection dataSelection; // holds current data selection
-    bool selectionFlag = false;     // used to avoid looping behaviour when selecting data
-    bool replotStatus = true;   // replot() is only active if true
+    void setPrevXRange(QDateTime datetime, int seconds);
 
-    std::vector<bool> sensorFailureFlags;
-    bool autoMoveGraph = true;
+    void shiftXRange(double seconds);
 
-    QMap<int, QPair<QString, QList<QCPItemRect *>>> userDefinedClassLabels;
-    QMap<int, QPair<QString, QList<QCPItemRect *>>> detectedClassLabels;
+    void makeSelection(const QRectF &rect);
 
-    QCPItemText* coordText = nullptr;
+    void makeSelection(uint min, uint max);
 
-    void setupGraph();
+    void makeSelection(double minT, double maxT);
 
-    /*
-     * returns index of data point where x == key on chart
-     * returns -1 if not found
-     */
-    double getIndex (int key);
+    void clearSelection();
 
-private slots:
-    void replot(uint timestamp=0);
-    void mousePressed(QMouseEvent*);
-    void mouseMoved	(QMouseEvent *  event);
-    void resizeEvent(QResizeEvent*);
+    virtual void setSensorFailures(const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation);
 
-    void dataSelected();
-    void onXRangeChanged(QCPRange range);
+    virtual void setFunctionalisation(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
 
-    /*
-     * draws label of user+detected class at top of graph
-     */
-    void setLabel(int xpos, Annotation annotation, bool isUserAnnotation);
+    void setAnnotations(const QMap<uint, Annotation> &annotations, bool isUserAnnotation);
 
-    /*
-     *  goes through userDefinedLabels and detectedLabels in range of x-axis
-     *  joins successive labels with matching classes
-     */
-    void redrawLabels();
+    void adjustLabels ( bool isUserAnnotation );
 
-    /*
-     * returns y-coord based on current y-range
-     * userDefinedLabel == true: for user defined labels
-     * else: for detected labels
-     */
-    QPair<double, double> getLabelYCoords(bool userDefinedLabel);
+protected slots:
+    void setMouseCoordinates(const QPointF &coords);
 
-    void adjustLabelBorders(int firstX, int secondX);
+    virtual void setupLegend(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
 
-    QCPGraph* firstVisibleGraph();
+//    void updateZoomBase(QPointF point);
+
+    void setZoomBase();
+
+    void setLabel(uint timestamp, Annotation annotation, bool isUserAnnotation);
+
+    void deleteLabel(double t, bool isUserAnnotation);
+
+protected:
+    bool replotStatus = true;
+    bool measRunning = false;
+
+
+    QVector<QwtPlotCurve*> dataCurves;
+    QVector<QwtPlotCurve*> selectionCurves;
+
+    QMap<uint, QList<AClassRectItem *>> userDefinedClassLabels;
+    QMap<uint, QList<AClassRectItem *>> detectedClassLabels;
+
+
+    FixedPlotZoomer *rectangleZoom;
+    QwtPlotPicker *zonePicker;
+    QwtPlotZoneItem *zoneItem;
+    ToolTipPlotPicker *toolTipPicker;
+
+    QwtPlotTextLabel *coordinateLabel;
+    QwtPlotLegendItem *legend;
+
+    QPointF zoomBaseOffset = QPointF(2000., 1.);
+
+    virtual void initPlot(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
+
+    virtual QString getGraphName(size_t i, const Functionalisation &functionalisation);
+
+    virtual QColor getGraphColor(uint i, const Functionalisation &functionalisation);
+
+    void addPoint(QwtPlotCurve* curve, QPointF point);
+
+    bool selectPoints(double min, double max);
+
+    bool autoMoveXRange(double t);
+
+//    QRectF united(QRectF, QRectF) const;
+
+
 };
 
-#endif // LINEGRAPH_H
+class AbsoluteLineGraphWidget : public LineGraphWidget
+{
+    Q_OBJECT
+public:
+    explicit AbsoluteLineGraphWidget(QWidget *parent = nullptr);
+
+    static double lowerLimit;
+    static double upperLimit;
+    static bool useLimits;
+
+    void setLimits(double lowerLimit, double upperLimit, bool useLimits);
+
+    void addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
+
+signals:
+    void sensorFailuresSet(const std::vector<bool> &sensorFailures);
+
+protected:
+    void checkLimits( MVector vector, const std::vector<bool> &sensorFailures );
+
+    virtual void initPlot(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
+};
+
+class RelativeLineGraphWidget : public LineGraphWidget
+{
+    Q_OBJECT
+
+public:
+    explicit RelativeLineGraphWidget(QWidget *parent = nullptr);
+
+    void addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
+
+protected:
+    virtual void initPlot(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
+};
+
+class FuncLineGraphWidget : public LineGraphWidget
+{
+    Q_OBJECT
+
+public:
+    explicit FuncLineGraphWidget(QWidget *parent = nullptr);
+
+public slots:
+    void addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
+
+    void setSensorFailures(const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation) override;
+
+    void setFunctionalisation(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
+
+    void setupLegend(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
+
+protected:
+    QString getGraphName(size_t i, const Functionalisation &functionalisation) override;
+    QColor getGraphColor(uint i, const Functionalisation &functionalisation) override;
+};
+
+#endif // LINEGRAPHWIDGET_H

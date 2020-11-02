@@ -1,7 +1,6 @@
-#include "widgets/mainwindow.h"
-
 #include "lib/QCrashHandler/src/qcrashhandler.h"
 #include <QApplication>
+#include "classes/controler.h"
 
 int main(int argc, char *argv[])
 {
@@ -23,12 +22,14 @@ int main(int argc, char *argv[])
 
     Breakpad::CrashHandler::instance()->Init(reportDir.absolutePath());
 
-    // start application
-    MainWindow w;
 
-    // timer to check aarguments
-    QTimer::singleShot(0, &w, SLOT(initialize()));
+    // init Controler
+    Controler c;
 
-    w.show();
+    // timer to check arguments
+    QTimer::singleShot(0, &c, &Controler::initialize);
+
+    // start applivation
+    c.getWindow()->show();
     return a.exec();
 }

@@ -212,7 +212,7 @@ void USBDataSource::processLine(const QByteArray &data)
 
         // extract values
         int count = valueList[0].toInt();
-        MVector vector = getVector(valueList);
+        AbsoluteMVector vector = getVector(valueList);
 
 //        qDebug() << vector.toString();
 
@@ -232,7 +232,7 @@ void USBDataSource::processLine(const QByteArray &data)
         {
             baselevelVectorMap[timestamp] = vector;
 
-            MVector baselevelVector = MVector::zeroes();
+            MVector baselevelVector;
 
             for (uint ts : baselevelVectorMap.keys())
                 baselevelVector = baselevelVector + baselevelVectorMap[ts] / baselevelVectorMap.size();
@@ -330,9 +330,9 @@ QString USBDataSource::identifier()
  * Set infinite for negative values
  * \return
  */
-MVector USBDataSource::getVector(QStringList vectorList)
+AbsoluteMVector USBDataSource::getVector(QStringList vectorList)
 {
-    MVector vector;
+    AbsoluteMVector vector;
 
     for (int i=0; i<MVector::nChannels; i++)
     {

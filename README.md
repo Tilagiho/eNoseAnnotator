@@ -2,6 +2,13 @@
 
 eNoseAnnotator is a program used to view, annotate and store measurements of the eNose sensor. Currently Windows and Linux systems are supported.
 
+[![Latest Release](https://img.shields.io/github/v/release/Tilagiho/eNoseAnnotator?label=Latest%20Release)](https://github.com/tilagiho/eNoseAnnotator/releases)
+
+[![CI: Windows Build](https://img.shields.io/appveyor/ci/tilagiho/eNoseAnnotator/master?label=CI%20Windows%20Build)](https://ci.appveyor.com/project/tilagiho/eNoseAnnotator/branch/master) 
+[![CI: Linux Build](https://img.shields.io/travis/com/tilagiho/eNoseAnnotator/master?label=CI%20Linux%20Build)](https://travis-ci.com/github/Tilagiho/eNoseAnnotator)
+
+[![Code Quality](https://www.code-inspector.com/project/15126/score/svg) ![Code Grade](https://www.code-inspector.com/project/15126/status/svg)](https://frontend.code-inspector.com/public/project/15126/eNoseAnnotator/dashboard)
+
 ## How to install
 
 ### Windows:
@@ -30,17 +37,21 @@ To start the measurement press start symbol in the tool bar. If you have not set
 
 You can pause and stop the measurement. After stopping you can start a new measurement by pressing the start icon again. If an error occurs during a measurement, you can click the reconnect symbol in order to resume the measurement. 
 
+### Navigation
+You drag and drop the graphs to move around and use the mousewheel to zoom into and out of the graphs. Additionally you can zoom into a specific area by holding <kbd>Shift</kbd> and drawing a rectangle of the area with the <kbd>Left Mouse Button</kbd>.
+Use <kbd>Shift</kbd>+<kbd>Right Mouse Button</kbd> to zoom put of the graph to show all data of the current measurement. With <kbd>Shift</kbd>+<kbd>Middle Mouse Button</kbd> you can zoom to the previous zoom area specified.
+
 ### Annotating data
 
 The graph in the top left shows the the relative deviation of the measurements to the base vector. You can changing the range of the x-axis of the graph by dragging & dropping the graph left and right. It is also possible to zoom in and out using the mouse wheel. 
 
-You can select data by pressing "Ctrl" and drawing a selection rectangle in the graph. After selecting data the graph on the bottom left will show the average vector of the selection. 
+You can select data by pressing <kbd>Ctrl</kbd> and drawing a selection rectangle in the graph. After selecting data the graph on the bottom left will show the average vector of the selection. 
 
-In order to select a class for the selected data press "Annotation->Set class of selection...".
+In order to annotate the selected data use the annotation symbol in the toolbar.
 
 ### Loading/ Saving data
 
-You can load and save data using "Measurement->Load..."/ "Measurement->Save" in the menu. You can save the whole measurement data as well as the current selection. 
+You can load and save data using the the symbols in the toolbar at the top.
 
 The data is stored in the format of a .csv file.
 

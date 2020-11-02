@@ -7,32 +7,39 @@
 #include "aclass.h"
 #include "annotation.h"
 #include "classifier_definitions.h"
+#include "functionalisation.h"
+
+// forward declarations
+class AbsoluteMVector;
+class RelativeMVector;
 
 class MVector
 {
 
 public:
-    static size_t nChannels;
-
-    MVector(size_t size=nChannels);
+    MVector(const MVector &other);
+//    MVector(const AbsoluteMVector &other);
+//    MVector(const RelativeMVector &other);
+    MVector(AbsoluteMVector* baseVector=nullptr, size_t size=nChannels);
     ~MVector();
+
+    static size_t nChannels;
 
     QString toString();
 
     bool operator ==(const MVector &other) const;
-
     bool operator !=(const MVector &other) const;
 
     MVector operator *(const double denominator);
     MVector operator *(const int denominator);
     MVector operator /(const double denominator);
     MVector operator /(const int denominator);
-
     MVector operator +(const MVector other);
     MVector operator -(const MVector other);
 
-    // Overloading [] operator to access elements in array style
     double &operator[] (int index);
+
+    double operator[] (int index) const;
 
     double average(const std::vector<bool> &sensorFailures) const;
 
@@ -47,40 +54,63 @@ public:
      */
     Annotation detectedAnnotation;
 
-    /*
-     * returns MVector with all elements being zero initialzed
-     */
-    static MVector zeroes();
+//    virtual RelativeMVector getFuncAverageVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures);
 
-    /*
-     * returns the deviation vector (/ %) of this relative to baseVector
-     * WARNING: only use this function with an absolute vector
-     */
-    MVector getRelativeVector(MVector baseVector);
+//    virtual RelativeMVector getFuncMedianAverageVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures, int nMedian = 4);
 
-    /*
-     * returns the absolute vector (/ Ohm) of this based on baseVector
-     * WARNING: only use this function with relative vector
-     */
-    MVector getAbsoluteVector(MVector baseVector);
-
-    MVector getAverageFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures);
-
-    MVector getMedianAverageFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures, int nMedian = 4);
-
-    MVector getFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures, InputFunctionType inputFunction);
-
-    size_t size;    // number of sensor inputs
-
-    std::vector<double> getVector() const;
+//    RelativeMVector getFuncVector(std::vector<int> functionalisation, std::vector<bool> sensorFailures, InputFunctionType inputFunction);
 
     QMap<QString, double> sensorAttributes;   // map: attributeName, attributeValue
 
-private:
-    /*
-     * contains the sensor values measured
-     */
+    std::vector<double> getVector() const;
+
+    size_t getSize() const;
+
+    void copyMetaData(const MVector &other);
+
+    bool isZeroVector();
+
+    void setBaseVector(AbsoluteMVector *value);
+
+    MVector getFuncAverageVector(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
+
+    MVector getFuncMedianAverageVector(const Functionalisation & functionalisation, const std::vector<bool> &sensorFailures, int nMedian = 4);
+
+    MVector getFuncVector(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures, InputFunctionType inputFunction = InputFunctionType::medianAverage);
+
+    AbsoluteMVector *getBaseVector() const;
+
+protected:
+    size_t size;    // number of sensor values
     std::vector<double> vector;
+    AbsoluteMVector* baseVector = nullptr;
+};
+
+class AbsoluteMVector : public MVector
+{
+public:
+    AbsoluteMVector(AbsoluteMVector* baseVector=nullptr, size_t size=nChannels);
+    AbsoluteMVector(const MVector &other);
+
+    ~AbsoluteMVector();
+
+    /*
+     * returns the deviation vector (/ %) of this relative to baseVector
+     */
+    RelativeMVector getRelativeVector() const;
+};
+
+class RelativeMVector : public MVector
+{
+public:
+    RelativeMVector(AbsoluteMVector* baseVector=nullptr, size_t size=nChannels);
+    RelativeMVector(const MVector &other);
+    ~RelativeMVector();
+
+    /*
+     * returns the absolute vector (/ Ohm) of this based on baseVector
+     */
+    AbsoluteMVector getAbsoluteVector() const;
 };
 
 Q_DECLARE_METATYPE(MVector);

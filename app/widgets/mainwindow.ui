@@ -192,7 +192,7 @@
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="LineGraphWidget" name="dockWidgetContents"/>
+   <widget class="QWidget" name="dockWidgetContents"/>
   </widget>
   <widget class="QDockWidget" name="dock2">
    <property name="sizePolicy">
@@ -448,12 +448,6 @@
    <class>ClassifierWidget</class>
    <extends>QWidget</extends>
    <header>widgets/classifierwidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>LineGraphWidget</class>
-   <extends>QWidget</extends>
-   <header>widgets/linegraphwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

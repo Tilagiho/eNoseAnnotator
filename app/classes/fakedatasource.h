@@ -32,7 +32,7 @@ private:
     QTimer* statusTimer = nullptr;
     QTimer* measTimer = nullptr;
 
-    MVector generateMeasurement(double randRange=300.0);
+    AbsoluteMVector generateMeasurement(double randRange=300.0);
 };
 
 #endif // FAKEDATASOURCE_H

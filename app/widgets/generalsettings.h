@@ -4,19 +4,19 @@
 #include <QtCore>
 #include <QDialog>
 
-#include "bargraphwidget.h"
+#include "bargraphwidget_old.h"
 
 namespace Ui {
 class GeneralSettings;
 }
 
-class GeneralSettings : public QDialog
+class GeneralSettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit GeneralSettings(QWidget *parent = nullptr);
-    ~GeneralSettings();
+    explicit GeneralSettingsDialog(QWidget *parent = nullptr);
+    ~GeneralSettingsDialog();
 
     double getMaxVal() const;
     void setMaxVal(double value);

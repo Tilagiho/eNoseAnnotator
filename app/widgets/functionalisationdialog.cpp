@@ -8,7 +8,7 @@
 #include <QVBoxLayout>
 #include <QPushButton>
 
-FunctionalisationDialog::FunctionalisationDialog(QWidget *parent, QString presetDir, ulong nChannels) :
+FunctionalisationDialog::FunctionalisationDialog(QString presetDir, ulong nChannels, QWidget *parent) :
     QDialog(parent),
     presetDir(presetDir),
     funcLabels(nChannels, nullptr),
@@ -91,17 +91,17 @@ FunctionalisationDialog::~FunctionalisationDialog()
     buttonBox->deleteLater();
 }
 
-void FunctionalisationDialog::setFunctionalisation(std::vector<int> funcs)
+void FunctionalisationDialog::setFunctionalisation(const Functionalisation &functionalisation)
 {
-    Q_ASSERT(funcs.size() == nChannels);
+    Q_ASSERT(functionalisation.size() == nChannels);
 
     for (uint i=0; i<nChannels; i++)
-        spinBoxes[i]->setValue(funcs[i]);
+        spinBoxes[i]->setValue(functionalisation[i]);
 }
 
-std::vector<int> FunctionalisationDialog::getFunctionalisations()
+Functionalisation FunctionalisationDialog::getFunctionalisation()
 {
-    std::vector<int> funcs (nChannels, 0);
+    Functionalisation funcs (nChannels, 0);
 
     for (uint i=0; i<nChannels; i++)
         funcs[i] = spinBoxes[i]->value();

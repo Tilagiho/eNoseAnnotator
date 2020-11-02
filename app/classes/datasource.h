@@ -51,7 +51,7 @@ signals:
      *
        This signal is emitted if a new vector was received and the measurement was started before.
      */
-    void vectorReceived (uint timestamp, MVector vector);
+    void vectorReceived (uint timestamp, AbsoluteMVector vector);
 
     /*! \fn void DataSource::baseVectorSet(uint timestamp, MVector vector)
 
@@ -65,11 +65,11 @@ signals:
      */
     void error(QString errorString);
 
-    /*! \fn void DataSource::statusSet(Status status)
+    /*! \fn void DataSource::statusSet(Status newStatus)
 
        This signal is emitted after a new connection status was set.
      */
-    void statusSet(Status status);
+    void statusSet(Status newStatus);
 
 public slots:
     virtual void init() = 0;

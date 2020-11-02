@@ -40,25 +40,25 @@ MeasurementData::~MeasurementData()
  * \brief MeasurementData::getRelativeData returns a map of the vectors contained in the MeasurementData converted into relative vectors
  * \return
  */
-const QMap<uint, MVector> MeasurementData::getRelativeData()
+QMap<uint, RelativeMVector> MeasurementData::getRelativeData()
 {
-    QMap<uint, MVector> relativeData;
+    QMap<uint, RelativeMVector> relativeData;
 
     for (uint timestamp : data.keys())
-        relativeData[timestamp] = data[timestamp].getRelativeVector(getBaseLevel(timestamp));
+        relativeData[timestamp] = data[timestamp].getRelativeVector();
 
     return relativeData;
 }
 
-const QMap<uint, MVector> MeasurementData::getFuncData()
+QMap<uint, RelativeMVector>MeasurementData::getFuncData()
 {
     // only one func set
     // -> return full relative data
-    if (getFuncMap(functionalisation, sensorFailures).size() == 1)
+    if (functionalisation.getFuncMap(sensorFailures).size() == 1)
         return getRelativeData();
 
-    QMap<uint, MVector> relativeData = getRelativeData();
-    QMap<uint, MVector> funcData;
+    QMap<uint, RelativeMVector> relativeData = getRelativeData();
+    QMap<uint, RelativeMVector> funcData;
     for (int timestamp : relativeData.keys())
         funcData[timestamp] = relativeData[timestamp].getFuncVector(functionalisation, sensorFailures, inputFunctionType);
 
@@ -69,7 +69,7 @@ const QMap<uint, MVector> MeasurementData::getFuncData()
  * \brief MeasurementData::getAbsoluteData returns a map of the vectors contained in the MeasurementData as absolute vectors
  * \return
  */
-const QMap<uint, MVector> MeasurementData::getAbsoluteData()
+const QMap<uint, AbsoluteMVector>& MeasurementData::getAbsoluteData()
 {
     return data;
 }
@@ -78,14 +78,9 @@ const QMap<uint, MVector> MeasurementData::getAbsoluteData()
  * \brief MeasurementData::getSelectionMap returns map of the vectors in the current selection
  * \return
  */
-const QMap<uint, MVector> MeasurementData::getSelectionMap()
+const QMap<uint, AbsoluteMVector>& MeasurementData::getSelectionMap()
 {
     return selectedData;
-}
-
-int MeasurementData::getNFuncs() const
-{
-    return getFuncMap(functionalisation, sensorFailures).size();
 }
 
 /*!
@@ -95,7 +90,7 @@ void MeasurementData::clear()
 {
     clearSelection();
 
-    baseLevelMap.clear();
+    baseVectorMap.clear();
     data.clear();
 
     std::vector<bool> zeroFailures;
@@ -128,12 +123,12 @@ void MeasurementData::clearSelection()
 }
 
 /*!
- * \brief MeasurementData::addMeasurement adds \a vector at \a timestamp
+ * \brief MeasurementData::addVector adds \a vector at \a timestamp
  * if the vector map was previously empty, set  \a vector as start timestamp of the measurement
  * \param timestamp
  * \param vector
  */
-void MeasurementData::addMeasurement(uint timestamp, MVector vector)
+void MeasurementData::addVector(uint timestamp, AbsoluteMVector vector)
 {
     // sync sensor attributes
     for (QString attributeName : vector.sensorAttributes.keys())
@@ -147,70 +142,61 @@ void MeasurementData::addMeasurement(uint timestamp, MVector vector)
     //  double usage of timestamps:
     if (data.contains(timestamp))
     {
-        qWarning() << timestamp << ": double usage of timestamp!";
-        // case 1: last timestamp was not skipped
-        // -> increment current timestamp
-        if (data.contains(timestamp-1))
-            timestamp++;
-        // case 2: last timesstamp was skipped:
-        // move last measurement to skipped timestamp
-        else
-            data[timestamp-1] = data[timestamp];
+        qCritical() << timestamp << ": double usage of timestamp!";
+        throw std::runtime_error("Error adding vector: double usage of timestamp!");
     }
 
     // empty data:
     // this timestamp is startTimestamp of data
-    if (data.isEmpty())
-    {
-        emit startTimestempSet(timestamp);
-    }
+//    if (data.isEmpty())
+//    {
+//        emit startTimestempSet(timestamp);
+//    }
 
-    // calculate deviation in %
-    MVector deviationVector;
-    MVector baseLevelVector = getBaseLevel(timestamp);
-
-    deviationVector = vector.getRelativeVector(baseLevelVector);
+    // set base vector
+    vector.setBaseVector(getBaseVector(timestamp));
 
     // add data, update dataChanged
     data[timestamp] = vector;
     if (!dataChanged)
         setDataChanged(true);
 
-    emit dataAdded(deviationVector, timestamp, functionalisation, sensorFailures, true);
-    emit absoluteDataAdded(vector, timestamp, functionalisation, sensorFailures, true);
+    if (replotStatus)
+        emit vectorAdded(timestamp, vector, functionalisation, sensorFailures, true);
 }
 
 /*!
- * \brief MeasurementData::addMeasurement adds \a vector at \a timestamp
+ * \brief MeasurementData::addVector adds \a vector at \a timestamp
  * \param timestamp
  * \param vector
  * \param baseLevel
  */
-void MeasurementData::addMeasurement(uint timestamp, MVector vector, MVector baseLevel)
+void MeasurementData::addVector(uint timestamp, AbsoluteMVector vector, AbsoluteMVector baseVector)
 {
     // if new baseLevel: add to baseLevelMap
-    if (baseLevelMap.isEmpty() || baseLevel != getBaseLevel(timestamp))
-        baseLevelMap[timestamp] = baseLevel;
+    if (baseVectorMap.isEmpty() || baseVector != *getBaseVector(timestamp))
+        setBaseVector(timestamp, baseVector);
 
     // add vector to data
-    addMeasurement(timestamp, vector);
+    addVector(timestamp, vector);
 }
 
-void MeasurementData::setData(QMap<uint, MVector> absoluteData, QMap<uint, MVector> baseVectors)
+void MeasurementData::setData(QMap<uint, AbsoluteMVector> absoluteData, QMap<uint, AbsoluteMVector> baseVectors)
 {
     // clear data
     data.clear();
-    baseLevelMap.clear();
+    baseVectorMap.clear();
 
     // set baseVectors
-    baseLevelMap = baseVectors;
+    baseVectorMap = baseVectors;
 
     // add vectors
-    emit setReplotStatus(false);
+    replotStatus = false;
     for (uint timestamp : absoluteData.keys())
-        addMeasurement(timestamp, absoluteData[timestamp]);
+        addVector(timestamp, absoluteData[timestamp]);
 
-    emit setReplotStatus(true);
+    emit dataSet(data, functionalisation, sensorFailures);
+    replotStatus = true;
 }
 
 void MeasurementData::setClasslist(QList<aClass> newClassList)
@@ -265,7 +251,7 @@ void MeasurementData::setComment(QString new_comment)
     }
 }
 
-void MeasurementData::setSensorFailures(const std::vector<bool> failures)
+void MeasurementData::setSensorFailures(const std::vector<bool> &failures)
 {
     Q_ASSERT(failures.size() == MVector::nChannels);
 
@@ -273,7 +259,11 @@ void MeasurementData::setSensorFailures(const std::vector<bool> failures)
     {
         sensorFailures = failures;
         setDataChanged(true);
-        emit sensorFailuresSet(failures);
+        emit sensorFailuresSet(data, functionalisation, sensorFailures);
+
+//        if (!selectedData.isEmpty())
+            emit selectionVectorChanged(getAbsoluteSelectionVector(), sensorFailures, functionalisation);
+
     }
 }
 
@@ -281,7 +271,7 @@ void MeasurementData::setSensorFailures(const std::vector<bool> failures)
  * \brief MeasurementData::setFailures sets sensor failures from a QString.
  * \param failureString is expected to be a numeric string of length MVector::nChannels.
  */
-void MeasurementData::setSensorFailures(QString failureString)
+void MeasurementData::setSensorFailures(const QString failureString)
 {
     Q_ASSERT(failureString.length()==MVector::nChannels);
 
@@ -313,13 +303,13 @@ void MeasurementData::setSensorId(QString newSensorId)
 /*!
  * \brief MeasurementData::setBaseLevel adds \a baseLevel to the base level vector map. All vectors added after \a timestamp will be normed to \a baseLevel if converted into a relative vector.
  */
-void MeasurementData::setBaseLevel(uint timestamp, MVector baseLevel)
+void MeasurementData::setBaseVector(uint timestamp, AbsoluteMVector baseVector)
 {
-    Q_ASSERT (!baseLevelMap.contains(timestamp));
+    Q_ASSERT (!baseVectorMap.contains(timestamp));
 
-    if (baseLevelMap.isEmpty() || baseLevelMap.last() != baseLevel)
+    if (baseVectorMap.isEmpty() || baseVectorMap.last() != baseVector)
     {
-        baseLevelMap.insert(timestamp, baseLevel);
+        baseVectorMap.insert(timestamp, baseVector);
         setDataChanged(true);
 //        qDebug() << "New baselevel at " << timestamp << ":\n" << baseLevelMap[timestamp].toString();
     }
@@ -330,19 +320,19 @@ QList<aClass> MeasurementData::getClassList() const
     return classList;
 }
 
-std::vector<int> MeasurementData::getFunctionalisation() const
+Functionalisation MeasurementData::getFunctionalisation() const
 {
     return functionalisation;
 }
 
-void MeasurementData::setFunctionalisation(const std::vector<int> &value)
+void MeasurementData::setFunctionalisation(const Functionalisation &value)
 {
     Q_ASSERT(value.size() == MVector::nChannels);
 
     if (value != functionalisation)
     {
         // set func name
-        if (funcName == "None")
+        if (functionalisation.getName() == "None")
         {
             for (uint i=0; i<MVector::nChannels; i++)
                 if (functionalisation[i] != 0)
@@ -353,34 +343,8 @@ void MeasurementData::setFunctionalisation(const std::vector<int> &value)
         functionalisation = value;
         setDataChanged(true);
         emit functionalisationChanged();
+        emit selectionVectorChanged(getAbsoluteSelectionVector(), sensorFailures, functionalisation);
     }
-}
-
-/*!
- * \brief MeasurementData::getFuncMap return map of functionalsations & the number of their appearences in funcs, ignoring channels with fails[channel] == true
- * \param funcs
- * \param sensorFailures
- * \return
- */
-QMap<int, int> MeasurementData::getFuncMap(const std::vector<int> &funcs, std::vector<bool> fails)
-{
-//    Q_ASSERT(funcs.size() == MVector::nChannels);
-//    Q_ASSERT(fails.size() == MVector::nChannels);
-
-    // get number of functionalisations, ignore channels with sensor failures
-    QMap<int, int> funcMap;
-    for (int i=0; i<MVector::nChannels; i++)
-    {
-        int func = funcs[i];
-        if (!funcMap.contains(func))
-            // sensor failure in channel i:
-            // assign 0, so failing funcs are not overseen
-            funcMap[func] = fails[i] ? 0 : 1;
-        else
-            if (!fails[i])
-                funcMap[func]++;
-    }
-    return funcMap;
 }
 
 /*!
@@ -411,13 +375,9 @@ void MeasurementData::setDataChanged(bool newValue)
  * \brief MeasurementData::getBaseLevel returns the last base level MVector set before \a timestamp.
  * \param timestamp
  */
-MVector MeasurementData::getBaseLevel(uint timestamp)
+AbsoluteMVector* MeasurementData::getBaseVector(uint timestamp)
 {
-    if (baseLevelMap.isEmpty())
-    {
-        qWarning() << "No baselevel was set!" << "\n";
-        return  MVector::zeroes();
-    }
+    Q_ASSERT(!baseVectorMap.isEmpty());
 
     uint bsTimestamp = 0;
 
@@ -425,7 +385,7 @@ MVector MeasurementData::getBaseLevel(uint timestamp)
     // -> bsTimestamp is last ts
     // or until timestamp == ts
     // -> bsTimestamp = ts
-    for (auto  ts: baseLevelMap.keys())
+    for (auto  ts: baseVectorMap.keys())
     {
         if (ts > timestamp)
             break;
@@ -439,7 +399,7 @@ MVector MeasurementData::getBaseLevel(uint timestamp)
     }
     Q_ASSERT ("Error: No baselevel was set!" && bsTimestamp!=0);
 
-    return baseLevelMap[bsTimestamp];
+    return &baseVectorMap[bsTimestamp];
 }
 
 std::vector<bool> MeasurementData::getSensorFailures() const
@@ -476,7 +436,9 @@ bool MeasurementData::contains(uint timestamp)
 
 bool MeasurementData::saveData(QString filename)
 {
-    return saveData(filename, data);
+    // workaround because QMap<uint, AbsoluteMVector> cannot be converted to QMap<uint, MVector> for some reason
+    QMap<uint, MVector>* neutralData = (QMap<uint, MVector>*) &data;
+    return saveData(filename, *neutralData);
 }
 
 /*!
@@ -509,19 +471,19 @@ bool MeasurementData::saveData(QString filename, QMap<uint, MVector> map)
     }
 
     // sensor functionalisation
-    out << "#funcName:" << funcName << "\n";
+    out << "#funcName:" << functionalisation.getName() << "\n";
     QStringList funcList;
     for (int i=0; i<functionalisation.size(); i++)
         funcList << QString::number(functionalisation[i]);
     out << "#functionalisation:" << funcList.join(";") << "\n";
 
     // base vector
-    for (uint timestamp : baseLevelMap.keys())
+    for (uint timestamp : baseVectorMap.keys())
     {
         out << "#baseLevel:" << getTimestampStringFromUInt(timestamp) << ";";
         QStringList valueList;
         for (int i=0; i<MVector::nChannels; i++)
-            valueList << QString::number(baseLevelMap[timestamp][i], 'g', 10);
+            valueList << QString::number(baseVectorMap[timestamp][i], 'g', 10);
         out <<  valueList.join(";") << "\n";
     }
 
@@ -579,7 +541,10 @@ bool MeasurementData::saveData(QString filename, QMap<uint, MVector> map)
 bool MeasurementData::saveSelection(QString filename)
 {
     Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
-    return saveData(filename, selectedData);
+
+    // workaround because QMap<uint, AbsoluteMVector> cannot be converted to QMap<uint, MVector> for some reason
+    QMap<uint, MVector>* neutralSelectionData = (QMap<uint, MVector>*) &selectedData;
+    return saveData(filename, *neutralSelectionData);
 }
 
 /*!
@@ -588,12 +553,12 @@ bool MeasurementData::saveSelection(QString filename)
  * \param filename
  * \return
  */
-bool MeasurementData::saveAverageSelectionMeasVector(QString filename)
+bool MeasurementData::saveAverageSelectionVector(QString filename, bool saveAbsolute)
 {
     Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
 
     // calculate average selection vector
-    MVector selectionMeasVector = getSelectionVector();
+    AbsoluteMVector selectionMeasVector = getAbsoluteSelectionVector();
 
     // save average vector in file
     QFile file(filename);
@@ -623,13 +588,13 @@ bool MeasurementData::saveAverageSelectionMeasVector(QString filename)
  * \param filename
  * \return
  */
-bool MeasurementData::saveAverageSelectionFuncVector(QString filename)
+bool MeasurementData::saveAverageSelectionFuncVector(QString filename, bool saveAbsolute)
 {
     Q_ASSERT("Selection data is empty!" && !selectedData.isEmpty());
 
     // calculate average selection vector
-    MVector selectionVector = getSelectionVector();
-    MVector selectionFuncVector = selectionVector.getFuncVector(functionalisation, sensorFailures, inputFunctionType);
+    AbsoluteMVector selectionVector = getAbsoluteSelectionVector();
+    RelativeMVector selectionFuncVector = selectionVector.getFuncVector(functionalisation, sensorFailures, inputFunctionType);
 
     // save average vector in file
     QFile file(filename);
@@ -670,7 +635,6 @@ void MeasurementData::copyFrom(MeasurementData *otherMData)
     setSaveFilename(otherMData->getSaveFilename());
     setComment(otherMData->getComment());
     setSensorId(otherMData->sensorId);
-    setFuncName(otherMData->funcName);
 
     setSensorFailures(otherMData->getSensorFailures());
     setFunctionalisation(otherMData->getFunctionalisation());
@@ -680,7 +644,7 @@ void MeasurementData::copyFrom(MeasurementData *otherMData)
     setDataChanged(false);
 }
 
-void MeasurementData::setSelection(int lower, int upper)
+void MeasurementData::setSelection(uint lower, uint upper)
 {
     // ignore existing selections
     if (!selectedData.isEmpty() && selectedData.firstKey() == lower && selectedData.lastKey() == upper)
@@ -693,8 +657,6 @@ void MeasurementData::setSelection(int lower, int upper)
     if (upper < lower)
         return;
 
-    MVector vector;
-
     qDebug() << "Selection requested: " << lower << ", " << upper;
 
     // single selection:
@@ -706,7 +668,7 @@ void MeasurementData::setSelection(int lower, int upper)
     // multi selection:
     else
     {
-        QMap<uint, MVector>::iterator beginIter, endIter;
+        QMap<uint, AbsoluteMVector>::iterator beginIter, endIter;
         bool beginIterSet = false, endIterSet = false;
 
         // find lowest beginTimestamp >= lower & endTimestamp >= higher respectively
@@ -744,19 +706,24 @@ void MeasurementData::setSelection(int lower, int upper)
     if (selectedData.isEmpty())
         return;
 
-    vector = getSelectionVector();
+    AbsoluteMVector vector = getAbsoluteSelectionVector();
 
-    qDebug() << "Selection made: " << selectedData.firstKey() << ", " << selectedData.lastKey() << "\n" << vector.toString() << "\n";
+//    qDebug() << "Selection made: " << selectedData.firstKey() << ", " << selectedData.lastKey() << "\n" << vector.toString() << "\n";
 
     emit selectionVectorChanged(vector, sensorFailures, functionalisation);
 }
 
-const MVector MeasurementData::getSelectionVector(MultiMode mode)
+const AbsoluteMVector MeasurementData::getAbsoluteSelectionVector(MultiMode mode)
 {
+    // no selection made:
+    // return zero vector
+    if (selectedData.isEmpty())
+        return AbsoluteMVector();
+
     // only average supported
     Q_ASSERT(mode == MultiMode::Average);
 
-    MVector selectionVector;
+    AbsoluteMVector selectionVector(getBaseVector(selectedData.firstKey()));
     // zero init
     for (int i=0; i<MVector::nChannels; i++)
         selectionVector[i] = 0.0;
@@ -764,11 +731,11 @@ const MVector MeasurementData::getSelectionVector(MultiMode mode)
     for (auto timestamp : selectedData.keys())
     {
         // ignore zero vectors
-        if (selectedData[timestamp] == MVector::zeroes())
+        if (selectedData[timestamp].isZeroVector())
             continue;
 
         // get relative selection vector
-        MVector vector = selectedData[timestamp].getRelativeVector(getBaseLevel(timestamp));
+        AbsoluteMVector vector = selectedData[timestamp];
 
         // calculate average
         if (mode == MultiMode::Average)
@@ -778,6 +745,37 @@ const MVector MeasurementData::getSelectionVector(MultiMode mode)
 
     return selectionVector;
 }
+
+const RelativeMVector MeasurementData::getRelativeSelectionVector(MultiMode mode)
+{
+    Q_ASSERT(!selectedData.isEmpty());
+
+    // only average supported
+    Q_ASSERT(mode == MultiMode::Average);
+
+    RelativeMVector selectionVector(getBaseVector(selectedData.firstKey()));
+    // zero init
+    for (int i=0; i<MVector::nChannels; i++)
+        selectionVector[i] = 0.0;
+
+    for (auto timestamp : selectedData.keys())
+    {
+        // ignore zero vectors
+        if (selectedData[timestamp].isZeroVector())
+            continue;
+
+        // get relative selection vector
+        RelativeMVector vector = selectedData[timestamp].getRelativeVector();
+
+        // calculate average
+        if (mode == MultiMode::Average)
+            for (int i=0; i<MVector::nChannels; i++)
+                selectionVector[i] += vector[i] / selectedData.size();
+    }
+
+    return selectionVector;
+}
+
 
 QString MeasurementData::sensorFailureString(std::vector<bool> failureBits)
 {
@@ -823,27 +821,37 @@ std::vector<bool> MeasurementData::sensorFailureArray(QString failureString)
 }
 
 void MeasurementData::setUserAnnotation(Annotation annotation, uint timestamp)
-{
+{  
+    Q_ASSERT(!selectedData.isEmpty());
+
     data[timestamp].userAnnotation = annotation;
     selectedData[timestamp].userAnnotation = annotation;
 
     setDataChanged(true);
-    QMap<uint, MVector> changedMap;
-    changedMap[timestamp] = data[timestamp];
-    emit labelsUpdated(changedMap);
+    QMap<uint, Annotation> changedMap;
+    changedMap[timestamp] = annotation;
+    emit annotationsChanged(changedMap, true);
+
+
 }
 
 void MeasurementData::setUserAnnotationOfSelection(Annotation annotation)
 {
+    Q_ASSERT(!selectedData.isEmpty());
+
+    QMap<uint, Annotation> changedMap;
     for (auto timestamp : selectedData.keys())
     {
         // add to data and selectedData
         data[timestamp].userAnnotation = annotation;
         selectedData[timestamp].userAnnotation = annotation;
+
+        changedMap[timestamp] = annotation;
     }
 
     setDataChanged(true);
-    emit labelsUpdated(selectedData);
+    emit annotationsChanged(changedMap, true);
+
 }
 
 void MeasurementData::setDetectedAnnotation(Annotation annotation, uint timestamp)
@@ -852,22 +860,26 @@ void MeasurementData::setDetectedAnnotation(Annotation annotation, uint timestam
     selectedData[timestamp].detectedAnnotation = annotation;
 
     setDataChanged(true);
-    QMap<uint, MVector> changedMap;
-    changedMap[timestamp] = data[timestamp];
-    emit labelsUpdated(changedMap);
+    QMap<uint, Annotation> changedMap;
+    changedMap[timestamp] = annotation;
+    emit annotationsChanged(changedMap, false);
 }
 
 void MeasurementData::setDetectedAnnotationOfSelection(Annotation annotation)
 {
+    QMap<uint, Annotation> changedMap;
+
     for (auto timestamp : selectedData.keys())
     {
         // data and selectedData
         data[timestamp].detectedAnnotation = annotation;
         selectedData[timestamp].detectedAnnotation = annotation;
+
+        changedMap[timestamp] = annotation;
     }
 
     setDataChanged(true);
-    emit labelsUpdated(selectedData);
+    emit annotationsChanged(changedMap, false);
 }
 
 void MeasurementData::addClass(aClass newClass)
@@ -892,42 +904,29 @@ void MeasurementData::removeClass(aClass oldClass)
     aClass::staticClassSet.remove(oldClass);
 
     // update measurement data
-    QMap<uint, MVector> updatedVectors;
+    QMap<uint, Annotation> userAnnotationChangedMap;
+    QMap<uint, Annotation> detectedAnnotationChangedMap;
 
     for (uint timestamp: data.keys())
     {
-        bool updated = false;   // flag for updated class
-
         if (data[timestamp].userAnnotation.contains(oldClass))
         {
             data[timestamp].userAnnotation.remove(oldClass);
-            updated = true;
+            userAnnotationChangedMap[timestamp] = data[timestamp].userAnnotation;
         }
         if (data[timestamp].detectedAnnotation.contains(oldClass))
         {
             data[timestamp].detectedAnnotation.remove(oldClass);
-            updated = true;
+            detectedAnnotationChangedMap[timestamp] = data[timestamp].detectedAnnotation;
         }
-
-//        if (data[timestamp].userAnnotation == oldClass)
-//        {
-//            double value = (userAnnotationType == aClass::Type::NUMERIC) ? 1.0 : -1.0;
-//            data[timestamp].userAnnotation = aClass{"", "", value};
-//            updated = true;
-//        }
-//        if (data[timestamp].detectedAnnotation == oldClass)
-//        {
-//            double value = (detectedAnnotationType == aClass::Type::NUMERIC) ? 1.0 : -1.0;
-//            data[timestamp].detectedAnnotation = aClass{"", "", value};
-//            updated = true;
-//        }
-
-        if (updated)
-            updatedVectors[timestamp] = data[timestamp];
     }
 
     setDataChanged(true);
-    emit labelsUpdated(updatedVectors);
+
+    if (!userAnnotationChangedMap.isEmpty())
+        emit annotationsChanged(userAnnotationChangedMap, true);
+    if (!detectedAnnotationChangedMap.isEmpty())
+        emit annotationsChanged(detectedAnnotationChangedMap, false);
 }
 
 void MeasurementData::changeClass(aClass oldClass, aClass newClass)
@@ -943,29 +942,30 @@ void MeasurementData::changeClass(aClass oldClass, aClass newClass)
     aClass::staticClassSet << newClass;
 
     // remember updated vectors
-    QMap<uint, MVector> updatedVectors;
+    QMap<uint, Annotation> userAnnotationChangedMap;
+    QMap<uint, Annotation> detectedAnnotationChangedMap;
+
 
     for (uint timestamp: data.keys())
     {
-        bool updated = false;   // flag for updated class
-
         if (data[timestamp].userAnnotation.contains(oldClass))
         {
             data[timestamp].userAnnotation.changeClass(oldClass, newClass);
-            updated = true;
+            userAnnotationChangedMap[timestamp] = data[timestamp].userAnnotation;
         }
         if (data[timestamp].detectedAnnotation.contains(oldClass))
         {
             data[timestamp].detectedAnnotation.changeClass(oldClass, newClass);
-            updated = true;
+            detectedAnnotationChangedMap[timestamp] = data[timestamp].detectedAnnotation;
         }
-
-        if (updated)
-            updatedVectors[timestamp] = data[timestamp];
     }
 
     setDataChanged(true);
-    emit labelsUpdated(updatedVectors);
+
+    if (!userAnnotationChangedMap.isEmpty())
+        emit annotationsChanged(userAnnotationChangedMap, true);
+    if (!detectedAnnotationChangedMap.isEmpty())
+        emit annotationsChanged(detectedAnnotationChangedMap, true);
 }
 
 QString MeasurementData::getSaveFilename() const
@@ -987,10 +987,10 @@ uint MeasurementData::getTimestampUIntfromString(QString string)
 
 void MeasurementData::setFuncName(QString name)
 {
-    if (name != funcName)
+    if (name != functionalisation.getName())
     {
-        funcName = name;
-        emit funcNameSet(name);
+        functionalisation.setName(name);
+        emit functionalisationChanged();
     }
 }
 
@@ -1003,7 +1003,7 @@ void MeasurementData::addAttributes(QSet<QString> attributeNames)
     sensorAttributes.unite(attributeNames);
 
     // add to vectors
-    for (MVector vector : data)
+    for (AbsoluteMVector vector : data)
         for (QString attributeName : attributeNames)
             vector.sensorAttributes[attributeName] = 0.0;
 }
@@ -1017,7 +1017,7 @@ void MeasurementData::deleteAttributes(QSet<QString> attributeNames)
     sensorAttributes.intersect(attributeNames);
 
     // delete from vectors
-    for (MVector vector : data)
+    for (AbsoluteMVector vector : data)
         for (QString attributeName : attributeNames)
             vector.sensorAttributes.remove(attributeName);
 }
@@ -1033,7 +1033,7 @@ void MeasurementData::renameAttribute(QString oldName, QString newName)
     sensorAttributes.remove(oldName);
 
     // rename in vectors
-    for (MVector vector : data)
+    for (AbsoluteMVector vector : data)
     {
         vector.sensorAttributes[newName] = vector.sensorAttributes[oldName];
         vector.sensorAttributes.remove(oldName);
@@ -1043,7 +1043,7 @@ void MeasurementData::renameAttribute(QString oldName, QString newName)
 void MeasurementData::resetNChannels()
 {
     setSensorFailures(std::vector<bool>(MVector::nChannels, false));
-    setFunctionalisation(std::vector<int>(MVector::nChannels, 0));
+    setFunctionalisation(Functionalisation(MVector::nChannels, 0));
 }
 
 void MeasurementData::setInputFunctionType(const InputFunctionType &value)
@@ -1089,9 +1089,9 @@ uint MeasurementData::getPreviousTimestamp(uint timestamp)
     return 0;
 }
 
-QMap<uint, MVector> MeasurementData::getBaseLevelMap() const
+QMap<uint, AbsoluteMVector> MeasurementData::getBaseLevelMap() const
 {
-    return baseLevelMap;
+    return baseVectorMap;
 }
 
 QSet<QString> MeasurementData::getSensorAttributes() const
@@ -1201,30 +1201,18 @@ void AnnotatorFileReader::parseHeader(QString line)
     else if (line.startsWith("#funcName:"))
     {
         QString funcName = line.split(":")[1];
-        data->setFuncName(funcName);
+        functionalistation.setName(funcName);
     }
     else if (line.startsWith("#functionalisation:"))
     {
         QString rawString = line.right(line.length()-QString("#functionalisation:").length());
         QStringList funcList = rawString.split(";");
 
+        std::vector<int> funcVector;
         for (int i=0; i<funcList.size(); i++)
-            functionalistation.push_back(funcList[i].toInt());
+            funcVector.push_back(funcList[i].toInt());
 
-        // funcName not stored in file?!
-        // -> emit Custom
-        if (data->funcName == "None")
-        {
-            auto functionalisation = data->getFunctionalisation();
-            for (uint i=0; i<functionalisation.size(); i++)
-            {
-                if (functionalisation[i] != 0)
-                {
-                    data->setFuncName("Custom");
-                    break;
-                }
-            }
-        }
+        functionalistation.setVector(funcVector);
     }
     else if (line.startsWith("#baseLevel:"))
     {
@@ -1241,7 +1229,7 @@ void AnnotatorFileReader::parseHeader(QString line)
             timestamp = data->getTimestampUIntfromString(valueList[0]);
 
         // get base level vector
-        MVector baseLevel(valueList.size()-1);
+        AbsoluteMVector baseLevel(nullptr, valueList.size()-1);
         for (int i=0; i<valueList.size()-1; i++)
             baseLevel[i] = valueList[i+1].toDouble();
 
@@ -1306,7 +1294,7 @@ void AnnotatorFileReader::parseHeader(QString line)
         data->setFunctionalisation(functionalistation);
 
         for (uint timestamp : baseLevelMap.keys())
-            data->setBaseLevel(timestamp, baseLevelMap[timestamp]);
+            data->setBaseVector(timestamp, baseLevelMap[timestamp]);
 
     }
     else    // comment
@@ -1375,20 +1363,19 @@ void AnnotatorFileReader::parseValues(QString line)
 
     // formatVersion 0.1: values are relative
     if (formatVersion == "0.1")
-        vector = vector.getAbsoluteVector(data->getBaseLevel(timestamp));
+        vector = static_cast<RelativeMVector>(vector).getAbsoluteVector();
 
     if (!readOk)
         throw std::runtime_error("Error in line " + std::to_string(lineCount) + ".\n");
 
     // ignore zero vectors
-    if (vector != MVector::zeroes())
-        data->addMeasurement(timestamp, vector, data->getBaseLevel(timestamp));
+    if (!vector.isZeroVector())
+        data->addVector(timestamp, vector);
 }
 
 LeifFileReader::LeifFileReader(QString filePath):
     FileReader(filePath)
 {
-
 }
 
 void LeifFileReader::readFile()
@@ -1488,13 +1475,13 @@ void LeifFileReader::parseHeader(QString line)
 void LeifFileReader::parseFuncs(QString line)
 {
     auto resistanceKeys = resistanceIndexes.keys();
-    int maxResChannel = *std::max_element(resistanceKeys.begin(), resistanceKeys.end());
+    size_t maxResChannel = *std::max_element(resistanceKeys.begin(), resistanceKeys.end()) + 1;
 
-    functionalistation = std::vector<int>(maxResChannel+1, 0);
+    functionalistation = Functionalisation(maxResChannel, 0);
     QStringList funcValues = line.split(" ");
 
     bool readOk = true;
-    for (int channel : resistanceIndexes.keys())
+    for (size_t channel : resistanceIndexes.keys())
     {
         functionalistation[channel] = funcValues[resistanceIndexes[channel]].toInt(&readOk);
 
@@ -1556,7 +1543,7 @@ void LeifFileReader::parseValues(QString line)
     int timestamp = start_time+qRound(time);
     // base vector is first vector
     if (data->getAbsoluteData().isEmpty())
-        data->setBaseLevel(timestamp, vector);
+        data->setBaseVector(timestamp, vector);
 
-    data->addMeasurement(timestamp, vector);
+    data->addVector(timestamp, vector);
 }

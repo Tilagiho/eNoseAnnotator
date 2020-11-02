@@ -1,63 +1,74 @@
 #ifndef BARGRAPHWIDGET_H
 #define BARGRAPHWIDGET_H
 
-#include <QtCore>
 #include <QWidget>
 
 #include "../classes/mvector.h"
-#include "../classes/classifier_definitions.h"
-#include "../qcustomplot/qcustomplot.h"
 
+#include <qwt_plot.h>
+#include <qwt_plot_barchart.h>
 
-namespace Ui {
-class BarGraphWidget;
-}
-
-class BarGraphWidget : public QWidget
+class BarChartItem: public QwtPlotBarChart
 {
-    Q_OBJECT
-
 public:
-    enum class Mode {
-        showAll,
-        showFunc
-    };
+    BarChartItem();
 
-    explicit BarGraphWidget(QWidget *parent = nullptr);
-    ~BarGraphWidget();
+    void setSamples( const QVector<double> &values, const QStringList &labels, const QList<QColor> &colors );
+    void setSamples ( const QVector<double> &values );
 
-    Mode getMode() const;
-    void setMode(const Mode &value);
+    virtual QwtColumnSymbol *specialSymbol(
+        int index, const QPointF& ) const override;
 
-    void setInputFunctionType(const InputFunctionType &value);
-
-public slots:
-    void setBars(MVector, std::vector<bool> sensorFailures, std::vector<int> functionalisation);
-    void clearBars();
-    void deleteBars();
-    bool saveImage(const QString &filename);
-    void resetColors();
-    void resetNChannels();
-
-signals:
-    void imageSaveRequested();
+    virtual QwtText barTitle( int sampleIndex ) const override;
 
 private:
-    Ui::BarGraphWidget *ui;
-    QVector<QCPBars*> sensorBarVector;    // contains 64 bars; one for each sensor in order to set seperate colors for each sensor
-    QVector<QCPBars*> funcBarVector;
+    QList<QColor> d_colors;
+    QList<QString> d_labels;
+};
 
-    Mode mode = Mode::showFunc;
+class AbstractBarGraphWidget : public QwtPlot
+{
+    Q_OBJECT
+public:
+    explicit AbstractBarGraphWidget(QWidget *parent = nullptr);
 
-    void initGraph();
-    void replot();
+signals:
 
-    InputFunctionType inputFunctionType = InputFunctionType::medianAverage;
+public slots:
+    void setVector(const MVector &vector, const std::vector<bool> sensorFailures, const Functionalisation &functionalisation);
+    void clear();
+protected:
+    BarChartItem *d_barChartItem;
 
+protected slots:
+    virtual QColor getColor(uint channel, const Functionalisation &functionalisation) const = 0;
+    virtual void setValues(const QVector<double> &values, const Functionalisation &functionalisation) = 0;
+};
 
-private slots:
-    void mousePressed(QMouseEvent*);
+class RelVecBarGraphWidget : public AbstractBarGraphWidget
+{
+    Q_OBJECT
+public:
+    explicit RelVecBarGraphWidget ( QWidget *parent = nullptr );
 
+public slots:
+
+protected slots:
+    QColor getColor(uint channel, const Functionalisation &functionalisation) const override;
+    virtual void setValues(const QVector<double> &values, const Functionalisation &functionalisation) override;
+};
+
+class FuncBarGraphWidget : public AbstractBarGraphWidget
+{
+    Q_OBJECT
+public:
+    explicit FuncBarGraphWidget(QWidget *parent = nullptr);
+
+public slots:
+
+protected slots:
+    QColor getColor(uint channel, const Functionalisation &functionalisation) const override;
+    virtual void setValues(const QVector<double> &values, const Functionalisation &functionalisation) override;
 };
 
 #endif // BARGRAPHWIDGET_H

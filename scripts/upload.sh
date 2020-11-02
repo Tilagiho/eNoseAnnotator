@@ -6,16 +6,16 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]
 then wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
 
 # upload continuous branch release
-if [ "$TRAVIS_TAG" == "" ]
-then 
-export UPLOADTOOL_SUFFIX="${TRAVIS_BRANCH}" 
-fi
+#if [ "$TRAVIS_TAG" == "" ]
+#then 
+#export UPLOADTOOL_SUFFIX="${TRAVIS_BRANCH}" 
+#fi
 
 # upload release
-if [ "$TRAVIS_TAG" != "" ]
-then 
-export UPLOADTOOL_SUFFIX="${TRAVIS_TAG}"
-fi
+#if [ "$TRAVIS_TAG" != "" ]
+#then 
+#export UPLOADTOOL_SUFFIX="${TRAVIS_TAG}"
+#fi
 
 bash upload.sh eNoseAnnotator*.AppImage symbols_*_linux.zip
 

@@ -44,3 +44,5 @@ CMakeLists.txt.user*
 
 # libs
 app/lib/libtorch/*
+
+app/lib/qwt-6.1.5/

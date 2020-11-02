@@ -8,6 +8,7 @@
 #include "mvector.h"
 #include "classifier_definitions.h"
 #include "leastsquaresfitter.h"
+#include "functionalisation.h"
 
 class MeasurementData : public QObject
 {
@@ -60,36 +61,24 @@ public:
     /*
      * returns relative data in a map<timestamp, vector>
      */
-    const QMap<uint, MVector> getRelativeData();
+    QMap<uint, RelativeMVector> getRelativeData();
 
-    const QMap<uint, MVector> getFuncData();
+    QMap<uint, RelativeMVector> getFuncData();
 
     /*
      * returns absolute data in a map<timestamp, vector>
      */
-    const QMap<uint, MVector> getAbsoluteData();
+    const QMap<uint, AbsoluteMVector>& getAbsoluteData();
 
     /*
      * returns current selection in a map<timestamp, vector>
      */
-    const QMap<uint, MVector> getSelectionMap();
-
-    int getNFuncs() const;
+    const QMap<uint, AbsoluteMVector>& getSelectionMap();
 
     QString getComment();
     QString getFailureString();
 
-    /*
-     * add absolute vector with timestamp to data
-     */
-    void addMeasurement(uint timestamp, MVector vector);
-
-    /*
-     * add absolute vector + baseLevelVector to data
-     */
-    void addMeasurement(uint timestamp, MVector vector, MVector baseLevelVector);
-
-    void setData (QMap<uint, MVector> absoluteData, QMap<uint, MVector> baseVectors);
+    void setData (QMap<uint, AbsoluteMVector> absoluteData, QMap<uint, AbsoluteMVector> baseVectors);
 
     void setClasslist(QList<aClass> classList);
 
@@ -136,8 +125,8 @@ public:
      */
     bool saveSelection();
     bool saveSelection(QString filename);
-    bool saveAverageSelectionMeasVector(QString filename);
-    bool saveAverageSelectionFuncVector(QString filename);
+    bool saveAverageSelectionVector(QString filename, bool saveAbsolute);
+    bool saveAverageSelectionFuncVector(QString filename, bool saveAbsolute);
 
 //    /*
 //     * calculates average of vectors in range from iterator begin until, but not including, iterator end
@@ -147,8 +136,8 @@ public:
 
     void copyFrom(MeasurementData* otherMData);
 
-    const MVector getSelectionVector(MultiMode mode=MultiMode::Average);
-
+    const AbsoluteMVector getAbsoluteSelectionVector(MultiMode mode=MultiMode::Average);
+    const RelativeMVector getRelativeSelectionVector(MultiMode mode=MultiMode::Average);
 
     QString getSensorId() const;
 
@@ -167,12 +156,10 @@ public:
     /*
      * returns baselevel at timestamp
      */
-    MVector getBaseLevel (uint timestamp);
+    AbsoluteMVector* getBaseVector (uint timestamp);
 
-    std::vector<int> getFunctionalisation() const;
-    void setFunctionalisation(const std::vector<int> &value);
-
-    static QMap<int, int> getFuncMap(const std::vector<int> &funcs, const std::vector<bool> sensorFailures);
+    Functionalisation getFunctionalisation() const;
+    void setFunctionalisation(const Functionalisation &value);
 
     bool getSaveRawInput() const;
     void setSaveRawInput(bool value);
@@ -181,7 +168,6 @@ public:
      * set the user defined class of the current selection
      */
     void setUserAnnotationOfSelection(Annotation annotation);
-
 
     /*
      * set the user defined class at timestamp
@@ -208,9 +194,7 @@ public:
 
     QSet<QString> getSensorAttributes() const;
 
-    QMap<uint, MVector> getBaseLevelMap() const;
-
-    QString funcName = "None";
+    QMap<uint, AbsoluteMVector> getBaseLevelMap() const;
 
     void setInputFunctionType(const InputFunctionType &value);
 
@@ -222,13 +206,13 @@ public slots:
     /*
      * clears selectedData and adds all vectors with timestamp between lower and upper to selectedData
      */
-    void setSelection(int lower, int upper);
+    void setSelection(uint lower, uint upper);
 
     void setComment(QString comment);
-    void setSensorFailures(std::vector<bool>);
-    void setSensorFailures(QString failureString);
+    void setSensorFailures(const std::vector<bool> &);
+    void setSensorFailures(const QString failureString);
     void setSensorId(QString sensorId);
-    void setBaseLevel(uint timestamp, MVector baseLevel);
+    void setBaseVector(uint timestamp, AbsoluteMVector baseVector);
     void addClass(aClass newClass);
     void removeClass(aClass oldClass);
     void changeClass(aClass oldClass, aClass newClass);
@@ -238,10 +222,21 @@ public slots:
     void renameAttribute(QString oldName, QString newName);
     void resetNChannels();
 
+    /*
+     * add absolute vector with timestamp to data
+     */
+    void addVector(uint timestamp, AbsoluteMVector vector);
+
+    /*
+     * add absolute vector + baseLevelVector to data
+     */
+    void addVector(uint timestamp, AbsoluteMVector vector, AbsoluteMVector baseLevelVector);
+
+
 signals:
-    void selectionVectorChanged(MVector vector, std::vector<bool> sensorFailures, std::vector<int>);  // emits new vector when dataSelected is changed
+    void selectionVectorChanged(const AbsoluteMVector &vector, const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation);  // emits new vector when dataSelected is changed
     void selectionMapChanged(QMap<uint, MVector> selectionMap);
-    void labelsUpdated(QMap<uint, MVector> updatedVectors);
+    void annotationsChanged(const QMap<uint, Annotation> annotations, bool isUserAnnotation);
 
     // emitted when selectionData was cleared
     void selectionCleared();
@@ -250,17 +245,16 @@ signals:
     void lgClearSelection();
 
     void dataReset();   // emitted when data is reset
-    void dataAdded(MVector vector, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool yRescale);
-    void absoluteDataAdded(MVector vector, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool yRescale);
-//    void dataSet(QMap<uint, MVector> data, std::vector<int> functionalisation, std::vector<bool> sensorFailures);
+    void relativeVectorAdded(MVector vector, uint timestamp, Functionalisation functionalisation , std::vector<bool> sensorFailures, bool yRescale);
+    void vectorAdded(uint timestamp, AbsoluteMVector vector, Functionalisation functionalisation , std::vector<bool> sensorFailures, bool yRescale);
+    void dataSet(const QMap<uint, AbsoluteMVector> &data, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
+
+    //    void dataSet(QMap<uint, MVector> data, Functionalisation functionalisation , std::vector<bool> sensorFailures);
     void absoluteDataSet(QMap<uint, MVector>);
     void sensorIdSet(QString sensorId);
     void startTimestempSet(uint timestamp);
     void commentSet(QString comment);
-    void sensorFailuresSet(std::vector<bool> sensorFailures);
-
-    // emitted when replotStatus in LinegraphWidgets should be set
-    void setReplotStatus(bool status);
+    void sensorFailuresSet(const QMap<uint, AbsoluteMVector> &data, Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
 
     void dataChangedSet(bool);
 
@@ -268,14 +262,12 @@ signals:
 
     void functionalisationChanged();
 
-    void funcNameSet(QString);
-
 private:
-    QMap<uint, MVector> data;  // map containing vectors of measurements with timestamps as keys
-    QMap<uint, MVector> selectedData;
-    QMap<uint, MVector> baseLevelMap;
+    QMap<uint, AbsoluteMVector> data;  // map containing vectors of measurements with timestamps as keys
+    QMap<uint, AbsoluteMVector> selectedData;
+    QMap<uint, AbsoluteMVector> baseVectorMap;
 
-    std::vector<int> functionalisation;
+    Functionalisation functionalisation;
     std::vector<bool> sensorFailures;
 
     bool dataChanged = false;
@@ -290,6 +282,8 @@ private:
     QSet<QString> sensorAttributes;
 
     InputFunctionType inputFunctionType = InputFunctionType::medianAverage;
+
+    bool replotStatus = true;
 
 //    int nChannels = MVector::nChannels;
 };
@@ -325,6 +319,7 @@ protected:
     QFile file;
     QTextStream in;
     int lineCount = -1;
+    Functionalisation functionalistation;
 };
 
 class AnnotatorFileReader : public FileReader
@@ -351,7 +346,6 @@ private:
 
     // meas meta attributes
     QString failureString;
-    std::vector<int> functionalistation;
     QMap<uint, MVector> baseLevelMap;
 };
 
@@ -370,11 +364,9 @@ private:
     void parseValues(QString line);
 
     QMap<QString, int> sensorAttributeIndexMap;
-    QMap<int, int> resistanceIndexes;
+    QMap<size_t, size_t> resistanceIndexes;
     int t_index = -1;
     uint start_time = 0;
-
-    std::vector<int> functionalistation;
 };
 
 #endif // MEASUREMENTDATA_H

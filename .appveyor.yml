@@ -7,32 +7,44 @@ install:
   - git submodule update --init --recursive
 build_script:
   # debug
-  #			#
-  # 	prepare build	#
-  #			#
+  #                     #
+  #     prepare build   #
+  #                     #
+  # setup build env
+  - vcvars64.bat
+  - set CL=/MP  # -> nmake uses all cores available
+
   # get libtorch
   - ps: Start-FileDownload 'https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.6.0%2Bcpu.zip' -FileName libtorch.zip
   - 7z t libtorch.zip
   - 7z x libtorch.zip -oapp/lib/
-  - dir "app/lib/"
-  - dir "app/lib/libtorch/"
 
-  # setup build env
-  - vcvars64.bat
+  # get qwt
+  - ps: Start-FileDownload 'https://sourceforge.net/projects/qwt/files/qwt/6.1.5/qwt-6.1.5.zip' -FileName qwt-6.1.5.zip
+  - 7z t qwt-6.1.5.zip
+  - 7z x qwt-6.1.5.zip -oapp/lib/
+  - cd "app/lib/qwt-6.1.5/"
+  - qmake qwt.pro
+  - nmake
+  - nmake install
+  - cd "../../.."
 
-  #			#
-  # 	build app	#
-  #			#
+  #                     #
+  #     build app       #
+  #                     #
   - qmake -config release -r eNoseAnnotator.pro
+
   - nmake
   - cd "app/release/"
   - ren app.exe eNoseAnnotator.exe
   - cd ../..
 after_build:
-  # 				# 
-  # 	create executable	#
-  #				#
-  - cd app   
+  #                             #
+  #     create executable       #
+  #                             #
+  - cd app
+  - dir %QTDIR%\bin
+  - cp %QTDIR%\bin\Qt5OpenGL.dll release\Qt5OpenGL.dll
   - windeployqt --compiler-runtime release/eNoseAnnotator.exe
 
   # remove unneeded files
@@ -40,16 +52,17 @@ after_build:
   - rm release/*.cpp
   - rm release/*.h
   - cd ..
-  
+
   # create directories to be deployed
   - mkdir "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/data/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/export/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/share/presets/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/classifiers/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
   - cp app/lib/libtorch/lib/*.dll "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
+  - cp app/lib/qwt-6.1.5/lib/*.dll "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
   - cp -r app/release/* "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
   - cp -r usr/share/presets "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/share/"
 
-  #				#
-  # 	generate symbol file	#
-  # 				#
+  #                             #
+  #     generate symbol file    #
+  #                             #
   - cd app
   # setup environment
   - ren "release\eNoseAnnotator.exe" "app.exe"
@@ -79,7 +92,7 @@ deploy:
   - provider: GitHub
     name: prerelease
     on:
-       APPVEYOR_REPO_TAG: true
+      APPVEYOR_REPO_TAG: true
 
     artifact:
     draft: false
@@ -87,4 +100,3 @@ deploy:
     force_update: true
     auth_token:
       secure: vgEATF2g25z4SRuiZeER1PiOcABqDjPdOilt5Yb0irKOVbhT14kQcPVNQ5UEbQ75
-

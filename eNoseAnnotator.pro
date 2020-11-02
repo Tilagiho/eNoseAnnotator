@@ -48,6 +48,8 @@ linux-g++{
 
         lib.files += $$files("$$PWD/app/lib/libtorch/*.so", true)
         lib.files += $$files("$$PWD/app/lib/libtorch/*.so.1", true)
+        lib.files += $$files("$$PWD/app/lib/qwt-6.1.5/lib/*.so*", true)
+
 
         lib.path = $$PREFIX/lib/
 

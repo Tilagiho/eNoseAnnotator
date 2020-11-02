@@ -91,7 +91,7 @@ void FakeDatasource::setNextStatus()
     }
 }
 
-MVector FakeDatasource::generateMeasurement(double randRange)
+AbsoluteMVector FakeDatasource::generateMeasurement(double randRange)
 {
     MVector vector;
 
@@ -102,7 +102,7 @@ MVector FakeDatasource::generateMeasurement(double randRange)
 
 void FakeDatasource::emitMeasurement()
 {
-    MVector vector = generateMeasurement();
+    AbsoluteMVector vector = generateMeasurement();
 
     emit vectorReceived(QDateTime::currentDateTime().toTime_t(), vector);
 }

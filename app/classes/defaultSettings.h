@@ -1,6 +1,8 @@
 #ifndef DEFAULTVALUES_H
 #define DEFAULTVALUES_H
 
+#include <QColor>
+
 // debug settings
 #define CLEAR_SETTINGS false
 
@@ -25,5 +27,8 @@
 #define DEFAULT_UPPER_LIMIT 90000.0
 #define LOWER_LIMIT_KEY "settings/lowerLimit"
 #define DEFAULT_LOWER_LIMIT 300.0
+
+// colors
+# define GRAPH_BACKGROUND_COLOR QColor(255,250,240)
 
 #endif // DEFAULTVALUES_H

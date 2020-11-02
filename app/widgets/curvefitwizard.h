@@ -118,7 +118,7 @@ private:
     std::vector<double> sigmaError, tau90, f_t90, sigmaNoise;
     std::vector<double> nSamples;
     MeasurementData* mData;
-    QMap<uint, MVector> selectedData;
+    QMap<uint, AbsoluteMVector> selectedData;
 //    std::vector<uint> x_start, x_end;
     std::vector<std::vector<std::pair<double, double>>> dataRange;
 
@@ -191,7 +191,7 @@ private:
     QGroupBox *resultBox, *channelDataBox;
     QPushButton *saveButton, *minusButton, *addButton;
     MeasurementData *mData;
-    QMap<uint, MVector> selectedData;
+    QMap<uint, AbsoluteMVector> selectedData;
 };
 
 class CurveFitWizard : public QWizard

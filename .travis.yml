@@ -21,10 +21,14 @@ matrix:
       - sudo apt-get update -qq
     install:
       # qt version needed for linuxdeployqt
-      - sudo apt-get -y install qt510base  qt510serialport libgl1-mesa-dev tree
-      - source /opt/qt*/bin/qt*-env.sh   
+      - sudo apt-get -y install qt510base  qt510serialport  qt510svg libgl1-mesa-dev tree
+      - source /opt/qt*/bin/qt*-env.sh  
+      # pytorch
       - wget -c -nv https://download.pytorch.org/libtorch/cpu/libtorch-shared-with-deps-1.6.0%2Bcpu.zip
       - unzip -q -o libtorch-*.zip  -d app/lib/
+      # qwt
+      - bash -xv scripts/install_qwt.sh
+      # linux-syscall-support for google breakpad
       - git clone https://chromium.googlesource.com/linux-syscall-support app/lib/QCrashHandler/deps/breakpad.git/src/third_party/lss
     compiler:
       - gcc-7
@@ -42,4 +46,3 @@ branches:
   - master
   - stable
   - /^v\d+\.\d+(\.\d+)?(-\S*)?$/
-

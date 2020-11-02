@@ -1,5 +1,5 @@
 TEMPLATE = app
-QT       += core gui serialport
+QT       += core gui serialport svg opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
@@ -48,9 +48,11 @@ CONFIG(debug, debug|release) {
 SOURCES += \
     classes/aclass.cpp \
     classes/annotation.cpp \
+    classes/controler.cpp \
     classes/datasource.cpp \
     classes/enosecolor.cpp \
     classes/fakedatasource.cpp \
+    classes/functionalisation.cpp \
     classes/leastsquaresfitter.cpp \
     classes/measurementdata.cpp \
     classes/mvector.cpp \
@@ -60,7 +62,6 @@ SOURCES += \
     lib/dlib/dlib/all/source.cpp \
     lib/spoiler.cpp \
     main.cpp \
-    qcustomplot/qcustomplot.cpp \
     widgets/acirclewidget.cpp \
     widgets/addattributedialog.cpp \
     widgets/attributeeditor.cpp \
@@ -83,10 +84,12 @@ HEADERS += \
     classes/aclass.h \
     classes/annotation.h \
     classes/classifier_definitions.h \
+    classes/controler.h \
     classes/datasource.h \
     classes/defaultSettings.h \
     classes/enosecolor.h \
     classes/fakedatasource.h \
+    classes/functionalisation.h \
     classes/leastsquaresfitter.h \
     classes/measurementdata.h \
     classes/mvector.h \
@@ -94,7 +97,6 @@ HEADERS += \
     classes/usbdatasource.h \
     lib/comboboxitemdelegate.h \
     lib/spoiler.h \
-    qcustomplot/qcustomplot.h \
     widgets/acirclewidget.h \
     widgets/addattributedialog.h \
     widgets/attributeeditor.h \
@@ -111,19 +113,16 @@ HEADERS += \
     widgets/mainwindow.h \
     widgets/setsensorfailuresdialog.h \
     widgets/sourcedialog.h \
-    widgets/usbsettingswidget.h
-
+    widgets/usbsettingswidget.h \
 
 FORMS += \
     widgets/acirclewidget.ui \
     widgets/addattributedialog.ui \
     widgets/attributeeditor.ui \
-    widgets/bargraphwidget.ui \
     widgets/classifierwidget.ui \
     widgets/classselector.ui \
     widgets/generalsettings.ui \
     widgets/infowidget.ui \
-    widgets/linegraphwidget.ui \
     widgets/mainwindow.ui \
     widgets/sourcedialog.ui \
     widgets/usbsettingswidget.ui
@@ -149,14 +148,31 @@ unix:!macx: QMAKE_RPATHDIR += $$PWD/lib/libtorch/lib
 
 INCLUDEPATH += $$PWD/lib/libtorch/include
 DEPENDPATH += $$PWD/lib/libtorch/include
+INCLUDEPATH += $$PWD/lib/libtorch/include/torch/csrc/api/include
+DEPENDPATH += $$PWD/lib/libtorch/include/torch/csrc/api/include
 
 # dlib
-# PKGCONFIG += dlib-1
-
 LIBS += -L$$PWD/lib/dlib
 INCLUDEPATH += $$PWD/lib/dlib
 DEPENDPATH += $$PWD/lib/dlib
 
-INCLUDEPATH += $$PWD/lib/libtorch/include/torch/csrc/api/include
-DEPENDPATH += $$PWD/lib/libtorch/include/torch/csrc/api/include
+#qwt
+unix: QWT_ROOT = /usr/local/qwt-6.1.5
+win32: QWT_ROOT = C:/qwt-6.1.5
 
+include ( $$QWT_ROOT/features/qwt.prf )
+LIBS += -L$$QWT_ROOT/lib -lqwt
+INCLUDEPATH += $$QWT_ROOT/lib/qwt-6.1.5/include
+DEPENDPATH += $$QWT_ROOT/lib/qwt-6.1.5/include
+
+#INCLUDEPATH += $$PWD/lib/qwt-6.1.5/src
+#DEPENDPATH += $$PWD/lib/qwt-6.1.5/src
+#LIBS += -L$$PWD/lib/qwt-6.1.5/lib -lqwt
+#win32: DEFINES += QWT_DLL QWT_NO_OPENGL
+#unix {
+# include ( $$(HOME)/qwt-6.1.5/features/qwt.prf )
+# INCLUDEPATH += $$PWD/lib/qwt-6.1.5/src
+# DEPENDPATH += $$PWD/lib/qwt-6.1.5/src
+# LIBS += -L$$PWD/lib/qwt-6.1.5/lib -lqwt
+#}
+#win32: include ( C:/qwt-6.1.5/features/qwt.prf )

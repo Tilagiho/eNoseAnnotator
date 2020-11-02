@@ -1,847 +1,849 @@
 #include "linegraphwidget.h"
-#include "ui_linegraphwidget.h"
 
-#include <math.h>
-
-#include "../classes/enosecolor.h"
-#include <QTime>
-
+#include "../classes/defaultSettings.h"
 #include "../classes/measurementdata.h"
+#include "../classes/enosecolor.h"
+#include "../classes/defaultSettings.h"
 
-// static limits
-double LineGraphWidget::maxVal = 90000.0;
-double LineGraphWidget::minVal = 300.0;
+#include <qwt_plot.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_grid.h>
+#include <qwt_symbol.h>
+#include <qwt_painter.h>
+#include <qwt_plot_panner.h>
 
-// declare meta type for usage in ReplotWorker
-Q_DECLARE_METATYPE(Ui::LineGraphWidget *);
+#include <qwt_picker_machine.h>
 
-LineGraphWidget::LineGraphWidget(QWidget *parent, int nChannels) :
-    QWidget(parent),
-    ui(new Ui::LineGraphWidget),
-    nChannels(nChannels),
-    graphMutex(new QMutex)
+#include <qwt_date_scale_draw.h>
+#include <qwt_date_scale_engine.h>
+
+#include <qwt_plot_marker.h>
+
+#include <QMouseEvent>
+
+double AbsoluteLineGraphWidget::lowerLimit = DEFAULT_LOWER_LIMIT;
+double AbsoluteLineGraphWidget::upperLimit = DEFAULT_UPPER_LIMIT;
+bool AbsoluteLineGraphWidget::useLimits = DEFAULT_USE_LIMITS;
+
+/*!
+ * \brief The CurveData class is a container for the data of one curve. It enables appending data to the curve.
+ * Based on qwt example "realtime".
+ */
+CurveData::CurveData()
+{}
+
+QRectF CurveData::boundingRect() const
 {
-    ui->setupUi(this);
+    if ( d_boundingRect.width() < 0.0 )
+        d_boundingRect = qwtBoundingRect( *this );
 
-    // zero init sensorFailureFlags
-    sensorFailureFlags = std::vector<bool>(MVector::nChannels, false);
+    return d_boundingRect.normalized();
+}
 
-    setupGraph();
+inline void CurveData::append( const QPointF &point )
+{
+    d_samples += point;
 
-    // connections:
-    // emit xAxis range changes
-    connect(ui->chart->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(onXRangeChanged(QCPRange)));
+    // resize bounding rectangle, if necessary, to contain point:
+    // init bounding rectangle
+    if ( d_boundingRect.width() < 0.0 )
+        d_boundingRect = qwtBoundingRect( *this );
 
-    // update y-scale when changing x-range
-    connect(ui->chart->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(replot()));
-    // set selectionRectMode when mouse is pressed
-    connect(ui->chart, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(mousePressed(QMouseEvent*)));
-    // process data selection
-    connect(ui->chart, SIGNAL(selectionChangedByUser()), this, SLOT(dataSelected()));
-    // show label information
-    connect(ui->chart, SIGNAL(mouseMove(QMouseEvent*)), this, SLOT(mouseMoved(QMouseEvent*)));
+    if (!d_boundingRect.contains(point))
+    {
+        d_boundingRect = d_boundingRect | QRectF(d_boundingRect.center(), point);
+        d_boundingRect = d_boundingRect.normalized();
+    }
+}
 
-    // init coordText
-    coordText = new QCPItemText(ui->chart);
-    coordText->setClipToAxisRect(false);
-    coordText->position->setType(QCPItemPosition::PositionType::ptAbsolute);
-    coordText->position->setCoords(ui->chart->width()-80, ui->chart->height()-20);
-    coordText->setText("");
+void CurveData::clear()
+{
+    d_samples.clear();
+    d_samples.squeeze();
+    d_boundingRect = QRectF( 0.0, 0.0, -1.0, -1.0 );
+}
+
+QVector<QPointF>* CurveData::samples()
+{
+    return &d_samples;
+}
+
+QwtText ToolTipPlotPicker::trackerTextF ( const QPointF & pos ) const
+{
+    emit mouseMoved(pos);
+
+    // get tooltip text
+    QwtText text;
+
+    auto plt = plot();
+
+    // check annotation rects
+    if (text.isEmpty())
+    {
+        QList<QwtPlotItem*> rectList = plt->itemList(1001); // AClassRectItem
+
+        for (auto item : rectList)
+        {
+            auto rect = static_cast<AClassRectItem*>(item);
+            if ( rect->boundingRect().contains(pos) )
+            {
+                QString annotationText;
+                annotationText += rect->getIsUserAnnotation() ? "User annotation:\n" : "Detected annotation:\n";
+                annotationText += rect->getAnnotation().toString().split(",").join("\n");
+                text.setText(annotationText);
+                text.setRenderFlags(Qt::AlignLeft);
+                break;
+            }
+        }
+    }
+
+    // check curves
+    if (text.isEmpty())
+    {
+        QList<QwtPlotItem*> curveList = plt->itemList(QwtPlotItem::Rtti_PlotCurve);
+
+        double minDistance = qInf();
+        int closestItemIndex = -1;
+        int closestPointIndex;
+        int point_index;
+
+        for (int i=0; i<curveList.size(); i++)
+        {
+            auto item = curveList[i];
+            double distance = qInf();
+
+            if (item->isVisible())
+            {
+                auto curve = dynamic_cast<QwtPlotCurve*>(item);
+                auto t_pos = transform(pos);
+                point_index = curve->closestPoint(t_pos, &distance);
+
+                QPointF curvePoint;
+                if (curve->data()->size() > 0)
+                    curvePoint = curve->sample(0);
+
+                if (point_index < 0)
+                    continue;
+
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    closestItemIndex = i;
+                    closestPointIndex = point_index;
+                }
+            }
+        }
+
+        // check if pos is close to curve
+        auto dummyPoint = pos;
+        dummyPoint.setX(dummyPoint.x() + 6000);
+        double threshold = QLineF(transform(pos), transform(dummyPoint)).length();
+
+        if(minDistance > threshold) { return QwtText(); }
+
+        // if close: return curve name
+        auto closestItem = curveList[closestItemIndex];
+        text = closestItem->title();
+    }
+
+    QColor bg( Qt::white );
+    bg.setAlpha( 200 );
+    text.setBackgroundBrush( QBrush( bg ) );
+
+    return text;
+}
+
+class DateScaleDraw: public QwtDateScaleDraw
+{
+public:
+    DateScaleDraw( Qt::TimeSpec timeSpec ):
+        QwtDateScaleDraw( timeSpec )
+    {
+        setDateFormat( QwtDate::Millisecond, "hh:mm:ss" );
+        setDateFormat( QwtDate::Second, "hh:mm:ss" );
+        setDateFormat( QwtDate::Minute, "hh:mm" );
+        setDateFormat( QwtDate::Hour, "hh:mm\nddd dd MMM" );
+        setDateFormat( QwtDate::Day, "ddd dd MMM" );
+        setDateFormat( QwtDate::Week, "dd MMM yy" );
+        setDateFormat( QwtDate::Month, "MMM yy" );
+    }
+};
+
+/*!
+ * \brief AClassRectItem::AClassRectItem draws a rectangular item for displaying aclass.
+ * The position of the rectangle is determined by the interval set (x) and by the position of aClass in annotation (y).
+ * When drawing all aClasses of an annotation with an AClassRectItem the top margin of the graph is split into 7 parts.
+ * Detected annotations are drawn into the 2nd and 3rd part, user annotations into the 5th and 6th.
+ *
+ * \param interval
+ * \param annotation
+ * \param aclass
+ * \param isUserAnnotation
+ */
+AClassRectItem::AClassRectItem(QwtInterval xInterval, Annotation annotation, aClass aclass, bool isUserAnnotation):
+    xInterval(xInterval),
+    annotation(annotation),
+    aclass(aclass),
+    isUserAnnotation(isUserAnnotation)
+{
+    Q_ASSERT(annotation.contains(aclass));
+    setZ( 10 );
+}
+
+void AClassRectItem::setInterval( QwtInterval& xValue)
+{
+    xInterval = xValue;
+}
+
+double AClassRectItem::left()
+{
+    return xInterval.minValue();
+}
+
+void AClassRectItem::setLeft(const double &value)
+{
+    xInterval.setMinValue(value);
+}
+
+double AClassRectItem::right()
+{
+    return xInterval.maxValue();
+}
+
+void AClassRectItem::setRight(const double &value)
+{
+    xInterval.setMaxValue(value);
+}
+
+void AClassRectItem::draw(QPainter *painter, const QwtScaleMap &xMap, const QwtScaleMap &yMap, const QRectF &canvasRect) const
+{
+    double x1 = xInterval.minValue();
+    int px1 = qRound( xMap.transform( x1 ) );
+    double x2 = xInterval.maxValue();
+    int px2 = qRound( xMap.transform( x2 ) );
+
+    // determine y range of class rect
+    auto plt = static_cast<LineGraphWidget*>(plot());
+
+    auto plot_b_rect = plt->boundingRect();
+    auto yInterval = QwtInterval( plot_b_rect.top(), plot_b_rect.bottom() );
+
+    double windowTop = yInterval.maxValue();
+    double windowHeight = yInterval.maxValue() - yInterval.minValue();
+
+    double yOffset = (isUserAnnotation) ? 0 : 4;
+    double annotationTop = windowTop - (7 + yOffset) / 14. * windowHeight * LGW_Y_RELATIVE_MARGIN;
+    double annotationBottom = windowTop - (10 + yOffset) / 14. * windowHeight * LGW_Y_RELATIVE_MARGIN;
+
+    double y1 = -1., y2 = -1;
+    int py1 = -1, py2 = -1;
+    auto classList = annotation.getClasses();
+    // sum up values
+    double valueSum = 0.;
+    if (annotation.getType() == aClass::Type::CLASS_ONLY)
+        valueSum = classList.size();
+    else
+        for ( aClass annoClass : classList)
+            valueSum += annoClass.getValue();
+
+    double cumulatedSum = 0.;
+    for ( aClass annoClass : classList)
+    {
+        double value = (annoClass.getType() == aClass::Type::NUMERIC) ? annoClass.getValue() : 1.;
+
+        if (annoClass == aclass)
+        {
+            y1 = annotationTop + cumulatedSum / valueSum * (annotationBottom - annotationTop);
+            py1 = qRound( yMap.transform( y1 ) );
+            y2 = annotationTop + (cumulatedSum + value) / valueSum * (annotationBottom - annotationTop);
+            py2 = qRound( yMap.transform( y2 ) );
+            break;
+        }
+        cumulatedSum += value;
+    }
+    b_rect = QRectF(x1, y1, x2-x1, y2-y1);
+    painter->fillRect( QRect(px1, py1, px2 - px1, py2 - py1), QBrush(getColor()));
+}
+
+QRectF AClassRectItem::boundingRect()
+{
+    return b_rect;
+}
+
+int AClassRectItem::rtti() const
+{
+    return 1001;
+}
+
+Annotation AClassRectItem::getAnnotation() const
+{
+    return annotation;
+}
+
+bool AClassRectItem::getIsUserAnnotation() const
+{
+    return isUserAnnotation;
+}
+
+QColor AClassRectItem::getColor() const
+{
+    return aClass::getColor(aclass);
+}
+
+LineGraphWidget::LineGraphWidget(QWidget *parent) :
+    QwtPlot(parent),
+    rectangleZoom(new FixedPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, canvas())),
+    zonePicker(new QwtPlotPicker(canvas())),
+    zoneItem(new QwtPlotZoneItem()),
+    toolTipPicker(new ToolTipPlotPicker(canvas())),
+    coordinateLabel(new QwtPlotTextLabel),
+    legend(new QwtPlotLegendItem)
+{
+    setCanvasBackground(QBrush(GRAPH_BACKGROUND_COLOR));
+
+    QwtPlotGrid *grid = new QwtPlotGrid();
+    grid->setMajorPen(QPen(Qt::DotLine));
+    grid->attach( this );
+
+    // setup x axis
+    QwtDateScaleDraw *dateScaleDraw = new DateScaleDraw( Qt::TimeSpec::LocalTime );
+    QwtDateScaleEngine *dateScaleEngine = new QwtDateScaleEngine( Qt::TimeSpec::LocalTime );
+    dateScaleEngine->setAttribute(QwtScaleEngine::Floating, true);
+    dateScaleEngine->setMargins(zoomBaseOffset.x(), zoomBaseOffset.x());
+
+    setAxisScaleDraw( QwtPlot::xBottom, dateScaleDraw );
+    setAxisScaleEngine( QwtPlot::xBottom, dateScaleEngine );
+    setAxisLabelAlignment( QwtPlot::xBottom, Qt::AlignCenter | Qt::AlignBottom );
+
+    setAxisTitle(QwtPlot::xBottom, "Time/ Date of measurement");
+
+    // set range of x-axis to current time
+    auto currentDatetime = QDateTime::currentDateTime();
+    int prevSecs = LGW_AUTO_MOVE_ZONE_SIZE;
+    setPrevXRange(currentDatetime.addSecs(prevSecs), prevSecs);
+
+    // setup y axis
+    QwtLinearScaleEngine *yScaleEngine = new QwtLinearScaleEngine();
+    yScaleEngine->setMargins(zoomBaseOffset.y(), zoomBaseOffset.y());
+    yScaleEngine->setAttribute(QwtScaleEngine::Floating, true);
+    yScaleEngine->setAttribute(QwtScaleEngine::Inverted, false);
+
+    setAxisScaleEngine( QwtPlot::yLeft, yScaleEngine );
+
+    // panner: drag and drop the graph range
+    auto panner = new QwtPlotPanner(canvas());
+    panner->setMouseButton(Qt::LeftButton, Qt::NoModifier);
+
+    // mouseWheelZoom: zoom with mousewheel
+    QwtPlotMagnifier *mouseWheelZoom = new FixedPlotMagnifier(canvas());
+    mouseWheelZoom->setMouseButton(Qt::MouseButton::NoButton);
+//    mouseWheelZoom->setAxisEnabled(QwtPlot::yLeft, false);
+
+    // rectangle zoom: zoom with SHIFT + left mouse rectangle
+    rectangleZoom->setRubberBand( QwtPicker::RectRubberBand );
+    rectangleZoom->setTrackerMode(QwtPicker::AlwaysOff);
+
+    rectangleZoom->setMousePattern(QwtEventPattern::MouseSelect1,Qt::LeftButton, Qt::ShiftModifier);
+    rectangleZoom->setMousePattern( QwtEventPattern::MouseSelect2,Qt::RightButton, Qt::ShiftModifier); //zoom out by 1
+    rectangleZoom->setMousePattern( QwtEventPattern::MouseSelect3,Qt::MiddleButton, Qt::ShiftModifier); //zoom out by 1
+
+    // zone picker: pick selection with CTRL + left mouse rectangle
+    zonePicker->setRubberBand(QwtPicker::RubberBand::RectRubberBand);
+    zonePicker->setStateMachine(new QwtPickerDragRectMachine);
+    zonePicker->setTrackerMode(QwtPicker::AlwaysOff);
+    zonePicker->setMousePattern(QwtEventPattern::MouseSelect1,Qt::LeftButton, Qt::ControlModifier);
+    connect(zonePicker, SIGNAL(selected(const QRectF &)), this, SLOT(makeSelection(const QRectF &)));
+
+    // zoneItem: used to show selection
+    zoneItem->setBrush(QBrush(QColor(Qt::blue)));
+    zoneItem->setOrientation(Qt::Orientation::Vertical);
+    zoneItem->setVisible(false);
+    zoneItem->attach(this);
+
+    // tooltip: show curve name
+    toolTipPicker->setTrackerMode(QwtPicker::AlwaysOn);
+    setMouseTracking(true);
+    connect(toolTipPicker, &ToolTipPlotPicker::mouseMoved, this, &LineGraphWidget::setMouseCoordinates);
+
+    // mouse coordinate label
+    coordinateLabel->setText( QwtText() );
+    coordinateLabel->attach( this );
+
+    // axis synchronisation
+    QObject::connect((QwtScaleWidget*) axisWidget(QwtPlot::xBottom) , &QwtScaleWidget::scaleDivChanged, this, [this](){
+        emit axisIntvSet(axisInterval(QwtPlot::xBottom), QwtPlot::xBottom);
+    });
+
+    // functionalisation legend
+    legend->setAlignment(Qt::AlignRight | Qt::AlignTop);
+    legend->attach(this);
+    legend->setBorderPen(QPen(Qt::black));
+    QColor lbg =canvasBackground().color();
+    lbg.setAlpha(200);
+    legend->setBackgroundBrush(lbg);
 }
 
 LineGraphWidget::~LineGraphWidget()
 {
-    if (worker != nullptr)
-    {
-        worker->deleteLater();
-    }
-    coordText->deleteLater();
-    delete graphMutex;
-    delete ui;
+    clearGraph();
 }
 
-void LineGraphWidget::setupGraph()
+void LineGraphWidget::clearGraph()
 {
-    // graph is dragable & zoomable in x direction
-    ui->chart->setInteraction(QCP::iRangeDrag, true);
-    ui->chart->axisRect()->setRangeDrag(Qt::Horizontal);
-
-    ui->chart->setInteraction(QCP::iRangeZoom, true);
-    ui->chart->axisRect()->setRangeZoom(Qt::Horizontal);
-
-    // make graphs selectable
-    ui->chart->setInteraction(QCP::iSelectPlottables);
-
-    // init graphs
-    for (uint i=0; i<nChannels; i++)
+    for (int i=0; i<dataCurves.size(); i++)
     {
-        ui->chart->addGraph();
-
-        // style of plotted lines
-        QColor color;
-        if (nChannels == MVector::nChannels)
-            color = ENoseColor::getInstance().getSensorColor(i);
-        else
-            color = ENoseColor::getInstance().getFuncColor(i);
-        ui->chart->graph(i)->setLineStyle(QCPGraph::lsLine);
-        ui->chart->graph(i)->setPen(QPen(color));
-        ui->chart->graph(i)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 3));
-
-        // make graphs selectable
-         ui->chart->graph(i)->setSelectable(QCP::stDataRange);
+        delete dataCurves[i];
+        delete selectionCurves[i];
     }
 
-    // configure bottom axis to show time:
-    QSharedPointer<QCPAxisTickerTime> dateTicker(new QCPAxisTickerTime);
-    dateTicker->setTimeFormat("%h:%m:%s");
-    ui->chart->xAxis->setTicker(dateTicker);
-
-    // set a more compact font size for bottom and left axis tick labels:
-    ui->chart->xAxis->setTickLabelFont(QFont(QFont().family(), 8));
-    ui->chart->yAxis->setTickLabelFont(QFont(QFont().family(), 8));
-
-    // set background
-    ui->chart->setBackground(QBrush(QColor(255,250,240)));
-
-    // set ticker colors
-    ui->chart->xAxis->setTickLabelColor(Qt::black);
-    ui->chart->xAxis->setLabelColor(Qt::black);
-    ui->chart->xAxis->setBasePen(QPen(Qt::black));
-    ui->chart->xAxis->setTickPen(QPen(Qt::black));
-    ui->chart->xAxis->setSubTickPen(QPen(Qt::black));
-    ui->chart->xAxis->setLabel("Time since start of measurement");
-
-    ui->chart->yAxis->setTickLabelColor(Qt::black);
-    ui->chart->yAxis->setLabelColor(Qt::black);
-    ui->chart->yAxis->setBasePen(QPen(Qt::black));
-    ui->chart->yAxis->setTickPen(QPen(Qt::black));
-    ui->chart->yAxis->setSubTickPen(QPen(Qt::black));
-    ui->chart->yAxis->setLabel(QString(u8"\u0394") + " R / R0 [%]");
-
-
-    // set axis ranges to show all data:
-    ui->chart->xAxis->setRange(-1, defaultXWidth);
-    ui->chart->yAxis->rescale(true);
-}
-
-void LineGraphWidget::setStartTimestamp(uint timestamp)
-{
-    startTimestamp = timestamp;
-}
-
-void LineGraphWidget::setSensorFailureFlags(const std::vector<bool> flags)
-{
-    Q_ASSERT(flags.size() == MVector::nChannels);
-
-    // ignore if different nChannels was set
-    if (nChannels != MVector::nChannels)
-        return;
-
-    if (flags != sensorFailureFlags)
-    {
-        for (int i=0; i<MVector::nChannels; i++)
-        {
-            if (flags[i] && !sensorFailureFlags[i])
-            {
-                ui->chart->graph(i)->setVisible(false);
-                ui->chart->graph(i)->setSelectable(QCP::SelectionType::stNone);
-            }
-            else if (!flags[i] && sensorFailureFlags[i])
-            {
-                ui->chart->graph(i)->setVisible(true);
-                ui->chart->graph(i)->setSelectable(QCP::SelectionType::stDataRange);
-            }
-        }
-    }
-    sensorFailureFlags = flags;
-
-    replot();
-}
-
-QPair<double, double> LineGraphWidget::getXRange()
-{
-    auto range = ui->chart->xAxis->range();
-    return QPair<double, double>(range.lower, range.upper);
-}
-
-void LineGraphWidget::setXRange(QPair<double, double> xRange)
-{
-    double x1 = xRange.first;
-    double x2 = xRange.second;
-    graphMutex->lock();
-    ui->chart->xAxis->setRange(x1, x2);
-    graphMutex->unlock();
-}
-
-void LineGraphWidget::setLogXAxis(bool logOn)
-{
-    if (logOn)
-    {
-        ui->chart->yAxis->setScaleType(QCPAxis::ScaleType::stLogarithmic);
-        QSharedPointer<QCPAxisTickerLog> logTicker(new QCPAxisTickerLog);
-        ui->chart->yAxis->setTicker(logTicker);
-
-    }
-    else
-    {
-        ui->chart->yAxis->setScaleType(QCPAxis::ScaleType::stLinear);
-        QSharedPointer<QCPAxisTicker> linTicker(new QCPAxisTicker);
-        ui->chart->yAxis->setTicker(linTicker);
-    }
-}
-
-void LineGraphWidget::setXRange(QCPRange range)
-{
-    if (range != ui->chart->xAxis->range())
-    {
-        graphMutex->lock();
-        ui->chart->xAxis->setRange(range);
-        graphMutex->unlock();
-        replot();
-        emit xRangeChanged(range);
-    }
-}
-
-void LineGraphWidget::resetColors()
-{
-    for (int i=0; i<ui->chart->graphCount(); i++)
-    {
-        QColor color;
-        if (nChannels == MVector::nChannels)
-            color = ENoseColor::getInstance().getSensorColor(i);
-        else
-            color = ENoseColor::getInstance().getFuncColor(i);
-
-        QPen pen;
-        pen.setColor(color);
-
-        ui->chart->graph(i)->setPen(pen);
-    }
-
-    ui->chart->replot();
-}
-
-void LineGraphWidget::setNChannels(int value)
-{
-    // delete old graphs
-    for (int i=0; i<nChannels; i++)
-    {
-        ui->chart->removeGraph(ui->chart->graph(0));
-    }
-
-    nChannels = value;
-
-    // setup new graphs
-    setupGraph();
-}
-
-
-
-int LineGraphWidget::getNChannels() const
-{
-    return nChannels;
-}
-
-void LineGraphWidget::resetGraph(int channels)
-{
-    QCPDataSelection selection = ui->chart->graph(0)->selection();
-    clearGraph(false);
-
-    if (channels != nChannels)
-    {
-        graphMutex->lock();
-        // remove graphs
-        int graphCount = ui->chart->graphCount();
-        for (int i=0; i<graphCount; i++)
-            ui->chart->removeGraph(ui->chart->graph(0));
-        graphMutex->unlock();
-
-        // add graphs
-        nChannels = channels;
-        setupGraph();
-    }
-}
-
-void LineGraphWidget::setMaxVal(double val)
-{
-    maxVal = val;
-}
-
-void LineGraphWidget::replot(uint timestamp)
-{
-    // replots are suspended
-    if (!replotStatus)
-        return;
-
-    // get current xaxis.range
-    auto xRange = ui->chart->xAxis->range();
-
-    // move x-range
-    if (autoMoveGraph && timestamp != 0 && timestamp >= xRange.upper+startTimestamp-4 && timestamp <= xRange.upper+startTimestamp)
-    {
-        graphMutex->lock();
-        ui->chart->xAxis->setRange(xRange.lower+2, xRange.upper+2);
-        graphMutex->unlock();
-
-    }
-
-    // init worker thread
-    if (thread == nullptr)
-    {
-        thread = new QThread;
-        worker = new ReplotWorker(graphMutex);
-        worker->moveToThread(thread);
-        connect(worker, &ReplotWorker::finished, this, &LineGraphWidget::setYRange);
-        connect(worker, SIGNAL(destroyed()), thread, SLOT(quit()));   // end thread when source is deleted
-        connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater())); // delete thread when finishes
-        thread->start();      
-
-        qRegisterMetaType<Ui::LineGraphWidget *>("Ui::LineGraphWidget *");
-    }
-
-    // invoke replot in thread
-    QMetaObject::invokeMethod(worker, "replot",  Qt::AutoConnection, Q_ARG(Ui::LineGraphWidget *, ui));
-}
-
-void LineGraphWidget::setYRange(double y_lower, double y_upper)
-{
-    //set y-range
-    graphMutex->lock();
-    ui->chart->yAxis->setRange(y_lower, y_upper);
-    graphMutex->unlock();
-
-    redrawLabels();
-
-    ui->chart->replot();
-}
-
-void LineGraphWidget::mousePressed(QMouseEvent * event)
-{
-    // dragging vs selection
-    if (event->button() == Qt::LeftButton)
-    {
-        if (QGuiApplication::keyboardModifiers().testFlag(Qt::ControlModifier))
-        {
-            // reset selection flag
-            selectionFlag = false;
-
-            // enable rectangle selection
-            ui->chart->setSelectionRectMode(QCP::srmSelect);
-
-        }
-        else
-            // disable rectangle selection
-            ui->chart->setSelectionRectMode(QCP::srmNone);
-    }
-    // context menu
-    else if (event->button() == Qt::RightButton)
-    {
-        if (coordText != nullptr)
-        {
-            coordText->setText("");
-            ui->chart->replot(QCustomPlot::RefreshPriority::rpImmediateRefresh);
-        }
-
-        QMenu *menu = new QMenu(this);
-        menu->setAttribute(Qt::WA_DeleteOnClose);
-
-        menu->addAction("Save Graph...", this, [this](){
-            emit ImageSaveRequested();
-        });
-
-        menu->popup(ui->chart->mapToGlobal(event->pos()));
-    }
-}
-
-void LineGraphWidget::mouseMoved (QMouseEvent *  event)
-{
-    // check if mouse is over label
-    auto item = ui->chart->itemAt(event->localPos());
-    if (item != 0)  // item found
-    {
-        // item is rectangle?
-        auto focusedRect = qobject_cast<QCPItemRect*>(item);
-        if (focusedRect != nullptr)
-        {
-            // find corresponding label string:
-            QString labelString;
-
-            // x-range of focused label
-            int x1 = std::ceil(focusedRect->topLeft->coords().x());
-            int x2 = std::floor(focusedRect->bottomRight->coords().x());
-
-            // find correct label & its label string
-            for (int xpos=x1; xpos<=x2; xpos++)
-            {
-                if (userDefinedClassLabels.contains(xpos))
-                {
-                    for (auto labelRect : userDefinedClassLabels[xpos].second)
-                        if (focusedRect == labelRect)
-                        {
-                            labelString = "User Annotation:\n" + userDefinedClassLabels[xpos].first;
-                            labelString = labelString.split(',').join('\n');
-                            QToolTip::showText(event->globalPos(), labelString);
-                            break;
-                        }
-                }
-                else if (detectedClassLabels.contains(xpos))
-                {
-                    for (auto labelRect : detectedClassLabels[xpos].second)
-                        if (focusedRect == labelRect)
-                        {
-                            labelString = "Detected class probabilities:\n" + detectedClassLabels[xpos].first;
-
-                            QToolTip::showText(event->globalPos(), labelString);
-                            break;
-                        }
-                }
-            }
-        }
-    }
-
-    // check if mouse is over graph
-    auto plottable = ui->chart->plottableAt(event->localPos(), true);
-    if (plottable != 0)
-    {
-        // plottable is graph?
-        auto graph = qobject_cast<QCPGraph*>(plottable);
-        if (graph != nullptr)
-        {
-            // get channel number
-            int channel = -1;
-            for (int i=0; i<ui->chart->graphCount(); i++)
-            {
-                if (graph == ui->chart->graph(i))
-                {
-                    channel = i;
-                    break;
-                }
-            }
-            if (channel != -1)
-            {
-                if (nChannels == MVector::nChannels)
-                    QToolTip::showText(event->globalPos(), "ch" + QString::number(channel+1));
-                else
-                    QToolTip::showText(event->globalPos(), "f" + QString::number(channel));
-            }
-
-        }
-    }
-
-    // get mouse position in graph coordinates
-    double x = ui->chart->xAxis->pixelToCoord(event->pos().x());
-    double y = ui->chart->yAxis->pixelToCoord(event->pos().y());
-
-    // mouse outside of graph:
-    // -> delete text of coordText
-    auto xRange = ui->chart->xAxis->range();
-    auto yRange = ui->chart->yAxis->range();
-    if (y < yRange.lower || y > yRange.upper || x < xRange.lower || x > xRange.upper)
-        coordText->setText("");
-    // mouse inside of graph:
-    // set coord text
-    else
-    {
-        // create time string
-        QString prefix = "";
-        if (x < 0)
-        {
-            prefix = "-";
-            x = -x;
-        }
-        int rawSecs = std::round(x);
-        int hours = (rawSecs % 86400) / 3600;
-        int mins = (rawSecs % 3600) / 60;
-        int secs = (rawSecs % 3600) % 60;
-        QTime time = QTime (hours, mins, secs);
-        QString timeString = time.toString("h:mm:ss");
-        // set coordinate text
-        coordText->setText(prefix + timeString + ", " + QString::number(y, 'f', 1));
-    }
-    ui->chart->replot();
-}
-
-// adapt coordText position when resizing
-void LineGraphWidget::resizeEvent(QResizeEvent* event)
-{
-    coordText->position->setCoords(ui->chart->width()-60, ui->chart->height()-17);
-}
-
-void LineGraphWidget::dataSelected()
-{
-    // get current selection
-    auto firstVisGraph = firstVisibleGraph();
-    if (firstVisGraph == nullptr)
-        return;
-    QCPDataSelection selection = firstVisGraph->selection();
-
-    // find x range of selection rectangle
-    QCPRange rectRange = ui->chart->selectionRect()->range(ui->chart->xAxis);
-
-    ui->chart->deselectAll();
-
-    int lower = ceil(rectRange.lower);
-    int upper = floor(rectRange.upper);
-
-    qDebug() << "Selection Rect: " << lower << ", " << upper;
-
-    // empty selection
-    if (upper<=lower || selection.isEmpty())
-    {
-        dataSelection.clear();
-        clearSelection();
-        emit selectionCleared();
-        return;
-    }
-
-    qDebug() << "Got selection: " << selection;
-
-
-    // select all graphs in range of selection
-    for (int i=0; i < ui->chart->graphCount(); i++)
-    {
-        ui->chart->graph(i)->setSelection(selection);
-    }
-
-    // save selection and emit signal for changed selection
-    dataSelection = selection;
-    emit selectionChanged(lower+startTimestamp, upper+startTimestamp);
-    emit dataSelectionChanged(selection);
-}
-
-void LineGraphWidget::onXRangeChanged(QCPRange range)
-{
-    emit xRangeChanged(range);
-}
-
-void LineGraphWidget::labelSelection(QMap<uint, MVector> selectionMap)
-{
-    // update class labels
-    for (auto timestamp : selectionMap.keys())
-    {
-        MVector vector = selectionMap[timestamp];
-        int xpos = timestamp-startTimestamp;
-
-        // user class changed
-        if (userDefinedClassLabels.contains(xpos) && userDefinedClassLabels[xpos].first != vector.userAnnotation.toString())
-            setLabel(xpos, vector.userAnnotation, true);
-        // vector didn't have user class before
-        else if (!userDefinedClassLabels.contains(xpos) && !vector.userAnnotation.isEmpty())
-            setLabel(xpos, vector.userAnnotation, true);
-
-        // detected class changed
-        if (detectedClassLabels.contains(xpos) && detectedClassLabels[xpos].first != vector.detectedAnnotation.toString())
-            setLabel(xpos, vector.detectedAnnotation, false);
-        // vector didn't have user class before
-        else if (!detectedClassLabels.contains(xpos) && !vector.detectedAnnotation.isEmpty())
-            setLabel(xpos, vector.detectedAnnotation, false);
-    }
-
-    redrawLabels();
-}
-
-void LineGraphWidget::setIsAbsolute(bool value)
-{
-    isAbsolute = value;
-
-    if (isAbsolute)
-    {
-        ui->chart->yAxis->setLabel("R  [kOhm]");
-    }
-}
-
-bool LineGraphWidget::saveImage(const QString &filename)
-{
-    QStringList splitFilename = filename.split(".");
-
-    Q_ASSERT("No file extension set!" && splitFilename.size() > 1);
-
-    QString extension = splitFilename.last();
-
-    bool writeOk;
-    if (extension == "pdf")
-        writeOk = ui->chart->savePdf(filename);
-    else if (extension == "bmp")
-        writeOk = ui->chart->saveBmp(filename);
-    else if (extension == "jpg" || extension == "jpeg")
-        writeOk = ui->chart->saveJpg(filename);
-    else if (extension == "png")
-        writeOk = ui->chart->savePng(filename);
-    else
-        Q_ASSERT("Unknown file extension!" && false);
-
-    return writeOk;
-}
-
-QPixmap LineGraphWidget::getPixmap()
-{
-    return ui->chart->toPixmap();
-}
-
-void LineGraphWidget::setReplotStatus(bool value)
-{
-    if (!replotStatus && value)
-    {
-        replotStatus = true;    // has to be set before replotting
-
-        // reset xRange to show all data
-        bool foundRange;
-
-        auto firstVisGraph = firstVisibleGraph();
-        if (firstVisGraph == nullptr)
-            return;
-        auto range = firstVisGraph->getKeyRange(foundRange);
-        if (foundRange)
-            ui->chart->xAxis->setRange(range.lower, range.upper);
-        replot();
-    } else
-    {
-        replotStatus = value;
-    }
-}
-
-void LineGraphWidget::setSelection(QCPDataSelection newSelection)
-{
-    // determine old selection:
-    // only visible graphs are selectable
-    // -> find first visble graph and get selection
-    auto firstVisGraph = firstVisibleGraph();
-    if (firstVisGraph == nullptr)
-        return;
-    QCPDataSelection oldSelection = firstVisGraph->selection();
-
-    if (newSelection.dataRange(0).end() < newSelection.dataRange(0).begin())
-    {
-        clearSelection();
-        emit selectionCleared();
-        return;
-    }
-
-    if (newSelection != oldSelection)
-    {
-        ui->chart->deselectAll();
-
-        for (int i=0; i<nChannels; i++)
-            ui->chart->graph(i)->setSelection(newSelection);
-
-        int lower = qFloor(firstVisGraph->data()->at(newSelection.dataRange(0).begin())->mainKey());
-        int upper = qCeil(firstVisGraph->data()->at(newSelection.dataRange(0).end()-1)->mainKey());
-
-        qDebug() << "Selection synced: " << lower << ", " << upper;
-
-        ui->chart->replot();
-        emit selectionChanged(lower+startTimestamp, upper+startTimestamp);
-        emit dataSelectionChanged(newSelection);
-    }
-}
-
-bool LineGraphWidget::getUseLimits() const
-{
-    return useLimits;
-}
-
-void LineGraphWidget::setUseLimits(bool value)
-{
-    useLimits = value;
-}
-
-void LineGraphWidget::clearGraph(bool replot)
-{
-    // signal changes
-    emit selectionCleared();
-
-    graphMutex->lock();
-    // clear graphs
-    for (int i=0; i<nChannels; i++)
-    {
-        ui->chart->graph(i)->data()->clear();
-    }
-    // clear labels
     for (auto label : userDefinedClassLabels)
-        for (auto rectangle : label.second)
-            ui->chart->removeItem(rectangle);
+        for (auto rect : label)
+            delete rect;
 
     for (auto label : detectedClassLabels)
-        for (auto rectangle : label.second)
-            ui->chart->removeItem(rectangle);
-    graphMutex->unlock();
+        for (auto rect : label)
+            delete rect;
 
+    replot();
+    dataCurves.clear();
+    selectionCurves.clear();
     userDefinedClassLabels.clear();
     detectedClassLabels.clear();
-
-    if (replot)
-        ui->chart->replot();
-}
-
-void LineGraphWidget::addMeasurement(MVector measurement, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool rescale)
-{
-    Q_ASSERT(measurement.size == nChannels);
-
-    // set timestamp & lastMeasKey:
-    int lastMeasKey;
-    if (ui->chart->graph(0)->data()->isEmpty())
-    {
-        setStartTimestamp(timestamp);
-        lastMeasKey = -2;
-    }
-    else
-    {
-        // get time of last measurement
-        // is used later to determine distance to current measurement
-        auto endIt = ui->chart->graph(0)->data()->end();
-        endIt--;
-        lastMeasKey = std::round(endIt->key);
-    }
-
-    // check if graph is showing funcs or meas vectors
-    auto funcMap = MeasurementData::getFuncMap(functionalisation, sensorFailures);
-    bool isFuncGraph = nChannels == funcMap.size();
-
-    // add values to graph
-    int xpos = timestamp-startTimestamp;
-    QList<uint> sensorFailureIndexes;
-    for (int i=0; i<nChannels; i++)
-    {
-        // if funcGaph: ignore funcs without active channels
-        if (isFuncGraph && funcMap[i] == 0)
-            continue;
-
-        // secure adding data
-        graphMutex->lock();
-        // add data point
-        if (!isAbsolute)    // not isAbsolute: relative values / %
-        {
-            if (qIsFinite(measurement[i]))
-                ui->chart->graph(i)->addData(xpos, measurement[i]);
-            else    // infinite value: assume 100x deviation
-                ui->chart->graph(i)->addData(xpos, 10000);
-        }
-        else // isAbsolute: absolute values / kOhm
-        {
-            if (qIsFinite(measurement[i]))
-                ui->chart->graph(i)->addData(xpos, measurement[i] / 1000);
-            else    // infinte value: use maxVal
-                ui->chart->graph(i)->addData(xpos, maxVal / 1000);
-        }
-        graphMutex->unlock();
-
-        // emit sensor failures (only for finite values)
-        if (useLimits && qIsFinite(measurement[i]) && (measurement[i] < minVal || measurement[i] > maxVal))
-            sensorFailureIndexes.append(i);
-    }
-
-    if (!sensorFailureIndexes.isEmpty())
-    {
-        std::vector<bool> sensorFailures(64, false);
-        for (uint i : sensorFailureIndexes)
-            sensorFailures[i] = true;
-        emit sensorFailure(sensorFailures);
-    }
-
-    // add annotation labels
-    if (!measurement.userAnnotation.isEmpty())
-        setLabel(xpos, measurement.userAnnotation, true);
-    if (!measurement.detectedAnnotation.isEmpty())
-        setLabel(xpos, measurement.detectedAnnotation, false);
-
-    // if last measurement was one second ago (normally 2 seconds):
-    // redraw x bounds of both labels, so they don't overlap
-    if (xpos - lastMeasKey == 1)
-        adjustLabelBorders(lastMeasKey, xpos);
-
-//    qDebug() << timestamp << " : Added new Data";
-
-    if (rescale)
-        replot(timestamp);
-}
-
-void LineGraphWidget::setData(QMap<uint, MVector> map, std::vector<int> functionalisation, std::vector<bool> sensorFailures)
-{
-    clearGraph(false);
-
-    if (map.isEmpty())
-    {
-        replot();
-        return;
-    }
-
-    for (auto timestamp : map.keys())
-        addMeasurement(map[timestamp], timestamp, functionalisation, sensorFailures, false);
-
-//    setXAxis(-1, defaultWidth);
-    replot();
-}
-
-void LineGraphWidget::setAutoMoveGraph(bool value)
-{
-    autoMoveGraph = value;
 }
 
 void LineGraphWidget::clearSelection()
 {
-    auto firstVisGraph = firstVisibleGraph();
-    if (firstVisGraph == nullptr)
-        return;
-    auto selection = firstVisGraph->selection();
-    bool selected = selection.isEmpty();
-
-    if (!firstVisGraph->selection().isEmpty())
+    if (zoneItem->isVisible())  // currently data selected
     {
-        ui->chart->deselectAll();
-        ui->chart->replot();
+        zoneItem->setInterval(0., 0.);
+        zoneItem->setVisible(false);
+
+        for (auto selectionCurve : selectionCurves)
+        {
+            CurveData *selectionCurveData = static_cast<CurveData *>( selectionCurve->data() );
+            selectionCurveData->clear();
+        }
+
+        if ( replotStatus )
+            replot();
+
         emit selectionCleared();
     }
 }
 
-double LineGraphWidget::getMinVal() const
+void LineGraphWidget::setSensorFailures(const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation)
 {
-    return minVal;
+    if (dataCurves.size() == 0)
+        return;
+
+    Q_ASSERT( sensorFailures.size() == dataCurves.size() );
+
+    for (int i=0; i<sensorFailures.size(); i++)
+    {
+        dataCurves[i]->setVisible(!sensorFailures[i]);
+        selectionCurves[i]->setVisible(!sensorFailures[i]);
+    }
+
+    if (replotStatus)
+    {
+        replot();
+        setZoomBase();
+    }
 }
 
-void LineGraphWidget::setMinVal(double value)
+void LineGraphWidget::setFunctionalisation(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
 {
-    minVal = value;
+    for (int i=0; i<dataCurves.size(); i++)
+    {
+        auto curve = dataCurves[i];
+        QColor graphColor = getGraphColor(i, functionalisation);
+
+        curve->setPen(graphColor);
+        curve->setStyle( QwtPlotCurve::CurveStyle::Lines );
+        curve->setSymbol( new QwtSymbol( QwtSymbol::Ellipse,
+                                           QBrush(graphColor), QPen(graphColor), QSize( 4, 4 ) ) );
+    }
+
+    for (int i=0; i<selectionCurves.size(); i++)
+    {
+        auto curve = selectionCurves[i];
+        QColor graphColor = getGraphColor(i, functionalisation);
+
+        curve->setPen(graphColor);
+        curve->setStyle( QwtPlotCurve::CurveStyle::Lines );
+        curve->setSymbol( new QwtSymbol( QwtSymbol::Ellipse,
+                                           QBrush(graphColor), QPen(graphColor), QSize(6, 6) ) );
+    }
+
+    setupLegend(functionalisation, sensorFailures);
+    replot();
 }
 
-double LineGraphWidget::getMaxVal() const
+void LineGraphWidget::setAnnotations(const QMap<uint, Annotation> &annotations, bool isUserAnnotation)
 {
-    return maxVal;
+    for (uint timestamp : annotations.keys())
+        setLabel(timestamp, annotations[timestamp], isUserAnnotation);
+
+    adjustLabels(isUserAnnotation);
+    if (replotStatus)
+        replot();
 }
 
-std::array<uint, 2> LineGraphWidget::getSelection()
+void LineGraphWidget::setMouseCoordinates(const QPointF &coords)
 {
-    // get data range of selected data
-    QCPDataRange dataRange = dataSelection.dataRange();
+    auto t_coords = QPointF(transform(QwtPlot::xBottom, coords.x()), transform(QwtPlot::yLeft, coords.y()));
 
-    double start = ui->chart->graph(0)->data()->at(dataRange.begin())->key;
-    double end = ui->chart->graph(0)->data()->at(dataRange.end())->key;
+    double w = canvas()->width();
+    double h =canvas()->height();
+    const double thresh = 0.04;
 
-    std::array<uint, 2> selectionArray;
-    selectionArray[0] = start+startTimestamp-1;
-    selectionArray[1] = end+startTimestamp-2;
+    // hide coordinate label at boundaries of the canvas
+    if (t_coords.x() < thresh * w || t_coords.x() > (1 - thresh) * w || t_coords.y() < thresh * h || t_coords.y() > (1 - thresh) * h)
+        coordinateLabel->setText(QwtText());
+    else
+    {
+        auto datetime = QwtDate::toDateTime(coords.x(), Qt::TimeSpec::LocalTime);
+        QwtText title( "x: " + datetime.toString(locale().dateTimeFormat()) + "\ny: " + QString::number(coords.y()));
 
-    return selectionArray;
+        QColor bg = canvasBackground().color();
+        bg.setAlpha( 200 );
+        title.setBackgroundBrush( QBrush( bg ) );
+
+        title.setRenderFlags( Qt::AlignLeft | Qt::AlignTop );
+        coordinateLabel->setText(title);
+    }
+
+    replot();
+}
+
+void LineGraphWidget::zoomToData()
+{
+    QRectF b_Rect = boundingRect();
+
+    setAxisIntv(QwtInterval(b_Rect.left(), b_Rect.right()), QwtPlot::xBottom);
+    setAxisIntv(QwtInterval(b_Rect.top(), b_Rect.bottom()), QwtPlot::yLeft);
+}
+
+void LineGraphWidget::autoScale (bool xAxis, bool yAxis)
+{
+    auto bounding_rect = boundingRect();
+    if (xAxis)
+        setAxisIntv(QwtInterval(bounding_rect.left(), bounding_rect.right()), QwtPlot::xBottom);
+    if (yAxis)
+        setAxisIntv(QwtInterval(bounding_rect.top(), bounding_rect.bottom()), QwtPlot::yLeft);
+}
+
+void LineGraphWidget::setAxisIntv (QwtInterval intv, QwtPlot::Axis axis)
+{
+    auto currentIntv = axisInterval(axis);
+
+    if (intv != currentIntv)
+    {
+        this->setAxisScale(axis, intv.minValue(), intv.maxValue());
+        if (replotStatus)
+            this->replot();
+    }
+}
+
+void LineGraphWidget::setPrevXRange(QDateTime datetime, int prevSeconds)
+{
+    QwtInterval intv(getT(datetime.addSecs(-prevSeconds)), getT(datetime));
+    setAxisIntv(intv, QwtPlot::xBottom);
+    autoScale(false, true);
+//    setAutoScale(false, true);
+
+    if (replotStatus)
+        replot();
+}
+
+void LineGraphWidget::shiftXRange(double seconds)
+{
+    QwtInterval intv = axisInterval(QwtPlot::xBottom);
+    intv.setMinValue(intv.minValue() + seconds * 1000.);
+    intv.setMaxValue(intv.maxValue() + seconds * 1000.);
+
+    setAxisIntv(intv, QwtPlot::xBottom);
+    if (replotStatus)
+        replot();
 }
 
 /*!
- * \brief LineGraphWidget::setLabel creates labels from \a annotation in form of multiple QCPItemRect.
+ * \brief LineGraphWidget::makeSelection makes selection in graph based on the x-range of rect.
+ * The x-coordinates of the rect have to be in the ms format. This format is produced by getT().
+ * \param rect
+ */
+void LineGraphWidget::makeSelection(const QRectF &rect)
+{
+    // get rectangle x interval
+    double minT = rect.left();
+    double maxT = rect.right();
+
+    if (maxT < minT)
+        std::swap(minT, maxT);
+
+    makeSelection(minT, maxT);
+}
+
+/*!
+ * \brief LineGraphWidget::makeSelection makes selection in graph in the range [minT; maxT].
+
+ * \param minT lower bound in the ms format produced by getT()
+ * \param maxT upper bound in the ms format produced by getT()
+ */
+void LineGraphWidget::makeSelection(double minT, double maxT)
+{
+    makeSelection(getTimestamp(minT), getTimestamp(maxT));
+}
+
+/*!
+ * \brief LineGraphWidget::makeSelection makes selection in graph in the range [lower; upper].
+ * \param lower lower bound in the timestamp format produced by getTimestamp()
+ * \param upper upper bound in the timestamp format produced by getTimestamp()
+ */
+void LineGraphWidget::makeSelection(uint lower, uint upper)
+{
+    auto zoneIntv = zoneItem->interval();
+
+    double minT = getT( lower );
+    double maxT = getT( upper );
+
+    if (!qFuzzyCompare(minT, zoneIntv.minValue()) || !qFuzzyCompare(maxT, zoneIntv.maxValue()))
+    {
+        if (selectPoints(minT, maxT))
+        {
+            zoneItem->setInterval(minT, maxT);
+            zoneItem->setVisible(true);
+
+            replot();
+            emit selectionMade(lower, upper);
+        }
+        else
+            emit selectionCleared();
+    }
+}
+
+
+bool LineGraphWidget::selectPoints(double min, double max)
+{
+    clearSelection();
+
+    if (dataCurves.isEmpty())
+        return false;
+
+    // find selected points
+    auto data = static_cast<CurveData*>(dataCurves[0]->data())->samples()->toStdVector();
+
+    auto startElement = std::find_if(data.begin(), data.end(), [min](QPointF p){
+        return p.rx() > min;
+    });
+    if (startElement == data.end()) // selection starts right of curve
+        return false;
+
+    auto endElement = std::find_if(startElement, data.end(), [max](QPointF p){
+        return p.rx() > max;
+    });
+    if (endElement == data.begin()) // selection ends left of curve
+        return false;
+
+    int startIndex = std::distance(data.begin(), startElement);
+    int endIndex = std::distance(data.begin(), endElement);
+
+    if (startIndex == endIndex)
+        return false;
+
+    setReplotStatus(false);
+    for (int i=0; i<dataCurves.size(); i++)
+    {
+        QwtPlotCurve* curve  = selectionCurves[i];
+
+        for (int pos=startIndex; pos<endIndex; pos++)
+        {
+            QPointF point = dataCurves[i]->data()->sample(pos);
+
+            addPoint(curve, point);
+        }
+    }
+    setReplotStatus(true);
+
+    return true;
+}
+
+bool LineGraphWidget::autoMoveXRange(double t)
+{
+    if (measRunning)
+    {
+        auto intv = axisInterval(QwtPlot::xBottom);
+        double delta = intv.maxValue() - t;
+        double ratio_threshold = LGW_AUTO_MOVE_ZONE_BORDER_RATIO * intv.width();
+        double min_threshold = LGW_AUTO_MOVE_ZONE_BORDER_MIN * 1000;
+        if (delta > 0)
+        {
+            if (delta < ratio_threshold)
+            {
+//                setReplotStatus(false); // set replotStatus to false in order to replot after points were added
+                shiftXRange((ratio_threshold - delta) / 1000.);
+                return true;
+            }
+            else if (delta < min_threshold)
+            {
+//                setReplotStatus(false); // set replotStatus to false in order to replot after points were added
+                shiftXRange((min_threshold - delta) / 1000.);
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+QRectF LineGraphWidget::boundingRect() const
+{
+    QRectF rect(0., 0., -1., -1.);
+    for (auto curve : dataCurves)
+    {
+        // ignore hidden channels
+        if (!curve->isVisible())
+            continue;
+
+        auto data = static_cast<CurveData*>(curve->data());
+        if (rect.width() < 0.)
+            rect = data->boundingRect();
+        else
+            rect = rect | data->boundingRect();
+    }
+
+    // add relative margins
+    double deltaX = LGW_X_RELATIVE_MARGIN * rect.width();
+    double deltaY = LGW_Y_RELATIVE_MARGIN * rect.height();
+
+    rect.adjust(-deltaX, -deltaY, deltaX, 2*deltaY);
+
+    return rect;
+}
+
+double LineGraphWidget::getT(double timestamp)
+{
+    uint roundedTimestamp = qRound(timestamp);
+    return getT(roundedTimestamp) + 1000. * (timestamp - roundedTimestamp);
+}
+
+double LineGraphWidget::getT(uint timestamp)
+{
+    return getT( QDateTime::fromTime_t(timestamp) );
+}
+
+double LineGraphWidget::getT(QDateTime datetime)
+{
+    return QwtDate::toDouble(datetime);
+}
+
+uint LineGraphWidget::getTimestamp(double t)
+{
+    return QwtDate::toDateTime(t).toTime_t();
+}
+
+void LineGraphWidget::setupLegend(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
+{
+    auto funcList = functionalisation.getFuncMap().keys();
+    QMap<int, QwtPlotCurve*> legendCurves;
+
+    for (int i=0; i<dataCurves.size(); i++)
+    {
+        int func = functionalisation[i];
+
+        // hide all data curves except one for each functionalisation
+        if (!sensorFailures[i] && funcList.contains(func))
+        {
+            // add curve to legend curves
+            legendCurves[func] = dataCurves[i];
+
+            // remove functionalisation
+            // future curves are ignored
+            funcList.removeAt(funcList.indexOf(func));
+        } else {
+            dataCurves[i]->setItemAttribute(QwtPlotItem::Legend, false);
+            updateLegend(dataCurves[i]);
+        }
+
+        // hide selection curves from legend
+        selectionCurves[i]->setItemAttribute(QwtPlotItem::Legend, false);
+        updateLegend(selectionCurves[i]);
+    }
+
+    // order legend entries
+
+    for (int func : legendCurves.keys())
+    {
+        auto curve = legendCurves[func];
+
+        // reattach legendCurves in desired order
+        curve->detach();
+        curve->attach(this);
+
+        // update legend data:
+        // display functionalisation of channel instead of title
+        QwtLegendData data;
+
+        QwtText label = "f" + QString::number(func);
+        label.setRenderFlags( label.renderFlags() & Qt::AlignLeft );
+
+        QVariant titleValue;
+        qVariantSetValue( titleValue, label );
+        data.setValue( QwtLegendData::TitleRole, titleValue );
+
+        const QwtGraphic graphic = curve->legendIcon( 0, curve->legendIconSize() );
+        if ( !graphic.isNull() )
+        {
+            QVariant iconValue;
+            qVariantSetValue( iconValue, graphic );
+            data.setValue( QwtLegendData::IconRole, iconValue );
+        }
+
+        QList<QwtLegendData> list;
+        list += data;
+
+        legend->updateLegend(curve, list);
+    }
+}
+
+void LineGraphWidget::setZoomBase()
+{
+    auto b_rect = boundingRect();
+    if (b_rect != rectangleZoom->zoomBase())
+    {
+        auto xIntv = axisInterval(QwtPlot::xBottom);
+        auto yIntv = axisInterval(QwtPlot::yLeft);
+
+        rectangleZoom->setZoomBase(b_rect.normalized());
+
+        // restore axis intervals
+        setAxisIntv(xIntv, QwtPlot::xBottom);
+        setAxisIntv(yIntv, QwtPlot::yLeft);
+    }
+}
+
+/*!
+ * \brief LineGraphWidget::setLabel creates labels from \a annotation in form of multiple AClassRectItem.
  * \param xpos
  * \param annotation
  * \a isUserAnnotation is used to determine wether a user defined or detected label should be created.
- * For class only annotations with n classes n QCPItemRect stacked on top of each other with uniform sizes are created.
+ * For class only annotations with n classes n AClassRectItem stacked on top of each other with uniform sizes are created.
  * For numeric annotations the size of each ractangle is based on their value relative to the sum of all values.
- *
  */
-void LineGraphWidget::setLabel(int xpos, Annotation annotation, bool isUserAnnotation)
+void LineGraphWidget::setLabel(uint timestamp, Annotation annotation, bool isUserAnnotation)
 {
     // init labelMap dependent on isUserAnnotation
-    QMap<int, QPair<QString, QList<QCPItemRect *>>>* labelMap;
+    QMap<uint, QList<AClassRectItem *>>* labelMap;
     if (isUserAnnotation)
         labelMap = &userDefinedClassLabels;
     else
         labelMap = &detectedClassLabels;
 
-    // label xpos with annotation
+    // remove old label
+    if (labelMap->contains(timestamp))
+        deleteLabel(timestamp, isUserAnnotation);
+
+    // draw new label
     if (!annotation.isEmpty())
     {
         QList<aClass> classList = annotation.getClasses();
@@ -850,303 +852,342 @@ void LineGraphWidget::setLabel(int xpos, Annotation annotation, bool isUserAnnot
         // delete labels with value == 0.0
         for (int i=0; i<classList.size(); i++)
         {
-            if (classList[i].getType() == aClass::Type::NUMERIC &&  classList[i].getValue() <= det_class_tresh)
+            if (classList[i].getType() == aClass::Type::NUMERIC &&  classList[i].getValue() <= LGW_DET_CLASS_TRESH)
             {
                 classList.removeAt(i);
                 i--;    // decrement i in order to keep i the same value for the next turn
             }
         }
 
-        // remove old label
-        if (labelMap->contains(xpos))
-        {
-            for (auto rect : (*labelMap)[xpos].second)
-                ui->chart->removeItem(rect);
-        }
-
-        // create new label
-        QList<QCPItemRect*> labels;
+        // create new labels
+        QList<AClassRectItem*> labels;
+        Annotation drawAnnotation = Annotation ( classList.toSet() );
         for (aClass aclass : classList)
-            if (isUserAnnotation || (aclass.getType() == aClass::Type::NUMERIC && aclass.getValue() > det_class_tresh))
-                labels << new QCPItemRect(ui->chart);
-        if (isUserAnnotation)
-            (*labelMap)[xpos] = QPair<QString, QList<QCPItemRect*>>(annotation.toString(), labels);
-        else
-            (*labelMap)[xpos] = QPair<QString, QList<QCPItemRect*>>(annotation.getProbString(), labels);
-
-        // get normation value for height of rectangles of the label
-        double valueSum = 0;
-        if (annotation.getType() == aClass::Type::CLASS_ONLY)
-            valueSum = static_cast<double>(classList.size());
-        else if (annotation.getType() == aClass::Type::NUMERIC)
-            for (auto aclass : classList)
-                valueSum += aclass.getValue();
-        else
-            Q_ASSERT ("Unknown annotation class type!" && false);
-
-        // set properties of the rectangles forming the label
-        QPair<double, double> yCoords = getLabelYCoords(isUserAnnotation);  // (lower, upper) y-Coord for the label
-        double yDelta = qAbs(yCoords.second - yCoords.first); // delta between lower and uppr bound of the label
-        double lastY = yCoords.second; // stores the y-coord of the bottom of the last rectangle drawn
-
-        for (int i=0; i<labels.size(); i++)
         {
-            auto rectangle = labels[i];
-            auto aclass = classList[i];
+            auto b_rect = boundingRect();
+            auto xIntv = QwtInterval(getT(timestamp - 1), getT(timestamp + 1));
+            auto classRect = new AClassRectItem(xIntv, drawAnnotation, aclass, isUserAnnotation);
+            classRect->attach(this);
+            labels <<  classRect;
 
-            // set rectangle coords
-            rectangle->topLeft->setType(QCPItemPosition::ptPlotCoords);
-            rectangle->topLeft->setCoords(QPointF(xpos-1, lastY));
-            rectangle->bottomRight->setType(QCPItemPosition::ptPlotCoords);
-
-            double value = (aclass.getType() == aClass::Type::NUMERIC) ? aclass.getValue() : 1.0;   // get value of aclass
-            double newY = lastY - yDelta * value / valueSum;    // newY: bottom of current rectangle, start of next rectangle
-            rectangle->bottomRight->setCoords(QPointF(xpos+1, newY));
-            lastY = newY;
-
-            // set rectangle appearance
-            QColor classColor = aClass::getColor(aclass);
-            rectangle->setPen(QPen(classColor)); // show black border around rectangle
-            rectangle->setBrush(QBrush(classColor));  // fill recatngle with the class color
-            rectangle->setSelectable(true);
         }
-    }
-    // annotation is empty, but old label exists: delete old label
-    else if (labelMap->contains(xpos))
-    {
-        for (auto userLabel : (*labelMap)[xpos].second)
-            ui->chart->removeItem(userLabel);
-        labelMap->remove(xpos);
+        (*labelMap)[timestamp] = labels;
     }
 }
 
-/*!
- * \brief LineGraphWidget::adjustLabelBorders adjusts right border of label at firstX to firstX+0.5, left border of label at secondX to secondX+0.5
- * \param firstX
- * \param secondX
- */
-void LineGraphWidget::adjustLabelBorders(int firstX, int secondX)
+void LineGraphWidget::adjustLabels (bool isUserAnnotation)
 {
-    // adjust right border of first label
-    if (userDefinedClassLabels.contains(firstX))
-    {
-        auto label = userDefinedClassLabels[firstX].second;
-
-        for (auto rectangle : label)
-            rectangle->bottomRight->setCoords(QPointF(firstX+0.5, rectangle->bottomRight->coords().y()));
-    }
-    if (detectedClassLabels.contains(firstX))
-    {
-        auto label = detectedClassLabels[firstX].second;
-
-        for (auto rectangle : label)
-            rectangle->bottomRight->setCoords(QPointF(firstX+0.5, rectangle->bottomRight->coords().y()));
-    }
-
-    // adjust left border of second label
-    if (userDefinedClassLabels.contains(secondX))
-    {
-        auto label = userDefinedClassLabels[secondX].second;
-
-        for (auto rectangle : label)
-            rectangle->topLeft->setCoords(QPointF(secondX-0.5, rectangle->topLeft->coords().y()));
-    }
-    if (detectedClassLabels.contains(secondX))
-    {
-        auto label = detectedClassLabels[secondX].second;
-
-        for (auto rectangle : label)
-            rectangle->topLeft->setCoords(QPointF(secondX-0.5, rectangle->topLeft->coords().y()));
-    }
-}
-
-void LineGraphWidget::redrawLabels()
-{
-
-    for (auto labelPair : userDefinedClassLabels)
-    {
-        auto label = labelPair.second;   // list of QCPItemRect
-
-        if (!label.isEmpty())
-        {
-            // get relative sizes of  rectangles
-            QMap<QCPItemRect*, double> rectSizeMap;
-            double oldDeltaY =  qAbs(label.first()->top->pixelPosition().y() - label.last()->bottom->pixelPosition().y());
-
-            for (auto rectangle : label)
-                rectSizeMap[rectangle] = qAbs(rectangle->top->pixelPosition().y() - rectangle->bottom->pixelPosition().y()) / oldDeltaY;
-
-            // reassign y-coords of rectangles
-            QPair<double, double> yCoords = getLabelYCoords(true);  // (lower, upper) bound of label
-            double deltaY = qAbs(yCoords.second - yCoords.first);
-            double lastY = yCoords.second;  // stores y-coord of last rectangle bottom bound
-
-            for (auto rectangle : label)
-            {
-                double newY = lastY - deltaY * rectSizeMap[rectangle];    // newY: bottom of current rectangle, start of next rectangle
-
-                rectangle->topLeft->setCoords(QPointF(rectangle->topLeft->coords().x(), lastY));
-                rectangle->bottomRight->setCoords(QPointF(rectangle->bottomRight->coords().x(), newY));
-
-                lastY = newY;
-            }
-        }
-    }
-
-    for (auto labelPair : detectedClassLabels)
-    {
-        auto label = labelPair.second;   // list of QCPItemRect
-
-        if (!label.isEmpty())
-        {
-            // get relative sizes of  rectangles
-            QMap<QCPItemRect*, double> rectSizeMap;
-            double oldDeltaY =  qAbs(label.first()->top->pixelPosition().y() - label.last()->bottom->pixelPosition().y());
-
-            for (auto rectangle : label)
-                rectSizeMap[rectangle] = qAbs(rectangle->top->pixelPosition().y() - rectangle->bottom->pixelPosition().y()) / oldDeltaY;
-
-            // reassign y-coords of rectangles
-            QPair<double, double> yCoords = getLabelYCoords(false);  // (lower, upper) bound of label
-            double deltaY = qAbs(yCoords.second - yCoords.first);
-            double lastY = yCoords.second;  // stores y-coord of last rectangle bottom bound
-
-            for (auto rectangle : label)
-            {
-                double newY = lastY - deltaY * rectSizeMap[rectangle];    // newY: bottom of current rectangle, start of next rectangle
-
-                rectangle->topLeft->setCoords(QPointF(rectangle->topLeft->coords().x(), lastY));
-                rectangle->bottomRight->setCoords(QPointF(rectangle->bottomRight->coords().x(), newY));
-
-                lastY = newY;
-            }
-        }
-    }
-
-    ui->chart->replot();
-}
-
-double LineGraphWidget::getIndex(int key)
-{
-    auto iter = ui->chart->graph(0)->data()->findBegin(key);
-
-    return  iter->key;
-}
-
-/*!
- * \brief LineGraphWidget::getLabelYCoords returns (lower, upper) y-coordinate for user defined labels if \a isUserDefined is true, for detected labels if \a isUserDefined is false.
- * \param isUserDefined
- * \return
- */
-QPair<double, double> LineGraphWidget::getLabelYCoords(bool isUserDefined)
-{
-    auto yRange = ui->chart->yAxis->range();
-
-    double yBaseHeight = (yRange.upper-yRange.lower) * (1.0-labelSpace);
-
-    if (isUserDefined)
-        return QPair<double, double>(yRange.upper - labelSpace / 3.3 * yBaseHeight, yRange.upper);
+    // init labelMap dependent on isUserAnnotation
+    QMap<uint, QList<AClassRectItem *>>* labelMap;
+    if (isUserAnnotation)
+        labelMap = &userDefinedClassLabels;
     else
-        return QPair<double, double>(yRange.upper - labelSpace / 3.0 * 2.0 * yBaseHeight, yRange.upper - labelSpace / 2.7 * yBaseHeight);
-}
+        labelMap = &detectedClassLabels;
 
-/*!
- * \brief LineGraphWidget::firstVisibleGraph returns a pointer to the first visible PCPGraph. If no graph visible, nullptr is returned.
- * \return
- */
-QCPGraph* LineGraphWidget::firstVisibleGraph()
-{
-    QCPGraph* firstVisGraph = nullptr;
-    for (int i=0; i<nChannels; i++)
+    // adjust width of labels
+    uint prevTimestamp = 0;
+    for ( uint timestamp : labelMap->keys() )
     {
-        if (ui->chart->graph(i)->visible())
+        long deltaT = timestamp - prevTimestamp;
+        if (deltaT == 1 || deltaT == 3)
         {
-            firstVisGraph = ui->chart->graph(i);
-            break;
+            for (auto rect : (*labelMap)[prevTimestamp])
+                rect->setRight(getT(prevTimestamp + 0.5 * deltaT));
+            for (auto rect : (*labelMap)[timestamp])
+                rect->setLeft(getT(prevTimestamp + 0.5 * deltaT));
         }
     }
-
-    return  firstVisGraph;
 }
 
-void ReplotWorker::replot(Ui::LineGraphWidget *ui)
+void LineGraphWidget::deleteLabel(double t, bool isUserAnnotation)
 {
-    sync.lock();
-    // get current xaxis.range
-    auto xRange = ui->chart->xAxis->range();
-
-//    // last and current range are bigger than full graph range
-//    // -> no replot necessary
-//    bool foundRange;
-//    auto graphRange = ui->chart->graph(0)->data()->keyRange(foundRange);
-//    if (foundRange && graphRange.lower < xRange.lower && graphRange.upper > xRange.upper && graphRange.lower < lastRange.lower && graphRange.upper > lastRange.upper)
-//        return;
-
-    // set new y-range
-    double y_lower = 1000;
-    double y_upper = 0;
-
-    // iterate through all data points of first graph
-    graphMutex->lock();
-    QCPGraphDataContainer::const_iterator it = ui->chart->graph(0)->data()->constBegin();
-    QCPGraphDataContainer::const_iterator itEnd = ui->chart->graph(0)->data()->constEnd();
-
-    int index = 0;
-    while (it != itEnd)
-    {
-        // check if data point is in xRange,
-        // if checkAllPoints == false, check if point was NOT in last range
-        bool inXRange = it->key >= xRange.lower && it->key <= xRange.upper;
-        if (inXRange)
-        {
-            // loop through all graphs and check for new high/ low points at index (of it->key)
-            for (int i = 0; i < ui->chart->graphCount(); i++)
-            {
-                // ignore invisible graphs
-                if (!ui->chart->graph(i)->visible())
-                    continue;
-
-                 auto data  = ui->chart->graph(i)->data()->at(index);
-
-                 if (data->value < y_lower )
-                     y_lower = data->value;
-                 if (data->value > y_upper )
-                     y_upper = data->value;
-            }
-        }
-
-        it++;
-        index++;
-    }
-    graphMutex->unlock();
-
-    // normal plot for medium y-intervals
-    if (y_lower > 100.0)
-    {
-        y_upper *= 1.2;
-        if (y_lower > 0)
-            y_lower *= 0.8;
-        else
-            y_lower *= 1.1;
-    }
-    // plot around 0 for small y-intervals
+    QMap<uint, QList<AClassRectItem *>>* labelMap;
+    if (isUserAnnotation)
+        labelMap = &userDefinedClassLabels;
     else
+        labelMap = &detectedClassLabels;
+
+    Q_ASSERT(labelMap->contains(t));
+
+    for (auto rect : (*labelMap)[t])
+        delete rect;
+    labelMap->remove(t);
+}
+
+
+void LineGraphWidget::setMeasRunning(bool value)
+{
+    measRunning = value;
+}
+
+void LineGraphWidget::setReplotStatus(bool value)
+{
+    if (value != replotStatus)
     {
-        if (y_lower > 0)
-            y_lower *= 0.8;
-        else
-            y_lower *= 1.1;
+        replotStatus = value;
 
-        // check for minimal y range
-        if (y_upper < yMin)
-            y_upper = yMin;
-        if (y_lower > -0.8*yMin)
-            y_lower = -yMin*0.8;
+        if (value)
+        {
+            adjustLabels(true);
+            adjustLabels(false);
+            setZoomBase();
+            replot();
+        }
+    }
+}
 
-        // make space for labels
-        y_upper += labelSpace * (y_upper - y_lower);
+QPair<double, double> LineGraphWidget::getSelectionRange()
+{
+    auto intv = zoneItem->interval();
+    return QPair<double, double>(intv.minValue(), intv.maxValue());
+}
+
+void LineGraphWidget::initPlot(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
+{
+    Q_ASSERT(dataCurves.size() == 0);
+
+    // add graphs
+    for (size_t i=0; i<vector.getSize(); i++)
+    {
+        // add data graph
+        QString graphName = getGraphName(i, functionalisation);
+        QColor graphColor = getGraphColor(i, functionalisation);
+
+        QwtPlotCurve* curve = new QwtPlotCurve(graphName);
+
+        curve->setPen(graphColor);
+        curve->setStyle( QwtPlotCurve::CurveStyle::Lines );
+        curve->setSymbol( new QwtSymbol( QwtSymbol::Ellipse,
+                                           QBrush(graphColor), QPen(graphColor), QSize( 4, 4 ) ) );
+
+//        curve->setRenderHint( QwtPlotItem::RenderAntialiased, true );
+
+        curve->setData( new CurveData() );
+        curve->attach( this );
+
+        dataCurves << curve;
+
+        // add selection graph
+        QwtPlotCurve* selectionCurve = new QwtPlotCurve(graphName);
+
+        selectionCurve->setPen(graphColor);
+        selectionCurve->setStyle( QwtPlotCurve::CurveStyle::Lines );
+        selectionCurve->setSymbol( new QwtSymbol( QwtSymbol::Ellipse,
+                                           QBrush(graphColor), QPen(graphColor), QSize(6, 6)));
+
+
+        selectionCurve->setData(new CurveData());
+        selectionCurve->attach(this);
+
+        selectionCurves << selectionCurve;
     }
 
-    Q_EMIT finished(y_lower, y_upper);
-    sync.unlock();
+    QDateTime datetime = QDateTime::fromTime_t(timestamp);
+    setPrevXRange(datetime.addSecs(qRound(0.9 * LGW_AUTO_MOVE_ZONE_SIZE)), LGW_AUTO_MOVE_ZONE_SIZE);
+
+    setupLegend(functionalisation, sensorFailures);
+
+    if (replotStatus)
+        replot();
+}
+
+QString LineGraphWidget::getGraphName(size_t i, const Functionalisation &functionalisation)
+{
+    return "ch" + QString::number(i+1);
+}
+
+QColor LineGraphWidget::getGraphColor(uint i, const Functionalisation &functionalisation)
+{
+    return ENoseColor::instance().getFuncColor(functionalisation[i]);
+}
+
+void LineGraphWidget::addPoint(QwtPlotCurve *curve, QPointF point)
+{
+    CurveData *curveData = static_cast<CurveData *>( curve->data() );
+    curveData->append( point );
+}
+
+void LineGraphWidget::addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
+{
+    Q_ASSERT(dataCurves.size() == 0 || vector.getSize() == dataCurves.size());
+
+    // graph empty:
+    // init graph
+    if (dataCurves.size() == 0)
+        initPlot(timestamp, vector, functionalisation, sensorFailures);
+
+    auto datetime = QDateTime::fromTime_t(timestamp);
+    double t = getT(timestamp);
+
+    for (int i=0; i<dataCurves.size(); i++)
+    {
+        QwtPlotCurve* curve = dataCurves[i];
+        QPointF point(t, vector[i]);
+
+        addPoint(curve, point);
+    }
+
+    // set the zoomBase updated by addPoint
+    if (replotStatus)
+        setZoomBase();
+
+    // auto-move x axis
+    bool autoMoved = autoMoveXRange(t);
+
+    // add annotation labels of vector
+    if ( !vector.userAnnotation.isEmpty() )
+    {
+        setLabel(timestamp, vector.userAnnotation, true);
+        if (replotStatus)
+            adjustLabels(true);
+    }
+    if ( !vector.detectedAnnotation.isEmpty() )
+    {
+        setLabel(timestamp, vector.detectedAnnotation, false);
+        if (replotStatus)
+            adjustLabels(false);
+    }
+
+    if (replotStatus)
+    {
+        auto xIntv = axisInterval(QwtPlot::xBottom);
+        if (qFuzzyCompare( xIntv.width(), LGW_AUTO_MOVE_ZONE_SIZE*1000 ) && xIntv.contains(t) )
+            autoScale(false, true);
+        replot();
+    }
+}
+
+RelativeLineGraphWidget::RelativeLineGraphWidget(QWidget* parent):
+    LineGraphWidget(parent)
+{
+    setAxisTitle(QwtPlot::yLeft, QString(u8"\u0394") + "R / R0 [%]");
+}
+
+void RelativeLineGraphWidget::addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
+{
+    Q_ASSERT(dataCurves.size() == 0 || functionalisation.size() == dataCurves.size());
+    Q_ASSERT(dataCurves.size() == 0 || sensorFailures.size() == dataCurves.size());
+
+    LineGraphWidget::addVector(timestamp, vector, functionalisation, sensorFailures);
+}
+
+void AbsoluteLineGraphWidget::initPlot(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
+{
+    LineGraphWidget::initPlot(timestamp, vector, functionalisation, sensorFailures);
+    setSensorFailures(sensorFailures, functionalisation);
+}
+
+AbsoluteLineGraphWidget::AbsoluteLineGraphWidget(QWidget* parent):
+    LineGraphWidget(parent)
+{
+    setAxisTitle(QwtPlot::yLeft, "R [k" + QString(u8"\u2126") + "]");
+}
+
+void AbsoluteLineGraphWidget::setLimits(double lowerLimit, double upperLimit, bool useLimits)
+{
+    this->lowerLimit = lowerLimit;
+    this->upperLimit = upperLimit;
+    this->useLimits = useLimits;
+}
+
+void AbsoluteLineGraphWidget::addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
+{
+    Q_ASSERT(dataCurves.size() == 0 || functionalisation.size() == dataCurves.size());
+    Q_ASSERT(dataCurves.size() == 0 || sensorFailures.size() == dataCurves.size());
+
+    LineGraphWidget::addVector(timestamp, vector / 1000., functionalisation, sensorFailures);   // add vector / kOhm
+
+    checkLimits(vector, sensorFailures);
+}
+
+void AbsoluteLineGraphWidget::checkLimits( MVector vector, const std::vector<bool> &sensorFailures )
+{
+    if (useLimits)
+    {
+        std::vector<bool> newSensorFailures = sensorFailures;
+        for (int i=0; i<vector.getSize(); i++)
+        {
+            newSensorFailures[i] = newSensorFailures[i] | (vector[i] < lowerLimit || vector[i] > upperLimit);
+
+            auto curve = dataCurves[i];
+
+            if (sensorFailures[i] && curve->isVisible())
+                curve->setVisible(false);
+        }
+
+        if (newSensorFailures != sensorFailures)
+            emit sensorFailuresSet(newSensorFailures);
+    }
+}
+
+void RelativeLineGraphWidget::initPlot(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
+{
+    LineGraphWidget::initPlot(timestamp, vector, functionalisation, sensorFailures);
+    setSensorFailures(sensorFailures, functionalisation);
+}
+
+FuncLineGraphWidget::FuncLineGraphWidget(QWidget* parent):
+    LineGraphWidget(parent)
+{
+    setAxisTitle(QwtPlot::yLeft, QString(u8"\u0394") + "R / R0 [%]");
+}
+
+void FuncLineGraphWidget::addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
+{
+    Q_ASSERT(dataCurves.size() == 0 || vector.getSize() == functionalisation.getNFuncs());
+
+    LineGraphWidget::addVector(timestamp, vector, functionalisation, sensorFailures);
+
+    setSensorFailures(sensorFailures, functionalisation);
+}
+
+void FuncLineGraphWidget::setSensorFailures(const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation)
+{
+    auto funcMap = functionalisation.getFuncMap(sensorFailures);
+    for (int i=0; i<funcMap.size(); i++)
+    {
+        if (funcMap.values()[i] == 0)
+        {
+            dataCurves[i]->setVisible(false);
+            selectionCurves[i]->setVisible(false);
+        }
+    }
+
+    if (replotStatus)
+    {
+        replot();
+        setZoomBase();
+    }
+}
+
+void FuncLineGraphWidget::setFunctionalisation(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
+{
+    throw std::runtime_error("Do not call setFunctionalisation of a FuncLineGraphWidget! Instead, the graph has to be redrawn with the recalculated func vectors!");
+}
+
+QString FuncLineGraphWidget::getGraphName(size_t i, const Functionalisation &functionalisation)
+{
+    auto funcMap = functionalisation.getFuncMap(std::vector<bool>(functionalisation.size(), false));
+    return "f" + QString::number(funcMap.keys()[i]);
+}
+
+QColor FuncLineGraphWidget::getGraphColor(uint i, const Functionalisation &functionalisation)
+{
+    return ENoseColor::instance().getFuncColor(functionalisation.getFuncMap().keys()[i]);
+}
+
+void FuncLineGraphWidget::setupLegend(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
+{
+    auto funcMap = functionalisation.getFuncMap(sensorFailures);
+
+    for (int i=0; i<dataCurves.size(); i++)
+    {
+        if (funcMap.values()[i] == 0)
+            dataCurves[i]->setItemAttribute(QwtPlotItem::Legend, false);
+
+        // hide selection curves from legend
+        selectionCurves[i]->setItemAttribute(QwtPlotItem::Legend, false);
+    }
+
+    updateLegend();
 }
