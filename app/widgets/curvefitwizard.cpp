@@ -462,7 +462,7 @@ void FitWorker::save(QString filePath) const
     out << getHeader().join(";") << "\n";
 
     auto data = getData();
-    for (int i=0; i<MVector::nChannels; i++)
+    for (int i=0; i<data.size(); i++)
     {
         QStringList valueStrings;
         for (double value : data[i])
