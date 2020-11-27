@@ -65,8 +65,6 @@ class FitWorker: public QObject
 public:
     explicit FitWorker(MeasurementData* mData, QObject *parent = nullptr);
 
-    QMap<QString, std::vector<double>> getParameterMap() const;
-
     std::vector<double> getTau90() const;
 
     std::vector<double> getSigmaError() const;
@@ -100,13 +98,14 @@ public Q_SLOTS:
     void setLimitFactor(const double &value);
 
     QStringList getHeader() const;
+    QStringList getTooltips() const;
     QList<QList<double>> getData() const;
 
 Q_SIGNALS:
     void started();
     void progressChanged(int value);
     void finished();
-    void dataSet(QStringList header, QList<QList<double>> data);
+    void dataSet(QStringList header, QStringList tooltips, QList<QList<double>> data);
     void error(QString errorMessage);
     void rangeRedeterminationPossible();
     void rangeDeterminationStarted();
@@ -114,7 +113,9 @@ Q_SIGNALS:
     void channelRangeProvided(int channel, QList<uint> channelRange);
 
 private:
-    QMap<QString, std::vector<double>> parameterMap;
+    QStringList fitTooltips;
+    QList<QString> parameterNames;
+    QList<std::vector<double>> parameterData;
     std::vector<double> sigmaError, tau90, f_t90, sigmaNoise;
     std::vector<double> nSamples;
     MeasurementData* mData;
@@ -179,7 +180,7 @@ Q_SIGNALS:
     void addToRange(int channel, QList<int> range);
 
 public Q_SLOTS:
-    void setData(QStringList header, QList<QList<double>> data);
+    void setData(QStringList header, QStringList tooltips, QList<QList<double>> data);
     void setChannelRange(int channel, QList<uint> range);
     void resultSelectionChanged();
     void channelDataSelectionChanged();

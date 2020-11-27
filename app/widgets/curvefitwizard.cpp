@@ -399,11 +399,15 @@ void FitWorker::fit()
         throw std::runtime_error("Unknown fitter type!");
     }
 
-    // init parameterMap
-    for (QString parameterName : fitter->getParameterNames())
-        parameterMap[parameterName] = std::vector<double>(64, 0.);
 
-    for (int channel=0; channel<MVector::nChannels; channel++)
+
+    // init parameters
+    parameterNames = fitter->getParameterNames();
+    fitTooltips = fitter->getTooltips();
+    for ( int i=0; i<fitTooltips.size(); i++ )
+        parameterData << std::vector<double>(MVector::nChannels, 0.);
+
+    for (size_t channel=0; channel<MVector::nChannels; channel++)
     {
         qDebug() << "\nFit channel: " << channel;
 
@@ -427,10 +431,9 @@ void FitWorker::fit()
             QList<QString> parameterNames = bestFitter->getParameterNames();
             auto params = bestFitter->getParams();
 
-            for (int i=0; i<parameterNames.size(); i++)
+            for (size_t i=0; i<parameterNames.size(); i++)
             {
-                QString parameterName = parameterNames[i];
-                parameterMap[parameterName][channel] = params[i];
+                parameterData[i][channel] = params[i];
             }
             sigmaError[channel] = std::sqrt(bestFitter->residual_sum_of_sqares(channelData) / channelData.size());
             tau90[channel] = bestFitter->tau_90();
@@ -443,8 +446,12 @@ void FitWorker::fit()
         emit progressChanged(channel);
     }
 
+    QStringList header = getHeader();
+    QStringList tooltips = getTooltips();
+    auto data = getData();
+
     emit finished();
-    emit dataSet(getHeader(), getData());
+    emit dataSet(header, tooltips, data);
     delete fitter;
     delete  fitter_lm;
 }
@@ -627,16 +634,30 @@ QStringList FitWorker::getHeader() const
     // get data from the worker and emit
     QStringList header;
 
-    header << "n samples";
-    header << "sigma error";
-    header << "sigma noise";
-    header << QString::fromUtf8("tau90");
-    header << QString::fromUtf8("f(t90)");
+    header << "number of\nsamples";
+    header << "sigma error\n[ % ]";
+    header << "sigma noise\n[ % ]";
+    header << QString::fromUtf8("tau90\n[ s ]");
+    header << QString::fromUtf8("f(t90)\n[ % ]");
 
-    for (QString parameterName : parameterMap.keys())
-        header << parameterName;
+    header << parameterNames;
 
     return header;
+}
+
+QStringList FitWorker::getTooltips() const
+{
+    QStringList tooltips;
+
+    tooltips << "number of samples:\nnumber of data points used for fitting the curve";                                 // number of samples
+    tooltips << "sigma error:\nstandard deviation of the exposition data in relation to the fitted curve";              // sigma error
+    tooltips << "sigma noise:\nstandard deviation before the start of the exposition in relation to the linear drift";  // sigma noise                                                // sigma noise
+    tooltips << "tau90:\ntime from start of the exposition until 90% of the plateau is reached";                       // tau90
+    tooltips << "f(t90):\n90% of the plateau height";                                                                   // f(t90)
+
+    tooltips.append(fitTooltips);
+
+    return  tooltips;
 }
 
 QList<QList<double>> FitWorker::getData() const
@@ -648,8 +669,8 @@ QList<QList<double>> FitWorker::getData() const
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getTau90()));
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getF_tau90()));
 
-    for (QString parameterName : parameterMap.keys())
-        resultData << QList<double>::fromVector(QVector<double>::fromStdVector(parameterMap[parameterName]));
+    for (size_t i=0; i<parameterData.size(); i++)
+        resultData << QList<double>::fromVector(QVector<double>::fromStdVector(parameterData[i]));
 
     return resultData;
 }
@@ -687,11 +708,6 @@ std::vector<double> FitWorker::getSigmaError() const
 std::vector<double> FitWorker::getTau90() const
 {
     return tau90;
-}
-
-QMap<QString, std::vector<double>> FitWorker::getParameterMap() const
-{
-    return parameterMap;
 }
 
 FitPage::FitPage(QWidget *parent):
@@ -901,24 +917,33 @@ ResultPage::~ResultPage()
 {
 }
 
-void ResultPage::setData(QStringList header, QList<QList<double>> data)
+void ResultPage::setData(QStringList header, QStringList tooltips, QList<QList<double>> data)
 {
+    Q_ASSERT(header.size() == tooltips.size());
+    Q_ASSERT(header.size() == data.size());
+
     resultTable->setRowCount(MVector::nChannels);
     resultTable->setColumnCount(data.size());
 
     // set header
     resultTable->setHorizontalHeaderLabels(header);
 
-    // set values
+
+    // set values & tooltips
     auto sensorFailures = mData->getSensorFailures();
     for (int column=0; column<data.size(); column++)
     {
+        // set tooltip
+        resultTable->horizontalHeaderItem(column)->setToolTip(tooltips[column]);
+
+        // set values
         for (int row=0; row<MVector::nChannels; row++)
         {
             QTableWidgetItem* item = new QTableWidgetItem(QString::number(data[column][row], 'g', 5));
 
             if (sensorFailures[row])
                 item->setBackgroundColor(Qt::gray);
+
             resultTable->setItem(row, column, item);
         }
     }

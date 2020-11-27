@@ -183,6 +183,18 @@ QList<QString> LeastSquaresFitter::getParameterNames() const
     return parameterNames;
 }
 
+QStringList LeastSquaresFitter::getTooltips() const
+{
+    QStringList tooltips;
+
+    for (QString parameterName : parameterNames)
+    {
+        tooltips << "parameter " + parameterName + "\n\n" + getFunctionString();
+    }
+
+    return tooltips;
+}
+
 QMap<QString, LeastSquaresFitter::Type> LeastSquaresFitter::getTypeMap()
 {
     return typeMap;
@@ -492,6 +504,11 @@ double ADG_superpos_Fitter::f_t_90()
     double t0_2 = params(5);
 
     return 0.9 * (alpha_1 + alpha_2);
+}
+
+QString ADG_superpos_Fitter::getFunctionString() const
+{
+    return "f(t) = alpha_1 * e^(-beta_1 * (t - t0_1)) + alpha_2 * e^(-beta_2 * (t - t0_2))";
 }
 
 //Exposition_Fitter::Exposition_Fitter():

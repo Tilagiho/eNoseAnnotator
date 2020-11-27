@@ -35,6 +35,10 @@ public:
 
     QList<QString> getParameterNames() const;
 
+    QStringList getTooltips() const;
+
+    virtual QString getFunctionString() const = 0;
+
     virtual Type type() const = 0;
 
     static QMap<QString, LeastSquaresFitter::Type> getTypeMap();
@@ -78,6 +82,8 @@ public:
     double f_t_90() override;
 
     Type type() const { return Type::SUPERPOS; }
+
+    virtual QString getFunctionString() const override;
 
 protected:
     double model(
