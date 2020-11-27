@@ -156,7 +156,7 @@ public:
 
     void setMeasRunning(bool value);
 
-    QRectF boundingRect() const;
+    virtual QRectF boundingRect() const;
 
     double getT(double timestamp);
 
@@ -270,6 +270,8 @@ public:
 
     void addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
 
+    virtual QRectF boundingRect() const override;
+
 signals:
     void sensorFailuresSet(const std::vector<bool> &sensorFailures);
 
@@ -288,6 +290,8 @@ public:
 
     void addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
 
+    virtual QRectF boundingRect() const override;
+
 protected:
     virtual void initPlot(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
 };
@@ -298,6 +302,8 @@ class FuncLineGraphWidget : public LineGraphWidget
 
 public:
     explicit FuncLineGraphWidget(QWidget *parent = nullptr);
+
+    virtual QRectF boundingRect() const override;
 
 public slots:
     void addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;

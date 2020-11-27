@@ -712,12 +712,6 @@ QRectF LineGraphWidget::boundingRect() const
             rect = rect | data->boundingRect();
     }
 
-    // add relative margins
-    double deltaX = LGW_X_RELATIVE_MARGIN * rect.width();
-    double deltaY = LGW_Y_RELATIVE_MARGIN * rect.height();
-
-    rect.adjust(-deltaX, -deltaY, deltaX, 2*deltaY);
-
     return rect;
 }
 
@@ -1071,6 +1065,19 @@ void RelativeLineGraphWidget::addVector(uint timestamp, MVector vector, const Fu
     LineGraphWidget::addVector(timestamp, vector, functionalisation, sensorFailures);
 }
 
+QRectF RelativeLineGraphWidget::boundingRect() const
+{
+    QRectF rect = LineGraphWidget::boundingRect();
+
+    // add relative margins
+    double deltaX = LGW_X_RELATIVE_MARGIN * rect.width();
+    double deltaY = LGW_Y_RELATIVE_MARGIN * rect.height();
+
+    rect.adjust(-deltaX, -0.3*deltaY, deltaX, 2*deltaY);
+
+    return rect;
+}
+
 void AbsoluteLineGraphWidget::initPlot(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
 {
     LineGraphWidget::initPlot(timestamp, vector, functionalisation, sensorFailures);
@@ -1098,6 +1105,19 @@ void AbsoluteLineGraphWidget::addVector(uint timestamp, MVector vector, const Fu
     LineGraphWidget::addVector(timestamp, vector / 1000., functionalisation, sensorFailures);   // add vector / kOhm
 
     checkLimits(vector, sensorFailures);
+}
+
+QRectF AbsoluteLineGraphWidget::boundingRect() const
+{
+    QRectF rect = LineGraphWidget::boundingRect();
+
+    // add relative margins
+    double deltaX = LGW_X_RELATIVE_MARGIN * rect.width();
+    double deltaY = LGW_Y_RELATIVE_MARGIN * rect.height();
+
+    rect.adjust(-deltaX, -deltaY, deltaX, 2*deltaY);
+
+    return rect;
 }
 
 void AbsoluteLineGraphWidget::checkLimits( MVector vector, const std::vector<bool> &sensorFailures )
@@ -1130,6 +1150,19 @@ FuncLineGraphWidget::FuncLineGraphWidget(QWidget* parent):
     LineGraphWidget(parent)
 {
     setAxisTitle(QwtPlot::yLeft, QString(u8"\u0394") + "R / R0 [%]");
+}
+
+QRectF FuncLineGraphWidget::boundingRect() const
+{
+    QRectF rect = LineGraphWidget::boundingRect();
+
+    // add relative margins
+    double deltaX = LGW_X_RELATIVE_MARGIN * rect.width();
+    double deltaY = LGW_Y_RELATIVE_MARGIN * rect.height();
+
+    rect.adjust(-deltaX, -0.3*deltaY, deltaX, 2*deltaY);
+
+    return rect;
 }
 
 void FuncLineGraphWidget::addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
