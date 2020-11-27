@@ -30,7 +30,7 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sensor resistances smaller than the lower limit trigger a sensor failure flag, if use limits is activated.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>lower limit:</string>
+          <string>lower limit [Ohm]:</string>
          </property>
         </widget>
        </item>
@@ -70,7 +70,7 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sensor resistances higher than the upper limit trigger a sensor failure flag, if use limits is activated.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>upper limit:</string>
+          <string>upper limit [Ohm]:</string>
          </property>
         </widget>
        </item>

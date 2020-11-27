@@ -1099,8 +1099,8 @@ AbsoluteLineGraphWidget::AbsoluteLineGraphWidget(QWidget* parent):
 
 void AbsoluteLineGraphWidget::setLimits(double lowerLimit, double upperLimit, bool useLimits)
 {
-    this->lowerLimit = lowerLimit;
-    this->upperLimit = upperLimit;
+    this->lowerLimit = lowerLimit / 1000;
+    this->upperLimit = upperLimit / 1000;
     this->useLimits = useLimits;
 }
 

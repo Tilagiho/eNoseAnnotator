@@ -312,10 +312,10 @@ void Controler::setGeneralSettings()
 
         // --- limits ---
         // get limits
-        int newUpperLimit = dialog.getMaxVal();
-        int newLowerLimit = dialog.getMinVal();
-        int oldUpperLimit = upperLimit;
-        int oldLowerLimit = lowerLimit;
+        double newUpperLimit = dialog.getMaxVal();
+        double newLowerLimit = dialog.getMinVal();
+        double oldUpperLimit = upperLimit;
+        double oldLowerLimit = lowerLimit;
 
         // get useLimits
         bool newUseLimits = dialog.getUseLimits();
@@ -325,7 +325,7 @@ void Controler::setGeneralSettings()
         QString newPresetDir = dialog.getPresetDir();
 
         // recalc sensor failure flags if limits or useLimits changed
-        bool limitsChanged = newUseLimits && ((newUpperLimit != oldUpperLimit) || (newUpperLimit != oldLowerLimit));
+        bool limitsChanged = newUseLimits && (qFuzzyCompare(newUpperLimit, oldUpperLimit) || qFuzzyCompare(newUpperLimit, oldLowerLimit));
         bool useLimitsChanged = newUseLimits != oldUseLimits;
 
         auto sensorFailureFlags = mData->getSensorFailures();
