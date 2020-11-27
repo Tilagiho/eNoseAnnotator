@@ -5,6 +5,8 @@
 #include "../classes/enosecolor.h"
 #include "../classes/defaultSettings.h"
 
+#include <float.h>
+
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_grid.h>
@@ -998,6 +1000,11 @@ QColor LineGraphWidget::getGraphColor(uint i, const Functionalisation &functiona
 void LineGraphWidget::addPoint(QwtPlotCurve *curve, QPointF point)
 {
     CurveData *curveData = static_cast<CurveData *>( curve->data() );
+
+    // check max y
+    if (point.y() > DBL_MAX)
+        point.setY(DBL_MAX / 2);
+
     curveData->append( point );
 }
 

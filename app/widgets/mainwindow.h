@@ -65,7 +65,6 @@ signals:
     void sensorIdSet(QString);
 
 public slots:
-
     void addVector(uint timestamp, AbsoluteMVector absoluteVector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
     void setData(const QMap<uint, AbsoluteMVector> &data, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
     void clearGraphs();
