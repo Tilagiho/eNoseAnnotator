@@ -39,7 +39,7 @@ You can pause and stop the measurement. After stopping you can start a new measu
 
 ### Navigation
 You drag and drop the graphs to move around and use the mousewheel to zoom into and out of the graphs. Additionally you can zoom into a specific area by holding <kbd>Shift</kbd> and drawing a rectangle of the area with the <kbd>Left Mouse Button</kbd>.
-Use <kbd>Shift</kbd>+<kbd>Right Mouse Button</kbd> to zoom put of the graph to show all data of the current measurement. With <kbd>Shift</kbd>+<kbd>Middle Mouse Button</kbd> you can zoom to the previous zoom area specified.
+Use <kbd>Shift</kbd>+<kbd>Right Mouse Button</kbd> to zoom out of the graph to show all data of the current measurement. With <kbd>Shift</kbd>+<kbd>Middle Mouse Button</kbd> you can zoom to the previous zoom area specified.
 
 ### Annotating data
 
@@ -54,6 +54,16 @@ In order to annotate the selected data use the annotation symbol in the toolbar.
 You can load and save data using the the symbols in the toolbar at the top.
 
 The data is stored in the format of a .csv file.
+
+## Crash reports
+
+The eNoseAnnotator automatically creates a crash report when it terminates unexpectedly. If you experience crashes, the related crash reports can help us fixing the problem.
+They are stored in the temporary directory in "eNoseAnnotator/crash_reports".
+### Windows:
+Press <kbd>⊞ Win</kbd>+<kbd>R</kbd>, type "%TMP%" and press ok to open the local temp directory.
+
+### Linux:
+The crash reports are stored in /tmp or if the environment variable is set in TMPDIR.
 
 ## Classifiers
 
