@@ -277,7 +277,7 @@ void Controler::loadSettings()
     int lowerLimit = settings.value(LOWER_LIMIT_KEY, DEFAULT_LOWER_LIMIT).toInt();
     int upperLimit = settings.value(UPPER_LIMIT_KEY, DEFAULT_UPPER_LIMIT).toInt();
 
-    w->setAbsoluteLimits(lowerLimit, upperLimit, useLimits);
+    mData->setLimits(lowerLimit, upperLimit, useLimits);
 }
 
 void Controler::initSettings()
@@ -295,9 +295,9 @@ void Controler::setGeneralSettings()
     GeneralSettingsDialog dialog;
 
     // load current settings
-    bool useLimits = settings.value(USE_LIMITS_KEY, DEFAULT_USE_LIMITS).toBool();
-    double lowerLimit = settings.value(LOWER_LIMIT_KEY, DEFAULT_LOWER_LIMIT).toDouble();
-    double upperLimit = settings.value(UPPER_LIMIT_KEY, DEFAULT_UPPER_LIMIT).toDouble();
+    bool useLimits = mData->getUseLimits();
+    double lowerLimit = mData->getLowerLimit();
+    double upperLimit = mData->getUpperLimit();
     QString presetDir = settings.value(PRESET_DIR_KEY, DEFAULT_PRESET_DIR).value<QString>();
 
     // set current settings
@@ -311,91 +311,18 @@ void Controler::setGeneralSettings()
         // get new settings
 
         // --- limits ---
-        // get limits
         double newUpperLimit = dialog.getMaxVal();
         double newLowerLimit = dialog.getMinVal();
-        double oldUpperLimit = upperLimit;
-        double oldLowerLimit = lowerLimit;
-
-        // get useLimits
         bool newUseLimits = dialog.getUseLimits();
-        bool oldUseLimits = useLimits;
+
+        mData->setLimits(newLowerLimit, newUpperLimit, newUseLimits);
 
         // get preset dir
         QString newPresetDir = dialog.getPresetDir();
 
-        // recalc sensor failure flags if limits or useLimits changed
-        bool limitsChanged = newUseLimits && (qFuzzyCompare(newUpperLimit, oldUpperLimit) || qFuzzyCompare(newUpperLimit, oldLowerLimit));
-        bool useLimitsChanged = newUseLimits != oldUseLimits;
 
-        auto sensorFailureFlags = mData->getSensorFailures();
-
-        // 4 cases for change
-        // 1. useLimits: true -> false:
-        //      set all sensorFailureFlags added by limit violations to false
-        // 2. useLimits: false -> true:
-        //      find all limit violations and set the according flags to true
-        // 3. limits: minVal gets bigger or maxVal smaller
-        //      find old violations that are no violations anymore and set flag to false
-        // 4. limits: minVal gets smaller or maxVal bigger
-        //      find new violations that were no violations and set flag  to true
-        if (limitsChanged || useLimitsChanged)
-        {
-            auto dataMap = mData->getAbsoluteData();
-
-            for (MVector vector : dataMap)
-            {
-                for (int i = 0; i<MVector::nChannels; i++)
-                {
-                    // case 1+2
-                    if (useLimitsChanged)
-                    {
-                        if (vector[i] < newLowerLimit || vector[i] > newUpperLimit)
-                            sensorFailureFlags[i] = newUseLimits;   // useLimits == true -> set flags, else delete them
-                    }
-                    // case 3+4
-                    else    // limitsChanged
-                    {
-                        // minVal changed
-                        if (newLowerLimit < oldLowerLimit)  // case 4
-                        {
-                            for (int i=0; i<MVector::nChannels; i++)
-                                if (vector[i] >= newLowerLimit && vector[i] < oldLowerLimit)
-                                    sensorFailureFlags[i] = false;
-                        } else if (newLowerLimit > oldLowerLimit)   // case 3
-                        {
-                            for (int i=0; i<MVector::nChannels; i++)
-                                if (vector[i] < newLowerLimit && vector[i] >= oldLowerLimit)
-                                    sensorFailureFlags[i] = true;
-                        }
-
-                        // maxVal changed
-                        if (newUpperLimit > oldUpperLimit)  // case 4
-                        {
-                            for (int i=0; i<MVector::nChannels; i++)
-                                if (vector[i] <= newUpperLimit && vector[i] > oldUpperLimit)
-                                    sensorFailureFlags[i] = false;
-                        } else if (newUpperLimit < oldUpperLimit)   // case 3
-                        {
-                            for (int i=0; i<MVector::nChannels; i++)
-                                if (vector[i] > newUpperLimit && vector[i] <= oldUpperLimit)
-                                    sensorFailureFlags[i] = true;
-                        }
-                    }
-                }
-            }
-//            qDebug() << "Keys after general settings dialog:\n"  << settings.allKeys().join("; ");
-
-            // set new values
-            mData->setSensorFailures(sensorFailureFlags);
-
-            w->setAbsoluteLimits(newLowerLimit, newUpperLimit, newUseLimits);
-        }
         // save settings
         settings.setValue(PRESET_DIR_KEY, newPresetDir);
-        settings.setValue(USE_LIMITS_KEY, newUseLimits);
-        settings.setValue(LOWER_LIMIT_KEY, newLowerLimit);
-        settings.setValue(UPPER_LIMIT_KEY, newUpperLimit);
 
         // copy presets into new preset dir
         if (!settings.contains(PRESET_DIR_KEY) || newPresetDir != presetDir)
@@ -413,6 +340,8 @@ void Controler::setGeneralSettings()
                 QFile::copy(filePath, newPresetDir + "/" + fileName);
             }
         }
+
+        // qDebug() << "Keys after general settings dialog:\n"  << settings.allKeys().join("; ");
     }
 }
 

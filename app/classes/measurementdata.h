@@ -9,6 +9,7 @@
 #include "classifier_definitions.h"
 #include "leastsquaresfitter.h"
 #include "functionalisation.h"
+#include "defaultSettings.h"
 
 class MeasurementData : public QObject
 {
@@ -202,6 +203,12 @@ public:
 
     uint getPreviousTimestamp (uint timestamp);
 
+    double getLowerLimit() const;
+
+    double getUpperLimit() const;
+
+    bool getUseLimits() const;
+
 public slots:
     /*
      * clears selectedData and adds all vectors with timestamp between lower and upper to selectedData
@@ -232,6 +239,10 @@ public slots:
      */
     void addVector(uint timestamp, AbsoluteMVector vector, AbsoluteMVector baseLevelVector);
 
+    void checkLimits (const AbsoluteMVector &vector);
+    void checkLimits ();
+
+    void setLimits(double lowerLimit, double upperLimit, bool useLimits);
 
 signals:
     void selectionVectorChanged(const AbsoluteMVector &vector, const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation);  // emits new vector when dataSelected is changed
@@ -286,6 +297,10 @@ private:
     bool replotStatus = true;
 
 //    int nChannels = MVector::nChannels;
+
+    double lowerLimit = DEFAULT_LOWER_LIMIT;
+    double upperLimit = DEFAULT_UPPER_LIMIT;
+    bool useLimits = DEFAULT_USE_LIMITS;
 };
 
 /*!

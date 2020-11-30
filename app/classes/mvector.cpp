@@ -383,7 +383,7 @@ RelativeMVector AbsoluteMVector::getRelativeVector() const
             if (qIsInf((*baseVector)[i]) && qIsInf(this->vector[i]))   // both infinite
                 relativeVector[i] = 0.0;
             else if (qIsInf((*baseVector)[i]))                         // vector finite, baseVector infinite
-                relativeVector[i] = this->vector[i] / AbsoluteLineGraphWidget::upperLimit;
+                relativeVector[i] = 0;
             else                                                    // vector infinite, baseVector finite
                 relativeVector[i] = qInf();
         }

@@ -687,11 +687,6 @@ void MainWindow::openSensorFailuresDialog(const std::vector<bool> &sensorFailure
     sfDialog->deleteLater();
 }
 
-void MainWindow::setAbsoluteLimits(double lowerLimit, double upperLimit, bool useLimits)
-{
-    absLineGraph->setLimits(lowerLimit, upperLimit, useLimits);
-}
-
 void MainWindow::setDataChanged(bool value, QString filename)
 {
     // update isChange
@@ -854,9 +849,6 @@ void MainWindow::createDockWidgets()
     connect(relLineGraph, &LineGraphWidget::selectionCleared, funcLineGraph, &LineGraphWidget::clearSelection);
     connect(funcLineGraph, &LineGraphWidget::selectionCleared, absLineGraph, &LineGraphWidget::clearSelection);
     connect(funcLineGraph, &LineGraphWidget::selectionCleared, relLineGraph, &LineGraphWidget::clearSelection);
-
-    // sensor failures
-    connect(absLineGraph, &AbsoluteLineGraphWidget::sensorFailuresSet, this, &MainWindow::sensorFailuresSet);
 
 //    // vector bar graph
     QDockWidget *vbgdock = ui->dock2;

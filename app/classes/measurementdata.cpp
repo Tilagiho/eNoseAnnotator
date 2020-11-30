@@ -139,19 +139,14 @@ void MeasurementData::addVector(uint timestamp, AbsoluteMVector vector)
         if (!vector.sensorAttributes.keys().contains(attributeName))
             vector.sensorAttributes[attributeName] = 0.0;
 
+    checkLimits(vector);
+
     //  double usage of timestamps:
     if (data.contains(timestamp))
     {
         qCritical() << timestamp << ": double usage of timestamp!";
         throw std::runtime_error("Error adding vector: double usage of timestamp!");
     }
-
-    // empty data:
-    // this timestamp is startTimestamp of data
-//    if (data.isEmpty())
-//    {
-//        emit startTimestempSet(timestamp);
-//    }
 
     // set base vector
     vector.setBaseVector(getBaseVector(timestamp));
@@ -1087,6 +1082,113 @@ uint MeasurementData::getPreviousTimestamp(uint timestamp)
         previousTimestamp--;
     }
     return 0;
+}
+
+void MeasurementData::checkLimits (const AbsoluteMVector &vector)
+{
+    Q_ASSERT(vector.getSize() == sensorFailures.size());
+
+    if (!useLimits)
+        return;
+
+    auto newSensorFailures = sensorFailures;
+
+    for (size_t i=0; i<vector.getSize(); i++)
+        newSensorFailures[i] = vector[i] < lowerLimit || vector[i] > upperLimit;
+
+    if (newSensorFailures != sensorFailures)
+        setSensorFailures(newSensorFailures);
+}
+
+void MeasurementData::checkLimits ()
+{
+    // clear sensorFailures
+    setSensorFailures(std::vector<bool>(sensorFailures.size(), false));
+
+    // check limits
+    for (auto vector : data)
+        checkLimits(vector);
+}
+
+void MeasurementData::setLimits(double newLowerLimit, double newUpperLimit, bool newUseLimits)
+{
+    // recalc sensor failure flags if limits or useLimits changed
+    bool limitsChanged = newUseLimits && (!qFuzzyCompare(newUpperLimit, upperLimit) || !qFuzzyCompare(newUpperLimit, lowerLimit));
+    bool useLimitsChanged = newUseLimits != useLimits;
+
+    auto newSensorFailures = sensorFailures;
+
+    // 4 cases for change
+    // 1. useLimits: true -> false:
+    //      set all sensorFailureFlags added by limit violations to false
+    // 2. useLimits: false -> true:
+    //      find all limit violations and set the according flags to true
+    // 3. limits: minVal gets bigger or maxVal smaller
+    //      find old violations that are no violations anymore and set flag to false
+    // 4. limits: minVal gets smaller or maxVal bigger
+    //      find new violations that were no violations and set flag  to true
+    if (limitsChanged || useLimitsChanged)
+    {
+        // case 1+2
+        if (useLimitsChanged)
+        {
+            for (MVector vector : data)
+            {
+                for (size_t i = 0; i<MVector::nChannels; i++)
+                {
+                    if (vector[i] < newLowerLimit || vector[i] > newUpperLimit)
+                        newSensorFailures[i] = newUseLimits;   // useLimits == true -> set flags, else delete them
+                }
+            }
+        } else  // limitsChanged -> case 3+4
+        {
+            for (MVector vector : data)
+            {
+                for (size_t i = 0; i<MVector::nChannels; i++)
+                {
+                    // check lower limit
+                    if (vector[i] >= newLowerLimit && vector[i] < lowerLimit)   // case 3
+                        newSensorFailures[i] = false;
+                    else if (vector[i] < newLowerLimit && vector[i] >= lowerLimit)   // case 4
+                            newSensorFailures[i] = true;
+
+                    // check upper limit
+                    if (vector[i] <= newUpperLimit && vector[i] > upperLimit)   // case 3
+                            newSensorFailures[i] = false;
+                    else if (vector[i] > newUpperLimit && vector[i] <= upperLimit) // case 4
+                            newSensorFailures[i] = true;
+                }
+            }
+        }
+
+        // set new values
+        setSensorFailures(newSensorFailures);
+    }
+
+    // save settings
+    lowerLimit = newLowerLimit;
+    upperLimit = newUpperLimit;
+    useLimits = newUseLimits;
+
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    settings.setValue(USE_LIMITS_KEY, newUseLimits);
+    settings.setValue(LOWER_LIMIT_KEY, newLowerLimit);
+    settings.setValue(UPPER_LIMIT_KEY, newUpperLimit);
+}
+
+bool MeasurementData::getUseLimits() const
+{
+    return useLimits;
+}
+
+double MeasurementData::getUpperLimit() const
+{
+    return upperLimit;
+}
+
+double MeasurementData::getLowerLimit() const
+{
+    return lowerLimit;
 }
 
 QMap<uint, AbsoluteMVector> MeasurementData::getBaseLevelMap() const

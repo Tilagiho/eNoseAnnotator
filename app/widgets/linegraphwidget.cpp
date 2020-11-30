@@ -23,10 +23,6 @@
 
 #include <QMouseEvent>
 
-double AbsoluteLineGraphWidget::lowerLimit = DEFAULT_LOWER_LIMIT;
-double AbsoluteLineGraphWidget::upperLimit = DEFAULT_UPPER_LIMIT;
-bool AbsoluteLineGraphWidget::useLimits = DEFAULT_USE_LIMITS;
-
 /*!
  * \brief The CurveData class is a container for the data of one curve. It enables appending data to the curve.
  * Based on qwt example "realtime".
@@ -1097,21 +1093,12 @@ AbsoluteLineGraphWidget::AbsoluteLineGraphWidget(QWidget* parent):
     setAxisTitle(QwtPlot::yLeft, "R [k" + QString(u8"\u2126") + "]");
 }
 
-void AbsoluteLineGraphWidget::setLimits(double lowerLimit, double upperLimit, bool useLimits)
-{
-    this->lowerLimit = lowerLimit / 1000;
-    this->upperLimit = upperLimit / 1000;
-    this->useLimits = useLimits;
-}
-
 void AbsoluteLineGraphWidget::addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
 {
     Q_ASSERT(dataCurves.size() == 0 || functionalisation.size() == dataCurves.size());
     Q_ASSERT(dataCurves.size() == 0 || sensorFailures.size() == dataCurves.size());
 
     LineGraphWidget::addVector(timestamp, vector / 1000., functionalisation, sensorFailures);   // add vector / kOhm
-
-    checkLimits(vector, sensorFailures);
 }
 
 QRectF AbsoluteLineGraphWidget::boundingRect() const
@@ -1125,26 +1112,6 @@ QRectF AbsoluteLineGraphWidget::boundingRect() const
     rect.adjust(-deltaX, -deltaY, deltaX, 2*deltaY);
 
     return rect;
-}
-
-void AbsoluteLineGraphWidget::checkLimits( MVector vector, const std::vector<bool> &sensorFailures )
-{
-    if (useLimits)
-    {
-        std::vector<bool> newSensorFailures = sensorFailures;
-        for (int i=0; i<vector.getSize(); i++)
-        {
-            newSensorFailures[i] = newSensorFailures[i] | (vector[i] < lowerLimit || vector[i] > upperLimit);
-
-            auto curve = dataCurves[i];
-
-            if (sensorFailures[i] && curve->isVisible())
-                curve->setVisible(false);
-        }
-
-        if (newSensorFailures != sensorFailures)
-            emit sensorFailuresSet(newSensorFailures);
-    }
 }
 
 void RelativeLineGraphWidget::initPlot(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)

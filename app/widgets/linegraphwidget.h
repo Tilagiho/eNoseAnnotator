@@ -262,22 +262,11 @@ class AbsoluteLineGraphWidget : public LineGraphWidget
 public:
     explicit AbsoluteLineGraphWidget(QWidget *parent = nullptr);
 
-    static double lowerLimit;
-    static double upperLimit;
-    static bool useLimits;
-
-    void setLimits(double lowerLimit, double upperLimit, bool useLimits);
-
     void addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
 
     virtual QRectF boundingRect() const override;
 
-signals:
-    void sensorFailuresSet(const std::vector<bool> &sensorFailures);
-
 protected:
-    void checkLimits( MVector vector, const std::vector<bool> &sensorFailures );
-
     virtual void initPlot(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures) override;
 };
 

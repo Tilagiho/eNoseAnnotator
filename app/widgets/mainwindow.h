@@ -79,8 +79,6 @@ public slots:
 
     void openSensorFailuresDialog(const std::vector<bool> &sensorFailures);
 
-    void setAbsoluteLimits(double lowerLimit, double upperLimit, bool useLimits);
-
     void setDataChanged(bool dataIsChanged, QString filename);
 
     void setClassifier(QString name, QStringList classNames, bool isInputAbsolute, QString presetName);
