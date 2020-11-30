@@ -3,22 +3,29 @@
 QWT_VERSION="6.1.5"
 QWT_NAME="qwt-${QWT_VERSION}"
 
-# check if qwt was loaded from cache,
-# install if it was not
-if [ ! -d "../${QWT_NAME}" ]
-  then
-    # download qwt
-    pushd ..
-    wget -c -nv "https://sourceforge.net/projects/qwt/files/qwt/${QWT_VERSION}/${QWT_NAME}.zip"
-    unzip -q -o "${QWT_NAME}.zip"
-    pushd "${QWT_NAME}"
+pushd "${TRAVIS_BUILD_DIR}/.."
 
-    # install qwt
-    qmake
-    make -j$(nproc)
-    sudo make install
-    popd
-    popd
+# check if pre-built qwt was loaded from cache,
+# download and build if it was not
+# go into qwt dir to prepare install anyways
+if find "${QWT_NAME}" -mindepth 1 | read; then
+  pushd "${QWT_NAME}"
+else 
+  # download qwt
+  wget -c -nv "https://sourceforge.net/projects/qwt/files/qwt/${QWT_VERSION}/${QWT_NAME}.zip"
+  unzip -q -o "${QWT_NAME}.zip"
+  pushd "${QWT_NAME}"
+
+  # install qwt
+  qmake
+  make -j$(nproc)
 fi
+
+# install qwt
+sudo make install
+
 # register lib
 sudo ldconfig "/usr/local/${QWT_NAME}/lib"
+
+popd
+popd

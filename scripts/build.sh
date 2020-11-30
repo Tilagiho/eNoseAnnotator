@@ -62,8 +62,8 @@ prefix="eNoseAnnotator/usr"
 # release build: rename AppImage
 if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_TAG" != "" ]
 then 
-mv eNoseAnnotator*.AppImage eNoseAnnotator-${TRAVIS_TAG}-x86_64.AppImage
-mv eNoseAnnotator*.AppImage.zsync eNoseAnnotator-${TRAVIS_TAG}-x86_64.AppImage.zsync
+  mv eNoseAnnotator*.AppImage eNoseAnnotator-${TRAVIS_TAG}-x86_64.AppImage
+  mv eNoseAnnotator*.AppImage.zsync eNoseAnnotator-${TRAVIS_TAG}-x86_64.AppImage.zsync
 fi
 
 

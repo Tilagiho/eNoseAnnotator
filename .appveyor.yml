@@ -19,15 +19,8 @@ build_script:
   - 7z t libtorch.zip
   - 7z x libtorch.zip -oapp/lib/
 
-  # get qwt
-  - ps: Start-FileDownload 'https://sourceforge.net/projects/qwt/files/qwt/6.1.5/qwt-6.1.5.zip' -FileName qwt-6.1.5.zip
-  - 7z t qwt-6.1.5.zip
-  - 7z x qwt-6.1.5.zip -oapp/lib/
-  - cd "app/lib/qwt-6.1.5/"
-  - qmake qwt.pro
-  - nmake
-  - nmake install
-  - cd "../../.."
+  # install qwt
+  - ps: .\scripts\install_qwt.ps1
 
   #                     #
   #     build app       #
@@ -43,8 +36,6 @@ after_build:
   #     create executable       #
   #                             #
   - cd app
-  - dir %QTDIR%\bin
-  - cp %QTDIR%\bin\Qt5OpenGL.dll release\Qt5OpenGL.dll
   - windeployqt --compiler-runtime release/eNoseAnnotator.exe
 
   # remove unneeded files
@@ -55,10 +46,12 @@ after_build:
 
   # create directories to be deployed
   - mkdir "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/data/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/export/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/share/presets/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/classifiers/" "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
-  - cp app/lib/libtorch/lib/*.dll "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
-  - cp app/lib/qwt-6.1.5/lib/*.dll "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
-  - cp -r app/release/* "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
   - cp -r usr/share/presets "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/share/"
+  - cp app/lib/libtorch/lib/*.dll app/release
+  - cp C:/Qwt-6.1.5/lib/*.dll app/release
+  - cp "%QTDIR%\bin\Qt5OpenGL.dll" app/release
+  
+  - cp -r app/release/* "eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/eNoseAnnotator-%APPVEYOR_REPO_TAG_NAME%-Windows/bin/"
 
   #                             #
   #     generate symbol file    #
@@ -81,6 +74,8 @@ after_build:
   - dump_syms "app/release/app.pdb" > "%SYMBOL_DIR%/%SYMBOL_FILE%"
   - cp "app/release/app.pdb" "%SYMBOL_DIR%/"
 
+cache:
+  - C:\Qwt-6.1.5 -> install_qwt.ps1
 
 artifacts:
   - path: "eNoseAnnotator-${APPVEYOR_REPO_TAG_NAME}-Windows"

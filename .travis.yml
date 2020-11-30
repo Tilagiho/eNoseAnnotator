@@ -37,8 +37,11 @@ matrix:
       - bash -xv scripts/build.sh
     
     after_success:
-      - ls
       - bash -xv scripts/upload.sh 
+      
+cache:
+  directories:
+  - "${TRAVIS_BUILD_DIR}/../qwt-6.1.5"
 
 # safelist
 branches:
