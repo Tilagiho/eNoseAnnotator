@@ -448,6 +448,7 @@ void LineGraphWidget::setSensorFailures(const std::vector<bool> &sensorFailures,
 
     if (replotStatus)
     {
+        setupLegend(functionalisation, sensorFailures);
         replot();
         setZoomBase();
     }
@@ -740,39 +741,38 @@ uint LineGraphWidget::getTimestamp(double t)
 
 void LineGraphWidget::setupLegend(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
 {
-    auto funcList = functionalisation.getFuncMap().keys();
+    auto funcMap = functionalisation.getFuncMap(sensorFailures);
     QMap<int, QwtPlotCurve*> legendCurves;
 
     for (int i=0; i<dataCurves.size(); i++)
     {
+        // hide all curves from legend
+        dataCurves[i]->setItemAttribute(QwtPlotItem::Legend, false);
+        updateLegend(dataCurves[i]);
+
+        selectionCurves[i]->setItemAttribute(QwtPlotItem::Legend, false);
+        updateLegend(selectionCurves[i]);
         int func = functionalisation[i];
 
-        // hide all data curves except one for each functionalisation
-        if (!sensorFailures[i] && funcList.contains(func))
+        // add one data curve for each functionalisation to be added to the legend
+        // channels with sensorFailures are ignored
+        if (!sensorFailures[i] && funcMap.contains(func) && funcMap[func] > 0)
         {
             // add curve to legend curves
             legendCurves[func] = dataCurves[i];
 
-            // remove functionalisation
-            // future curves are ignored
-            funcList.removeAt(funcList.indexOf(func));
-        } else {
-            dataCurves[i]->setItemAttribute(QwtPlotItem::Legend, false);
-            updateLegend(dataCurves[i]);
+            // set count in funcMap to zero
+            // -> future curves with the same functionalisation are ignored
+            funcMap[func] = 0;
         }
-
-        // hide selection curves from legend
-        selectionCurves[i]->setItemAttribute(QwtPlotItem::Legend, false);
-        updateLegend(selectionCurves[i]);
     }
 
-    // order legend entries
-
+    // add legendCurves to legend
     for (int func : legendCurves.keys())
     {
         auto curve = legendCurves[func];
 
-        // reattach legendCurves in desired order
+        // reattach legendCurves so they appear in the desired order
         curve->detach();
         curve->attach(this);
 
@@ -1195,6 +1195,7 @@ void FuncLineGraphWidget::setSensorFailures(const std::vector<bool> &sensorFailu
 
     if (replotStatus)
     {
+        setupLegend(functionalisation, sensorFailures);
         replot();
         setZoomBase();
     }
