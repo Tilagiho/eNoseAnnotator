@@ -4,8 +4,9 @@
 #include <dlib/optimization.h>
 #include <QtCore>
 
-#define LEAST_SQUARES_N_ITERATIONS 10
+#define LEAST_SQUARES_N_ITERATIONS 10   // number of iterations
 #define LEAST_SQUARES_LIMIT_FACTOR 1.5
+#define LEAST_SQUARES_MAX_ITERATIONS 75
 
 typedef dlib::matrix<double,1,1> input_vector;
 typedef dlib::matrix<double,6,1> parameter_vector;

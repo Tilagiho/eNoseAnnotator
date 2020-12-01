@@ -21,6 +21,7 @@ double LeastSquaresFitter::model(double input) const
 
 void LeastSquaresFitter::solve(const std::vector<std::pair<double, double> > &samples, int nIterations, double limitFactor)
 {
+    qDebug() << "solve";
     // find y_max
     double y_max = 0.;
     for (auto pair : samples)
@@ -51,7 +52,7 @@ void LeastSquaresFitter::solve(const std::vector<std::pair<double, double> > &sa
 
         // start solver
         dlib::solve_least_squares(
-                    dlib::objective_delta_stop_strategy(1e-7, 75),
+                    dlib::objective_delta_stop_strategy(1e-7, LEAST_SQUARES_MAX_ITERATIONS),
                     [this](const std::pair<input_vector, double>& data, const parameter_vector& params) -> double
                       { return residual(data, params);},
                     [this](const std::pair<input_vector, double>& data, const parameter_vector& params) -> parameter_vector
@@ -60,33 +61,35 @@ void LeastSquaresFitter::solve(const std::vector<std::pair<double, double> > &sa
                     parameters
         );
 
+//        qDebug() << parameters(0) << ", " << parameters(1) << ", " << parameters(2) << ", " <<  parameters(3) << parameters(4) << parameters(5) << parameters(6) << parameters(7);
+
+        double error = residual_sum_of_sqares(samples, parameters);
+//        qDebug() << "Error:\t" << QString::number(error);
+
         // check f(t->infinty)
         // if f(t->infinity) > 2 * y_max:
         // ignore result
         input_vector testInput = {100000.};
         double testOutput = model(testInput, parameters);
         if (testOutput > limitFactor * y_max)
+        {
+//          qDebug() << "Plateau = " << QString::number(parameters(0) + parameters(3)) << "\t-> result ignored";
             continue;
-
-//        qDebug() << parameters(0) << ", " << parameters(1) << ", " << parameters(2) << ", " <<  parameters(3) << parameters(4) << parameters(5) << parameters(6) << parameters(7);
-
-        double error = residual_sum_of_sqares(samples, parameters);
-//        qDebug() << "error:\t" << error;
+        }
 
         if (error < bestError)
         {
             bestError = error;
             best_parameters = parameters;
-
-//            qDebug() << "New best error!";
         }
     }
-
     params = best_parameters;
+//    qDebug() << "-> Best error:\t" << QString::number(bestError);
 }
 
 void LeastSquaresFitter::solve_lm(const std::vector<std::pair<double, double> > &samples, int nIterations, double limitFactor)
 {
+    qDebug() << "solve_lm";
     // find y_max
     double y_max = 0.;
     for (auto pair : samples)
@@ -115,7 +118,7 @@ void LeastSquaresFitter::solve_lm(const std::vector<std::pair<double, double> > 
 
         // start solver
         dlib::solve_least_squares_lm(
-                    dlib::objective_delta_stop_strategy(1e-7, 75),
+                    dlib::objective_delta_stop_strategy(1e-7, LEAST_SQUARES_MAX_ITERATIONS),
                     [this](const std::pair<input_vector, double>& data, const parameter_vector& params) -> double
                       { return residual(data, params);},
                     [this](const std::pair<input_vector, double>& data, const parameter_vector& params) -> parameter_vector
@@ -124,15 +127,19 @@ void LeastSquaresFitter::solve_lm(const std::vector<std::pair<double, double> > 
                     parameters
         );
 
+        double error = residual_sum_of_sqares(samples, parameters);
+//        qDebug() << "Error:\t" << QString::number(error);
+
         // check f(t->infinty)
         // if f(t->infinity) > 2 * y_max:
         // ignore result
         input_vector testInput = {100000.};
         double testOutput = model(testInput, parameters);
         if (testOutput > limitFactor * y_max)
+        {
+//            qDebug() << "Plateau = " << QString::number(parameters(0) + parameters(3)) << "\t-> result ignored";
             continue;
-
-        double error = residual_sum_of_sqares(samples, parameters);
+        }
 
         if (error < bestError)
         {
@@ -140,8 +147,8 @@ void LeastSquaresFitter::solve_lm(const std::vector<std::pair<double, double> > 
             best_parameters = parameters;
         }
     }
-
     params = best_parameters;
+//    qDebug() << "-> Best error:\t" << QString::number(bestError);
 }
 
 double LeastSquaresFitter::residual_sum_of_sqares(const std::vector<std::pair<double, double> > &samples) const

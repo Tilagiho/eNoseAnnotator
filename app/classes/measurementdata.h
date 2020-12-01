@@ -209,6 +209,8 @@ public:
 
     bool getUseLimits() const;
 
+    size_t nChannels() const;
+
 public slots:
     /*
      * clears selectedData and adds all vectors with timestamp between lower and upper to selectedData

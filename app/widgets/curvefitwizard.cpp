@@ -8,8 +8,8 @@ CurveFitWizard::CurveFitWizard(MeasurementData* mData, QWidget* parent):
     introPage(new IntroPage),
     fitPage(new FitPage),
     resultPage(new ResultPage(mData)),
-    worker(mData),
-    thread(new QThread)
+    worker(new FitWorker(mData)),
+    nChannels(mData->nChannels())
 {
     setWindowTitle(tr("Fit curve to selection"));
     setMinimumWidth(1200);
@@ -19,76 +19,78 @@ CurveFitWizard::CurveFitWizard(MeasurementData* mData, QWidget* parent):
     setPage(Page_Fit, fitPage);
     setPage(Page_Result, resultPage);
 
-    // setup worker thread
-    worker.moveToThread(thread);
-    thread->start();
+    // don't delete QRunnable after run() was finished
+    // -> 1 call to run for each channel
+    worker->setAutoDelete(false);
+//    QThreadPool::globalInstance()->setMaxThreadCount(1);
 
     // page connections:
     // worker settings
     connect(introPage, &IntroPage::typeChanged, this, &CurveFitWizard::selectType);
-    connect(introPage, &IntroPage::detectExpositionChanged, &worker, &FitWorker::setDetectExpositionStart);
-    connect(introPage, &IntroPage::jumpBaseThresholdChanged, &worker, &FitWorker::setJumpBaseThreshold);
-    connect(introPage, &IntroPage::jumpFactorChanged, &worker, &FitWorker::setJumpFactor);
+    connect(introPage, &IntroPage::detectExpositionChanged, worker, &FitWorker::setDetectExpositionStart);
+    connect(introPage, &IntroPage::jumpBaseThresholdChanged, worker, &FitWorker::setJumpBaseThreshold);
+    connect(introPage, &IntroPage::jumpFactorChanged, worker, &FitWorker::setJumpFactor);
 
-    connect(introPage, &IntroPage::detectRecoveryChanged, &worker, &FitWorker::setDetectRecoveryStart);
-    connect(introPage, &IntroPage::recoveryFactorChanged, &worker, &FitWorker::setRecoveryFactor);
-    connect(introPage, &IntroPage::fitBufferChanged, &worker, &FitWorker::setFitBuffer);
+    connect(introPage, &IntroPage::detectRecoveryChanged, worker, &FitWorker::setDetectRecoveryStart);
+    connect(introPage, &IntroPage::recoveryFactorChanged, worker, &FitWorker::setRecoveryFactor);
+    connect(introPage, &IntroPage::fitBufferChanged, worker, &FitWorker::setFitBuffer);
 
-    connect(introPage, &IntroPage::nIterationsChanged, &worker, &FitWorker::setNIterations);
-    connect(introPage, &IntroPage::limitFactorChanged, &worker, &FitWorker::setLimitFactor);
+    connect(introPage, &IntroPage::nIterationsChanged, worker, &FitWorker::setNIterations);
+    connect(introPage, &IntroPage::limitFactorChanged, worker, &FitWorker::setLimitFactor);
 
     // range determination
-    connect(&worker, &FitWorker::rangeRedeterminationPossible, introPage, &IntroPage::setRangeRedeterminationPossible);
-    connect(introPage, &IntroPage::rangeDeterminationRequested, &worker, &FitWorker::determineChannelRanges);
-    connect(&worker, &FitWorker::rangeDeterminationStarted, fitPage, &FitPage::onRangeDeterminationStarted);
-    connect(&worker, &FitWorker::rangeDeterminationFinished, fitPage, &FitPage::onRangeDeterminationFinished);
+    connect(worker, &FitWorker::rangeRedeterminationPossible, introPage, &IntroPage::setRangeRedeterminationPossible);
+    connect(introPage, &IntroPage::rangeDeterminationRequested, worker, &FitWorker::determineChannelRanges);
+    connect(worker, &FitWorker::rangeDeterminationStarted, fitPage, &FitPage::onRangeDeterminationStarted);
+    connect(worker, &FitWorker::rangeDeterminationFinished, fitPage, &FitPage::onRangeDeterminationFinished);
 
     // fit process
-    connect(fitPage, &FitPage::fitRequested, &worker, &FitWorker::fit);
-    connect(&worker, &FitWorker::started, fitPage, &FitPage::onStarted);
-    connect(&worker, &FitWorker::finished, fitPage, &FitPage::onFinished);
+    connect(fitPage, &FitPage::fitRequested, this, &CurveFitWizard::fitCurves);
+    connect(worker, &FitWorker::started, fitPage, &FitPage::onStarted);
+    connect(worker, &FitWorker::finished, fitPage, &FitPage::onFinished);
 
     qRegisterMetaType<QList<QList<double>>>("QList<QList<double>>");
-    connect(&worker, &FitWorker::dataSet, resultPage, &ResultPage::setData); // set data in results page
+    connect(worker, &FitWorker::dataSet, resultPage, &ResultPage::setData); // set data in results page
 
-    connect(&worker, &FitWorker::progressChanged, fitPage, &FitPage::onProgressChanged);
-    connect(&worker, &FitWorker::error, fitPage, &FitPage::onError);
+    connect(worker, &FitWorker::progressChanged, fitPage, &FitPage::onProgressChanged);
+    connect(worker, &FitWorker::error, fitPage, &FitPage::onError);
 
     // result connections
     connect(resultPage, &ResultPage::saveResultsRequested, this, &CurveFitWizard::saveData); // save fit results
-    connect(resultPage, &ResultPage::channelRangeRequested, &worker, &FitWorker::emitChannelRange);
-    connect(&worker, &FitWorker::channelRangeProvided, resultPage, &ResultPage::setChannelRange);
+    connect(resultPage, &ResultPage::channelRangeRequested, worker, &FitWorker::emitChannelRange);
+    connect(worker, &FitWorker::channelRangeProvided, resultPage, &ResultPage::setChannelRange);
 
-    connect(resultPage, &ResultPage::removeFromRange, &worker, &FitWorker::removeFromRange);
-    connect(resultPage, &ResultPage::addToRange, &worker, &FitWorker::addToRange);
+    connect(resultPage, &ResultPage::removeFromRange, worker, &FitWorker::removeFromRange);
+    connect(resultPage, &ResultPage::addToRange, worker, &FitWorker::addToRange);
 
-    connect(&worker, &FitWorker::rangeDeterminationFinished, this, &CurveFitWizard::updateChannelRange);
+    connect(worker, &FitWorker::rangeDeterminationFinished, this, &CurveFitWizard::updateChannelRange);
 }
 
 CurveFitWizard::~CurveFitWizard()
 {
-    thread->quit();
-    thread->wait();
-    thread->deleteLater();
+    // stop worker threads and delete worker
+    QThreadPool::globalInstance()->clear();
+    QThreadPool::globalInstance()->waitForDone();
+    worker->deleteLater();
 }
 
 void CurveFitWizard::selectType()
 {
     auto type = LeastSquaresFitter::getTypeMap()[field("typeSelector").toString()];
-    QMetaObject::invokeMethod(&worker, "setType", Qt::QueuedConnection, Q_ARG(LeastSquaresFitter::Type, type));
+    worker->setType(type);
 }
 
 void CurveFitWizard::saveData()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
+    QString filePath = QFileDialog::getSaveFileName(this,
          tr("Save curve fit results"), "",
          tr("Data files (*.csv);;All Files (*)"));
 
-    if (!fileName.isEmpty())
+    if (!filePath.isEmpty())
     {
-        if (!fileName.endsWith(".csv"))
-            fileName += ".csv";
-        QMetaObject::invokeMethod(&worker, "save", Qt::QueuedConnection, Q_ARG(QString, fileName));
+        if (!filePath.endsWith(".csv"))
+            filePath += ".csv";
+        worker->save(filePath);
         resultPage->setDataSaved(true);
     }
 }
@@ -98,7 +100,17 @@ void CurveFitWizard::updateChannelRange()
     int channel = resultPage->getCurrentChannel();
 
     if (channel >= 0)
-        QMetaObject::invokeMethod(&worker, "emitChannelRange", Qt::QueuedConnection, Q_ARG(int, channel));
+        worker->emitChannelRange(channel);
+}
+
+void CurveFitWizard::fitCurves()
+{
+    worker->init();
+
+    qDebug() << "\n--------\nStarting curve fit:";
+    qDebug() << "max thread count:\t" << QString::number(QThreadPool::globalInstance()->maxThreadCount());
+    for (size_t i=0; i<nChannels; i++)
+        QThreadPool::globalInstance()->start(worker);
 }
 
 IntroPage::IntroPage(QWidget* parent):
@@ -248,6 +260,7 @@ void IntroPage::setDetectRecoveryStart(bool value)
 
 FitWorker::FitWorker(MeasurementData* mData, QObject *parent):
     QObject(parent),
+    QRunnable(),
     sigmaError(MVector::nChannels, 0.),
     tau90(MVector::nChannels, 0.),
     f_t90(MVector::nChannels, 0.),
@@ -269,6 +282,59 @@ FitWorker::FitWorker(MeasurementData* mData, QObject *parent):
         selectedData[timestamp] = relativeData[timestamp];
 }
 
+void FitWorker::run()
+{
+    Q_ASSERT(ch < mData->nChannels());
+
+    if (ch == 0)
+        emit started();
+
+    // select channel to be fitted
+    mutex.lock();
+    size_t channel = ch;
+    ch++;
+    mutex.unlock();
+
+    // fit channel
+    fitChannel(channel);
+
+    if (channelsFinished == mData->getAbsoluteData().first().getSize())
+    {
+        QStringList header = getHeader();
+        QStringList tooltips = getTooltips();
+        auto data = getData();
+
+        emit finished();
+        emit dataSet(header, tooltips, data);
+    }
+}
+
+void FitWorker::init()
+{
+    // reset ch
+    ch = 0;
+    channelsFinished = 0;
+
+    // init parameters
+    LeastSquaresFitter *fitter;
+    switch (type) {
+    case LeastSquaresFitter::Type::SUPERPOS:
+        fitter = new ADG_superpos_Fitter();
+        break;
+    default:
+        throw std::runtime_error("Unknown fitter type!");
+    }
+
+    parameterNames = fitter->getParameterNames();
+    fitTooltips = fitter->getTooltips();
+
+    parameterData.clear();
+    for ( int i=0; i<fitTooltips.size(); i++ )
+        parameterData << std::vector<double>(MVector::nChannels, 0.);
+
+    delete fitter;
+}
+
 void FitWorker::determineChannelRanges()
 {
     emit rangeDeterminationStarted();
@@ -280,7 +346,7 @@ void FitWorker::determineChannelRanges()
     auto sensorFailures = mData->getSensorFailures();
 
     std::vector<uint> x_end(MVector::nChannels, selectedData.lastKey());
-    for (int channel=0; channel<MVector::nChannels; channel++)
+    for (size_t channel=0; channel<MVector::nChannels; channel++)
     {
         // ignore channels with sensor failure flags
         if (sensorFailures[channel])
@@ -385,10 +451,8 @@ void FitWorker::determineChannelRanges()
     emit rangeDeterminationFinished();
 }
 
-void FitWorker::fit()
+void FitWorker::fitChannel(size_t channel)
 {
-    emit started();
-
     // init fitter
     LeastSquaresFitter *fitter, *fitter_lm;
     switch (type) {
@@ -400,29 +464,16 @@ void FitWorker::fit()
         throw std::runtime_error("Unknown fitter type!");
     }
 
+    qDebug() << "\nFit channel: " << channel;
 
+    auto channelData = dataRange[channel];
+//    for (auto pair : channelData)
+//        qDebug() << pair.first << ", " << pair.second;
 
-    // init parameters
-    parameterNames = fitter->getParameterNames();
-    fitTooltips = fitter->getTooltips();
-    for ( int i=0; i<fitTooltips.size(); i++ )
-        parameterData << std::vector<double>(MVector::nChannels, 0.);
-
-    for (size_t channel=0; channel<MVector::nChannels; channel++)
+    // no jump found or unplausible range detected:
+    // ignore
+    if (!channelData.empty() || !(channelData.size() < 0.15 * selectedData.size()))
     {
-        qDebug() << "\nFit channel: " << channel;
-
-        auto channelData = dataRange[channel];
-        for (auto pair : channelData)
-            qDebug() << pair.first << ", " << pair.second;
-
-        // no jump found or unplausible range detected:
-        // ignore
-        if (channelData.empty() || channelData.size() < 0.15 * selectedData.size())
-        {
-            continue;
-        }
-
         // fit curve to channelData
         try {
             fitter->solve(channelData, nIterations, limitFactor);
@@ -443,16 +494,13 @@ void FitWorker::fit()
         } catch (dlib::error exception) {
             error("Error in channel " + QString::number(channel) + ": " + QString(exception.what()));
         }
-
-        emit progressChanged(channel);
     }
 
-    QStringList header = getHeader();
-    QStringList tooltips = getTooltips();
-    auto data = getData();
+    mutex.lock();
+    channelsFinished++;
+    emit progressChanged(channelsFinished);
+    mutex.unlock();
 
-    emit finished();
-    emit dataSet(header, tooltips, data);
     delete fitter;
     delete  fitter_lm;
 }
@@ -752,7 +800,7 @@ void FitPage::startFit()
 
     progressbar->setValue(0);
 
-    for(QWizard::WizardButton which: {QWizard::BackButton, QWizard::NextButton, QWizard::CancelButton, QWizard::FinishButton})
+    for(QWizard::WizardButton which: {QWizard::BackButton, QWizard::NextButton})
         if(QAbstractButton * button = wizard()->button(which))
             button->setEnabled(false);
 

@@ -58,7 +58,7 @@ private:
 };
 
 
-class FitWorker: public QObject
+class FitWorker: public QObject, public QRunnable
 {
     Q_OBJECT
 
@@ -75,8 +75,11 @@ public:
 
     std::vector<double> getF_tau90() const;
 
+    void run() override;
+
 public Q_SLOTS:
-    void fit();
+    void init();
+    void fitChannel(size_t channel);
     void determineChannelRanges();
     void save(QString filePath) const;
 
@@ -113,6 +116,10 @@ Q_SIGNALS:
     void channelRangeProvided(int channel, QList<uint> channelRange);
 
 private:
+    size_t ch = 0;
+    int channelsFinished = 0;
+    QMutex mutex;
+
     QStringList fitTooltips;
     QList<QString> parameterNames;
     QList<std::vector<double>> parameterData;
@@ -215,13 +222,14 @@ public Q_SLOTS:
     void selectType();
     void saveData();
     void updateChannelRange();
+    void fitCurves();
 
 private:
     IntroPage* introPage;
     FitPage* fitPage;
     ResultPage* resultPage;
-    FitWorker worker;
-    QThread *thread;
+    FitWorker* worker;
+    size_t nChannels;
 };
 
 #endif // CURVEFITWIZARD_H

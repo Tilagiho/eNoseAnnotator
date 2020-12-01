@@ -1181,6 +1181,11 @@ bool MeasurementData::getUseLimits() const
     return useLimits;
 }
 
+size_t MeasurementData::nChannels() const
+{
+    return data.first().getSize();
+}
+
 double MeasurementData::getUpperLimit() const
 {
     return upperLimit;
