@@ -171,7 +171,11 @@ public:
     explicit ResultPage(MeasurementData *mData, QWidget *parent = nullptr);
     ~ResultPage();
 
+    bool isComplete() const;
+
     int getCurrentChannel();
+
+    void setDataSaved(bool value);
 
 Q_SIGNALS:
     void saveResultsRequested();
@@ -193,6 +197,8 @@ private:
     QPushButton *saveButton, *minusButton, *addButton;
     MeasurementData *mData;
     QMap<uint, AbsoluteMVector> selectedData;
+
+    bool dataSaved = false;
 };
 
 class CurveFitWizard : public QWizard

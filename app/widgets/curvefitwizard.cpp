@@ -89,6 +89,7 @@ void CurveFitWizard::saveData()
         if (!fileName.endsWith(".csv"))
             fileName += ".csv";
         QMetaObject::invokeMethod(&worker, "save", Qt::QueuedConnection, Q_ARG(QString, fileName));
+        resultPage->setDataSaved(true);
     }
 }
 
@@ -917,6 +918,11 @@ ResultPage::~ResultPage()
 {
 }
 
+bool ResultPage::isComplete() const
+{
+    return dataSaved;
+}
+
 void ResultPage::setData(QStringList header, QStringList tooltips, QList<QList<double>> data)
 {
     Q_ASSERT(header.size() == tooltips.size());
@@ -1017,6 +1023,12 @@ void ResultPage::requestRangeExtension()
         rangeList << item->column();
 
     emit addToRange(channel, rangeList);
+}
+
+void ResultPage::setDataSaved(bool value)
+{
+    dataSaved = value;
+    emit completeChanged();
 }
 
 int ResultPage::getCurrentChannel()
