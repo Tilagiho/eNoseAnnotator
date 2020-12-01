@@ -166,6 +166,8 @@ public:
 
     uint getTimestamp(double t);
 
+    void setAxisScale( int axisId, double min, double max, double stepSize = 0 );
+
 signals:
     void axisIntvSet(QwtInterval intv, QwtPlot::Axis axis);
 

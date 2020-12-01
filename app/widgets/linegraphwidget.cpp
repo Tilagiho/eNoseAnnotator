@@ -28,7 +28,9 @@
  * Based on qwt example "realtime".
  */
 CurveData::CurveData()
-{}
+{
+    clear();    // init d_bounding_rect
+}
 
 QRectF CurveData::boundingRect() const
 {
@@ -44,7 +46,7 @@ inline void CurveData::append( const QPointF &point )
 
     // resize bounding rectangle, if necessary, to contain point:
     // init bounding rectangle
-    if ( d_boundingRect.width() < 0.0 )
+    if ( qFuzzyCompare(d_boundingRect.width(), 0.0) && qFuzzyCompare(d_boundingRect.height(), 0.0) )
         d_boundingRect = qwtBoundingRect( *this );
 
     if (!d_boundingRect.contains(point))
@@ -58,7 +60,7 @@ void CurveData::clear()
 {
     d_samples.clear();
     d_samples.squeeze();
-    d_boundingRect = QRectF( 0.0, 0.0, -1.0, -1.0 );
+    d_boundingRect = QRectF( 0.0, 0.0, 0.0, 0.0 );
 }
 
 QVector<QPointF>* CurveData::samples()
@@ -402,11 +404,14 @@ void LineGraphWidget::clearGraph()
         for (auto rect : label)
             delete rect;
 
-    replot();
     dataCurves.clear();
     selectionCurves.clear();
     userDefinedClassLabels.clear();
     detectedClassLabels.clear();
+    legend->clearLegend();
+
+    if (replotStatus)
+        replot();
 }
 
 void LineGraphWidget::clearSelection()
@@ -538,9 +543,9 @@ void LineGraphWidget::setAxisIntv (QwtInterval intv, QwtPlot::Axis axis)
 
     if (intv != currentIntv)
     {
-        this->setAxisScale(axis, intv.minValue(), intv.maxValue());
+        setAxisScale(axis, intv.minValue(), intv.maxValue());
         if (replotStatus)
-            this->replot();
+            replot();
     }
 }
 
@@ -733,6 +738,23 @@ double LineGraphWidget::getT(QDateTime datetime)
 uint LineGraphWidget::getTimestamp(double t)
 {
     return QwtDate::toDateTime(t).toTime_t();
+}
+
+/*!
+ * \brief LineGraphWidget::setAxisScale calls QwtPlot::setAxisScale, but converts inverted ranges (min > max) into non-inverted ranges.
+ * Necessary, because setZoomBase sometimes inverses the y-scale for some reason.
+ * Call QwtPlot::setAxisScale directly if inverted scales should be allowed.
+ * \param axisId
+ * \param min
+ * \param max
+ * \param stepSize
+ */
+void LineGraphWidget::setAxisScale(int axisId, double min, double max, double stepSize)
+{
+    if (min > max)
+        std::swap(min, max);
+
+    QwtPlot::setAxisScale(axisId, min, max, stepSize);
 }
 
 void LineGraphWidget::setupLegend(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)
