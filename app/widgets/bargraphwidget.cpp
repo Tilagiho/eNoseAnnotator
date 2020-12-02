@@ -7,6 +7,11 @@
 #include <qwt_scale_draw.h>
 #include <qwt_scale_engine.h>
 #include <qwt_plot_grid.h>
+#include <qwt_plot_renderer.h>
+
+#include <QMenu>
+#include <QMouseEvent>
+#include <QGuiApplication>
 
 class FullTicksScaleEngine: public QwtLinearScaleEngine
 {
@@ -169,6 +174,28 @@ void AbstractBarGraphWidget::clear()
 
     d_barChartItem->setSamples(values);
     replot();
+}
+
+void AbstractBarGraphWidget::exportGraph(QString filePath)
+{
+    int widthResolution = logicalDpiX();  //width dots per inch
+    int heightResolution = logicalDpiY();  //width dots per inch
+
+    double widthMM = 25.4 * static_cast<double>(size().width()) / static_cast<double>(widthResolution);
+    double heightMM = 25.4 * static_cast<double>(size().height()) / static_cast<double>(heightResolution);
+    QSizeF sizeMM(widthMM, heightMM);
+
+    QwtPlotRenderer renderer;
+    renderer.renderDocument(this, filePath, sizeMM, 150);}
+
+void AbstractBarGraphWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::RightButton && !(QGuiApplication::keyboardModifiers() & Qt::ShiftModifier))
+    {
+        QMenu* menu = new QMenu(this);
+        menu->addAction("Save graph as image...", this, &AbstractBarGraphWidget::saveRequested);
+        menu->popup(this->mapToGlobal(event->pos()));
+    }
 }
 
 RelVecBarGraphWidget::RelVecBarGraphWidget ( QWidget *parent ) :

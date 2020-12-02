@@ -20,8 +20,11 @@
 #include <qwt_date_scale_engine.h>
 
 #include <qwt_plot_marker.h>
+#include <qwt_plot_renderer.h>
 
 #include <QMouseEvent>
+#include <QMenu>
+#include <QGuiApplication>
 
 /*!
  * \brief The CurveData class is a container for the data of one curve. It enables appending data to the curve.
@@ -700,6 +703,16 @@ bool LineGraphWidget::autoMoveXRange(double t)
     return false;
 }
 
+void LineGraphWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::RightButton && !(QGuiApplication::keyboardModifiers() & Qt::ShiftModifier))
+    {
+        QMenu* menu = new QMenu(this);
+        menu->addAction("Save graph as image...", this, &LineGraphWidget::saveRequested);
+        menu->popup(this->mapToGlobal(event->pos()));
+    }
+}
+
 QRectF LineGraphWidget::boundingRect() const
 {
     QRectF rect(0., 0., -1., -1.);
@@ -755,6 +768,27 @@ void LineGraphWidget::setAxisScale(int axisId, double min, double max, double st
         std::swap(min, max);
 
     QwtPlot::setAxisScale(axisId, min, max, stepSize);
+}
+
+void LineGraphWidget::exportGraph(QString filePath)
+{
+    // hide tooltips
+    coordinateLabel->hide();
+    replot();
+
+    int widthResolution = logicalDpiX();  //width dots per inch
+    int heightResolution = logicalDpiY();  //width dots per inch
+
+    double widthMM = 25.4 * static_cast<double>(size().width()) / static_cast<double>(widthResolution);
+    double heightMM = 25.4 * static_cast<double>(size().height()) / static_cast<double>(heightResolution);
+    QSizeF sizeMM(widthMM, heightMM);
+
+    QwtPlotRenderer renderer;
+    renderer.renderDocument(this, filePath, sizeMM, 150);
+
+    // show tooltips again
+    coordinateLabel->show();
+    replot();
 }
 
 void LineGraphWidget::setupLegend(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures)

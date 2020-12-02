@@ -60,212 +60,6 @@ MainWindow::MainWindow(QWidget *parent)
     //                  //
     connect (this, &MainWindow::commentSet, measInfoWidget, &InfoWidget::setComment);
     connect (this, &MainWindow::sensorIdSet, measInfoWidget, &InfoWidget::setSensorId);
-
-
-    // this->setStyleSheet("QSplitter::handle{background: black;}"); // make splitter visible
-
-    // connections:
-    // connect funcLineGraph, lGraph & absLGraph
-
-//    connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector selectionVector){
-//        if (classifier != nullptr)
-//        {
-//            auto funcVector = selectionVector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures(), inputFunctionType);
-
-//            try {
-//                Annotation annotation = classifier->getAnnotation(funcVector.getVector());
-//                classifierWidget->setAnnotation(annotation);
-//                classifierWidget->setInfoString("Class of selection");
-//                classifierWidget->isSelectionAnnotation = true;
-//            } catch (std::invalid_argument& e) {
-//                QString error_message = e.what() + QString("\nDo you want to close the classifier?");
-//                QMessageBox::StandardButton answer = QMessageBox::question(this, "Classifier error", error_message);
-//                if (answer == QMessageBox::StandardButton::Yes)
-//                {
-//                    closeClassifier();
-//                }
-//            }
-//        }
-//    }); // classify selection
-//    connect(mData, &MeasurementData::selectionCleared, classifierWidget, &ClassifierWidget::clearAnnotation); // clear selection classification
-
-//    connect(mData, &MeasurementData::labelsUpdated, funcLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
-//    connect(mData, &MeasurementData::labelsUpdated, absLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
-//    connect(mData, &MeasurementData::labelsUpdated, relLineGraph, &LineGraphWidget::labelSelection); // draw selection and classes
-
-//    connect(mData, &MeasurementData::selectionVectorChanged, this, [this](MVector, std::vector<bool>){
-//        ui->actionAnnotate_selection->setEnabled(true);
-//        ui->actionDelete_Annotation->setEnabled(true);
-//        ui->actionSet_detected_class_of_selection->setEnabled(true);
-//    }); // show classification actions
-//    connect(mData, &MeasurementData::selectionCleared, this, [this](){
-//        ui->actionAnnotate_selection->setEnabled(false);
-//        ui->actionDelete_Annotation->setEnabled(false);
-//        ui->actionSet_detected_class_of_selection->setEnabled(false);
-//    }); // hide classification actions
-
-//    // reset graphs
-//    connect(mData, &MeasurementData::dataReset, this, [this]{
-//        funcLineGraph->clearGraph();
-//        relLineGraph->clearGraph();
-//        absLineGraph->clearGraph();
-//        vectorBarGraph->clearBars();
-//        funcBarGraph->clearBars();
-//    }); // clear all graphs when data is reset
-
-//    // new data
-//    connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool yRescale){
-//        // calculate funcVector, if necessary
-//        bool calcFuncVector = false;
-//        for (int func : mData->getFunctionalisation())
-//        {
-//            if (func != 0)
-//            {
-//                calcFuncVector = true;
-//                break;
-//            }
-//        }
-//        if (!calcFuncVector)
-//            funcLineGraph->addMeasurement(vector, timestamp, functionalisation, sensorFailures, yRescale);
-//        else
-//        {
-//            MVector funcVector = vector.getFuncVector(mData->getFunctionalisation(), mData->getSensorFailures(), inputFunctionType);
-//            funcLineGraph->addMeasurement(funcVector, timestamp, functionalisation, sensorFailures, yRescale);
-//        }
-//    });    // add new data to func line graph
-//    connect(mData, &MeasurementData::absoluteDataAdded, absLineGraph, &LineGraphWidget::addMeasurement); // add new absolute measruement
-////    connect(mData, &MeasurementData::dataSet, relLineGraph, &LineGraphWidget::setData);     // set loaded data in lGraph
-////    connect(mData, &MeasurementData::dataSet, this, [this](QMap<uint, MVector> data, std::vector<int> functionalisation, std::vector<bool> sensorFailures){
-////        auto funcs = mData->getFunctionalisation();
-////        auto failures = mData->getSensorFailures();
-
-////        // add recalculated functionalitisation averages to cleared funcLineGraph
-////        QMap<uint, MVector> funcData;
-////        for (int timestamp : data.keys())
-////            funcData[timestamp] = data[timestamp].getFuncVector(funcs, failures, inputFunctionType);
-
-////        funcLineGraph->setData(funcData, functionalisation, sensorFailures);
-////    });     // set loaded data in lGraph
-
-//    connect(mData, &MeasurementData::setReplotStatus, funcLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
-//    connect(mData, &MeasurementData::setReplotStatus, relLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
-//    connect(mData, &MeasurementData::setReplotStatus, absLineGraph, &LineGraphWidget::setReplotStatus);   // replotStatus
-//    connect(mData, &MeasurementData::dataAdded, this, [this](MVector vector, uint timestamp, std::vector<int> functionalisation, std::vector<bool> sensorFailures, bool){
-//        // no classifier loaded or no live measurement running
-//        // -> don't classify
-//        bool measRunning = source != nullptr && source->status() == DataSource::Status::RECEIVING_DATA;
-//        bool isLiveClassification = classifierWidget->getIsLive();
-//        if (classifier == nullptr || !measRunning || !isLiveClassification)
-//            return;
-
-//        // get annotation from the classifier
-//        auto funcVector = vector.getFuncVector(functionalisation, sensorFailures, inputFunctionType);
-
-//        try {
-//            Annotation annotation = classifier->getAnnotation(funcVector.getVector());
-
-//            // set annotation
-//            mData->setDetectedAnnotation(annotation, timestamp);
-
-//            // don't show in classifier widget if selection is made
-//            if (!classifierWidget->isSelectionAnnotation)
-//            {
-//                classifierWidget->setAnnotation(annotation);
-//                classifierWidget->setInfoString("Live classification is running...");
-//            }
-//        } catch (std::invalid_argument& e) {
-//            QString error_message = e.what() + QString("\nDo you want to close the classifier?");
-//            QMessageBox::StandardButton answer = QMessageBox::question(this, "Classifier error", error_message);
-//            if (answer == QMessageBox::StandardButton::Yes)
-//            {
-//                closeClassifier();
-//            }
-//        }
-
-//    });     // live classification
-//    connect(classifierWidget, &ClassifierWidget::isLiveChanged, this, &MainWindow::setIsLiveClassificationState);
-
-
-//    // measurement data changed
-//    connect(mData, &MeasurementData::dataChangedSet, this, [this](bool dataChanged){
-//        setTitle(dataChanged);
-//    });
-
-//    // sensor failures detected
-//    connect(absLineGraph, &LineGraphWidget::sensorFailure, this, [this](std::vector<bool> newSensorFailures){
-//        Q_ASSERT(newSensorFailures.size() == MVector::nChannels);
-
-//        std::vector<bool> oldSensorFailures = mData->getSensorFailures();
-//        std::vector<bool> mergedSensorFailures;
-
-//        for (uint i=0; i<MVector::nChannels; i++)
-//            mergedSensorFailures.push_back(oldSensorFailures[i] || newSensorFailures[i]);
-
-//        if (mergedSensorFailures != oldSensorFailures)
-//        {
-//            mData->setSensorFailures(mergedSensorFailures);
-//            measInfoWidget->setFailures(mergedSensorFailures);
-//        }
-//    }); // absGraph -> mData
-//    connect(mData, &MeasurementData::sensorFailuresSet, relLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> lGraph: update sensr failures
-//    connect(mData, &MeasurementData::sensorFailuresSet, absLineGraph, &LineGraphWidget::setSensorFailureFlags);    // mData: failures changed -> absLGraph: update sensor failures
-//    connect(mData, &MeasurementData::sensorFailuresSet, this, [this](std::vector<bool>){
-//        auto functionalisation = mData->getFunctionalisation();
-//        auto sensorFailures = mData->getSensorFailures();
-
-//        if (mData->getFuncMap(functionalisation, sensorFailures).size() > 1)
-//        {
-//            // update func line graph:
-//            funcLineGraph->clearGraph();
-
-//            auto data = mData->getRelativeData();
-
-//            funcLineGraph->setData(mData->getFuncData(), functionalisation, sensorFailures);
-
-//            // update func bar graphs:
-//            if (!mData->getSelectionMap().isEmpty())
-//            {
-//                funcBarGraph->clearBars();
-//                MVector selectionVector = mData->getSelectionVector();
-
-//                funcBarGraph->setBars(selectionVector, sensorFailures, functionalisation);
-//            }
-//        } else
-//            funcLineGraph->setSensorFailureFlags(mData->getSensorFailures());
-//    });     // update functionalisation graphs
-
-
-
-
-
-//    // saving images of the graphs
-//    connect(relLineGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
-//        saveLineGraph(relLineGraph);
-//    });
-
-//    connect(funcLineGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
-//        saveLineGraph(funcLineGraph);
-//    });
-
-//    connect(absLineGraph, &LineGraphWidget::ImageSaveRequested, this, [this](){
-//        saveLineGraph(absLineGraph);
-//    });
-
-//    connect(vectorBarGraph, &BarGraphWidget::imageSaveRequested, this, [this](){
-//        saveBarGraph(vectorBarGraph);
-//    });
-
-//    connect(funcBarGraph, &BarGraphWidget::imageSaveRequested, this, [this](){
-//        saveBarGraph(funcBarGraph);
-//    });
-
-//    // functionalisation changed
-//    connect(mData, &MeasurementData::functionalisationChanged, this, &MainWindow::updateFuncGraph); // recalculate func line graph
-
-//    // timer for autosaves
-//    connect(&autosaveTimer, &QTimer::timeout, this, &MainWindow::updateAutosave);
-//    autosaveTimer.setSingleShot(false);
-//    autosaveTimer.start(static_cast<int>(autosaveIntervall * 60 * 1000));
 }
 
 MainWindow::~MainWindow()
@@ -413,90 +207,6 @@ void MainWindow::on_actionsave_selection_triggered()
     emit saveSelectionRequested();
 }
 
-//void MainWindow::saveLineGraph(LineGraphWidget *graph)
-//{
-//    // load export directory
-//    QString exportDir = settings->value(EXPORT_DIR_KEY, DEFAULT_EXPORT_DIR).toString();
-
-//    // save file dialog
-//    QString selectedExtension;
-//    QString filename = QFileDialog::getSaveFileName(this, tr("Save Graph Image"), exportDir, "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
-
-//    // save image
-//    if (!filename.isEmpty())
-//    {
-//        // add extension if none was set
-//        QStringList splitList = filename.split(".");
-//        if (splitList.size() < 2)
-//            filename += ".jpg";
-//        // unknown file extension
-//        else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
-//            filename += ".jpg";
-
-//        graph->saveImage(filename);
-
-//        // save export dir
-//        QStringList filePathList = filename.split("/");
-//        filePathList.removeLast();
-//        QString newExportDir = filePathList.join("/");
-//        if (newExportDir != exportDir)
-//        {
-//            settings->setValue(EXPORT_DIR_KEY, newExportDir);
-//            settings->sync();
-//        }
-//    }
-//}
-
-//void MainWindow::saveBarGraph(BarGraphWidget *graph)
-//{
-//    // load export directory
-//    QString exportDir = settings->value(EXPORT_DIR_KEY, DEFAULT_EXPORT_DIR).toString();
-
-//    // save file dialog
-//    QString selectedExtension;
-//    QString filename = QFileDialog::getSaveFileName(this, tr("Save Graph Image"), exportDir, "Image Files (*.png *.jpg *.jpeg *.bmp)", &selectedExtension);
-
-//    // save image
-//    if (!filename.isEmpty())
-//    {
-//        // add extension if none was set
-//        QStringList splitList = filename.split(".");
-//        if (splitList.size() < 2)
-//            filename += ".jpg";
-//        // unknown file extension
-//        else if (splitList.last() != "png" && splitList.last() != "jpg" && splitList.last() != "jpeg" && splitList.last() != "bmp")
-//            filename += ".jpg";
-
-//        graph->saveImage(filename);
-
-//        // save export dir
-//        QStringList filePathList = filename.split("/");
-//        filePathList.removeLast();
-//        QString newExportDir = filePathList.join("/");
-//        if (newExportDir != exportDir)
-//        {
-//            settings->setValue(EXPORT_DIR_KEY, newExportDir);
-//            settings->sync();
-//        }
-//    }
-//}
-
-//void MainWindow::resetNChannels(uint newNChannels)
-//{
-//    // change nChannels
-//    MVector::nChannels = newNChannels;
-
-//    // reset mData
-//    mData->resetNChannels();
-
-//    // reset graphs
-//    // funcLineGraph will be updated anyways
-//    relLineGraph->setNChannels(MVector::nChannels);
-//    absLineGraph->setNChannels(MVector::nChannels);
-//    vectorBarGraph->resetNChannels();
-//    funcBarGraph->resetNChannels();
-//}
-
 void MainWindow::on_actionLoad_triggered()
 {
     emit loadMeasurementRequested();
@@ -641,7 +351,52 @@ void MainWindow::setSelectionActionsEnabled(bool selectionMade)
     ui->actionFit_curve->setEnabled(selectionMade);
 }
 
-bool MainWindow::getConverterRunning() const
+void MainWindow::saveLineGraph(LineGraphWidget *graph)
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QString exportPath = settings.value(EXPORT_DIR_KEY, DEFAULT_EXPORT_DIR).toString();
+    QString filter;
+    QString filePath = QFileDialog::getSaveFileName(this, "Save line graph", exportPath, "png (*.png);;jpg (*.jpg);;svg (*.svg);;pdf (*.pdf)", &filter);
+
+    if (!filePath.isEmpty())
+    {
+        if (filter != "")
+        {
+            filter = filter.split(" ")[0];
+            if (!filePath.endsWith(filter))
+                filePath += "." + filter;
+        }
+
+        graph->exportGraph(filePath);
+    }
+
+    settings.setValue(EXPORT_DIR_KEY, filePath);
+}
+
+
+void MainWindow::saveBarGraph(AbstractBarGraphWidget *graph)
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QString exportPath = settings.value(EXPORT_DIR_KEY, DEFAULT_EXPORT_DIR).toString();
+    QString filter;
+    QString filePath = QFileDialog::getSaveFileName(this, "Save bar graph", exportPath, "png (*.png);;jpg (*.jpg);;svg (*.svg);;pdf (*.pdf)", &filter);
+
+    if (!filePath.isEmpty())
+    {
+        if (filter != "")
+        {
+            filter = filter.split(" ")[0];
+            if (!filePath.endsWith(filter))
+                filePath += "." + filter;
+        }
+
+        graph->exportGraph(filePath);
+    }
+
+    settings.setValue(EXPORT_DIR_KEY, filePath);
+}
+
+bool MainWindow::isConverterRunning() const
 {
     return converterRunning;
 }
@@ -817,6 +572,26 @@ void MainWindow::createDockWidgets()
     leftDocks << algdock;
 //    algdock->hide();
 
+//    // vector bar graph
+    QDockWidget *vbgdock = ui->dock2;
+    vectorBarGraph = new RelVecBarGraphWidget;
+    vbgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    vbgdock->setWidget(vectorBarGraph);
+    addDockWidget(Qt::LeftDockWidgetArea, vbgdock);
+    leftDocks << vbgdock;
+//    vbgdock->hide();
+
+    // functionalisation bar graph
+    QDockWidget *fbgdock = new QDockWidget(tr("Functionalisation Bar Graph"), this);
+    funcBarGraph = new FuncBarGraphWidget;
+    fbgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
+    fbgdock->setWidget(funcBarGraph);
+    addDockWidget(Qt::LeftDockWidgetArea, fbgdock);
+    leftDocks << fbgdock;
+
+    //                      //
+    //  graph connections   //
+    //                      //
     // sync x-range of line graphs
     connect(absLineGraph, &LineGraphWidget::axisIntvSet, relLineGraph, &LineGraphWidget::setAxisIntv);
     connect(absLineGraph, &LineGraphWidget::axisIntvSet, funcLineGraph, &LineGraphWidget::setAxisIntv);
@@ -850,22 +625,22 @@ void MainWindow::createDockWidgets()
     connect(funcLineGraph, &LineGraphWidget::selectionCleared, absLineGraph, &LineGraphWidget::clearSelection);
     connect(funcLineGraph, &LineGraphWidget::selectionCleared, relLineGraph, &LineGraphWidget::clearSelection);
 
-//    // vector bar graph
-    QDockWidget *vbgdock = ui->dock2;
-    vectorBarGraph = new RelVecBarGraphWidget;
-    vbgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
-    vbgdock->setWidget(vectorBarGraph);
-    addDockWidget(Qt::LeftDockWidgetArea, vbgdock);
-    leftDocks << vbgdock;
-//    vbgdock->hide();
-
-    // functionalisation bar graph
-    QDockWidget *fbgdock = new QDockWidget(tr("Functionalisation Bar Graph"), this);
-    funcBarGraph = new FuncBarGraphWidget;
-    fbgdock->setAllowedAreas(Qt::LeftDockWidgetArea);
-    fbgdock->setWidget(funcBarGraph);
-    addDockWidget(Qt::LeftDockWidgetArea, fbgdock);
-    leftDocks << fbgdock;
+    // save graphs
+    connect(absLineGraph, &LineGraphWidget::saveRequested, this, [this](){
+        saveLineGraph(absLineGraph);
+    });
+    connect(relLineGraph, &LineGraphWidget::saveRequested, this, [this](){
+        saveLineGraph(relLineGraph);
+    });
+    connect(funcLineGraph, &LineGraphWidget::saveRequested, this, [this](){
+        saveLineGraph(funcLineGraph);
+    });
+    connect(funcBarGraph, &AbstractBarGraphWidget::saveRequested, this, [this](){
+        saveBarGraph(funcBarGraph);
+    });
+    connect(vectorBarGraph, &AbstractBarGraphWidget::saveRequested, this, [this](){
+        saveBarGraph(vectorBarGraph);
+    });
 
     // add actions to view menu
     ui->menuView->addAction(flgdock->toggleViewAction());
@@ -891,19 +666,19 @@ void MainWindow::createDockWidgets()
         dock->resize(dockWidth, dock->size().height());
 }
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)
-{
-    auto resizedDock = static_cast<QDockWidget*>(obj);
+//bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+//{
+//    auto resizedDock = static_cast<QDockWidget*>(obj);
 
-  if (event->type() == QEvent::Resize && leftDocks.contains(resizedDock))
-  {
-        auto resizeEvent = static_cast<QResizeEvent*>(event);
-        int newWidth = window()->size().width() - resizeEvent->size().width() - 5;
-//        measInfoWidget->resize(newWidth, measInfoWidget->size().width());
-//        classifierWidget->resize(newWidth, classifierWidget->size().width());
-  }
-  return QWidget::eventFilter(obj, event);
-}
+//  if (event->type() == QEvent::Resize && leftDocks.contains(resizedDock))
+//  {
+//        auto resizeEvent = static_cast<QResizeEvent*>(event);
+//        int newWidth = window()->size().width() - resizeEvent->size().width() - 5;
+////        measInfoWidget->resize(newWidth, measInfoWidget->size().width());
+////        classifierWidget->resize(newWidth, classifierWidget->size().width());
+//  }
+//  return QWidget::eventFilter(obj, event);
+//}
 
 void MainWindow::on_actionLoadClassifier_triggered()
 {

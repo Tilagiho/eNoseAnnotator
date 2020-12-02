@@ -936,7 +936,7 @@ void Controler::classifyMeasurement()
 
 void Controler::updateAutosave()
 {
-    if (mData->isChanged() && !mData->getAbsoluteData().isEmpty() && !w->getConverterRunning())
+    if (mData->isChanged() && !mData->getAbsoluteData().isEmpty() && !w->isConverterRunning())
     {
         try {
             mData->saveData(autosavePath + "/" + autosaveName);

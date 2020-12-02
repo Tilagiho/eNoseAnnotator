@@ -168,12 +168,16 @@ public:
 
     void setAxisScale( int axisId, double min, double max, double stepSize = 0 );
 
+    void exportGraph(QString filePath);
+
 signals:
     void axisIntvSet(QwtInterval intv, QwtPlot::Axis axis);
 
     void selectionMade(uint min, uint max);
 
     void selectionCleared();
+
+    void saveRequested();
 
 public slots:
     virtual void addVector(uint timestamp, MVector vector, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
@@ -223,13 +227,11 @@ protected:
     bool replotStatus = true;
     bool measRunning = false;
 
-
     QVector<QwtPlotCurve*> dataCurves;
     QVector<QwtPlotCurve*> selectionCurves;
 
     QMap<uint, QList<AClassRectItem *>> userDefinedClassLabels;
     QMap<uint, QList<AClassRectItem *>> detectedClassLabels;
-
 
     FixedPlotZoomer *rectangleZoom;
     QwtPlotPicker *zonePicker;
@@ -253,8 +255,7 @@ protected:
 
     bool autoMoveXRange(double t);
 
-//    QRectF united(QRectF, QRectF) const;
-
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
 };
 

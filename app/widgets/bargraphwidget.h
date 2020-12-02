@@ -33,12 +33,17 @@ public:
     explicit AbstractBarGraphWidget(QWidget *parent = nullptr);
 
 signals:
+    void saveRequested();
 
 public slots:
     void setVector(const MVector &vector, const std::vector<bool> sensorFailures, const Functionalisation &functionalisation);
     void clear();
+    void exportGraph(QString filePath);
+
 protected:
     BarChartItem *d_barChartItem;
+
+    virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
 protected slots:
     virtual QColor getColor(uint channel, const Functionalisation &functionalisation) const = 0;

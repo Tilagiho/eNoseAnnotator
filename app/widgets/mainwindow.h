@@ -25,7 +25,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    bool getConverterRunning() const;
+    bool isConverterRunning() const;
 
 signals:
     void setConnectionRequested();
@@ -138,6 +138,9 @@ private slots:
 
     void setSelectionActionsEnabled(bool selectionMade);
 
+    void saveLineGraph(LineGraphWidget *graph);
+    void saveBarGraph(AbstractBarGraphWidget *graph);
+
 private:
     Ui::MainWindow *ui;
 
@@ -172,14 +175,10 @@ private:
 
     void setIsLiveClassificationState(bool isLive);
 
-    void saveLineGraph(LineGraphWidget* graph);
-
-    void saveBarGraph(AbstractBarGraphWidget* graph);
-
     void resetNChannels(uint newNChannels);
 
 protected:
-  bool eventFilter(QObject *obj, QEvent *event);
+//  bool eventFilter(QObject *obj, QEvent *event);
 };
 
 #endif // MAINWINDOW_H
