@@ -57,6 +57,8 @@ signals:
     void sensorFailureDialogRequested();
     void functionalisationDialogRequested();
 
+    void commentTextChanged(QString);
+
     void selectionMade(uint min, uint max);
     void selectionCleared();
 

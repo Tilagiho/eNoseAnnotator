@@ -58,6 +58,7 @@ MainWindow::MainWindow(QWidget *parent)
     //                  //
     //  connections     //
     //                  //
+    connect(measInfoWidget, &InfoWidget::mCommentChanged, this, &MainWindow::commentTextChanged);
     connect (this, &MainWindow::commentSet, measInfoWidget, &InfoWidget::setComment);
     connect (this, &MainWindow::sensorIdSet, measInfoWidget, &InfoWidget::setSensorId);
 }

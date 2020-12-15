@@ -100,7 +100,7 @@ Controler::Controler(QObject *parent) :
         w->openSensorFailuresDialog(sensorFailures);
     });
     connect(w, &MainWindow::functionalisationDialogRequested, this, &Controler::selectFunctionalisation);
-
+    connect(w, &MainWindow::commentTextChanged, mData, &MeasurementData::setComment);
     connect (mData, &MeasurementData::startTimestempSet, w, &MainWindow::startTimestempSet);
     connect (mData, &MeasurementData::commentSet, w, &MainWindow::commentSet);
     connect (mData, &MeasurementData::sensorIdSet, w, &MainWindow::sensorIdSet);
