@@ -162,8 +162,8 @@ win32: QWT_ROOT = C:/qwt-6.1.5
 
 include ( $$QWT_ROOT/features/qwt.prf )
 LIBS += -L$$QWT_ROOT/lib -lqwt
-INCLUDEPATH += $$QWT_ROOT/lib/qwt-6.1.5/include
-DEPENDPATH += $$QWT_ROOT/lib/qwt-6.1.5/include
+INCLUDEPATH += $$QWT_ROOT/include
+DEPENDPATH += $$QWT_ROOT/include
 
 #INCLUDEPATH += $$PWD/lib/qwt-6.1.5/src
 #DEPENDPATH += $$PWD/lib/qwt-6.1.5/src
