@@ -88,7 +88,7 @@ bool MVector::operator!=(const MVector &other) const
 
 MVector MVector::operator*(const double multiplier)
 {
-    MVector vector;
+    MVector vector(baseVector);
     vector.copyMetaData(*this);
 
     for (int i=0; i<size; i++)
@@ -109,7 +109,7 @@ MVector MVector::operator*(const int multiplier)
 
 MVector MVector::operator/(const double denominator)
 {
-    MVector vector;
+    MVector vector(baseVector);
     vector.copyMetaData(*this);
 
     for (int i=0; i<size; i++)
@@ -132,7 +132,7 @@ MVector MVector::operator+(const MVector other)
 {
     Q_ASSERT(other.size == this->size);
 
-    MVector vector;
+    MVector vector(baseVector);
     vector.copyMetaData(*this);
 
     for (int i=0; i<size; i++)
@@ -146,11 +146,28 @@ MVector MVector::operator+(const MVector other)
     return vector;
 }
 
+MVector MVector::operator +(const double value)
+{
+    MVector vector(baseVector);
+    vector.copyMetaData(*this);
+
+    for (int i=0; i<size; i++)
+    {
+        if (qIsFinite(this->vector[i]))
+            vector[i] = this->vector[i] + value;
+        else    // deal with infinte values
+            vector[i] = qInf();
+    }
+
+    return vector;
+}
+
+
 MVector MVector::operator-(const MVector other)
 {
     Q_ASSERT(other.size == this->size);
 
-    MVector vector;
+    MVector vector(baseVector);
     vector.copyMetaData(*this);
 
     for (int i=0; i<size; i++)
@@ -162,6 +179,15 @@ MVector MVector::operator-(const MVector other)
     }
 
     return vector;
+}
+
+MVector& MVector::operator+=(const MVector& other)
+{
+    auto otherVec = other.getVector();
+    for (size_t i=0; i<size; i++)
+        vector[i] += otherVec[i];
+
+    return *this;
 }
 
 
@@ -313,6 +339,26 @@ MVector MVector::getFuncVector(const Functionalisation &functionalisation, const
 AbsoluteMVector *MVector::getBaseVector() const
 {
     return baseVector;
+}
+
+MVector MVector::squared() const
+{
+    MVector squaredVector(baseVector);
+
+    for (size_t i=0; i<size; i++)
+        squaredVector[i] = qPow(vector[i], 2);
+
+    return squaredVector;
+}
+
+MVector MVector::squareRoot() const
+{
+    MVector squareRootVector(baseVector);
+
+    for (size_t i=0; i<size; i++)
+        squareRootVector[i] = qPow(vector[i], 0.5);
+
+    return squareRootVector;
 }
 
 std::vector<double> MVector::getVector() const

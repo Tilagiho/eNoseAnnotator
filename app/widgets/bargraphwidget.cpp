@@ -8,6 +8,9 @@
 #include <qwt_scale_engine.h>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_renderer.h>
+#include <qwt_interval_symbol.h>
+#include <qwt_symbol.h>
+#include <qwt_painter.h>
 
 #include <QMenu>
 #include <QMouseEvent>
@@ -79,11 +82,51 @@ private:
 };
 
 
+ErrorBarMarker::ErrorBarMarker (int index, double value, double error):
+    index(index),
+    value(value),
+    error(error)
+{}
+
+void ErrorBarMarker::draw(QPainter *pPainter, const QwtScaleMap &pXMap, const QwtScaleMap &pYMap, const QRectF &pBoundingRectangle) const
+{
+    // ignore failing channels
+    if (failure)
+        return;
+
+    // get pixel values for lines
+    const int vLineX = static_cast<int>(pXMap.transform(index));
+    const int hLineX1 = static_cast<int>(pXMap.transform(index-width));
+    const int hLineX2 = static_cast<int>(pXMap.transform(index+width));
+    const int yBottom = static_cast<int>(pYMap.transform(value - error));
+    const int yTop = static_cast<int>(pYMap.transform(value + error));
+
+    // select line pen
+    pPainter->setPen(linePen());
+
+    // draw bar chart symbol:
+    // vertical line
+    QwtPainter::drawLine(pPainter, vLineX, yBottom, vLineX, yTop);
+
+    // horizontal line
+    QwtPainter::drawLine(pPainter, hLineX1, yBottom, hLineX2, yBottom);
+    QwtPainter::drawLine(pPainter, hLineX1, yTop, hLineX2, yTop);
+
+    // Call the parent implementation for the other part of the QwtPlotMarker
+    QwtPlotMarker::draw(pPainter,pXMap,pYMap,pBoundingRectangle);
+}
+
+void ErrorBarMarker::setFailure(bool value)
+{
+    failure = value;
+}
+
 BarChartItem::BarChartItem():
     QwtPlotBarChart( "Page Hits" )
 {
     setLayoutPolicy( AutoAdjustSamples );
     setLayoutHint( 4.0 ); // minimum width for a single bar
+
 
 //    setSpacing( 5 ); // spacing between bars
 }
@@ -98,6 +141,7 @@ void BarChartItem::setSamples( const QVector<double> &values, const QStringList 
 
 void BarChartItem::setSamples(const QVector<double> &values)
 {
+    // set bars
     QwtPlotBarChart::setSamples(values);
 }
 
@@ -131,11 +175,12 @@ QwtText BarChartItem::barTitle( int sampleIndex ) const
 AbstractBarGraphWidget::AbstractBarGraphWidget( QWidget *parent ) :
     QwtPlot(parent),
     d_barChartItem (new BarChartItem)
-{    
+{
     setCanvasBackground(QBrush(GRAPH_BACKGROUND_COLOR));
 
     setAxisTitle( QwtPlot::yLeft, QString(u8"\u0394") + "R / R0 [%]" );
 
+    // bars
     d_barChartItem->setLayoutPolicy( QwtPlotBarChart::AutoAdjustSamples );
     d_barChartItem->setMargin( 3 );
 
@@ -149,8 +194,9 @@ AbstractBarGraphWidget::AbstractBarGraphWidget( QWidget *parent ) :
     axisScaleEngine(QwtPlot::yLeft)->setMargins(1., 1.);
 }
 
-void AbstractBarGraphWidget::setVector( const MVector &vector, const std::vector<bool> sensorFailures, const Functionalisation &functionalisation )
+void AbstractBarGraphWidget::setVector( const MVector &vector, const MVector &stdDevVector, const std::vector<bool> sensorFailures, const Functionalisation &functionalisation )
 {
+    // add bars
     bool useFailures = vector.getSize() == sensorFailures.size();
 
     QVector<double> values;
@@ -163,6 +209,27 @@ void AbstractBarGraphWidget::setVector( const MVector &vector, const std::vector
     }
 
     setValues(values, functionalisation);
+
+    // add error bars:
+    // clear previous errorBars
+    for (auto errorBar : errorBars)
+        delete errorBar;
+    errorBars.clear();
+
+    // add new error bars
+    for (int i=0; i<stdDevVector.getSize(); i++)
+    {
+        ErrorBarMarker *errorbar = new ErrorBarMarker(i, vector[i], stdDevVector[i]);
+
+        errorbar->setVisible(errorBarsVisible);
+        if (sensorFailures[i])
+                    errorbar->setFailure(true);
+
+        errorbar->setSymbol(new QwtSymbol(QwtSymbol::Style::NoSymbol));
+        errorbar->setLinePen(Qt::black, qPow(MVector::nChannels, 0.3) / qPow(stdDevVector.getSize(), 0.3));
+        errorbar->attach(this);
+        errorBars << errorbar;
+    }
 }
 
 void AbstractBarGraphWidget::clear()
@@ -173,6 +240,11 @@ void AbstractBarGraphWidget::clear()
         values += 0.;
 
     d_barChartItem->setSamples(values);
+
+    for (auto errorBar : errorBars)
+        delete errorBar;
+    errorBars.clear();
+
     replot();
 }
 
@@ -186,14 +258,40 @@ void AbstractBarGraphWidget::exportGraph(QString filePath)
     QSizeF sizeMM(widthMM, heightMM);
 
     QwtPlotRenderer renderer;
-    renderer.renderDocument(this, filePath, sizeMM, 150);}
+    renderer.renderDocument(this, filePath, sizeMM, 150);
+}
+
+void AbstractBarGraphWidget::setErrorBarsVisible(bool value)
+{
+    if (value != errorBarsVisible)
+    {
+        errorBarsVisible = value;
+        for (auto errorBar : errorBars)
+            errorBar->setVisible(value);
+
+        replot();
+
+        emit errorBarsVisibleSet(value);
+    }
+}
 
 void AbstractBarGraphWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::RightButton && !(QGuiApplication::keyboardModifiers() & Qt::ShiftModifier))
     {
         QMenu* menu = new QMenu(this);
+        // error bars
+        QAction* errorBarAction = new QAction("Show error bars", this);
+        errorBarAction->setCheckable(true);
+        errorBarAction->setChecked(errorBarsVisible);
+        connect(errorBarAction, &QAction::triggered, this, &AbstractBarGraphWidget::setErrorBarsVisible);
+        menu->addAction(errorBarAction);
+
+        menu->addSeparator();
+
+        // saving actions
         menu->addAction("Save graph as image...", this, &AbstractBarGraphWidget::saveRequested);
+
         menu->popup(this->mapToGlobal(event->pos()));
     }
 }
@@ -205,7 +303,7 @@ RelVecBarGraphWidget::RelVecBarGraphWidget ( QWidget *parent ) :
     d_barChartItem->setSpacing( 7 );
 
     // zero init
-    setVector(MVector(), std::vector<bool>(MVector::nChannels, false), Functionalisation(MVector::nChannels, 0));
+    setVector(MVector(), MVector(), std::vector<bool>(MVector::nChannels, false), Functionalisation(MVector::nChannels, 0));
 }
 
 QColor RelVecBarGraphWidget::getColor( uint channel, const Functionalisation &functionalisation ) const
@@ -235,7 +333,7 @@ FuncBarGraphWidget::FuncBarGraphWidget( QWidget *parent ) :
     d_barChartItem->setSpacing( 20 );
 
     // zero init
-    setVector(MVector(nullptr, 1), std::vector<bool>(1, false), Functionalisation(1, 0));
+    setVector(MVector(nullptr, 1),MVector(nullptr, 1), std::vector<bool>(1, false), Functionalisation(1, 0));
 
 //    setAxisScaleEngine(QwtPlot::xBottom, new FullTicksScaleEngine());
 }

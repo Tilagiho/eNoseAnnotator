@@ -35,7 +35,10 @@ public:
     MVector operator /(const double denominator);
     MVector operator /(const int denominator);
     MVector operator +(const MVector other);
+    MVector operator +(const double value);
     MVector operator -(const MVector other);
+
+    MVector& operator+=(const MVector& other);
 
     double &operator[] (int index);
 
@@ -79,6 +82,10 @@ public:
     MVector getFuncVector(const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures, InputFunctionType inputFunction = InputFunctionType::medianAverage);
 
     AbsoluteMVector *getBaseVector() const;
+
+    MVector squared() const;
+
+    MVector squareRoot() const;
 
 protected:
     size_t size;    // number of sensor values

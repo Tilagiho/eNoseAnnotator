@@ -256,9 +256,11 @@ void MeasurementData::setSensorFailures(const std::vector<bool> &failures)
         setDataChanged(true);
         emit sensorFailuresSet(data, functionalisation, sensorFailures);
 
-//        if (!selectedData.isEmpty())
-            emit selectionVectorChanged(getAbsoluteSelectionVector(), sensorFailures, functionalisation);
-
+        AbsoluteMVector stdDevVector;
+        if (!selectedData.isEmpty())
+            stdDevVector.setBaseVector(selectedData.first().getBaseVector());
+        auto selectionVector = getAbsoluteSelectionVector(&stdDevVector);
+        emit selectionVectorChanged(selectionVector, stdDevVector, sensorFailures, functionalisation);
     }
 }
 
@@ -338,8 +340,12 @@ void MeasurementData::setFunctionalisation(const Functionalisation &value)
         functionalisation = value;
         setDataChanged(true);
         emit functionalisationChanged();
-        emit selectionVectorChanged(getAbsoluteSelectionVector(), sensorFailures, functionalisation);
-    }
+
+        AbsoluteMVector stdDevVector;
+        if (!selectedData.isEmpty())
+            stdDevVector.setBaseVector(selectedData.first().getBaseVector());
+        auto selectionVector = getAbsoluteSelectionVector(&stdDevVector);
+        emit selectionVectorChanged(selectionVector, stdDevVector, sensorFailures, functionalisation);    }
 }
 
 /*!
@@ -701,14 +707,15 @@ void MeasurementData::setSelection(uint lower, uint upper)
     if (selectedData.isEmpty())
         return;
 
-    AbsoluteMVector vector = getAbsoluteSelectionVector();
-
 //    qDebug() << "Selection made: " << selectedData.firstKey() << ", " << selectedData.lastKey() << "\n" << vector.toString() << "\n";
-
-    emit selectionVectorChanged(vector, sensorFailures, functionalisation);
+    AbsoluteMVector stdDevVector;
+    if (!selectedData.isEmpty())
+        stdDevVector.setBaseVector(selectedData.first().getBaseVector());
+    auto selectionVector = getAbsoluteSelectionVector(&stdDevVector);
+    emit selectionVectorChanged(selectionVector, stdDevVector, sensorFailures, functionalisation);
 }
 
-const AbsoluteMVector MeasurementData::getAbsoluteSelectionVector(MultiMode mode)
+const AbsoluteMVector MeasurementData::getAbsoluteSelectionVector(MVector *stdDevVector, MultiMode mode)
 {
     // no selection made:
     // return zero vector
@@ -729,7 +736,7 @@ const AbsoluteMVector MeasurementData::getAbsoluteSelectionVector(MultiMode mode
         if (selectedData[timestamp].isZeroVector())
             continue;
 
-        // get relative selection vector
+        // get absolute selection vector
         AbsoluteMVector vector = selectedData[timestamp];
 
         // calculate average
@@ -738,10 +745,21 @@ const AbsoluteMVector MeasurementData::getAbsoluteSelectionVector(MultiMode mode
                 selectionVector[i] += vector[i] / selectedData.size();
     }
 
+    // calculate standard deviation of selection
+    if (stdDevVector != nullptr)
+    {
+        MVector varVector(stdDevVector->getBaseVector());
+
+        for (auto timestamp : selectedData.keys())
+            varVector += (selectedData[timestamp] - selectionVector).squared();
+
+        *stdDevVector = (varVector / selectedData.size()).squareRoot();
+    }
+
     return selectionVector;
 }
 
-const RelativeMVector MeasurementData::getRelativeSelectionVector(MultiMode mode)
+const RelativeMVector MeasurementData::getRelativeSelectionVector(MVector *stdDevVector, MultiMode mode)
 {
     Q_ASSERT(!selectedData.isEmpty());
 
@@ -766,6 +784,17 @@ const RelativeMVector MeasurementData::getRelativeSelectionVector(MultiMode mode
         if (mode == MultiMode::Average)
             for (int i=0; i<MVector::nChannels; i++)
                 selectionVector[i] += vector[i] / selectedData.size();
+    }
+
+    // calculate standard deviation of selection
+    if (stdDevVector != nullptr)
+    {
+        MVector varVector;
+
+        for (auto timestamp : selectedData.keys())
+            varVector += (selectedData[timestamp] - selectionVector).squared();
+
+        *stdDevVector = (varVector / selectedData.size()).squareRoot();
     }
 
     return selectionVector;

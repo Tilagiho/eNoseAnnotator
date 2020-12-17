@@ -501,11 +501,12 @@ void MainWindow::changeAnnotations( const QMap<uint, Annotation> annotations , b
     funcLineGraph->setAnnotations(annotations, isUserAnnotation);
 }
 
-void MainWindow::setSelectionVector ( const AbsoluteMVector &vector, const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation )
+void MainWindow::setSelectionVector ( const AbsoluteMVector &vector, const AbsoluteMVector &stdDevVector, const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation )
 {
     auto relVector = vector.getRelativeVector();
-    vectorBarGraph->setVector(relVector, sensorFailures, functionalisation);
-    funcBarGraph->setVector(relVector.getFuncVector(functionalisation, sensorFailures), sensorFailures, functionalisation);
+    auto relStdVector = stdDevVector.getRelativeVector() + 100.;
+    vectorBarGraph->setVector(relVector, relStdVector, sensorFailures, functionalisation);
+    funcBarGraph->setVector(relVector.getFuncVector(functionalisation, sensorFailures), relStdVector.getFuncVector(functionalisation, sensorFailures), sensorFailures, functionalisation);
 }
 
 void MainWindow::clearSelectionVector()
@@ -642,6 +643,10 @@ void MainWindow::createDockWidgets()
     connect(vectorBarGraph, &AbstractBarGraphWidget::saveRequested, this, [this](){
         saveBarGraph(vectorBarGraph);
     });
+
+    // error bars in bar garoh widgets
+    connect(funcBarGraph, &AbstractBarGraphWidget::errorBarsVisibleSet, vectorBarGraph, &AbstractBarGraphWidget::setErrorBarsVisible);
+    connect(vectorBarGraph, &AbstractBarGraphWidget::errorBarsVisibleSet, funcBarGraph, &AbstractBarGraphWidget::setErrorBarsVisible);
 
     // add actions to view menu
     ui->menuView->addAction(flgdock->toggleViewAction());

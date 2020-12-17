@@ -89,7 +89,7 @@ public slots:
 
     void changeAnnotations( const QMap<uint, Annotation> annotations, bool isUserAnnotation );
 
-    void setSelectionVector ( const AbsoluteMVector &vector, const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation );
+    void setSelectionVector ( const AbsoluteMVector &vector, const AbsoluteMVector &stdDevVector, const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation );
 
     void clearSelectionVector ();
 

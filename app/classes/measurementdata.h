@@ -137,8 +137,8 @@ public:
 
     void copyFrom(MeasurementData* otherMData);
 
-    const AbsoluteMVector getAbsoluteSelectionVector(MultiMode mode=MultiMode::Average);
-    const RelativeMVector getRelativeSelectionVector(MultiMode mode=MultiMode::Average);
+    const AbsoluteMVector getAbsoluteSelectionVector(MVector *stdDevVector=nullptr, MultiMode mode=MultiMode::Average);
+    const RelativeMVector getRelativeSelectionVector(MVector *stdDevVector=nullptr, MultiMode mode=MultiMode::Average);
 
     QString getSensorId() const;
 
@@ -247,7 +247,7 @@ public slots:
     void setLimits(double lowerLimit, double upperLimit, bool useLimits);
 
 signals:
-    void selectionVectorChanged(const AbsoluteMVector &vector, const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation);  // emits new vector when dataSelected is changed
+    void selectionVectorChanged(const AbsoluteMVector &vector, const MVector &stdDevVector, const std::vector<bool> &sensorFailures, const Functionalisation &functionalisation);  // emits new vector when dataSelected is changed
     void selectionMapChanged(QMap<uint, MVector> selectionMap);
     void annotationsChanged(const QMap<uint, Annotation> annotations, bool isUserAnnotation);
 
