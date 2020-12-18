@@ -43,6 +43,7 @@ signals:
     void saveDataRequested();
     void saveDataAsRequested();
     void saveSelectionRequested();
+    void saveSelectionVectorRequested(QString filePath, bool saveFunc);
 
     void generalSettingsRequested();
 
@@ -140,8 +141,9 @@ private slots:
 
     void setSelectionActionsEnabled(bool selectionMade);
 
-    void saveLineGraph(LineGraphWidget *graph);
-    void saveBarGraph(AbstractBarGraphWidget *graph);
+    void saveLineGraphImage(LineGraphWidget *graph);
+    void saveBarGraphImage(AbstractBarGraphWidget *graph);
+    void saveBarGraphSelectionVector(bool saveFunc);
 
 private:
     Ui::MainWindow *ui;

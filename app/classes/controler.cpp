@@ -127,6 +127,7 @@ Controler::Controler(QObject *parent) :
         saveData(true);
     });
     connect(w, &MainWindow::saveSelectionRequested, this, &Controler::saveSelection);
+    connect(w, &MainWindow::saveSelectionVectorRequested, mData, &MeasurementData::saveSelectionVector);
 
     connect(w, &MainWindow::generalSettingsRequested, this, &Controler::setGeneralSettings);
 

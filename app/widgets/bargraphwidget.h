@@ -55,7 +55,8 @@ public:
     void setAutoScale(bool value);
 
 signals:
-    void saveRequested();
+    void imageSaveRequested();
+    void selectionVectorSaveRequested();
     void errorBarsVisibleSet(bool);
 
 public slots:
@@ -74,6 +75,7 @@ protected:
 
     bool errorBarsVisible = false;
     bool autoScale = true;
+    bool dataSelected = false;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
 protected slots:

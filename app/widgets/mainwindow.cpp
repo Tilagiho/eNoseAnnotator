@@ -352,7 +352,7 @@ void MainWindow::setSelectionActionsEnabled(bool selectionMade)
     ui->actionFit_curve->setEnabled(selectionMade);
 }
 
-void MainWindow::saveLineGraph(LineGraphWidget *graph)
+void MainWindow::saveLineGraphImage(LineGraphWidget *graph)
 {
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
     QString exportPath = settings.value(EXPORT_DIR_KEY, DEFAULT_EXPORT_DIR).toString();
@@ -375,7 +375,7 @@ void MainWindow::saveLineGraph(LineGraphWidget *graph)
 }
 
 
-void MainWindow::saveBarGraph(AbstractBarGraphWidget *graph)
+void MainWindow::saveBarGraphImage(AbstractBarGraphWidget *graph)
 {
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
     QString exportPath = settings.value(EXPORT_DIR_KEY, DEFAULT_EXPORT_DIR).toString();
@@ -392,10 +392,33 @@ void MainWindow::saveBarGraph(AbstractBarGraphWidget *graph)
         }
 
         graph->exportGraph(filePath);
+
+        settings.setValue(EXPORT_DIR_KEY, filePath);
     }
 
-    settings.setValue(EXPORT_DIR_KEY, filePath);
 }
+
+void MainWindow::saveBarGraphSelectionVector(bool saveFunc)
+{
+    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QString exportPath = settings.value(EXPORT_DIR_KEY, DEFAULT_EXPORT_DIR).toString();
+    QString filter;
+    QString filePath = QFileDialog::getSaveFileName(this, "Save selection vector", exportPath, "csv (*.csv)", &filter);
+
+    if (!filePath.isEmpty())
+    {
+        if (filter != "")
+        {
+            filter = filter.split(" ")[0];
+            if (!filePath.endsWith(filter))
+                filePath += "." + filter;
+        }
+
+        emit saveSelectionVectorRequested(filePath, saveFunc);
+        settings.setValue(EXPORT_DIR_KEY, filePath);
+    }
+}
+
 
 bool MainWindow::isConverterRunning() const
 {
@@ -629,19 +652,25 @@ void MainWindow::createDockWidgets()
 
     // save graphs
     connect(absLineGraph, &LineGraphWidget::saveRequested, this, [this](){
-        saveLineGraph(absLineGraph);
+        saveLineGraphImage(absLineGraph);
     });
     connect(relLineGraph, &LineGraphWidget::saveRequested, this, [this](){
-        saveLineGraph(relLineGraph);
+        saveLineGraphImage(relLineGraph);
     });
     connect(funcLineGraph, &LineGraphWidget::saveRequested, this, [this](){
-        saveLineGraph(funcLineGraph);
+        saveLineGraphImage(funcLineGraph);
     });
-    connect(funcBarGraph, &AbstractBarGraphWidget::saveRequested, this, [this](){
-        saveBarGraph(funcBarGraph);
+    connect(funcBarGraph, &AbstractBarGraphWidget::imageSaveRequested, this, [this](){
+        saveBarGraphImage(funcBarGraph);
     });
-    connect(vectorBarGraph, &AbstractBarGraphWidget::saveRequested, this, [this](){
-        saveBarGraph(vectorBarGraph);
+    connect(vectorBarGraph, &AbstractBarGraphWidget::imageSaveRequested, this, [this](){
+        saveBarGraphImage(vectorBarGraph);
+    });
+    connect(funcBarGraph, &AbstractBarGraphWidget::selectionVectorSaveRequested, this, [this](){
+        saveBarGraphSelectionVector(true);
+    });
+    connect(vectorBarGraph, &AbstractBarGraphWidget::selectionVectorSaveRequested, this, [this](){
+        saveBarGraphSelectionVector(false);
     });
 
     // error bars in bar garoh widgets

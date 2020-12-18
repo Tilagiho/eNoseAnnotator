@@ -120,6 +120,8 @@ public:
      */
     bool saveData(QString filename, QMap<uint, MVector> map);
 
+    void saveSelectionVector(QString filePath, bool saveFunc);
+
     /*
      *  saves current selection
      * opens QFileDialog in order to get the save path

@@ -261,6 +261,9 @@ void AbstractBarGraphWidget::setVector( const MVector &vector, const MVector &st
     // set zoom base
     // -> shift + rightclick to zooom to all bars
     setZoomBase();
+
+    // data selected?
+    dataSelected = !vector.isZeroVector();
 }
 
 void AbstractBarGraphWidget::clear()
@@ -275,6 +278,8 @@ void AbstractBarGraphWidget::clear()
     for (auto errorBar : errorBars)
         delete errorBar;
     errorBars.clear();
+
+    dataSelected = false;
 
     replot();
 }
@@ -379,8 +384,19 @@ void AbstractBarGraphWidget::mouseReleaseEvent(QMouseEvent *event)
         menu->addSeparator();
 
         // saving actions
-        menu->addAction("Save graph as image...", this, &AbstractBarGraphWidget::saveRequested);
+        QAction* saveImageAction = new QAction("Save graph as image...", this);
+        saveImageAction->setEnabled(dataSelected);
+        connect(saveImageAction, &QAction::triggered, this, [this](bool){
+            emit imageSaveRequested();
+        });
+        menu->addAction(saveImageAction);
 
+        QAction* saveVectorAction = new QAction("Save selection vector...", this);
+        saveVectorAction->setEnabled(dataSelected);
+        connect(saveVectorAction, &QAction::triggered, this, [this](bool){
+            emit selectionVectorSaveRequested();
+        });
+        menu->addAction(saveVectorAction);
         menu->popup(this->mapToGlobal(event->pos()));
     }
 }

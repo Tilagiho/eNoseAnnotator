@@ -537,6 +537,46 @@ bool MeasurementData::saveData(QString filename, QMap<uint, MVector> map)
 }
 
 /*!
+ * \brief saveSelectionVector saves a
+ * \param saveFunc
+ */
+void MeasurementData::saveSelectionVector(QString filePath, bool saveFunc)
+{
+    RelativeMVector stdDevVector;
+    auto selectionVector = getRelativeSelectionVector(&stdDevVector);
+
+    if (saveFunc)
+    {
+        stdDevVector = stdDevVector.getFuncVector(functionalisation, sensorFailures);
+        selectionVector = selectionVector.getFuncVector(functionalisation, sensorFailures);
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly))
+        throw std::runtime_error("Unable to open file: " + file.errorString().toStdString());
+
+    QTextStream out(&file);
+    if (saveFunc)
+        out << "func;value;standard deviation\n";
+    else
+        out << "channel;value;standard deviation\n";
+
+    for (size_t i=0; i<selectionVector.getSize(); i++)
+    {
+        QStringList output;
+
+        if (saveFunc)
+            output << QString::number(functionalisation.getFuncMap().keys()[i]);
+        else
+            output << QString::number(i+1);
+        output << QString::number(selectionVector[i]) << QString::number(stdDevVector[i]);
+
+        out << output.join(";") << "\n";
+    }
+}
+
+
+/*!
  * \brief MeasurementData::saveSelection  saves current selection in \a filename.
  */
 bool MeasurementData::saveSelection(QString filename)
@@ -726,9 +766,6 @@ const AbsoluteMVector MeasurementData::getAbsoluteSelectionVector(MVector *stdDe
     Q_ASSERT(mode == MultiMode::Average);
 
     AbsoluteMVector selectionVector(getBaseVector(selectedData.firstKey()));
-    // zero init
-    for (int i=0; i<MVector::nChannels; i++)
-        selectionVector[i] = 0.0;
 
     for (auto timestamp : selectedData.keys())
     {
@@ -748,12 +785,22 @@ const AbsoluteMVector MeasurementData::getAbsoluteSelectionVector(MVector *stdDe
     // calculate standard deviation of selection
     if (stdDevVector != nullptr)
     {
-        MVector varVector(stdDevVector->getBaseVector());
+        MVector varVector(selectionVector.getBaseVector());
 
         for (auto timestamp : selectedData.keys())
             varVector += (selectedData[timestamp] - selectionVector).squared();
 
         *stdDevVector = (varVector / selectedData.size()).squareRoot();
+    }
+
+    // set failing channels to zero
+    for (size_t i=0; i<selectionVector.getSize(); i++)
+    {
+        if (sensorFailures[i])
+        {
+            selectionVector[i] = 0;
+            (*stdDevVector)[i] = 0;
+        }
     }
 
     return selectionVector;
@@ -761,43 +808,61 @@ const AbsoluteMVector MeasurementData::getAbsoluteSelectionVector(MVector *stdDe
 
 const RelativeMVector MeasurementData::getRelativeSelectionVector(MVector *stdDevVector, MultiMode mode)
 {
-    Q_ASSERT(!selectedData.isEmpty());
+    AbsoluteMVector absStdDevVector;
+    auto absSelectionVector = getAbsoluteSelectionVector(&absStdDevVector);
 
-    // only average supported
-    Q_ASSERT(mode == MultiMode::Average);
+    *stdDevVector = absStdDevVector.getRelativeVector() + 100.;
+    auto selectionVector = absSelectionVector.getRelativeVector();
 
-    RelativeMVector selectionVector(getBaseVector(selectedData.firstKey()));
-    // zero init
-    for (int i=0; i<MVector::nChannels; i++)
-        selectionVector[i] = 0.0;
-
-    for (auto timestamp : selectedData.keys())
+    // set failing channels to zero
+    for (size_t i=0; i<selectionVector.getSize(); i++)
     {
-        // ignore zero vectors
-        if (selectedData[timestamp].isZeroVector())
-            continue;
-
-        // get relative selection vector
-        RelativeMVector vector = selectedData[timestamp].getRelativeVector();
-
-        // calculate average
-        if (mode == MultiMode::Average)
-            for (int i=0; i<MVector::nChannels; i++)
-                selectionVector[i] += vector[i] / selectedData.size();
+        if (sensorFailures[i])
+        {
+            selectionVector[i] = 0;
+            (*stdDevVector)[i] = 0;
+        }
     }
 
-    // calculate standard deviation of selection
-    if (stdDevVector != nullptr)
-    {
-        MVector varVector;
+    return  selectionVector;
 
-        for (auto timestamp : selectedData.keys())
-            varVector += (selectedData[timestamp] - selectionVector).squared();
+//    Q_ASSERT(!selectedData.isEmpty());
 
-        *stdDevVector = (varVector / selectedData.size()).squareRoot();
-    }
+//    // only average supported
+//    Q_ASSERT(mode == MultiMode::Average);
 
-    return selectionVector;
+//    RelativeMVector selectionVector(getBaseVector(selectedData.firstKey()));
+//    // zero init
+//    for (int i=0; i<MVector::nChannels; i++)
+//        selectionVector[i] = 0.0;
+
+//    for (auto timestamp : selectedData.keys())
+//    {
+//        // ignore zero vectors
+//        if (selectedData[timestamp].isZeroVector())
+//            continue;
+
+//        // get relative selection vector
+//        RelativeMVector vector = selectedData[timestamp].getRelativeVector();
+
+//        // calculate average
+//        if (mode == MultiMode::Average)
+//            for (int i=0; i<MVector::nChannels; i++)
+//                selectionVector[i] += vector[i] / selectedData.size();
+//    }
+
+//    // calculate standard deviation of selection
+//    if (stdDevVector != nullptr)
+//    {
+//        MVector varVector;
+
+//        for (auto timestamp : selectedData.keys())
+//            varVector += (selectedData[timestamp] - selectionVector).squared();
+
+//        *stdDevVector = (varVector / selectedData.size()).squareRoot();
+//    }
+
+//    return selectionVector;
 }
 
 

@@ -205,6 +205,18 @@ double MVector::operator[](int index) const
     return vector[index];
 }
 
+bool MVector::isZeroVector() const
+{
+    for (size_t i=0; i<size; i++)
+    {
+        if (!qFuzzyIsNull(vector[i]))
+            return false;
+    }
+
+    return  true;
+}
+
+
 double MVector::average(const std::vector<bool> &sensorFailures) const
 {
     double sum = 0.;

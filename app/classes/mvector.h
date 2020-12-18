@@ -44,6 +44,8 @@ public:
 
     double operator[] (int index) const;
 
+    bool isZeroVector() const;
+
     double average(const std::vector<bool> &sensorFailures) const;
 
     /*
