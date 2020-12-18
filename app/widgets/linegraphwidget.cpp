@@ -4,6 +4,7 @@
 #include "../classes/measurementdata.h"
 #include "../classes/enosecolor.h"
 #include "../classes/defaultSettings.h"
+#include "fixedplotmagnifier.h"
 
 #include <float.h>
 

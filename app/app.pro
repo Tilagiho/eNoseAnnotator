@@ -106,6 +106,8 @@ HEADERS += \
     widgets/classselector.h \
     widgets/convertwizard.h \
     widgets/curvefitwizard.h \
+    widgets/fixedplotmagnifier.h \
+    widgets/fixedplotzoomer.h \
     widgets/functionalisationdialog.h \
     widgets/generalsettings.h \
     widgets/infowidget.h \

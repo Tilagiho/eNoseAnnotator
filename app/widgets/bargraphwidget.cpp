@@ -2,6 +2,7 @@
 
 #include "../classes/enosecolor.h"
 #include "../classes/defaultSettings.h"
+#include "fixedplotmagnifier.h"
 
 #include <qwt_column_symbol.h>
 #include <qwt_scale_draw.h>
@@ -11,6 +12,7 @@
 #include <qwt_interval_symbol.h>
 #include <qwt_symbol.h>
 #include <qwt_painter.h>
+#include <qwt_plot_panner.h>
 
 #include <QMenu>
 #include <QMouseEvent>
@@ -174,7 +176,8 @@ QwtText BarChartItem::barTitle( int sampleIndex ) const
 
 AbstractBarGraphWidget::AbstractBarGraphWidget( QWidget *parent ) :
     QwtPlot(parent),
-    d_barChartItem (new BarChartItem)
+    d_barChartItem (new BarChartItem),
+    rectangleZoom(new FixedPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, canvas()))
 {
     setCanvasBackground(QBrush(GRAPH_BACKGROUND_COLOR));
 
@@ -192,6 +195,30 @@ AbstractBarGraphWidget::AbstractBarGraphWidget( QWidget *parent ) :
 
     axisScaleEngine(QwtPlot::xBottom)->setAttribute(QwtScaleEngine::Floating,true);
     axisScaleEngine(QwtPlot::yLeft)->setMargins(1., 1.);
+
+    // panner: drag and drop the graph range
+    auto panner = new QwtPlotPanner(canvas());
+    panner->setMouseButton(Qt::LeftButton, Qt::NoModifier);
+
+    // mouse wheel zoom
+    QwtPlotMagnifier *mouseWheelZoom = new FixedPlotMagnifier(canvas());
+    mouseWheelZoom->setMouseButton(Qt::MouseButton::NoButton);
+    mouseWheelZoom->setAxisEnabled(QwtPlot::yLeft, true);
+    mouseWheelZoom->setAxisEnabled(QwtPlot::xBottom, false);
+
+    // zoom rect -> Shift + Rightclick to show full vector
+    rectangleZoom->setRubberBand( QwtPicker::RectRubberBand );
+    rectangleZoom->setTrackerMode(QwtPicker::AlwaysOff);
+
+    rectangleZoom->setMousePattern(QwtEventPattern::MouseSelect1,Qt::LeftButton, Qt::ShiftModifier);
+    rectangleZoom->setMousePattern( QwtEventPattern::MouseSelect2,Qt::RightButton, Qt::ShiftModifier); //zoom out by 1
+    rectangleZoom->setMousePattern( QwtEventPattern::MouseSelect3,Qt::MiddleButton, Qt::ShiftModifier); //zoom out by 1
+}
+
+QRectF AbstractBarGraphWidget::boundingRect() const
+{
+    return d_barChartItem->boundingRect();
+;
 }
 
 void AbstractBarGraphWidget::setVector( const MVector &vector, const MVector &stdDevVector, const std::vector<bool> sensorFailures, const Functionalisation &functionalisation )
@@ -230,6 +257,10 @@ void AbstractBarGraphWidget::setVector( const MVector &vector, const MVector &st
         errorbar->attach(this);
         errorBars << errorbar;
     }
+
+    // set zoom base
+    // -> shift + rightclick to zooom to all bars
+    setZoomBase();
 }
 
 void AbstractBarGraphWidget::clear()
@@ -275,11 +306,69 @@ void AbstractBarGraphWidget::setErrorBarsVisible(bool value)
     }
 }
 
+void AbstractBarGraphWidget::setZoomBase()
+{
+    auto b_rect = boundingRect();
+    // no vector set:
+    // do nothing
+    if (qFuzzyIsNull(b_rect.height()))
+        return;
+
+    if (b_rect != rectangleZoom->zoomBase())
+    {
+        auto xIntv = axisInterval(QwtPlot::xBottom);
+        auto yIntv = axisInterval(QwtPlot::yLeft);
+
+        rectangleZoom->setZoomBase(b_rect.normalized());
+
+        // restore axis intervals
+        if (!autoScale)
+        {
+            setAxisIntv(xIntv, QwtPlot::xBottom);
+            setAxisIntv(yIntv, QwtPlot::yLeft);
+        }
+    }
+}
+
+void AbstractBarGraphWidget::setAxisIntv (QwtInterval intv, QwtPlot::Axis axis)
+{
+    auto currentIntv = axisInterval(axis);
+
+    if (intv != currentIntv)
+    {
+        setAxisScale(axis, intv.minValue(), intv.maxValue());
+        replot();
+    }
+}
+
+void AbstractBarGraphWidget::setAutoScale(bool value)
+{
+    autoScale = value;
+
+    // auto scale directly???
+//    if (value)
+//    {
+//        auto rect = rectangleZoom->zoomBase();
+//        QwtInterval xIntv(rect.left(), rect.right());
+//        QwtInterval yIntv(rect.bottom(), rect.top());
+
+//        setAxisIntv(xIntv.normalized(), QwtPlot::xBottom);
+//        setAxisIntv(yIntv.normalized(), QwtPlot::yLeft);
+//    }
+}
+
 void AbstractBarGraphWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::RightButton && !(QGuiApplication::keyboardModifiers() & Qt::ShiftModifier))
     {
         QMenu* menu = new QMenu(this);
+        // auto scale
+        QAction* autoScaleAction = new QAction("Auto scale bars", this);
+        autoScaleAction->setCheckable(true);
+        autoScaleAction->setChecked(autoScale);
+        connect(autoScaleAction, &QAction::triggered, this, &AbstractBarGraphWidget::setAutoScale);
+        menu->addAction(autoScaleAction);
+
         // error bars
         QAction* errorBarAction = new QAction("Show error bars", this);
         errorBarAction->setCheckable(true);

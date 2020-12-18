@@ -4,6 +4,7 @@
 #include <QWidget>
 
 #include "../classes/mvector.h"
+#include "fixedplotzoomer.h"
 
 #include <qwt_plot.h>
 #include <qwt_plot_barchart.h>
@@ -49,6 +50,9 @@ class AbstractBarGraphWidget : public QwtPlot
     Q_OBJECT
 public:
     explicit AbstractBarGraphWidget(QWidget *parent = nullptr);
+    QRectF boundingRect() const;
+
+    void setAutoScale(bool value);
 
 signals:
     void saveRequested();
@@ -59,12 +63,17 @@ public slots:
     void clear();
     void exportGraph(QString filePath);
     void setErrorBarsVisible(bool);
+    void setZoomBase();
+    void setAxisIntv (QwtInterval intv, QwtPlot::Axis axis);
 
 protected:
     BarChartItem *d_barChartItem;
     QVector<ErrorBarMarker*> errorBars;
 
+    FixedPlotZoomer *rectangleZoom;
+
     bool errorBarsVisible = false;
+    bool autoScale = true;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
 protected slots:
