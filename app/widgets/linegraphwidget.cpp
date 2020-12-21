@@ -1054,10 +1054,6 @@ void LineGraphWidget::addPoint(QwtPlotCurve *curve, QPointF point)
 {
     CurveData *curveData = static_cast<CurveData *>( curve->data() );
 
-    // check max y
-    if (point.y() > DBL_MAX)
-        point.setY(DBL_MAX / 2);
-
     curveData->append( point );
 }
 
@@ -1076,6 +1072,10 @@ void LineGraphWidget::addVector(uint timestamp, MVector vector, const Functional
     for (int i=0; i<dataCurves.size(); i++)
     {
         QwtPlotCurve* curve = dataCurves[i];
+        double value = vector[i];
+        if (qIsInf(value) || value > DBL_MAX / 2)
+            value = DBL_MAX / 2;
+
         QPointF point(t, vector[i]);
 
         addPoint(curve, point);

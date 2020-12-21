@@ -339,10 +339,10 @@ AbsoluteMVector USBDataSource::getVector(QStringList vectorList)
         // get values
         vector[i] = vectorList[i+1].toDouble(); // ignore first entry in vectorList (count)
 
-        // values < 0 or value == 1.0:
-        // huge resistances on sensor
-        if (vector[i] < 0 || qFuzzyCompare(vector[i], 1.0))
-            vector[i] = qInf();
+//        // values < 0 or value == 1.0:
+//        // huge resistances on sensor
+//        if (vector[i] < 0 || qFuzzyCompare(vector[i], 1.0))
+//            vector[i] = qInf();
     }
 
     return vector;
