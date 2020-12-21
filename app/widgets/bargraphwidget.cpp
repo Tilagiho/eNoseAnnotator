@@ -118,9 +118,24 @@ void ErrorBarMarker::draw(QPainter *pPainter, const QwtScaleMap &pXMap, const Qw
     QwtPlotMarker::draw(pPainter,pXMap,pYMap,pBoundingRectangle);
 }
 
+bool ErrorBarMarker::getFailure() const
+{
+    return failure;
+}
+
 void ErrorBarMarker::setFailure(bool value)
 {
     failure = value;
+}
+
+QRectF ErrorBarMarker::boundingRect() const
+{
+    QPointF topLeft (index - width, value + error);
+    QPointF bottomRight (index + width, value - error);
+
+    QRectF b_rect (topLeft, bottomRight);
+
+    return b_rect;
 }
 
 BarChartItem::BarChartItem():
@@ -217,8 +232,24 @@ AbstractBarGraphWidget::AbstractBarGraphWidget( QWidget *parent ) :
 
 QRectF AbstractBarGraphWidget::boundingRect() const
 {
-    return d_barChartItem->boundingRect();
-;
+    auto b_rect = d_barChartItem->boundingRect();
+
+    if (errorBarsVisible)
+    {
+        for (auto errorBar : errorBars)
+        {
+            if (!errorBar->getFailure())
+                b_rect = b_rect | errorBar->boundingRect();
+        }
+    }
+
+    double leftMargin = -(1. / errorBars.size()) * b_rect.width();
+    double rightMargin = (1. / errorBars.size()) * b_rect.width();
+    double topMargin = BGW_RELATIVE_MARGIN * b_rect.height();
+    double bottomMargin = -BGW_RELATIVE_MARGIN * b_rect.height();
+
+    b_rect.adjust( leftMargin, bottomMargin, rightMargin, topMargin );
+    return b_rect;
 }
 
 void AbstractBarGraphWidget::setVector( const MVector &vector, const MVector &stdDevVector, const std::vector<bool> sensorFailures, const Functionalisation &functionalisation )
@@ -249,8 +280,7 @@ void AbstractBarGraphWidget::setVector( const MVector &vector, const MVector &st
         ErrorBarMarker *errorbar = new ErrorBarMarker(i, vector[i], stdDevVector[i]);
 
         errorbar->setVisible(errorBarsVisible);
-        if (sensorFailures[i])
-                    errorbar->setFailure(true);
+        errorbar->setFailure(useFailures && sensorFailures[i]);
 
         errorbar->setSymbol(new QwtSymbol(QwtSymbol::Style::NoSymbol));
         errorbar->setLinePen(Qt::black, qPow(MVector::nChannels, 0.3) / qPow(stdDevVector.getSize(), 0.3));
@@ -305,6 +335,7 @@ void AbstractBarGraphWidget::setErrorBarsVisible(bool value)
         for (auto errorBar : errorBars)
             errorBar->setVisible(value);
 
+        setZoomBase();
         replot();
 
         emit errorBarsVisibleSet(value);
@@ -349,17 +380,6 @@ void AbstractBarGraphWidget::setAxisIntv (QwtInterval intv, QwtPlot::Axis axis)
 void AbstractBarGraphWidget::setAutoScale(bool value)
 {
     autoScale = value;
-
-    // auto scale directly???
-//    if (value)
-//    {
-//        auto rect = rectangleZoom->zoomBase();
-//        QwtInterval xIntv(rect.left(), rect.right());
-//        QwtInterval yIntv(rect.bottom(), rect.top());
-
-//        setAxisIntv(xIntv.normalized(), QwtPlot::xBottom);
-//        setAxisIntv(yIntv.normalized(), QwtPlot::yLeft);
-//    }
 }
 
 void AbstractBarGraphWidget::mouseReleaseEvent(QMouseEvent *event)

@@ -10,12 +10,18 @@
 #include <qwt_plot_barchart.h>
 #include <qwt_plot_marker.h>
 
+#define BGW_RELATIVE_MARGIN 0.10
+
 class ErrorBarMarker: public QwtPlotMarker
 {
 public:
     ErrorBarMarker (int index, double value, double error);
 
     void setFailure(bool value);
+
+    virtual QRectF boundingRect() const override;
+
+    bool getFailure() const;
 
 protected:
     void draw(QPainter *pPainter,const QwtScaleMap &pXMap, const QwtScaleMap &pYMap, const QRectF &pBoundingRectangle) const override;
