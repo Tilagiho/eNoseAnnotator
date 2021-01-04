@@ -8,7 +8,7 @@ CurveFitWizard::CurveFitWizard(MeasurementData* mData, QWidget* parent):
     introPage(new IntroPage),
     fitPage(new FitPage),
     resultPage(new ResultPage(mData)),
-    worker(new FitWorker(mData)),
+    worker(new CurveFitWorker(mData)),
     nChannels(mData->nChannels())
 {
     setWindowTitle(tr("Fit curve to selection"));
@@ -27,43 +27,43 @@ CurveFitWizard::CurveFitWizard(MeasurementData* mData, QWidget* parent):
     // page connections:
     // worker settings
     connect(introPage, &IntroPage::typeChanged, this, &CurveFitWizard::selectType);
-    connect(introPage, &IntroPage::detectExpositionChanged, worker, &FitWorker::setDetectExpositionStart);
-    connect(introPage, &IntroPage::jumpBaseThresholdChanged, worker, &FitWorker::setJumpBaseThreshold);
-    connect(introPage, &IntroPage::jumpFactorChanged, worker, &FitWorker::setJumpFactor);
+    connect(introPage, &IntroPage::detectExpositionChanged, worker, &CurveFitWorker::setDetectExpositionStart);
+    connect(introPage, &IntroPage::jumpBaseThresholdChanged, worker, &CurveFitWorker::setJumpBaseThreshold);
+    connect(introPage, &IntroPage::jumpFactorChanged, worker, &CurveFitWorker::setJumpFactor);
 
-    connect(introPage, &IntroPage::detectRecoveryChanged, worker, &FitWorker::setDetectRecoveryStart);
-    connect(introPage, &IntroPage::recoveryFactorChanged, worker, &FitWorker::setRecoveryFactor);
-    connect(introPage, &IntroPage::fitBufferChanged, worker, &FitWorker::setFitBuffer);
+    connect(introPage, &IntroPage::detectRecoveryChanged, worker, &CurveFitWorker::setDetectRecoveryStart);
+    connect(introPage, &IntroPage::recoveryFactorChanged, worker, &CurveFitWorker::setRecoveryFactor);
+    connect(introPage, &IntroPage::fitBufferChanged, worker, &CurveFitWorker::setFitBuffer);
 
-    connect(introPage, &IntroPage::nIterationsChanged, worker, &FitWorker::setNIterations);
-    connect(introPage, &IntroPage::limitFactorChanged, worker, &FitWorker::setLimitFactor);
+    connect(introPage, &IntroPage::nIterationsChanged, worker, &CurveFitWorker::setNIterations);
+    connect(introPage, &IntroPage::limitFactorChanged, worker, &CurveFitWorker::setLimitFactor);
 
     // range determination
-    connect(worker, &FitWorker::rangeRedeterminationPossible, introPage, &IntroPage::setRangeRedeterminationPossible);
-    connect(introPage, &IntroPage::rangeDeterminationRequested, worker, &FitWorker::determineChannelRanges);
-    connect(worker, &FitWorker::rangeDeterminationStarted, fitPage, &FitPage::onRangeDeterminationStarted);
-    connect(worker, &FitWorker::rangeDeterminationFinished, fitPage, &FitPage::onRangeDeterminationFinished);
+    connect(worker, &CurveFitWorker::rangeRedeterminationPossible, introPage, &IntroPage::setRangeRedeterminationPossible);
+    connect(introPage, &IntroPage::rangeDeterminationRequested, worker, &CurveFitWorker::determineChannelRanges);
+    connect(worker, &CurveFitWorker::rangeDeterminationStarted, fitPage, &FitPage::onRangeDeterminationStarted);
+    connect(worker, &CurveFitWorker::rangeDeterminationFinished, fitPage, &FitPage::onRangeDeterminationFinished);
 
     // fit process
     connect(fitPage, &FitPage::fitRequested, this, &CurveFitWizard::fitCurves);
-    connect(worker, &FitWorker::started, fitPage, &FitPage::onStarted);
-    connect(worker, &FitWorker::finished, fitPage, &FitPage::onFinished);
+    connect(worker, &CurveFitWorker::started, fitPage, &FitPage::onStarted);
+    connect(worker, &CurveFitWorker::finished, fitPage, &FitPage::onFinished);
 
     qRegisterMetaType<QList<QList<double>>>("QList<QList<double>>");
-    connect(worker, &FitWorker::dataSet, resultPage, &ResultPage::setData); // set data in results page
+    connect(worker, &CurveFitWorker::dataSet, resultPage, &ResultPage::setData); // set data in results page
 
-    connect(worker, &FitWorker::progressChanged, fitPage, &FitPage::onProgressChanged);
-    connect(worker, &FitWorker::error, fitPage, &FitPage::onError);
+    connect(worker, &CurveFitWorker::progressChanged, fitPage, &FitPage::onProgressChanged);
+    connect(worker, &CurveFitWorker::error, fitPage, &FitPage::onError);
 
     // result connections
     connect(resultPage, &ResultPage::saveResultsRequested, this, &CurveFitWizard::saveData); // save fit results
-    connect(resultPage, &ResultPage::channelRangeRequested, worker, &FitWorker::emitChannelRange);
-    connect(worker, &FitWorker::channelRangeProvided, resultPage, &ResultPage::setChannelRange);
+    connect(resultPage, &ResultPage::channelRangeRequested, worker, &CurveFitWorker::emitChannelRange);
+    connect(worker, &CurveFitWorker::channelRangeProvided, resultPage, &ResultPage::setChannelRange);
 
-    connect(resultPage, &ResultPage::removeFromRange, worker, &FitWorker::removeFromRange);
-    connect(resultPage, &ResultPage::addToRange, worker, &FitWorker::addToRange);
+    connect(resultPage, &ResultPage::removeFromRange, worker, &CurveFitWorker::removeFromRange);
+    connect(resultPage, &ResultPage::addToRange, worker, &CurveFitWorker::addToRange);
 
-    connect(worker, &FitWorker::rangeDeterminationFinished, this, &CurveFitWizard::updateChannelRange);
+    connect(worker, &CurveFitWorker::rangeDeterminationFinished, this, &CurveFitWizard::updateChannelRange);
 }
 
 CurveFitWizard::~CurveFitWizard()
@@ -258,506 +258,6 @@ void IntroPage::setDetectRecoveryStart(bool value)
     emit detectRecoveryChanged(value);
 }
 
-FitWorker::FitWorker(MeasurementData* mData, QObject *parent):
-    QObject(parent),
-    QRunnable(),
-    sigmaError(MVector::nChannels, 0.),
-    tau90(MVector::nChannels, 0.),
-    f_t90(MVector::nChannels, 0.),
-    sigmaNoise(MVector::nChannels, 0.),
-    nSamples(MVector::nChannels, 0),
-    mData(mData),
-    dataRange(MVector::nChannels, std::vector<std::pair<double, double>>()),
-    y_offset(MVector::nChannels, 0),
-    x_start(MVector::nChannels, mData->getSelectionMap().firstKey())
-{
-    selectedData = mData->getSelectionMap();
-    auto relativeData = mData->getRelativeData();
-
-    Q_ASSERT(!relativeData.isEmpty());
-    Q_ASSERT(!selectedData.isEmpty());
-
-    // convert selectedData to relative
-    for (uint timestamp : selectedData.keys())
-        selectedData[timestamp] = relativeData[timestamp];
-}
-
-void FitWorker::run()
-{
-    Q_ASSERT(ch < mData->nChannels());
-
-    if (ch == 0)
-        emit started();
-
-    // select channel to be fitted
-    mutex.lock();
-    size_t channel = ch;
-    ch++;
-    mutex.unlock();
-
-    // fit channel
-    fitChannel(channel);
-
-    if (channelsFinished == mData->getAbsoluteData().first().getSize())
-    {
-        QStringList header = getHeader();
-        QStringList tooltips = getTooltips();
-        auto data = getData();
-
-        emit finished();
-        emit dataSet(header, tooltips, data);
-    }
-}
-
-void FitWorker::init()
-{
-    // reset ch
-    ch = 0;
-    channelsFinished = 0;
-
-    // init parameters
-    LeastSquaresFitter *fitter;
-    switch (type) {
-    case LeastSquaresFitter::Type::SUPERPOS:
-        fitter = new ADG_superpos_Fitter();
-        break;
-    default:
-        throw std::runtime_error("Unknown fitter type!");
-    }
-
-    parameterNames = fitter->getParameterNames();
-    fitTooltips = fitter->getTooltips();
-
-    parameterData.clear();
-    for ( int i=0; i<fitTooltips.size(); i++ )
-        parameterData << std::vector<double>(MVector::nChannels, 0.);
-
-    delete fitter;
-}
-
-void FitWorker::determineChannelRanges()
-{
-    emit rangeDeterminationStarted();
-
-    for (int i=0; i<MVector::nChannels; i++)
-        dataRange[i].clear();
-
-    auto relativeData = mData->getRelativeData();
-    auto sensorFailures = mData->getSensorFailures();
-
-    std::vector<uint> x_end(MVector::nChannels, selectedData.lastKey());
-    for (size_t channel=0; channel<MVector::nChannels; channel++)
-    {
-        // ignore channels with sensor failure flags
-        if (sensorFailures[channel])
-            continue;
-
-        // adjust data range for channel
-        auto it = relativeData.find(selectedData.firstKey());
-        auto endIt = relativeData.constFind(selectedData.lastKey());
-
-        bool inRange = false;
-        bool reactionIsPositive = true;
-
-        // exposition start detection turned off:
-        if (!detectExpositionStart)
-        {
-            x_start[channel] = selectedData.firstKey();
-            y_offset[channel] = selectedData.first()[channel];
-            inRange = true;
-        }
-
-        // collect points for linear fit:
-        // before exposition start:
-        // -> fitBuffer seconds before current point
-        // after exposition start:
-        // -> fitBuffer seconds after current point
-        uint x_0 = it.key();
-        while(it.key() <= endIt.key() && it != relativeData.constEnd())
-        {
-            // collect vectors in range [innerIt.key(); innerIt.key() + CURVE_FIT_CHANNEL_BUFFER]
-            std::vector<double> x, y;
-            auto lineIt = it;
-
-            while(std::labs(static_cast<long>(lineIt.key()) - static_cast<long>(it.key())) < fitBuffer)
-            {
-                x.push_back(lineIt.key() - x_0);
-                y.push_back(lineIt.value()[channel]);
-
-                // in range:
-                // fit line to subsequent values
-                if (inRange)
-                    lineIt++;
-                // not in range:
-                // fit line to previous values
-                else
-                    lineIt--;
-            }
-
-            // fit line to range
-            LinearFitter linearModel;
-            linearModel.fit(x, y);
-
-            // check if unexpected jump occures in next step
-            double delta_y = (it+1).value()[channel] - linearModel.model((it+1).key() - x_0);
-
-            // not in range and jump detected:
-            if (!inRange && std::abs(delta_y) > jumpFactor * linearModel.getStdDev() + jumpBaseThreshold)
-            {
-                // offset data:
-                // x_start = t_jump
-                // y_offset = linear_model(t_jump)
-                x_start[channel] = it.key();
-                y_offset[channel] = linearModel.model(x_start[channel] - x_0);
-                sigmaNoise[channel] = linearModel.getStdDev();
-
-                reactionIsPositive = delta_y > 0;
-                inRange = true;
-            }
-            // in range:
-            else if (inRange)
-            {
-                // recovery start detection turned off:
-                if (!detectRecoveryStart)
-                {
-                    x_end[channel] = selectedData.lastKey();
-                    break;
-                }
-
-                // check if recovery is beginning after current point
-                double recoveryThreshold = recoveryFactor * linearModel.getStdDev();
-                if (reactionIsPositive ? linearModel.getM() < -recoveryThreshold : linearModel.getM() > recoveryThreshold)
-                {
-                    x_end[channel] = it.key();
-                    break;
-                }
-            }
-            it++;
-        }
-
-        // collect data
-        auto collectionIt = selectedData.find(x_start[channel]);
-        auto collectionEndIt = selectedData.constFind(x_end[channel]);
-
-        while(collectionIt.key() <= collectionEndIt.key() && collectionIt != selectedData.constEnd())
-        {
-            double x = collectionIt.key() - x_start[channel];
-            double y = collectionIt.value()[channel] - y_offset[channel];
-            dataRange[channel].push_back(std::pair<double, double>(x, y));
-            collectionIt++;
-        }
-    }
-
-    emit rangeDeterminationFinished();
-}
-
-void FitWorker::fitChannel(size_t channel)
-{
-    // init fitter
-    LeastSquaresFitter *fitter, *fitter_lm;
-    switch (type) {
-    case LeastSquaresFitter::Type::SUPERPOS:
-        fitter = new ADG_superpos_Fitter();
-        fitter_lm = new ADG_superpos_Fitter();
-        break;
-    default:
-        throw std::runtime_error("Unknown fitter type!");
-    }
-
-    qDebug() << "\nFit channel: " << channel;
-
-    auto channelData = dataRange[channel];
-//    for (auto pair : channelData)
-//        qDebug() << pair.first << ", " << pair.second;
-
-    // no jump found or unplausible range detected:
-    // ignore
-    if (!channelData.empty() || !(channelData.size() < 0.15 * selectedData.size()))
-    {
-        // fit curve to channelData
-        try {
-            fitter->solve(channelData, nIterations, limitFactor);
-            fitter_lm->solve_lm(channelData, nIterations, limitFactor);
-
-            auto bestFitter = fitter->residual_sum_of_sqares(channelData) < fitter_lm->residual_sum_of_sqares(channelData) ? fitter : fitter_lm;
-            QList<QString> parameterNames = bestFitter->getParameterNames();
-            auto params = bestFitter->getParams();
-
-            for (size_t i=0; i<parameterNames.size(); i++)
-            {
-                parameterData[i][channel] = params[i];
-            }
-            sigmaError[channel] = std::sqrt(bestFitter->residual_sum_of_sqares(channelData) / channelData.size());
-            tau90[channel] = bestFitter->tau_90();
-            f_t90[channel] = bestFitter->f_t_90();
-            nSamples[channel] = channelData.size();
-        } catch (dlib::error exception) {
-            error("Error in channel " + QString::number(channel) + ": " + QString(exception.what()));
-        }
-    }
-
-    mutex.lock();
-    channelsFinished++;
-    emit progressChanged(channelsFinished);
-    mutex.unlock();
-
-    delete fitter;
-    delete  fitter_lm;
-}
-
-void FitWorker::save(QString filePath) const
-{
-    QFile file (filePath);
-
-    if (!file.open(QIODevice::WriteOnly))
-        throw std::runtime_error("Unable to open file:" + file.errorString().toStdString());
-
-    QTextStream out(&file);
-
-    // write header
-    out << getHeader().join(";") << "\n";
-
-    auto data = getData();
-    for (int i=0; i<data.size(); i++)
-    {
-        QStringList valueStrings;
-        for (double value : data[i])
-            valueStrings << QString::number(value);
-
-        out << valueStrings.join(";") << "\n";
-    }
-}
-
-
-std::vector<double> FitWorker::getNSamples() const
-{
-    return nSamples;
-}
-
-bool FitWorker::rangeIsSet()
-{
-    for (int i=0; i<MVector::nChannels; i++)
-        if (!dataRange[i].empty())
-            return true;
-    return false;
-}
-
-void FitWorker::setJumpBaseThreshold(double value)
-{
-    if (!qFuzzyCompare(value, jumpBaseThreshold))
-    {
-        jumpBaseThreshold = value;
-        if (rangeIsSet())
-            emit rangeRedeterminationPossible();
-    }
-}
-
-void FitWorker::setJumpFactor(double value)
-{
-    if (!qFuzzyCompare(value, jumpFactor))
-    {
-        jumpFactor = value;
-        if (rangeIsSet())
-            emit rangeRedeterminationPossible();
-    }
-
-}
-
-void FitWorker::setRecoveryFactor(double value)
-{
-    if (!qFuzzyCompare(value, recoveryFactor))
-    {
-        recoveryFactor = value;
-        if (rangeIsSet())
-            emit rangeRedeterminationPossible();
-    }
-}
-
-void FitWorker::emitChannelRange(int channel)
-{
-    if (dataRange.empty())
-        return;
-
-    QList<uint> range;
-    for (auto pair : dataRange[channel])
-        range.append(pair.first + x_start[channel]);
-
-    emit channelRangeProvided(channel, range);
-}
-
-void FitWorker::addToRange(int channel, QList<int> range)
-{
-    auto selectionKeys = selectedData.keys();
-    auto *channelData = &dataRange[channel];
-
-    for (int index : range)
-    {
-        int timestamp = selectionKeys[index];
-        int time = timestamp  - x_start[channel];
-
-        bool containsTime = false;
-
-        // dont add if timestamp already part of range
-        for (auto it=channelData->begin(); it!=channelData->end(); it++)
-        {
-            if (it->first == time)
-            {
-                containsTime = true;
-                break;
-            }
-        }
-
-        if (!containsTime)
-        {
-            channelData->push_back(std::pair<double, double>(time, selectedData[timestamp][channel] - y_offset[channel]));
-            emit rangeRedeterminationPossible();
-        }
-    }
-
-    emit rangeDeterminationFinished();
-}
-
-void FitWorker::removeFromRange(int channel, QList<int> range)
-{
-    auto selectionKeys = selectedData.keys();
-    auto *channelData = &dataRange[channel];
-
-    for (int index : range)
-    {
-        int timestamp = selectionKeys[index];
-        int time = timestamp - x_start[channel];
-
-        // erase if timestamp part of range
-        for (auto it=channelData->begin(); it!=channelData->end(); it++)
-        {
-            if (it->first == time)
-            {
-                channelData->erase(it);
-                emit rangeRedeterminationPossible();
-                break;
-            }
-        }
-    }
-
-    emit rangeDeterminationFinished();
-}
-
-void FitWorker::setDetectExpositionStart(bool value)
-{
-    if (value != detectExpositionStart)
-    {
-        detectExpositionStart = value;
-        if (rangeIsSet())
-            emit rangeRedeterminationPossible();
-    }
-}
-
-void FitWorker::setDetectRecoveryStart(bool value)
-{
-    if (value != detectRecoveryStart)
-    {
-        detectRecoveryStart = value;
-        if (rangeIsSet())
-            emit rangeRedeterminationPossible();
-    }
-}
-
-void FitWorker::setNIterations(const int &value)
-{
-    if (value != nIterations)
-    {
-        nIterations = value;
-    }
-}
-
-void FitWorker::setLimitFactor(const double &value)
-{
-    if (value != limitFactor)
-    {
-        limitFactor = value;
-    }
-}
-
-QStringList FitWorker::getHeader() const
-{
-    // get data from the worker and emit
-    QStringList header;
-
-    header << "number of\nsamples";
-    header << "sigma error\n[ % ]";
-    header << "sigma noise\n[ % ]";
-    header << QString::fromUtf8("tau90\n[ s ]");
-    header << QString::fromUtf8("f(t90)\n[ % ]");
-
-    header << parameterNames;
-
-    return header;
-}
-
-QStringList FitWorker::getTooltips() const
-{
-    QStringList tooltips;
-
-    tooltips << "number of samples:\nnumber of data points used for fitting the curve";                                 // number of samples
-    tooltips << "sigma error:\nstandard deviation of the exposition data in relation to the fitted curve";              // sigma error
-    tooltips << "sigma noise:\nstandard deviation before the start of the exposition in relation to the linear drift";  // sigma noise                                                // sigma noise
-    tooltips << "tau90:\ntime from start of the exposition until 90% of the plateau is reached";                       // tau90
-    tooltips << "f(t90):\n90% of the plateau height";                                                                   // f(t90)
-
-    tooltips.append(fitTooltips);
-
-    return  tooltips;
-}
-
-QList<QList<double>> FitWorker::getData() const
-{
-    QList<QList<double>> resultData;
-    resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getNSamples()));
-    resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getSigmaError()));
-    resultData << QList<double>::fromVector(QVector<double>::fromStdVector(sigmaNoise));
-    resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getTau90()));
-    resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getF_tau90()));
-
-    for (size_t i=0; i<parameterData.size(); i++)
-        resultData << QList<double>::fromVector(QVector<double>::fromStdVector(parameterData[i]));
-
-    return resultData;
-}
-
-std::vector<double> FitWorker::getF_tau90() const
-{
-    return f_t90;
-}
-
-void FitWorker::setFitBuffer(const uint &value)
-{
-    if (value != fitBuffer)
-    {
-        fitBuffer = value;
-        if (rangeIsSet())
-            emit rangeRedeterminationPossible();
-    }
-}
-
-void FitWorker::setType(const LeastSquaresFitter::Type &value)
-{
-    if (value != type)
-    {
-        type = value;
-        if (rangeIsSet())
-            emit rangeRedeterminationPossible();
-    }
-}
-
-std::vector<double> FitWorker::getSigmaError() const
-{
-    return sigmaError;
-}
-
-std::vector<double> FitWorker::getTau90() const
-{
-    return tau90;
-}
 
 FitPage::FitPage(QWidget *parent):
     QWizardPage(parent),

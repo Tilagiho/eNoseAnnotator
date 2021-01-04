@@ -83,6 +83,15 @@ const QMap<uint, AbsoluteMVector>& MeasurementData::getSelectionMap()
     return selectedData;
 }
 
+const QMap<uint, AbsoluteMVector>& MeasurementData::getFitMap()
+{
+    if (!selectedData.isEmpty())
+        return selectedData;
+
+    return data;
+}
+
+
 /*!
  * \brief MeasurementData::clear deletes all data from MeasurementData
  */

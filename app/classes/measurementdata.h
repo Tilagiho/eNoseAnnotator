@@ -76,6 +76,9 @@ public:
      */
     const QMap<uint, AbsoluteMVector>& getSelectionMap();
 
+    const QMap<uint, AbsoluteMVector>& getFitMap();
+
+
     QString getComment();
     QString getFailureString();
 

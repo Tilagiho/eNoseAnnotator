@@ -58,6 +58,7 @@ SOURCES += \
     classes/mvector.cpp \
     classes/torchclassifier.cpp \
     classes/usbdatasource.cpp \
+    classes/curvefitworker.cpp \
     lib/comboboxitemdelegate.cpp \
     lib/dlib/dlib/all/source.cpp \
     lib/spoiler.cpp \
@@ -95,6 +96,7 @@ HEADERS += \
     classes/mvector.h \
     classes/torchclassifier.h \
     classes/usbdatasource.h \
+    classes/curvefitworker.h \
     lib/comboboxitemdelegate.h \
     lib/spoiler.h \
     widgets/acirclewidget.h \

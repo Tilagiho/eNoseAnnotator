@@ -11,6 +11,28 @@
 #include "torchclassifier.h"
 #include "classifier_definitions.h"
 
+class ParseResult
+{
+public:
+    ParseResult() {}
+
+    QString filename;
+    bool curveFit = false;
+    int timeout = -1;
+    int nCores = -1;
+
+    QString toString()
+    {
+        QString resultString;
+        resultString += "filename:\t" + filename + "\n";
+        resultString += "curveFit:\t" + QString::number(curveFit) + "\n";
+        resultString += "timeout:\t" + QString::number(timeout) + "\n";
+        resultString += "nCores:\t" + QString::number(nCores) + "\n";
+
+        return resultString;
+    }
+};
+
 class Controler : public QObject
 {
     Q_OBJECT
@@ -19,6 +41,8 @@ public:
     ~Controler();
 
      MainWindow* getWindow() const;
+
+     ParseResult getParseResult() const;
 
 signals:
 
@@ -36,6 +60,8 @@ public slots:
 
     void setDataChanged(bool);
 
+    void parseArguments();
+
 private:
     MainWindow* w;
 
@@ -50,6 +76,7 @@ private:
     TorchClassifier *classifier = nullptr;
 
     InputFunctionType inputFunctionType = InputFunctionType::medianAverage;
+    ParseResult parseResult;
 
 private slots:
     void clearData();

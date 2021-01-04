@@ -27,7 +27,8 @@ Controler::Controler(QObject *parent) :
     // declare meta types
     qRegisterMetaType<AbsoluteMVector>("AbsoluteMVector");
 
-    // setup mainwindow
+    // parse launch arguments
+    parseArguments();
 
     // init mData
     mData->setInputFunctionType(inputFunctionType);
@@ -194,15 +195,26 @@ void Controler::initialize()
 
 void Controler::loadCLArguments()
 {
-    // parse launch arguments & load file in first arg (if it exists)
-    QStringList arguments = QCoreApplication::arguments();
-    qDebug() << "Launched with args: " << arguments;
 
-    if (arguments.size() > 1)
-        loadData(arguments[1]);
+    // fit curves
+    if (parseResult.curveFit)
+    {
+        if (parseResult.filename == "")
+            throw std::runtime_error("No filename for curve fit specified!");
 
-    if (arguments.size() > 2)
-        QMessageBox::warning(w, "Launch error", "The application can only be launched with one argument!");
+        loadData(parseResult.filename);
+        AutomatedFitWorker fitWorker(mData, parseResult.timeout, parseResult.nCores);
+        fitWorker.fit();
+
+        QFileInfo fileInfo(parseResult.filename);
+        fitWorker.save(fileInfo.path() + "/" + "cf_" + fileInfo.fileName());
+        QApplication::instance()->quit();
+    }
+    // load file
+    else if (parseResult.filename != "")
+    {
+        loadData(parseResult.filename);
+    }
 }
 
 void Controler::loadAutosave()
@@ -469,6 +481,50 @@ void Controler::loadData(QString fileName)
 void Controler::setDataChanged(bool value)
 {
     w->setDataChanged(value, mData->getSaveFilename());
+}
+
+ParseResult Controler::getParseResult() const
+{
+    return parseResult;
+}
+
+void Controler::parseArguments()
+{
+    // setup launch arguments
+    QCommandLineParser parser;
+    parser.setApplicationDescription("eNoseAnnotator " + QString(GIT_VERSION));
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("filename", QCoreApplication::translate("main", "Measurement file (.csv) to open"));
+
+    QCommandLineOption curveFitOption(QStringList() << "curve-fit",
+            QCoreApplication::translate("main", "Fit curves to exposition"));
+    parser.addOption(curveFitOption);
+
+    QCommandLineOption timeoutOption(QStringList{"t","timeout"}, "timeout in seconds for fitting process", "timeoutInS", "-1");
+    parser.addOption(timeoutOption);
+
+    QCommandLineOption nCoresOption(QStringList{"n","nCores"}, "number of cores used used during the fitting process", "nCores", "-1");
+    parser.addOption(nCoresOption);
+
+    // parse launch arguments
+    parser.process(*QApplication::instance());
+
+    // save launch arguments
+    const QStringList posArgs = parser.positionalArguments();
+    if (posArgs.size() > 0)
+        parseResult.filename = posArgs[0];
+
+    parseResult.curveFit = parser.isSet(curveFitOption);
+
+    bool ok;
+    parseResult.timeout = parser.value(timeoutOption).toInt(&ok);
+    parseResult.nCores = parser.value(nCoresOption).toInt(&ok);
+    if (!ok)
+        throw std::runtime_error("One or more parameters are invalid!");
+
+//    QString filename = "/home/pingu/eNose-ml-engine/data/eNose-base-dataset/train/5_Ammoniak_200206.csv";
+    qDebug() << parseResult.toString();
 }
 
 void Controler::saveSelection()

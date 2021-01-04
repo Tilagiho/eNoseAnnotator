@@ -1,6 +1,10 @@
 #include "lib/QCrashHandler/src/qcrashhandler.h"
+
 #include <QApplication>
+#include <QtCore>
+
 #include "classes/controler.h"
+//#include "classes/curvefitworker.h"
 
 #define CLI_CURVE_FIT_OPTION "--curve-fit"
 
@@ -27,31 +31,11 @@ int main(int argc, char *argv[])
     // init Controler
     Controler c;
 
-    // parse launch arguments & load file in first arg (if it exists)
-    QCommandLineParser parser;
-    parser.setApplicationDescription("eNoseAnnotator");
-    parser.addHelpOption();
-    parser.addVersionOption();
-    parser.addPositionalArgument("filename", QCoreApplication::translate("main", "Measurement file (.csv) to open"));
-
-    QCommandLineOption curveFitOption(QStringList() << "curve-fit",
-            QCoreApplication::translate("main", "Fit curves to exposition"));
-    parser.addOption(curveFitOption);
-
-    parser.process(a);
-
-    const QStringList args = parser.positionalArguments();
-    bool curveFit = parser.isSet(curveFitOption);
-
-    if (curveFit)
-    {
-        throw std::runtime_error("Requested curve fit with " + args[0].toStdString());
-    }
-
     // timer to check arguments
     QTimer::singleShot(0, &c, &Controler::initialize);
 
-    // start applivation
-    c.getWindow()->show();
+    // start application
+    if (!c.getParseResult().curveFit)
+        c.getWindow()->show();
     return a.exec();
 }
