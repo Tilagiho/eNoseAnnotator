@@ -255,6 +255,13 @@ void MeasurementData::setComment(QString new_comment)
     }
 }
 
+void MeasurementData::setSensorFailure(uint index, bool value)
+{
+    auto failures = sensorFailures;
+    failures[index] = value;
+    setSensorFailures(failures);
+}
+
 void MeasurementData::setSensorFailures(const std::vector<bool> &failures)
 {
     Q_ASSERT(failures.size() == MVector::nChannels);
@@ -337,16 +344,9 @@ void MeasurementData::setFunctionalisation(const Functionalisation &value)
 
     if (value != functionalisation)
     {
-        // set func name
-        if (functionalisation.getName() == "None")
-        {
-            for (uint i=0; i<MVector::nChannels; i++)
-                if (functionalisation[i] != 0)
-                    setFuncName("Custom");
-        }
-
-        // set functionalisation
         functionalisation = value;
+
+        // emit changes
         setDataChanged(true);
         emit functionalisationChanged();
 
@@ -355,6 +355,21 @@ void MeasurementData::setFunctionalisation(const Functionalisation &value)
             stdDevVector.setBaseVector(selectedData.first().getBaseVector());
         auto selectionVector = getAbsoluteSelectionVector(&stdDevVector);
         emit selectionVectorChanged(selectionVector, stdDevVector, sensorFailures, functionalisation);    }
+
+        // set func name
+        if (functionalisation.getName() == "None")
+        {
+            for (uint i=0; i<MVector::nChannels; i++)
+                if (functionalisation[i] != 0)
+                    setFuncName("Custom");
+        }
+
+        // check for NC funcs
+        for (uint i=0; i<MVector::nChannels; i++)
+        {
+            if (functionalisation[i] == FUNC_NC_VALUE && !sensorFailures[i])
+                setSensorFailure(i, true);
+        }
 }
 
 /*!

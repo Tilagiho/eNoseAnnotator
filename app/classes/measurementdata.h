@@ -223,6 +223,7 @@ public slots:
     void setSelection(uint lower, uint upper);
 
     void setComment(QString comment);
+    void setSensorFailure(uint index, bool value);
     void setSensorFailures(const std::vector<bool> &);
     void setSensorFailures(const QString failureString);
     void setSensorId(QString sensorId);

@@ -18,7 +18,7 @@ QString Functionalisation::getName()
         {
             if (vector[i] != 0)
             {
-                name = "Custom";
+                name = QString("Custom");
                 break;
             }
         }

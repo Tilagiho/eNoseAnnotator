@@ -42,5 +42,6 @@
 
 // functionalisation
 #define FUNC_MAX_VALUE 100000
+#define FUNC_NC_VALUE 999
 
 #endif // DEFAULTVALUES_H

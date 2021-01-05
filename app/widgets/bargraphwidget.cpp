@@ -477,14 +477,22 @@ void FuncBarGraphWidget::setValues(const QVector<double> &values, const Function
 {
     QStringList labels;
     QList<QColor> colors;
+    QVector<double> funcValues = values;
     auto funcList = functionalisation.getFuncMap().keys();
     for (int i=0; i<funcList.size(); i++)
     {
-        labels << QString::number(funcList[i]);
-        colors << getColor(i, functionalisation);
+        // dont display NC func
+        if (funcList[i] != FUNC_NC_VALUE)
+        {
+            labels << QString::number(funcList[i]);
+            colors << getColor(i, functionalisation);
+        }
+        else
+            funcValues.remove(i);
+
     }
     setAxisScaleDraw( QwtPlot::xBottom, new LabelScaleDraw( Qt::Vertical, labels ) );
     setAxisScaleEngine(QwtPlot::xBottom, new FullTicksScaleEngine);
-    d_barChartItem->setSamples(values, labels, colors);
+    d_barChartItem->setSamples(funcValues, labels, colors);
     replot();
 }
