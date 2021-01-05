@@ -40,4 +40,7 @@
 #define CVWIZ_DEFAULT_DETECT_EXPOSITION_START true
 #define CVWIZ_DEFAULT_DETECT_RECOVERY_START false
 
+// functionalisation
+#define FUNC_MAX_VALUE 100000
+
 #endif // DEFAULTVALUES_H

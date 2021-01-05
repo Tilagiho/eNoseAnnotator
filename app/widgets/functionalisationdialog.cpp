@@ -48,6 +48,8 @@ FunctionalisationDialog::FunctionalisationDialog(QString presetDir, ulong nChann
     {
         funcLabels[i] = new QLabel("ch" + QString::number(i+1));
         spinBoxes[i] = new QSpinBox();
+        spinBoxes[i]->setMaximum(FUNC_MAX_VALUE);
+
         // gridLayout looks like this
         // | label | spinBox | empty  | label | spinBox | empty | ... (spinBoxes.size() / 16 columns; end on spinBox)
         // | label | spinBox | empty  | label | spinBox | empty | ...
