@@ -111,9 +111,9 @@ void CurveFitWorker::determineChannelRanges()
 
         // collect points for linear fit:
         // before exposition start:
-        // -> fitBuffer seconds before current point
+        // -> *fitBuffer* seconds before current point
         // after exposition start:
-        // -> fitBuffer seconds after current point
+        // -> *fitBuffer* seconds after current point
         uint x_0 = it.key();
         while(it.key() <= endIt.key() && it != relativeData.constEnd())
         {
@@ -121,19 +121,21 @@ void CurveFitWorker::determineChannelRanges()
             std::vector<double> x, y;
             auto lineIt = it;
 
-            while(std::labs(static_cast<long>(lineIt.key()) - static_cast<long>(it.key())) < fitBuffer)
+            while(std::abs(static_cast<long>(lineIt.key()) - static_cast<long>(it.key())) < fitBuffer)
             {
                 x.push_back(lineIt.key() - x_0);
                 y.push_back(lineIt.value()[channel]);
 
                 // in range:
                 // fit line to subsequent values
-                if (inRange)
+                if (inRange && lineIt != relativeData.constEnd()-1)
                     lineIt++;
                 // not in range:
                 // fit line to previous values
-                else
+                else if (!inRange && lineIt != relativeData.constBegin())
                     lineIt--;
+                else
+                    break;
             }
 
             // fit line to range
@@ -141,7 +143,11 @@ void CurveFitWorker::determineChannelRanges()
             linearModel.fit(x, y);
 
             // check if unexpected jump occures in next step
-            double delta_y = (it+1).value()[channel] - linearModel.model((it+1).key() - x_0);
+            double delta_y;
+            if (x.size() > 3 && it+1 != relativeData.constEnd())   // drift fitted with at least 3 values
+                delta_y = (it+1).value()[channel] - linearModel.model((it+1).key() - x_0);
+            else
+                delta_y = 0;
 
             // not in range and jump detected:
             if (!inRange && std::abs(delta_y) > jumpFactor * linearModel.getStdDev() + jumpBaseThreshold)
