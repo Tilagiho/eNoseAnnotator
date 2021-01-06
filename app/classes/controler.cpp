@@ -203,7 +203,7 @@ void Controler::loadCLArguments()
             throw std::runtime_error("No filename for curve fit specified!");
 
         loadData(parseResult.filename);
-        AutomatedFitWorker fitWorker(mData, parseResult.timeout, parseResult.nCores);
+        AutomatedFitWorker fitWorker(mData, parseResult.timeout, parseResult.nCores, parseResult.tExposition, parseResult.tRecovery, parseResult.tOffset);
         fitWorker.fit();
 
         QFileInfo fileInfo(parseResult.filename);
@@ -501,11 +501,20 @@ void Controler::parseArguments()
             QCoreApplication::translate("main", "Fit curves to exposition"));
     parser.addOption(curveFitOption);
 
-    QCommandLineOption timeoutOption(QStringList{"t","timeout"}, "timeout in seconds for fitting process", "timeoutInS", "-1");
+    QCommandLineOption timeoutOption(QStringList{"timeout"}, "timeout in seconds for fitting process", "timeoutInS", "-1");
     parser.addOption(timeoutOption);
 
     QCommandLineOption nCoresOption(QStringList{"n","nCores"}, "number of cores used used during the fitting process", "nCores", "-1");
     parser.addOption(nCoresOption);
+
+    QCommandLineOption tOffsetOption(QStringList{"t_offset"}, "time offset before exposition", "tOffset", "0");
+    parser.addOption(tOffsetOption);
+
+    QCommandLineOption tRecoveryOption(QStringList{"t_exposition"}, "time of exposition", "tExposition", "-1");
+    parser.addOption(tRecoveryOption);
+
+    QCommandLineOption tExpositionOption(QStringList{"t_recovery"}, "max time of recovery", "tRecovery", QString::number(CVWIZ_DEFAULT_RECOVERY_TIME));
+    parser.addOption(tExpositionOption);
 
     // parse launch arguments
     parser.process(*QApplication::instance());
@@ -520,6 +529,9 @@ void Controler::parseArguments()
     bool ok;
     parseResult.timeout = parser.value(timeoutOption).toInt(&ok);
     parseResult.nCores = parser.value(nCoresOption).toInt(&ok);
+    parseResult.tOffset = parser.value(tOffsetOption).toInt(&ok);
+    parseResult.tExposition = parser.value(tExpositionOption).toInt(&ok);
+    parseResult.tRecovery = parser.value(tRecoveryOption).toInt(&ok);
     if (!ok)
         throw std::runtime_error("One or more parameters are invalid!");
 

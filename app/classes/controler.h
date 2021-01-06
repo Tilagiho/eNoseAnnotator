@@ -20,6 +20,9 @@ public:
     bool curveFit = false;
     int timeout = -1;
     int nCores = -1;
+    int tOffset = 0;
+    int tExposition = -1;
+    int tRecovery = CVWIZ_DEFAULT_RECOVERY_TIME;
 
     QString toString()
     {

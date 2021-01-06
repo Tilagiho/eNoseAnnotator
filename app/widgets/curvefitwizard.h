@@ -33,6 +33,7 @@ Q_SIGNALS:
     void jumpFactorChanged(double jumpFactor);
     void recoveryFactorChanged (double recoveryFactor);
     void fitBufferChanged(int fitBuffer);
+    void recoveryTimeChanged(int recoveryTime);
     void rangeDeterminationRequested() const;
     void detectExpositionChanged(bool useJump);
     void detectRecoveryChanged(bool useRecovery);
@@ -46,7 +47,7 @@ private:
     QComboBox *typeSelector;
     QCheckBox *detectExpositionStartCheckBox, *detectRecoveryCheckBox;
     QDoubleSpinBox *limitFactorSpinBox, *jumpFactorSpinBox, *jumpBaseThresholdSpinBox, *recoveryFactorSpinBox;
-    QSpinBox *nIterationsSpinBox, *fitBufferSpinBox;
+    QSpinBox *nIterationsSpinBox, *fitBufferSpinBox, *recoveryTimeSpinBox;
     bool rangeRedeterminationPossible = false;
 };
 

@@ -7,11 +7,13 @@ CurveFitWorker::CurveFitWorker(MeasurementData* mData, QObject *parent):
     tau90(MVector::nChannels, 0.),
     f_t90(MVector::nChannels, 0.),
     sigmaNoise(MVector::nChannels, 0.),
+    t10_recovery(MVector::nChannels, 0.),
     nSamples(MVector::nChannels, 0),
     mData(mData),
     dataRange(MVector::nChannels, std::vector<std::pair<double, double>>()),
     y_offset(MVector::nChannels, 0),
-    x_start(MVector::nChannels, mData->getFitMap().firstKey())
+    x_start(MVector::nChannels, mData->getFitMap().firstKey()),
+    relativeData(mData->getRelativeData())
 {
     fitData = mData->getFitMap();
     auto relativeData = mData->getRelativeData();
@@ -77,6 +79,30 @@ void CurveFitWorker::init()
     delete fitter;
 }
 
+void CurveFitWorker::setChannelRanges(uint start, uint end)
+{
+    Q_ASSERT(fitData.keys().contains(start));
+    Q_ASSERT(fitData.keys().contains(end));
+
+    // collect fitData from key range [start; end]
+    fitData.clear();
+    for (uint timestamp : relativeData.keys())
+        if (timestamp >= start && timestamp <= end)
+            fitData[timestamp] = relativeData[timestamp];
+
+    // execute chanel range determination without detection of exposition & recovery
+    bool prevDetExpSt = detectExpositionStart;
+    bool prevDetRecSt = detectRecoveryStart;
+
+    setDetectExpositionStart(false);
+    setDetectRecoveryStart(false);
+
+    determineChannelRanges();
+
+    setDetectExpositionStart(prevDetExpSt);
+    setDetectRecoveryStart(prevDetRecSt);
+}
+
 void CurveFitWorker::determineChannelRanges()
 {
     emit rangeDeterminationStarted();
@@ -84,7 +110,6 @@ void CurveFitWorker::determineChannelRanges()
     for (int i=0; i<MVector::nChannels; i++)
         dataRange[i].clear();
 
-    auto relativeData = mData->getRelativeData();
     auto sensorFailures = mData->getSensorFailures();
 
     std::vector<uint> x_end(MVector::nChannels, fitData.lastKey());
@@ -218,7 +243,7 @@ void CurveFitWorker::fitChannel(size_t channel)
 //    for (auto pair : channelData)
 //        qDebug() << pair.first << ", " << pair.second;
 
-    // no jump found or unplausible range detected:
+    // no jump found or detected range too small:
     // ignore
     if (!channelData.empty() || !(channelData.size() < 0.15 * fitData.size()))
     {
@@ -242,6 +267,10 @@ void CurveFitWorker::fitChannel(size_t channel)
         } catch (dlib::error exception) {
             error("Error in channel " + QString::number(channel) + ": " + QString(exception.what()));
         }
+
+        // after curve fit:
+        // recovery time
+        determineTRecovery(channel);
     }
 
     mutex.lock();
@@ -251,6 +280,51 @@ void CurveFitWorker::fitChannel(size_t channel)
 
     delete fitter;
     delete  fitter_lm;
+}
+
+/*!
+ * \brief CurveFitWorker::determineTRecovery determines time until channel recovers to 10% of the plateau value.
+ * Rolling average values are used to make the determination more robust.
+ * The result is stored in t10_recovery[channel].
+ * if this time is greater than t_recovery or the measurement stops before, t_recovery is used
+ *
+ * \param channel
+ * \param tAverage delta time within which values are averaged to determine recovery
+ */
+void CurveFitWorker::determineTRecovery(size_t channel, int tAverage)
+{
+    uint recovery_start = fitData.lastKey();
+    double recovery_threshold = f_t90[channel] / 9;
+
+    auto it = relativeData.find(recovery_start);
+    while (it != relativeData.constEnd() && it.key()-recovery_start < t_recovery)
+    {
+        // collect vectors within tAverage of it
+        QList<double> rollingAverageValues;
+        for (uint t=it.key()-tAverage; t<it.key()+tAverage; t++)
+        {
+            if (relativeData.contains(t))
+                rollingAverageValues <<  relativeData[t][channel];
+        }
+
+        // calculate rolling average
+        double rollingAverage = 0.;
+        for (auto value : rollingAverageValues)
+            rollingAverage += value / rollingAverageValues.size();
+
+        // detect recovery
+        if (rollingAverage < recovery_threshold)
+        {
+            t10_recovery[channel] = it.key() - recovery_start;
+            break;
+        }
+
+        it++;
+    }
+
+    // check if recovery time was set
+    if (qFuzzyIsNull(t10_recovery[channel]))
+        t10_recovery[channel] = t_recovery;
 }
 
 void CurveFitWorker::save(QString filePath) const
@@ -442,6 +516,7 @@ QStringList CurveFitWorker::getTableHeader() const
     header << "sigma noise\n[ % ]";
     header << QString::fromUtf8("tau90\n[ s ]");
     header << QString::fromUtf8("f(t90)\n[ % ]");
+    header << "t_recovery\n[ s ]";
 
     header << parameterNames;
 
@@ -465,6 +540,7 @@ QStringList CurveFitWorker::getTooltips() const
     tooltips << "sigma noise:\nstandard deviation before the start of the exposition in relation to the linear drift";  // sigma noise                                                // sigma noise
     tooltips << "tau90:\ntime from start of the exposition until 90% of the plateau is reached";                       // tau90
     tooltips << "f(t90):\n90% of the plateau height";                                                                   // f(t90)
+    tooltips << "t_recovery: time in s from end of exposition until 10% of the plateau is reached";
 
     tooltips.append(fitTooltips);
 
@@ -479,6 +555,7 @@ QList<QList<double>> CurveFitWorker::getData() const
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(sigmaNoise));
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getTau90()));
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getF_tau90()));
+    resultData << QList<double>::fromVector(QVector<double>::fromStdVector(t10_recovery));
 
     for (size_t i=0; i<parameterData.size(); i++)
         resultData << QList<double>::fromVector(QVector<double>::fromStdVector(parameterData[i]));
@@ -489,6 +566,14 @@ QList<QList<double>> CurveFitWorker::getData() const
 MeasurementData* CurveFitWorker::getMData() const
 {
     return mData;
+}
+
+void CurveFitWorker::setT_recovery(int value)
+{
+    // convert into minutes
+    if (value > 0)
+        value = 60 * value;
+    t_recovery = value;
 }
 
 std::vector<double> CurveFitWorker::getF_tau90() const
@@ -526,11 +611,26 @@ std::vector<double> CurveFitWorker::getTau90() const
     return tau90;
 }
 
-AutomatedFitWorker::AutomatedFitWorker(MeasurementData *mData, int timeout, int nCores, QObject *parent):
+/*!
+ * \brief AutomatedFitWorker::AutomatedFitWorker automatically
+ * \param mData
+ * \param timeout time until curve fit is canceled by timeout
+ * \param nCores number of threads used simultaneously
+ * \param t_exposition time of exposition
+ * exposition starts at the start of the measurement + t_offset
+ * Default (t_exposition=-1): exposition is assumed to go until the end of the measurement.
+ * \param t_offset time offset until the start of the exposition
+ * \param parent
+ */
+AutomatedFitWorker::AutomatedFitWorker(MeasurementData *mData, int timeout, int nCores, int t_exposition, int t_recovery, int t_offset, QObject *parent):
     mData(mData),
     QObject(parent),
     timeoutInS(timeout)
 {
+    auto absoluteData = mData->getAbsoluteData();
+    if (absoluteData.isEmpty())
+        throw std::runtime_error("Measurement loaded is empty!");
+
     worker = new CurveFitWorker(mData, this);
 
     // adjust default parameters:
@@ -540,6 +640,10 @@ AutomatedFitWorker::AutomatedFitWorker(MeasurementData *mData, int timeout, int 
     // nCores: all available
     if (nCores < 0)
         nCores = QThread::idealThreadCount();
+
+    t_exposition_start = absoluteData.begin().key() + t_offset;
+    t_exposition_end = t_exposition>=0 ? t_exposition_start + t_exposition : absoluteData.end().key();
+    this->t_recovery = t_recovery>=0 ? t_recovery : absoluteData.end().key() - t_exposition_end;
 }
 
 AutomatedFitWorker::~AutomatedFitWorker()
@@ -549,6 +653,8 @@ AutomatedFitWorker::~AutomatedFitWorker()
 
 void AutomatedFitWorker::fit()
 {
+    worker->setT_recovery(t_recovery);
+    worker->setChannelRanges(t_exposition_start, t_exposition_end);
     worker->init();
 
     // prepare event loop:

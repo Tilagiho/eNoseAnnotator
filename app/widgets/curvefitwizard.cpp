@@ -34,6 +34,7 @@ CurveFitWizard::CurveFitWizard(MeasurementData* mData, QWidget* parent):
     connect(introPage, &IntroPage::detectRecoveryChanged, worker, &CurveFitWorker::setDetectRecoveryStart);
     connect(introPage, &IntroPage::recoveryFactorChanged, worker, &CurveFitWorker::setRecoveryFactor);
     connect(introPage, &IntroPage::fitBufferChanged, worker, &CurveFitWorker::setFitBuffer);
+    connect(introPage, &IntroPage::recoveryTimeChanged, worker, &CurveFitWorker::setT_recovery);
 
     connect(introPage, &IntroPage::nIterationsChanged, worker, &CurveFitWorker::setNIterations);
     connect(introPage, &IntroPage::limitFactorChanged, worker, &CurveFitWorker::setLimitFactor);
@@ -124,7 +125,8 @@ IntroPage::IntroPage(QWidget* parent):
     jumpBaseThresholdSpinBox(new QDoubleSpinBox),
     recoveryFactorSpinBox(new QDoubleSpinBox),
     nIterationsSpinBox(new QSpinBox),
-    fitBufferSpinBox(new QSpinBox)
+    fitBufferSpinBox(new QSpinBox),
+    recoveryTimeSpinBox(new QSpinBox)
 {
     setTitle("Settings");
 
@@ -187,6 +189,10 @@ IntroPage::IntroPage(QWidget* parent):
     fitBufferSpinBox->setValue(CVWIZ_DEFAULT_BUFFER_SIZE);
     detectionLayout->addRow("Buffer length", fitBufferSpinBox);
 
+    recoveryTimeSpinBox->setSuffix("min");
+    recoveryTimeSpinBox->setValue(CVWIZ_DEFAULT_RECOVERY_TIME);
+    detectionLayout->addRow("Max recovery time", recoveryTimeSpinBox);
+
     QVBoxLayout *windowLayout = new QVBoxLayout;
     windowLayout->addWidget(modelGroupBox);
     windowLayout->addWidget(detectiongroupBox);
@@ -200,6 +206,7 @@ IntroPage::IntroPage(QWidget* parent):
     connect(jumpFactorSpinBox, SIGNAL(valueChanged(double)), this, SIGNAL(jumpFactorChanged(double)));
     connect(recoveryFactorSpinBox, SIGNAL(valueChanged(double)), this, SIGNAL(recoveryFactorChanged(double)));
     connect(fitBufferSpinBox, SIGNAL(valueChanged(int)), this, SIGNAL(fitBufferChanged(int)));
+    connect(recoveryTimeSpinBox, SIGNAL(valueChanged(int)), this, SIGNAL(recoveryTimeChanged(int)));
 
     connect(detectExpositionStartCheckBox, &QCheckBox::clicked, this, &IntroPage::setDetectExpositionStart);
 

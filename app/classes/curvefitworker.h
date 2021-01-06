@@ -26,9 +26,13 @@ public:
 
     void run() override;
 
+    void setT_recovery(int value);
+
 public Q_SLOTS:
     void init();
     void fitChannel(size_t channel);
+    void determineTRecovery(size_t channel, int tAverage=4);
+    void setChannelRanges(uint start, uint end);
     void determineChannelRanges();
     void save(QString filePath) const;
 
@@ -75,10 +79,11 @@ private:
     QStringList fitTooltips;
     QList<QString> parameterNames;
     QList<std::vector<double>> parameterData;
-    std::vector<double> sigmaError, tau90, f_t90, sigmaNoise;
+    std::vector<double> sigmaError, tau90, f_t90, sigmaNoise, t10_recovery;
     std::vector<double> nSamples;
     MeasurementData* mData;
     QMap<uint, AbsoluteMVector> fitData;
+    QMap<uint, RelativeMVector> relativeData;
 //    std::vector<uint> x_start, x_end;
     std::vector<std::vector<std::pair<double, double>>> dataRange;
 
@@ -93,6 +98,8 @@ private:
     bool detectRecoveryStart = CVWIZ_DEFAULT_DETECT_RECOVERY_START;
     int nIterations = LEAST_SQUARES_N_ITERATIONS;
     double limitFactor = LEAST_SQUARES_LIMIT_FACTOR;
+
+    int t_recovery = 60*CVWIZ_DEFAULT_RECOVERY_TIME;
 };
 
 class AutomatedFitWorker: public QObject
@@ -100,7 +107,7 @@ class AutomatedFitWorker: public QObject
     Q_OBJECT
 
 public:
-    explicit AutomatedFitWorker(MeasurementData *mData, int timeout=-1, int nCores=-1, QObject *parent = nullptr);
+    explicit AutomatedFitWorker(MeasurementData *mData, int timeout=-1, int nCores=-1, int t_exposition=-1, int t_recovery=-1, int t_offset=0, QObject *parent = nullptr);
     ~AutomatedFitWorker();
 
 public slots:
@@ -112,6 +119,9 @@ protected:
     CurveFitWorker* worker;
     int timeoutInS;
     int nCores;
+    uint t_exposition_start;
+    uint t_exposition_end;
+    uint t_recovery;
 };
 
 #endif // CURVEFITWORKER_H
