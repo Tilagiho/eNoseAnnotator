@@ -81,16 +81,18 @@ void CurveFitWorker::init()
 
 void CurveFitWorker::setChannelRanges(uint start, uint end)
 {
-    Q_ASSERT(fitData.keys().contains(start));
-    Q_ASSERT(fitData.keys().contains(end));
-
     // collect fitData from key range [start; end]
     fitData.clear();
     for (uint timestamp : relativeData.keys())
         if (timestamp >= start && timestamp <= end)
             fitData[timestamp] = relativeData[timestamp];
 
-    // execute chanel range determination without detection of exposition & recovery
+    for (uint channel=0; channel<MVector::nChannels; channel++)
+    {
+
+    }
+
+    // execute channel range determination without detection of exposition & recovery
     bool prevDetExpSt = detectExpositionStart;
     bool prevDetRecSt = detectRecoveryStart;
 
@@ -132,6 +134,28 @@ void CurveFitWorker::determineChannelRanges()
             x_start[channel] = fitData.firstKey();
             y_offset[channel] = fitData.first()[channel];
             inRange = true;
+
+            // calculate drift noise
+            double x0 = fitData.firstKey();
+            double y0 = fitData.first()[channel];
+            std::vector<double> x, y;
+            for (int t=x0-1; t>x0-fitBuffer-1; t--)
+            {
+                if (relativeData.contains(t))
+                {
+                    x.push_back(t - x0);
+                    y.push_back(relativeData[t][channel] - y0);
+                }
+            }
+
+            if (x.size() > 3)
+            {
+                // fit line to range
+                LinearFitter linearModel;
+                linearModel.fit(x, y);
+
+                sigmaNoise[channel] = linearModel.getStdDev();
+            }
         }
 
         // collect points for linear fit:

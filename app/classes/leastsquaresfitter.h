@@ -4,7 +4,7 @@
 #include <dlib/optimization.h>
 #include <QtCore>
 
-#define LEAST_SQUARES_N_ITERATIONS 10   // number of iterations
+#define LEAST_SQUARES_N_ITERATIONS 20   // number of iterations
 #define LEAST_SQUARES_LIMIT_FACTOR 1.5
 #define LEAST_SQUARES_MAX_ITERATIONS 75
 
@@ -67,6 +67,8 @@ protected:
     ) const;
 
     virtual parameter_vector getRandomParameterVector(const std::vector<std::pair<double, double>>& samples) const = 0;
+
+    virtual bool parameters_valid(const parameter_vector &param_vector, double y_limit) const = 0;
 };
 
 /*!
@@ -99,6 +101,8 @@ protected:
     );
 
     parameter_vector getRandomParameterVector(const std::vector<std::pair<double, double>>& samples) const;
+
+    virtual bool parameters_valid(const parameter_vector &param_vector, double y_limit) const override;
 };
 
 class LinearFitter

@@ -108,6 +108,10 @@ void CurveFitWizard::fitCurves()
 {
     worker->init();
 
+    // debug: only one active fitWorker thread at once
+    if (CVWIZ_DEBUG_MODE)
+        QThreadPool::globalInstance()->setMaxThreadCount(1);
+
     qDebug() << "\n--------\nStarting curve fit:";
     qDebug() << "max thread count:\t" << QString::number(QThreadPool::globalInstance()->maxThreadCount());
     for (size_t i=0; i<nChannels; i++)

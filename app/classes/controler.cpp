@@ -507,13 +507,13 @@ void Controler::parseArguments()
     QCommandLineOption nCoresOption(QStringList{"n","nCores"}, "number of cores used used during the fitting process", "nCores", "-1");
     parser.addOption(nCoresOption);
 
-    QCommandLineOption tOffsetOption(QStringList{"t_offset"}, "time offset before exposition", "tOffset", "0");
+    QCommandLineOption tOffsetOption(QStringList{"t_offset"}, "time offset before exposition in seconds", "tOffset", "0");
     parser.addOption(tOffsetOption);
 
-    QCommandLineOption tRecoveryOption(QStringList{"t_exposition"}, "time of exposition", "tExposition", "-1");
+    QCommandLineOption tRecoveryOption(QStringList{"t_recovery"}, "time of exposition in seconds", "tExposition", "-1");
     parser.addOption(tRecoveryOption);
 
-    QCommandLineOption tExpositionOption(QStringList{"t_recovery"}, "max time of recovery", "tRecovery", QString::number(CVWIZ_DEFAULT_RECOVERY_TIME));
+    QCommandLineOption tExpositionOption(QStringList{"t_exposition"}, "max time of recovery in seconds", "tRecovery", QString::number(CVWIZ_DEFAULT_RECOVERY_TIME));
     parser.addOption(tExpositionOption);
 
     // parse launch arguments

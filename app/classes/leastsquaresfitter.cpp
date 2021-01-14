@@ -3,6 +3,8 @@
 #include <cmath>
 #include <QtCore>
 
+#include "defaultSettings.h"
+
 QMap<QString, LeastSquaresFitter::Type> LeastSquaresFitter::typeMap {{"Exposition", LeastSquaresFitter::Type::SUPERPOS}};
 
 
@@ -46,7 +48,7 @@ void LeastSquaresFitter::solve(const std::vector<std::pair<double, double> > &sa
     parameter_vector best_parameters;
     for (int i=0; i<nIterations; i++)
     {
-        parameter_vector parameters = getRandomParameterVector(samples);
+        parameter_vector temp_params = getRandomParameterVector(samples);
 //        qDebug() << i << ")";
 //        qDebug() << parameters(0) << ", " << parameters(1) << ", " << parameters(2) << ", " <<  parameters(3) << parameters(4) << parameters(5) << parameters(6) << parameters(7);
 
@@ -58,33 +60,38 @@ void LeastSquaresFitter::solve(const std::vector<std::pair<double, double> > &sa
                     [this](const std::pair<input_vector, double>& data, const parameter_vector& params) -> parameter_vector
                       { return  residual_derivative(data, params);},
                     sample_vector,
-                    parameters
+                    temp_params
         );
 
 //        qDebug() << parameters(0) << ", " << parameters(1) << ", " << parameters(2) << ", " <<  parameters(3) << parameters(4) << parameters(5) << parameters(6) << parameters(7);
 
-        double error = residual_sum_of_sqares(samples, parameters);
+        double error = residual_sum_of_sqares(samples, temp_params);
 //        qDebug() << "Error:\t" << QString::number(error);
 
-        // check f(t->infinty)
-        // if f(t->infinity) > 2 * y_max:
-        // ignore result
-        input_vector testInput = {100000.};
-        double testOutput = model(testInput, parameters);
-        if (testOutput > limitFactor * y_max)
+        // check parameters
+        // skip if invalid
+        if (!parameters_valid(temp_params, limitFactor * y_max))
         {
-//          qDebug() << "Plateau = " << QString::number(parameters(0) + parameters(3)) << "\t-> result ignored";
+            if (CVWIZ_DEBUG_MODE)
+                qDebug() << "\n!Parameters invalid!\nPlateau = " << QString::number(temp_params(0) + temp_params(3)) << "\nbeta_1 = " << QString::number(temp_params(1)) << "\nbeta_2 = " << QString::number(temp_params(4)) << "\n\t-> result ignored";
             continue;
         }
 
         if (error < bestError)
         {
+            if (CVWIZ_DEBUG_MODE) {
+                qDebug() << "\n!Improved error from " << QString::number(bestError) << " to " << QString::number(error) << "!";
+                qDebug() << "alpha_1 = " << QString::number(temp_params(0)) << "\tbeta_1 = " << QString::number(temp_params(1)) << "\tt0_1 = " << QString::number(temp_params(2)) << "\nalpha_2 = " << QString::number(temp_params(3)) << "\tbeta_2 = " << QString::number(temp_params(4)) << "\tt0_2 = " << QString::number(temp_params(5));
+            }
             bestError = error;
-            best_parameters = parameters;
+            best_parameters = temp_params;
         }
     }
     params = best_parameters;
-//    qDebug() << "-> Best error:\t" << QString::number(bestError);
+    if (CVWIZ_DEBUG_MODE) {
+        qDebug() << "-> Best error:\t" << QString::number(bestError);
+        qDebug() << "alpha_1 = " << QString::number(params(0)) << "\tbeta_1 = " << QString::number(params(1)) << "\tt0_1 = " << QString::number(params(2)) << "\nalpha_2 = " << QString::number(params(3)) << "\tbeta_2 = " << QString::number(params(4)) << "\tt0_2 = " << QString::number(params(5));
+    }
 }
 
 void LeastSquaresFitter::solve_lm(const std::vector<std::pair<double, double> > &samples, int nIterations, double limitFactor)
@@ -114,7 +121,7 @@ void LeastSquaresFitter::solve_lm(const std::vector<std::pair<double, double> > 
     parameter_vector best_parameters;
     for (int i=0; i<nIterations; i++)
     {
-        parameter_vector parameters = getRandomParameterVector(samples);
+        parameter_vector temp_params = getRandomParameterVector(samples);
 
         // start solver
         dlib::solve_least_squares_lm(
@@ -124,31 +131,37 @@ void LeastSquaresFitter::solve_lm(const std::vector<std::pair<double, double> > 
                     [this](const std::pair<input_vector, double>& data, const parameter_vector& params) -> parameter_vector
                       { return  residual_derivative(data, params);},
                     sample_vector,
-                    parameters
+                    temp_params
         );
 
-        double error = residual_sum_of_sqares(samples, parameters);
+        double error = residual_sum_of_sqares(samples, temp_params);
 //        qDebug() << "Error:\t" << QString::number(error);
 
-        // check f(t->infinty)
-        // if f(t->infinity) > 2 * y_max:
-        // ignore result
-        input_vector testInput = {100000.};
-        double testOutput = model(testInput, parameters);
-        if (testOutput > limitFactor * y_max)
+        // check parameters
+        // skip if invalid
+        if (!parameters_valid(temp_params, limitFactor * y_max))
         {
-//            qDebug() << "Plateau = " << QString::number(parameters(0) + parameters(3)) << "\t-> result ignored";
+            if (CVWIZ_DEBUG_MODE)
+                if (CVWIZ_DEBUG_MODE)
+                    qDebug() << "\n!Parameters invalid!\nPlateau = " << QString::number(temp_params(0) + temp_params(3)) << "\nbeta_1 = " << QString::number(temp_params(1)) << "\nbeta_2 = " << QString::number(temp_params(4)) << "\n\t-> result ignored";
             continue;
         }
 
         if (error < bestError)
         {
+            if (CVWIZ_DEBUG_MODE) {
+                qDebug() << "\n!Improved error from " << QString::number(bestError) << " to " << QString::number(error) << "!";
+                qDebug() << "alpha_1 = " << QString::number(temp_params(0)) << "\tbeta_1 = " << QString::number(temp_params(1)) << "\tt0_1 = " << QString::number(temp_params(2)) << "\nalpha_2 = " << QString::number(temp_params(3)) << "\tbeta_2 = " << QString::number(temp_params(4)) << "\tt0_2 = " << QString::number(temp_params(5));
+            }
             bestError = error;
-            best_parameters = parameters;
+            best_parameters = temp_params;
         }
     }
     params = best_parameters;
-//    qDebug() << "-> Best error:\t" << QString::number(bestError);
+    if (CVWIZ_DEBUG_MODE) {
+        qDebug() << "-> Best error:\t" << QString::number(bestError);
+        qDebug() << "alpha_1 = " << QString::number(params(0)) << "\tbeta_1 = " << QString::number(params(1)) << "\tt0_1 = " << QString::number(params(2)) << "\nalpha_2 = " << QString::number(params(3)) << "\tbeta_2 = " << QString::number(params(4)) << "\tt0_2 = " << QString::number(params(5));
+    }
 }
 
 double LeastSquaresFitter::residual_sum_of_sqares(const std::vector<std::pair<double, double> > &samples) const
@@ -212,161 +225,6 @@ double LeastSquaresFitter::residual(const std::pair<input_vector, double>& data,
     return model(data.first, param_vector) - data.second;
 }
 
-//ARMT0_Fitter::ARMT0_Fitter():
-//    LeastSquaresFitter()
-//{
-//}
-
-//double ARMT0_Fitter::model(const input_vector &input_vector, const parameter_vector &param_vector) const
-//{
-//    double t = input_vector(0);
-
-//    double alpha = param_vector(0);
-//    double beta = param_vector(1);
-//    double gamma = param_vector(2);
-//    double t0 = param_vector(3);
-
-//    return alpha * std::exp(-beta * (t - t0)) + gamma;
-//}
-
-//parameter_vector ARMT0_Fitter::getRandomParameterVector(const std::vector<std::pair<double, double> > &samples) const
-//{
-//    parameter_vector parameters = dlib::randm(params.size(), 1);
-
-//    double t_first = samples.front().first;
-//    double t_last = samples.back().first;
-
-//    // alpha is random in range (0; -2*last_sample)
-//    parameters(0) = -2 * parameters(0) * samples.back().second;
-
-//    // beta is random in range (0; 2 * (ln(10)) / (tlast - t0))
-//    // formula is based on tau90 of adg
-//    parameters(1) = 2 * parameters(1) * (std::log(10)) / (t_last - t_first);
-
-//    // gamma is random in range (0; 2*last_sample)
-//    parameters(2) = 2 * parameters(2) * samples.back().second;
-
-//    // t0 = t_first +- (0; 20)
-//    parameters(3) = t_first + (parameters(3) - 0.5) * 20;
-
-//    return parameters;
-//}
-
-//parameter_vector ARMT0_Fitter::residual_derivative(const std::pair<input_vector, double>& data, const parameter_vector& param_vector)
-//{
-//    // zero init parameter vector
-//    parameter_vector der;
-//    der = 0;
-
-//    double t = data.first(0);
-
-//    double alpha = param_vector(0);
-//    double beta = param_vector(1);
-//    double gamma = param_vector(2);
-//    double t0 = param_vector(3);
-
-//    der(0) = std::exp(beta * (t0 - t));
-//    der(1) = alpha * (t0 - t) * std::exp(beta * (t0 - t));
-//    der(2) = 1;
-//    der(3) = alpha * beta * std::exp(-beta * (t - t0));
-
-//    return der;
-//}
-
-///*!
-// * \brief ARMT0_Fitter::tau_90
-// * t_zero_intersection = t0 - log(- gamma / alpha) / beta
-// * t_90%_intersection = t0 - log(- gamma / (10 * alpha)) / beta
-// *
-// * \return
-// */
-//double ARMT0_Fitter::tau_90()
-//{
-//    double alpha = params(0);
-//    double beta = params(1);
-//    double gamma = params(2);
-//    double t0 = params(3);
-
-//    double t_zero_intersection = t0 - std::log(- gamma / alpha) / beta;
-//    double t90 = t0 - std::log(- gamma / (10 * alpha)) / beta;
-
-//    return t90 - t_zero_intersection;
-//}
-
-//ADG_Fitter::ADG_Fitter():
-//    LeastSquaresFitter()
-//{
-//}
-
-//double ADG_Fitter::model(const input_vector &input_vector, const parameter_vector &param_vector) const
-//{
-//    double t = input_vector(0);
-
-//    double alpha = param_vector(0);
-//    double beta = param_vector(1);
-//    double t0 = param_vector(2);
-
-//    return alpha * (1 - std::exp(-beta * (t - t0)));
-//}
-
-//parameter_vector ADG_Fitter::getRandomParameterVector(const std::vector<std::pair<double, double> > &samples) const
-//{
-//    parameter_vector parameters = dlib::randm(params.size(), 1);
-
-//    double t_first = samples.front().first;
-//    double t_last = samples.back().first;
-
-//    // alpha is random in range (0; 2*last_sample)
-//    parameters(0) = 2 * parameters(0) * samples.back().second;
-
-//    // beta is random in range (0; 2 * (ln(2) + ln(5)) / (tlast - t0))
-//    // formula is based on tau90
-//    parameters(1) = 2 * parameters(1) * (std::log(2) + std::log(5)) / (t_last - t_first);
-
-//    // t0 = t_first +- (0; 20)
-//    parameters(2) = t_first + (parameters(2) - 0.5) * 20;
-
-//    return parameters;
-//}
-
-//parameter_vector ADG_Fitter::residual_derivative(const std::pair<input_vector, double>& data, const parameter_vector& param_vector)
-//{
-//    // zero init parameter vector
-//    parameter_vector der;
-//    der = 0;
-
-//    double t = data.first(0);
-
-//    double alpha = param_vector(0);
-//    double beta = param_vector(1);
-//    double t0 = param_vector(2);
-
-//    der(0) = 1 - std::exp(-beta * (t - t0));
-//    der(1) = alpha * (t - t0) * std::exp(-beta * (t - t0));
-//    der(2) = -alpha * beta * std::exp(-beta * (t - t0));
-
-//    return der;
-//}
-
-///*!
-// * \brief ARM_Fitter::tau_90
-// * t_zero_intersection = t0 - log(- gamma / alpha) / beta
-// * t_90%_intersection = t0 - log(- gamma / (10 * alpha)) / beta
-// *
-// * \return
-// */
-//double ADG_Fitter::tau_90()
-//{
-//    double alpha = params(0);
-//    double beta = params(1);
-//    double t0 = params(2);
-
-//    double t_zero_intersection = t0;
-//    double t90 = t0 + (std::log(2) + std::log(5)) / beta;
-
-//    return t90 - t_zero_intersection;
-//}
-
 ADG_superpos_Fitter::ADG_superpos_Fitter():
     LeastSquaresFitter()
 {
@@ -392,6 +250,32 @@ double ADG_superpos_Fitter::model(const input_vector &input_vector, const parame
 
     return alpha_1 * (1 - std::exp(-beta_1 * (t - t0_1))) + alpha_2 * (1 - std::exp(-beta_2 * (t - t0_2)));
 }
+
+/*!
+ * \brief ADG_superpos_Fitter::parameters_valid is used to specify constraints on the model parameters.
+ * During the fitting process this function is called to skip invalid result parameters.
+ * \param param_vector
+ * \return
+ */
+bool ADG_superpos_Fitter::parameters_valid(const parameter_vector &param_vector, double y_limit) const
+{
+    double alpha_1 = param_vector(0);
+    double beta_1 = param_vector(1);
+    double t0_1 = param_vector(2);
+    double alpha_2 = param_vector(3);
+    double beta_2 = param_vector(4);
+    double t0_2 = param_vector(5);
+
+    // alpha: plateau < y_limit
+    bool alpha_valid = qAbs(alpha_1 + alpha_2) < y_limit;
+
+    // beta: always positive
+    bool beta_valid = beta_1 >= 0. && beta_2 >= 0.;
+
+    return  alpha_valid && beta_valid;
+}
+
+
 
 parameter_vector ADG_superpos_Fitter::getRandomParameterVector(const std::vector<std::pair<double, double> > &samples) const
 {

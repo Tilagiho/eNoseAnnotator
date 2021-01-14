@@ -489,7 +489,6 @@ void FuncBarGraphWidget::setValues(const QVector<double> &values, const Function
         }
         else
             funcValues.remove(i);
-
     }
     setAxisScaleDraw( QwtPlot::xBottom, new LabelScaleDraw( Qt::Vertical, labels ) );
     setAxisScaleEngine(QwtPlot::xBottom, new FullTicksScaleEngine);
