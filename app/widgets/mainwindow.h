@@ -96,6 +96,8 @@ public slots:
 
     void setTitle( QString title, bool dataChanged );
 
+    void resetNChannels(uint newNChannels);
+
 private slots:
     void on_actionSave_Data_As_triggered();
 
@@ -178,8 +180,6 @@ private:
     void connectFLGraph();
 
     void setIsLiveClassificationState(bool isLive);
-
-    void resetNChannels(uint newNChannels);
 
 protected:
 //  bool eventFilter(QObject *obj, QEvent *event);

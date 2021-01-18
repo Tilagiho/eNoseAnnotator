@@ -69,6 +69,7 @@ Controler::Controler(QObject *parent) :
     // data
     connect(mData, &MeasurementData::vectorAdded, w, &MainWindow::addVector);    // add new vector to graphs
     connect(mData, &MeasurementData::dataSet, w, &MainWindow::setData);
+    connect(mData, &MeasurementData::dataCleared, w, &MainWindow::clearGraphs);
 
     // failures
     connect(mData, &MeasurementData::sensorFailuresSet, w, &MainWindow::setSensorFailures);
@@ -419,7 +420,7 @@ void Controler::loadData()
         QDir().mkdir(dataDir);
 
     // load data
-    QString fileName = QFileDialog::getOpenFileName(w, "Open data file", dataDir, "Data files (*.csv)");
+    QString fileName = QFileDialog::getOpenFileName(w, "Open data file", dataDir, "Data files (*.csv *.txt)");
 
     if (fileName.isEmpty())
         return;    
@@ -436,7 +437,7 @@ void Controler::loadData(QString fileName)
         FileReader generalFileReader(fileName, this);
         specificReader = generalFileReader.getSpecificReader();
 
-//        connect(specificReader, &FileReader::resetNChannels, w, &MainWindow::resetNChannels);
+        connect(specificReader, &FileReader::resetNChannels, w, &MainWindow::resetNChannels);
         specificReader->readFile();
     }
     catch (std::runtime_error e)

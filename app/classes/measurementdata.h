@@ -235,7 +235,7 @@ public slots:
     void addAttributes(QSet<QString> attributes);
     void deleteAttributes(QSet<QString> attributes);
     void renameAttribute(QString oldName, QString newName);
-    void resetNChannels();
+    void resetNChannels(size_t channels = MVector::nChannels);
 
     /*
      * add absolute vector with timestamp to data
@@ -260,13 +260,9 @@ signals:
     // emitted when selectionData was cleared
     void selectionCleared();
 
-    // emitted when LineGraphWidget should clear its selection
-    void lgClearSelection();
-
-    void dataReset();   // emitted when data is reset
-    void relativeVectorAdded(MVector vector, uint timestamp, Functionalisation functionalisation , std::vector<bool> sensorFailures, bool yRescale);
     void vectorAdded(uint timestamp, AbsoluteMVector vector, Functionalisation functionalisation , std::vector<bool> sensorFailures, bool yRescale);
     void dataSet(const QMap<uint, AbsoluteMVector> &data, const Functionalisation &functionalisation, const std::vector<bool> &sensorFailures);
+    void dataCleared();
 
     //    void dataSet(QMap<uint, MVector> data, Functionalisation functionalisation , std::vector<bool> sensorFailures);
     void absoluteDataSet(QMap<uint, MVector>);
@@ -384,6 +380,7 @@ public:
 private:
     void parseHeader(QString line);
     void parseFuncs(QString line);
+    void parseMeasurementStart(QString line);
     void parseValues(QString line);
 
     QMap<QString, int> sensorAttributeIndexMap;

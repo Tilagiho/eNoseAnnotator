@@ -4,7 +4,7 @@
 #include <dlib/optimization.h>
 #include <QtCore>
 
-#define LEAST_SQUARES_N_ITERATIONS 20   // number of iterations
+#define LEAST_SQUARES_N_FITS 20   // number of iterations
 #define LEAST_SQUARES_LIMIT_FACTOR 1.5
 #define LEAST_SQUARES_MAX_ITERATIONS 75
 
@@ -24,8 +24,8 @@ public:
 
     double model(double input) const;
 
-    void solve(const std::vector<std::pair<double, double>>& samples, int nIterations = LEAST_SQUARES_N_ITERATIONS, double limitFactor = LEAST_SQUARES_LIMIT_FACTOR);
-    void solve_lm(const std::vector<std::pair<double, double>>& samples, int nIterations = LEAST_SQUARES_N_ITERATIONS, double limitFactor = LEAST_SQUARES_LIMIT_FACTOR);
+    void solve(const std::vector<std::pair<double, double>>& samples, int nIterations = LEAST_SQUARES_N_FITS, double limitFactor = LEAST_SQUARES_LIMIT_FACTOR);
+    void solve_lm(const std::vector<std::pair<double, double>>& samples, int nIterations = LEAST_SQUARES_N_FITS, double limitFactor = LEAST_SQUARES_LIMIT_FACTOR);
 
     double residual_sum_of_sqares(const std::vector<std::pair<double, double> > &samples) const;
 
@@ -43,6 +43,10 @@ public:
     virtual Type type() const = 0;
 
     static QMap<QString, LeastSquaresFitter::Type> getTypeMap();
+
+    bool parameters_valid(double y_limit) const;
+
+    void resetParams();
 
 protected:
     parameter_vector params;

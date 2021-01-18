@@ -13,6 +13,7 @@ CurveFitWorker::CurveFitWorker(MeasurementData* mData, QObject *parent):
     dataRange(MVector::nChannels, std::vector<std::pair<double, double>>()),
     y_offset(MVector::nChannels, 0),
     x_start(MVector::nChannels, mData->getFitMap().firstKey()),
+    fitValid(MVector::nChannels, true),
     relativeData(mData->getRelativeData())
 {
     fitData = mData->getFitMap();
@@ -42,7 +43,13 @@ void CurveFitWorker::run()
     // fit channel
     fitChannel(channel);
 
-    if (channelsFinished == mData->getAbsoluteData().first().getSize())
+    // signal progress
+    mutex.lock();
+    channelsFinished++;
+    emit progressChanged(channelsFinished);
+    mutex.unlock();
+
+    if (channelsFinished == mData->nChannels())
     {
         QStringList header = getTableHeader();
         QStringList tooltips = getTooltips();
@@ -59,11 +66,11 @@ void CurveFitWorker::init()
     ch = 0;
     channelsFinished = 0;
 
-    // init parameters
-    LeastSquaresFitter *fitter;
+    // reset parameters
+    std::unique_ptr<LeastSquaresFitter> fitter;
     switch (type) {
     case LeastSquaresFitter::Type::SUPERPOS:
-        fitter = new ADG_superpos_Fitter();
+        fitter.reset(new ADG_superpos_Fitter());
         break;
     default:
         throw std::runtime_error("Unknown fitter type!");
@@ -76,7 +83,16 @@ void CurveFitWorker::init()
     for ( int i=0; i<fitTooltips.size(); i++ )
         parameterData << std::vector<double>(MVector::nChannels, 0.);
 
-    delete fitter;
+    sigmaError = std::vector<double>(sigmaError.size(), 0.);
+    tau90 = std::vector<double>(tau90.size(), 0.);
+    f_t90 = std::vector<double>(f_t90.size(), 0.);
+    sigmaNoise =  std::vector<double>(sigmaNoise.size(), 0.);
+    t10_recovery =  std::vector<double>(t10_recovery.size(), 0.);
+    nSamples =  std::vector<double>(nSamples.size(), 0.);
+    fitValid = std::vector<bool>(fitValid.size(), true);
+
+    // determine channel ranges
+    determineChannelRanges();
 }
 
 void CurveFitWorker::setChannelRanges(uint start, uint end)
@@ -99,7 +115,7 @@ void CurveFitWorker::setChannelRanges(uint start, uint end)
     setDetectExpositionStart(false);
     setDetectRecoveryStart(false);
 
-    determineChannelRanges();
+    init();
 
     setDetectExpositionStart(prevDetExpSt);
     setDetectRecoveryStart(prevDetRecSt);
@@ -248,20 +264,35 @@ void CurveFitWorker::determineChannelRanges()
     emit rangeDeterminationFinished();
 }
 
+/*!
+ * \brief CurveFitWorker::fitChannel fits LeastSquaresFitter to \param channel.
+ * Two fitting algorithms are used multiple times. The best valid result is used and its parameters and metrics are stored.
+ * If there is no valid result, fitValid is set to false. Channels with failures are ignored and fitValid also is set to false.
+ * \param channel
+ */
 void CurveFitWorker::fitChannel(size_t channel)
 {
+    // failing channel: ignore
+    if (mData->getSensorFailures()[channel])
+    {
+        fitValid[channel] = false;
+        qDebug() << "Skipping channel " << channel+1 << " (channel failure)";
+
+        return;
+    }
+
+    qDebug() << "Fitting channel " << channel+1;
+
     // init fitter
-    LeastSquaresFitter *fitter, *fitter_lm;
+    std::shared_ptr<LeastSquaresFitter> fitter, fitter_lm;
     switch (type) {
     case LeastSquaresFitter::Type::SUPERPOS:
-        fitter = new ADG_superpos_Fitter();
-        fitter_lm = new ADG_superpos_Fitter();
+        fitter.reset(new ADG_superpos_Fitter());
+        fitter_lm.reset(new ADG_superpos_Fitter());
         break;
     default:
         throw std::runtime_error("Unknown fitter type!");
     }
-
-    qDebug() << "\nFit channel: " << channel;
 
     auto channelData = dataRange[channel];
 //    for (auto pair : channelData)
@@ -271,39 +302,58 @@ void CurveFitWorker::fitChannel(size_t channel)
     // ignore
     if (!channelData.empty() || !(channelData.size() < 0.15 * fitData.size()))
     {
-        // fit curve to channelData
-        try {
-            fitter->solve(channelData, nIterations, limitFactor);
-            fitter_lm->solve_lm(channelData, nIterations, limitFactor);
 
-            auto bestFitter = fitter->residual_sum_of_sqares(channelData) < fitter_lm->residual_sum_of_sqares(channelData) ? fitter : fitter_lm;
-            QList<QString> parameterNames = bestFitter->getParameterNames();
+        try {
+            // fit curve to channelData:
+            // usage of two algorithms (solve vs solvs_lm)
+            // results are compared afterwards
+            fitter->solve(channelData, nIterations, limitFactor);
+            double solve_error = fitter->residual_sum_of_sqares(channelData);
+
+            fitter_lm->solve_lm(channelData, nIterations, limitFactor);
+            double solve_lm_error = fitter->residual_sum_of_sqares(channelData);
+
+            // validate parameters:
+            // invalid results should be ignored in the fitting process,
+            // however edge cases may produce invalid parameters
+            double lastVal = channelData.back().second;
+            bool solve_valid = fitter->parameters_valid(limitFactor * lastVal);
+            bool solve_lm_valid = fitter->parameters_valid(limitFactor * lastVal);
+
+            std::shared_ptr<LeastSquaresFitter> bestFitter;
+            double bestError = qInf();
+            if ( solve_valid && solve_lm_valid ) {   // parameters of both fitters valid
+                bestFitter = solve_error < solve_lm_error ? fitter : fitter_lm;
+                bestError = solve_error < solve_lm_error ? solve_error : solve_lm_error;
+            } else if ( solve_valid ) { // only fitter params valid
+                bestFitter = fitter;
+                bestError = solve_error;
+            } else if ( solve_lm_valid ) {  // only fitter_lm params valid
+                bestFitter = fitter_lm;
+                bestError = solve_lm_error;
+            } else {    // invalid results -> return
+                fitValid[channel] = false;
+                return;
+            }
+
             auto params = bestFitter->getParams();
 
-            for (size_t i=0; i<parameterNames.size(); i++)
+            for (size_t i=0; i<params.size(); i++)
             {
                 parameterData[i][channel] = params[i];
             }
-            sigmaError[channel] = std::sqrt(bestFitter->residual_sum_of_sqares(channelData) / channelData.size());
+            sigmaError[channel] = std::sqrt(bestError / channelData.size());
             tau90[channel] = bestFitter->tau_90();
             f_t90[channel] = bestFitter->f_t_90();
             nSamples[channel] = channelData.size();
+
+            // after curve fit:
+            // recovery time
+            determineTRecovery(channel);
         } catch (dlib::error exception) {
             error("Error in channel " + QString::number(channel) + ": " + QString(exception.what()));
         }
-
-        // after curve fit:
-        // recovery time
-        determineTRecovery(channel);
     }
-
-    mutex.lock();
-    channelsFinished++;
-    emit progressChanged(channelsFinished);
-    mutex.unlock();
-
-    delete fitter;
-    delete  fitter_lm;
 }
 
 /*!
@@ -535,6 +585,11 @@ QStringList CurveFitWorker::getTableHeader() const
     // get data from the worker and emit
     QStringList header;
 
+    // channel state
+    header << "channel\nfailure";
+    header << "fit valid";
+
+    // metrics
     header << "number of\nsamples";
     header << "sigma error\n[ % ]";
     header << "sigma noise\n[ % ]";
@@ -542,6 +597,7 @@ QStringList CurveFitWorker::getTableHeader() const
     header << QString::fromUtf8("f(t90)\n[ % ]");
     header << "t_recovery\n[ s ]";
 
+    // curve parameters
     header << parameterNames;
 
     return header;
@@ -558,7 +614,11 @@ QStringList CurveFitWorker::getHeader() const
 QStringList CurveFitWorker::getTooltips() const
 {
     QStringList tooltips;
+    // channel state
+    tooltips << "channel failure:\nno curve is fitted to failed channels";
+    tooltips << "fit valid\nsignals wether the curve fitted for the channel is valid";
 
+    // metrics
     tooltips << "number of samples:\nnumber of data points used for fitting the curve";                                 // number of samples
     tooltips << "sigma error:\nstandard deviation of the exposition data in relation to the fitted curve";              // sigma error
     tooltips << "sigma noise:\nstandard deviation before the start of the exposition in relation to the linear drift";  // sigma noise                                                // sigma noise
@@ -566,6 +626,7 @@ QStringList CurveFitWorker::getTooltips() const
     tooltips << "f(t90):\n90% of the plateau height";                                                                   // f(t90)
     tooltips << "t_recovery: time in s from end of exposition until 10% of the plateau is reached";
 
+    // curve paramters
     tooltips.append(fitTooltips);
 
     return  tooltips;
@@ -574,13 +635,28 @@ QStringList CurveFitWorker::getTooltips() const
 QList<QList<double>> CurveFitWorker::getData() const
 {
     QList<QList<double>> resultData;
+
+    // channel state
+    auto sensorFailures = mData->getSensorFailures();
+    QList<double> sensorFailureList;
+    QList<double> fitValidList;
+    for (uint i=0; i<fitValid.size(); i++) {
+        sensorFailureList << static_cast<double>(sensorFailures[i]);
+        fitValidList << static_cast<double>(fitValid[i]);
+    }
+    resultData << sensorFailureList;
+    resultData << fitValidList;
+
+    // metrics
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getNSamples()));
+
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getSigmaError()));
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(sigmaNoise));
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getTau90()));
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(getF_tau90()));
     resultData << QList<double>::fromVector(QVector<double>::fromStdVector(t10_recovery));
 
+    // curve parameters
     for (size_t i=0; i<parameterData.size(); i++)
         resultData << QList<double>::fromVector(QVector<double>::fromStdVector(parameterData[i]));
 
@@ -672,14 +748,12 @@ AutomatedFitWorker::AutomatedFitWorker(MeasurementData *mData, int timeout, int 
 
 AutomatedFitWorker::~AutomatedFitWorker()
 {
-    delete worker;
 }
 
 void AutomatedFitWorker::fit()
 {
     worker->setT_recovery(t_recovery);
     worker->setChannelRanges(t_exposition_start, t_exposition_end);
-    worker->init();
 
     // prepare event loop:
     // wait for finished signal of the curve fit
@@ -703,9 +777,9 @@ void AutomatedFitWorker::fit()
     loop.exec();
 
     if(timer.isActive())
-        qDebug("success");
+        qDebug("Curve fit terminated successfully");
     else
-        qDebug("timeout");
+        qDebug("Error: Curve fit terminated due to timeout");
 }
 
 void AutomatedFitWorker::save(QString fileName)

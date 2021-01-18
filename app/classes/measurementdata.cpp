@@ -101,9 +101,10 @@ void MeasurementData::clear()
 
     baseVectorMap.clear();
     data.clear();
+    emit dataCleared();
 
     std::vector<bool> zeroFailures;
-    for (int i=0; i<MVector::nChannels; i++)
+    for (int i=0; i<sensorFailures.size(); i++)
         zeroFailures.push_back(false);
     setSensorFailures(zeroFailures);
 
@@ -264,7 +265,7 @@ void MeasurementData::setSensorFailure(uint index, bool value)
 
 void MeasurementData::setSensorFailures(const std::vector<bool> &failures)
 {
-    Q_ASSERT(failures.size() == MVector::nChannels);
+    Q_ASSERT(failures.size() == nChannels());
 
     if (failures != sensorFailures)
     {
@@ -691,8 +692,9 @@ void MeasurementData::copyFrom(MeasurementData *otherMData)
     // --> remember sensorFailures and functionalisation
     // TODO: introduce non-static sensorFailures and functionalisation
 
-    // clear local data
+    // clear local data & reset number of channels
     clear();
+    resetNChannels();
 
     // meta data
     setClasslist(otherMData->getClassList());
@@ -1153,10 +1155,15 @@ void MeasurementData::renameAttribute(QString oldName, QString newName)
     }
 }
 
-void MeasurementData::resetNChannels()
+void MeasurementData::resetNChannels(size_t channels)
 {
-    setSensorFailures(std::vector<bool>(MVector::nChannels, false));
-    setFunctionalisation(Functionalisation(MVector::nChannels, 0));
+    Q_ASSERT(data.isEmpty());
+
+    sensorFailures = std::vector<bool>(channels, false);
+    functionalisation = Functionalisation(channels, 0);
+
+    emit sensorFailuresSet(data, functionalisation, sensorFailures);
+    emit functionalisationChanged();
 }
 
 void MeasurementData::setInputFunctionType(const InputFunctionType &value)
@@ -1301,7 +1308,8 @@ bool MeasurementData::getUseLimits() const
 
 size_t MeasurementData::nChannels() const
 {
-    return data.first().getSize();
+    Q_ASSERT(functionalisation.size() == sensorFailures.size());
+    return functionalisation.size();
 }
 
 double MeasurementData::getUpperLimit() const
@@ -1511,8 +1519,9 @@ void AnnotatorFileReader::parseHeader(QString line)
             }
         }
         // after parsing the header:
-        // reset MVector::nChannels
-        emit resetNChannels(resistanceIndexMap.size());
+        // reset number of channels
+        data->resetNChannels(resistanceIndexMap.size());
+        emit resetNChannels(resistanceIndexMap.size()); // resets MVector::nChannels if connected
 
         // set data meta attributes
         data->setSensorFailures(failureString);
@@ -1605,7 +1614,7 @@ LeifFileReader::LeifFileReader(QString filePath):
 
 void LeifFileReader::readFile()
 {
-    // set start_time
+    // default start_time: file creation date
     start_time = file.fileTime(QFileDevice::FileTime::FileBirthTime).toTime_t();
 
     // read header line
@@ -1613,15 +1622,23 @@ void LeifFileReader::readFile()
     if (!in.readLineInto(&line))
         throw  std::runtime_error(file.fileName().toStdString() + " is empty!");
     lineCount++;
-
     parseHeader(line);
 
     // read functionalisation
     if (!in.readLineInto(&line))
         throw  std::runtime_error(file.fileName().toStdString() + " is empty!");
     lineCount++;
-    if (line.startsWith(" "));
     parseFuncs(line);
+
+    // optional: read measurement start
+    if (!in.readLineInto(&line))
+        throw  std::runtime_error(file.fileName().toStdString() + " is empty!");
+    if (line.startsWith("meas_start:")) {
+        parseMeasurementStart(line);
+        lineCount++;
+    } else {   // reset text stream
+        in.seek(lineCount);
+    }
 
     // read data
     while(in.readLineInto(&line))
@@ -1693,7 +1710,7 @@ void LeifFileReader::parseHeader(QString line)
     // prepare MVector class:
     // MVector default size is number of resistance values
     emit resetNChannels(resistanceIndexes.size());
-    data->resetNChannels();
+    data->resetNChannels(resistanceIndexes.size());
     data->addAttributes(sensorAttributeIndexMap.keys().toSet());
 }
 
@@ -1715,6 +1732,13 @@ void LeifFileReader::parseFuncs(QString line)
     }
 
     data->setFunctionalisation(functionalistation);
+}
+
+void LeifFileReader::parseMeasurementStart(QString line)
+{
+    QString prefix("meas_start:");
+    QString measTimestampString = line.mid(prefix.size(), line.size()-prefix.size());
+    start_time = MeasurementData::getTimestampUIntfromString (measTimestampString);
 }
 
 void LeifFileReader::parseValues(QString line)

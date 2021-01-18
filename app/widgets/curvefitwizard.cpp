@@ -41,7 +41,7 @@ CurveFitWizard::CurveFitWizard(MeasurementData* mData, QWidget* parent):
 
     // range determination
     connect(worker, &CurveFitWorker::rangeRedeterminationPossible, introPage, &IntroPage::setRangeRedeterminationPossible);
-    connect(introPage, &IntroPage::rangeDeterminationRequested, worker, &CurveFitWorker::determineChannelRanges);
+    connect(introPage, &IntroPage::rangeDeterminationRequested, worker, &CurveFitWorker::init);
     connect(worker, &CurveFitWorker::rangeDeterminationStarted, fitPage, &FitPage::onRangeDeterminationStarted);
     connect(worker, &CurveFitWorker::rangeDeterminationFinished, fitPage, &FitPage::onRangeDeterminationFinished);
 
@@ -148,7 +148,7 @@ IntroPage::IntroPage(QWidget* parent):
     modelLayout->addRow(tr("Model:"), typeSelector);
 
     nIterationsSpinBox->setRange(1, 1000);
-    nIterationsSpinBox->setValue(LEAST_SQUARES_N_ITERATIONS);
+    nIterationsSpinBox->setValue(LEAST_SQUARES_N_FITS);
     modelLayout->addRow("Iterations", nIterationsSpinBox);
     modelLayout->labelForField(nIterationsSpinBox)->setToolTip("Number of solving repetitions for each channel");
 
@@ -315,14 +315,12 @@ void FitPage::startFit()
         if(QAbstractButton * button = wizard()->button(which))
             button->setEnabled(false);
 
-    startButton->setEnabled(false);
-
     emit fitRequested();
 }
 
 void FitPage::onStarted()
 {
-
+    startButton->setEnabled(false);
 }
 
 void FitPage::onFinished()
@@ -508,6 +506,8 @@ void ResultPage::setData(QStringList header, QStringList tooltips, QList<QList<d
 
             if (sensorFailures[row])
                 item->setBackgroundColor(Qt::gray);
+            else if (qFuzzyIsNull(data[1][row]))
+                item->setBackgroundColor(Qt::lightGray);
 
             resultTable->setItem(row, column, item);
         }

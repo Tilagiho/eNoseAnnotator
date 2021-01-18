@@ -81,6 +81,7 @@ private:
     QList<std::vector<double>> parameterData;
     std::vector<double> sigmaError, tau90, f_t90, sigmaNoise, t10_recovery;
     std::vector<double> nSamples;
+    std::vector<bool> fitValid;
     MeasurementData* mData;
     QMap<uint, AbsoluteMVector> fitData;
     QMap<uint, RelativeMVector> relativeData;
@@ -96,7 +97,7 @@ private:
     double jumpBaseThreshold = CVWIZ_DEFAULT_JUMP_BASE_THRESHOLD;
     bool detectExpositionStart = CVWIZ_DEFAULT_DETECT_EXPOSITION_START;
     bool detectRecoveryStart = CVWIZ_DEFAULT_DETECT_RECOVERY_START;
-    int nIterations = LEAST_SQUARES_N_ITERATIONS;
+    int nIterations = LEAST_SQUARES_N_FITS;
     double limitFactor = LEAST_SQUARES_LIMIT_FACTOR;
 
     int t_recovery = 60*CVWIZ_DEFAULT_RECOVERY_TIME;

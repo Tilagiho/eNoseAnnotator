@@ -40,7 +40,7 @@
 #define CVWIZ_DEFAULT_DETECT_EXPOSITION_START true
 #define CVWIZ_DEFAULT_DETECT_RECOVERY_START false
 #define CVWIZ_DEFAULT_RECOVERY_TIME 30
-#define CVWIZ_DEBUG_MODE false
+#define CVWIZ_DEBUG_MODE false  // true: curve fit executed in a single thread and additional debugging info activated
 
 // functionalisation
 #define FUNC_MAX_VALUE 100000

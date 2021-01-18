@@ -23,7 +23,8 @@ double LeastSquaresFitter::model(double input) const
 
 void LeastSquaresFitter::solve(const std::vector<std::pair<double, double> > &samples, int nIterations, double limitFactor)
 {
-    qDebug() << "solve";
+    if (CVWIZ_DEBUG_MODE)
+        qDebug() << "solve";
     // find y_max
     double y_max = 0.;
     for (auto pair : samples)
@@ -96,7 +97,8 @@ void LeastSquaresFitter::solve(const std::vector<std::pair<double, double> > &sa
 
 void LeastSquaresFitter::solve_lm(const std::vector<std::pair<double, double> > &samples, int nIterations, double limitFactor)
 {
-    qDebug() << "solve_lm";
+    if (CVWIZ_DEBUG_MODE)
+        qDebug() << "solve_lm";
     // find y_max
     double y_max = 0.;
     for (auto pair : samples)
@@ -142,8 +144,7 @@ void LeastSquaresFitter::solve_lm(const std::vector<std::pair<double, double> > 
         if (!parameters_valid(temp_params, limitFactor * y_max))
         {
             if (CVWIZ_DEBUG_MODE)
-                if (CVWIZ_DEBUG_MODE)
-                    qDebug() << "\n!Parameters invalid!\nPlateau = " << QString::number(temp_params(0) + temp_params(3)) << "\nbeta_1 = " << QString::number(temp_params(1)) << "\nbeta_2 = " << QString::number(temp_params(4)) << "\n\t-> result ignored";
+                qDebug() << "\n!Parameters invalid!\nPlateau = " << QString::number(temp_params(0) + temp_params(3)) << "\nbeta_1 = " << QString::number(temp_params(1)) << "\nbeta_2 = " << QString::number(temp_params(4)) << "\n\t-> result ignored";
             continue;
         }
 
@@ -220,6 +221,16 @@ QMap<QString, LeastSquaresFitter::Type> LeastSquaresFitter::getTypeMap()
     return typeMap;
 }
 
+bool LeastSquaresFitter::parameters_valid(double y_limit) const
+{
+    return parameters_valid(params, y_limit);
+}
+
+void LeastSquaresFitter::resetParams()
+{
+    params = 0;
+}
+
 double LeastSquaresFitter::residual(const std::pair<input_vector, double>& data, const parameter_vector& param_vector) const
 {
     return model(data.first, param_vector) - data.second;
@@ -266,13 +277,17 @@ bool ADG_superpos_Fitter::parameters_valid(const parameter_vector &param_vector,
     double beta_2 = param_vector(4);
     double t0_2 = param_vector(5);
 
+    // all parameters zero: fit not successfull
+    bool not_zero = !(qFuzzyIsNull(alpha_1) && qFuzzyIsNull(beta_1) && qFuzzyIsNull(t0_1) && qFuzzyIsNull(alpha_2) && qFuzzyIsNull(beta_2) && qFuzzyIsNull(t0_2));
+
     // alpha: plateau < y_limit
-    bool alpha_valid = qAbs(alpha_1 + alpha_2) < y_limit;
+    bool alpha_valid1 = qAbs(alpha_1 + alpha_2) < y_limit;
+    bool alpha_valid2 = (alpha_1 > 0) == (alpha_2 > 0);
 
     // beta: always positive
     bool beta_valid = beta_1 >= 0. && beta_2 >= 0.;
 
-    return  alpha_valid && beta_valid;
+    return  not_zero && alpha_valid1 && beta_valid;
 }
 
 

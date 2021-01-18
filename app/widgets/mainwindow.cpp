@@ -826,6 +826,12 @@ void MainWindow::setIsLiveClassificationState(bool isLive)
     classifierWidget->setLiveClassification(isLive);
 }
 
+void  MainWindow::resetNChannels(uint newNChannels)
+{
+    MVector::nChannels = newNChannels;
+}
+
+
 void MainWindow::on_actionCloseClassifier_triggered()
 {
     closeClassifier();
