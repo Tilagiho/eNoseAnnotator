@@ -850,3 +850,8 @@ void MainWindow::on_actionFit_curve_triggered()
 {
     emit fitCurvesRequested();
 }
+
+void MainWindow::on_actionLabViewFile_triggered()
+{
+    emit saveAsLabviewFileRequested();
+}

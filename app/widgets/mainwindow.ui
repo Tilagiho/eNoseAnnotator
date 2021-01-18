@@ -88,9 +88,16 @@
      <addaction name="actionSave_Data_As"/>
      <addaction name="actionsave_selection"/>
     </widget>
+    <widget class="QMenu" name="menuExport">
+     <property name="title">
+      <string>Export...</string>
+     </property>
+     <addaction name="actionLabViewFile"/>
+    </widget>
     <addaction name="actionSave"/>
     <addaction name="menuSave"/>
     <addaction name="actionLoad"/>
+    <addaction name="menuExport"/>
     <addaction name="separator"/>
     <addaction name="actionStart"/>
     <addaction name="actionStop"/>
@@ -434,6 +441,11 @@
   <action name="actionFit_curve">
    <property name="text">
     <string>Curve fitter</string>
+   </property>
+  </action>
+  <action name="actionLabViewFile">
+   <property name="text">
+    <string>LabViewFile...</string>
    </property>
   </action>
  </widget>

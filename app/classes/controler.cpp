@@ -130,6 +130,7 @@ Controler::Controler(QObject *parent) :
     });
     connect(w, &MainWindow::saveSelectionRequested, this, &Controler::saveSelection);
     connect(w, &MainWindow::saveSelectionVectorRequested, mData, &MeasurementData::saveSelectionVector);
+    connect(w, &MainWindow::saveAsLabviewFileRequested, this, &Controler::saveAsLabviewFile);
 
     connect(w, &MainWindow::generalSettingsRequested, this, &Controler::setGeneralSettings);
 
@@ -391,6 +392,32 @@ void Controler::saveData(bool forceDialog)
     } catch (std::runtime_error e) {
         QMessageBox::critical(w, "Error saving measurement", e.what());
     }
+}
+
+void Controler::saveAsLabviewFile()
+{
+    QString path = mData->getSaveFilename();
+    if (path.split(".").last() == "csv") {
+        QStringList pathList = path.split(".");
+        pathList.removeLast();
+        path = pathList.join(".") + ".txt";
+    }
+
+    QString fileName = QFileDialog::getSaveFileName(w, QString("Export data as LabView file"), path, "Text files (*.txt)");
+
+    // no file selected
+    if (fileName.isEmpty() || fileName.endsWith("/"))
+        return;
+
+    if (fileName.split(".").last() != "txt")
+        fileName += ".txt";
+
+    try {
+        mData->saveLabViewFile(fileName);
+    } catch (std::runtime_error e) {
+        QMessageBox::critical(w, "Error exporting measurement", e.what());
+    }
+
 }
 
 void Controler::loadData()

@@ -58,6 +58,7 @@ public slots:
 
     void saveData();
     void saveData(bool forceDialog);
+    void saveAsLabviewFile();
     void loadData();
     void loadData(QString filename);
 

@@ -86,7 +86,7 @@ public:
 
     void setClasslist(QList<aClass> classList);
 
-    void setSensorAttributes(QSet<QString> sensorAttributes);
+    void setSensorAttributes(QStringList sensorAttributes);
 
     void setSaveFilename(QString saveFilename);
 
@@ -115,6 +115,8 @@ public:
      * opens QFileDialog in order to get the save path
      */
     bool saveData(QString filename);
+
+    void saveLabViewFile(QString filepath);
 
 
     /*
@@ -198,7 +200,7 @@ public:
 
     QString getSaveFilename() const;
 
-    QSet<QString> getSensorAttributes() const;
+    QStringList getSensorAttributes() const;
 
     QMap<uint, AbsoluteMVector> getBaseLevelMap() const;
 
@@ -232,7 +234,7 @@ public slots:
     void removeClass(aClass oldClass);
     void changeClass(aClass oldClass, aClass newClass);
     void setFuncName(QString);
-    void addAttributes(QSet<QString> attributes);
+    void addAttributes(QStringList attributes);
     void deleteAttributes(QSet<QString> attributes);
     void renameAttribute(QString oldName, QString newName);
     void resetNChannels(size_t channels = MVector::nChannels);
@@ -294,13 +296,11 @@ private:
 
     QString saveFilename = "./data/";
 
-    QSet<QString> sensorAttributes;
+    QList<QString> sensorAttributes;
 
     InputFunctionType inputFunctionType = InputFunctionType::medianAverage;
 
     bool replotStatus = true;
-
-//    int nChannels = MVector::nChannels;
 
     double lowerLimit = DEFAULT_LOWER_LIMIT;
     double upperLimit = DEFAULT_UPPER_LIMIT;
@@ -368,10 +368,10 @@ private:
     QMap<uint, MVector> baseLevelMap;
 };
 
-class LeifFileReader : public FileReader
+class LabviewFileReader : public FileReader
 {
 public:
-    LeifFileReader(QString filePath);
+    LabviewFileReader(QString filePath);
 
     FileReaderType getType() override;
 

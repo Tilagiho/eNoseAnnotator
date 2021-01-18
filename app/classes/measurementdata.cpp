@@ -143,7 +143,7 @@ void MeasurementData::addVector(uint timestamp, AbsoluteMVector vector)
     // sync sensor attributes
     for (QString attributeName : vector.sensorAttributes.keys())
         if (!sensorAttributes.contains(attributeName))
-            addAttributes(QSet<QString>{attributeName});
+            addAttributes(QStringList{attributeName});
 
     for (QString attributeName : sensorAttributes)
         if (!vector.sensorAttributes.keys().contains(attributeName))
@@ -213,7 +213,7 @@ void MeasurementData::setClasslist(QList<aClass> newClassList)
         addClass(aclass);
 }
 
-void MeasurementData::setSensorAttributes(QSet<QString> newSensorAttributes)
+void MeasurementData::setSensorAttributes(QStringList newSensorAttributes)
 {
     sensorAttributes.clear();
 
@@ -685,6 +685,64 @@ bool MeasurementData::saveAverageSelectionFuncVector(QString filename, bool save
     return true;
 }
 
+void MeasurementData::saveLabViewFile(QString filepath)
+{
+    QFile file(filepath);
+    if (!file.open(QIODevice::WriteOnly))
+        throw std::runtime_error("Unable to open file:" + file.errorString().toStdString());
+
+    QTextStream out(&file);
+
+    // write header
+    QStringList header;
+
+    auto sensorAttributeList = sensorAttributes;
+    header << sensorAttributeList;
+    for (size_t i=0; i<nChannels(); i++) {
+        header << "t" + QString::number(i+1);
+        header << "R" + QString::number(i+1);
+    }
+    out << header.join(" ") << "\n";
+
+    // write functionalisation
+    QString funcPrefix = "                 ";   // func line begins with 17 whitespaces
+    QStringList funcList;
+    for (size_t i=0; i<nChannels(); i++) {
+        funcList << QString::number(functionalisation[i]);
+    }
+    out << funcPrefix + funcList.join("  ") << "\n";   // two whitespaces on purpose
+
+    if (!data.isEmpty()) {
+        auto startTimestamp = data.firstKey();
+        // write measurement start
+        if (startTimestamp > 10000) {  // don't write out invalid timestamps (too small)
+            QString measStartPrefix = "meas_start:";
+            QString measStart = getTimestampStringFromUInt(data.firstKey());
+            out << measStartPrefix + measStart << "\n";
+        }
+
+        // write data
+        for (auto timestamp : data.keys())
+        {
+            AbsoluteMVector vector = data[timestamp];
+            QStringList valueList;
+
+            // additional sensors
+            for (auto attribute : sensorAttributeList)
+                valueList << QString::number(vector.sensorAttributes[attribute], 'f', 2);
+
+            // t & R pairs
+            for (size_t i=0; i<vector.getSize(); i++) {
+                valueList << QString::number(timestamp - startTimestamp, 'f', 2);
+                valueList << QString::number(vector[i], 'f', 0);
+            }
+            out << valueList.join(" ") << "\n";
+        }
+    }
+
+
+}
+
 void MeasurementData::copyFrom(MeasurementData *otherMData)
 {
     // sensorFailures and functionalisation are static
@@ -1097,6 +1155,9 @@ QString MeasurementData::getTimestampStringFromUInt(uint timestamp)
 uint MeasurementData::getTimestampUIntfromString(QString string)
 {
     QDateTime dateTime = QDateTime::fromString(string, "d.M.yyyy - h:mm:ss");
+    if (!dateTime.isValid())
+        throw std::runtime_error(("Invalid timestamp string: " + string).toStdString());
+
     return dateTime.toTime_t();
 }
 
@@ -1109,17 +1170,18 @@ void MeasurementData::setFuncName(QString name)
     }
 }
 
-void MeasurementData::addAttributes(QSet<QString> attributeNames)
+void MeasurementData::addAttributes(QStringList newAttributeNames)
 {
-    for (QString attributeName : attributeNames)
+    for (QString attributeName : newAttributeNames)
         Q_ASSERT(!sensorAttributes.contains(attributeName));
 
     // add attributes to sensorAttributes
-    sensorAttributes.unite(attributeNames);
+    for (QString newAttribute : newAttributeNames)
+        sensorAttributes.append(newAttribute);
 
     // add to vectors
     for (AbsoluteMVector vector : data)
-        for (QString attributeName : attributeNames)
+        for (QString attributeName : newAttributeNames)
             vector.sensorAttributes[attributeName] = 0.0;
 }
 
@@ -1129,7 +1191,8 @@ void MeasurementData::deleteAttributes(QSet<QString> attributeNames)
         Q_ASSERT(sensorAttributes.contains(attributeName));
 
     // delete attributes from sensorAttributes
-    sensorAttributes.intersect(attributeNames);
+    for (QString attributeName : attributeNames)
+        sensorAttributes.removeAll(attributeName);  // each elemtent should only be contained once
 
     // delete from vectors
     for (AbsoluteMVector vector : data)
@@ -1144,8 +1207,8 @@ void MeasurementData::renameAttribute(QString oldName, QString newName)
     Q_ASSERT(oldName != newName);
 
     // rename in sensorAttributes
-    sensorAttributes.insert(newName);
-    sensorAttributes.remove(oldName);
+    sensorAttributes.append(newName);
+    sensorAttributes.removeAll(oldName);
 
     // rename in vectors
     for (AbsoluteMVector vector : data)
@@ -1327,7 +1390,7 @@ QMap<uint, AbsoluteMVector> MeasurementData::getBaseLevelMap() const
     return baseVectorMap;
 }
 
-QSet<QString> MeasurementData::getSensorAttributes() const
+QStringList MeasurementData::getSensorAttributes() const
 {
     return sensorAttributes;
 }
@@ -1361,7 +1424,7 @@ FileReader* FileReader::getSpecificReader()
     }
     else
     {
-        return new LeifFileReader(file.fileName());
+        return new LabviewFileReader(file.fileName());
     }
 }
 
@@ -1515,7 +1578,7 @@ void AnnotatorFileReader::parseHeader(QString line)
             else    // attribute
             {
                 sensorAttributeMap[headerItem] = i;
-                data->addAttributes(QSet<QString>{headerItem});
+                data->addAttributes(QStringList{headerItem});
             }
         }
         // after parsing the header:
@@ -1607,16 +1670,13 @@ void AnnotatorFileReader::parseValues(QString line)
         data->addVector(timestamp, vector);
 }
 
-LeifFileReader::LeifFileReader(QString filePath):
+LabviewFileReader::LabviewFileReader(QString filePath):
     FileReader(filePath)
 {
 }
 
-void LeifFileReader::readFile()
+void LabviewFileReader::readFile()
 {
-    // default start_time: file creation date
-    start_time = file.fileTime(QFileDevice::FileTime::FileBirthTime).toTime_t();
-
     // read header line
     QString line;
     if (!in.readLineInto(&line))
@@ -1629,6 +1689,8 @@ void LeifFileReader::readFile()
         throw  std::runtime_error(file.fileName().toStdString() + " is empty!");
     lineCount++;
     parseFuncs(line);
+    // store pos in case no measurement start line present
+    auto measStartPos = in.pos();
 
     // optional: read measurement start
     if (!in.readLineInto(&line))
@@ -1637,7 +1699,7 @@ void LeifFileReader::readFile()
         parseMeasurementStart(line);
         lineCount++;
     } else {   // reset text stream
-        in.seek(lineCount);
+        in.seek(measStartPos);
     }
 
     // read data
@@ -1652,12 +1714,12 @@ void LeifFileReader::readFile()
     }
 }
 
-FileReader::FileReaderType LeifFileReader::getType()
+FileReader::FileReaderType LabviewFileReader::getType()
 {
     return FileReaderType::Leif;
 }
 
-void LeifFileReader::parseHeader(QString line)
+void LabviewFileReader::parseHeader(QString line)
 {
     QStringList attributeNames = line.split(" ");
 
@@ -1711,10 +1773,10 @@ void LeifFileReader::parseHeader(QString line)
     // MVector default size is number of resistance values
     emit resetNChannels(resistanceIndexes.size());
     data->resetNChannels(resistanceIndexes.size());
-    data->addAttributes(sensorAttributeIndexMap.keys().toSet());
+    data->addAttributes(sensorAttributeIndexMap.keys());
 }
 
-void LeifFileReader::parseFuncs(QString line)
+void LabviewFileReader::parseFuncs(QString line)
 {
     auto resistanceKeys = resistanceIndexes.keys();
     size_t maxResChannel = *std::max_element(resistanceKeys.begin(), resistanceKeys.end()) + 1;
@@ -1723,9 +1785,10 @@ void LeifFileReader::parseFuncs(QString line)
     QStringList funcValues = line.split(" ");
 
     bool readOk = true;
+    funcValues.removeAll("");
     for (size_t channel : resistanceIndexes.keys())
     {
-        functionalistation[channel] = funcValues[resistanceIndexes[channel]].toInt(&readOk);
+        functionalistation[channel] = funcValues[channel].toInt(&readOk);
 
         if (!readOk)
             throw std::runtime_error("Error in line " + QString::number(lineCount+1).toStdString()+ ".\nExpected integer, got\"" + funcValues[channel].toStdString() + "\"!");
@@ -1734,14 +1797,14 @@ void LeifFileReader::parseFuncs(QString line)
     data->setFunctionalisation(functionalistation);
 }
 
-void LeifFileReader::parseMeasurementStart(QString line)
+void LabviewFileReader::parseMeasurementStart(QString line)
 {
     QString prefix("meas_start:");
     QString measTimestampString = line.mid(prefix.size(), line.size()-prefix.size());
     start_time = MeasurementData::getTimestampUIntfromString (measTimestampString);
 }
 
-void LeifFileReader::parseValues(QString line)
+void LabviewFileReader::parseValues(QString line)
 {
     QStringList values = line.split(" ");
 
@@ -1757,12 +1820,12 @@ void LeifFileReader::parseValues(QString line)
     if (values.size() <=max)
         throw std::runtime_error("Error in line " + QString::number(lineCount+1).toStdString()+ ".\nLine has to contain at least " + QString::number(max).toStdString() + " values!");
 
-    double time;
+    uint time;
     MVector vector;
 
     // get time of measurement
     bool conversionOk = false;
-    time = values[t_index].toDouble(&conversionOk);
+    time = static_cast<uint>(qRound(values[t_index].toDouble(&conversionOk)));
 
     if (!conversionOk || time<0)
         throw std::runtime_error("Error in line " + std::to_string(lineCount+1) + ".\nIncompatible time value.\n\"" + values[t_index].toStdString() + "\" can not be converted into a double!");
@@ -1789,7 +1852,7 @@ void LeifFileReader::parseValues(QString line)
             throw std::runtime_error("Error in line " + std::to_string(lineCount+1) + ".\nIncompatible attribute value.\n\"" + values[index].toStdString() + "\" can not be converted into a double!");
     }
 
-    int timestamp = start_time+qRound(time);
+    uint timestamp = start_time + time;
     // base vector is first vector
     if (data->getAbsoluteData().isEmpty())
         data->setBaseVector(timestamp, vector);
