@@ -403,7 +403,8 @@ void MeasurementData::setDataChanged(bool newValue)
  */
 AbsoluteMVector* MeasurementData::getBaseVector(uint timestamp)
 {
-    Q_ASSERT(!baseVectorMap.isEmpty());
+    if (baseVectorMap.isEmpty())
+        throw std::runtime_error("Error: No baselevel was set!");
 
     uint bsTimestamp = 0;
 
@@ -423,8 +424,6 @@ AbsoluteMVector* MeasurementData::getBaseVector(uint timestamp)
 
         bsTimestamp = ts;
     }
-    Q_ASSERT ("Error: No baselevel was set!" && bsTimestamp!=0);
-
     return &baseVectorMap[bsTimestamp];
 }
 
