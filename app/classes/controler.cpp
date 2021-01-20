@@ -192,12 +192,12 @@ bool Controler::dirIsWriteable(QDir dir)
 void Controler::initialize()
 {
     loadCLArguments();
-    loadAutosave();
+    if (!parseResult.curveFit)
+        loadAutosave();
 }
 
 void Controler::loadCLArguments()
 {
-
     // fit curves
     if (parseResult.curveFit)
     {
