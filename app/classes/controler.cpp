@@ -466,44 +466,41 @@ void Controler::loadData(QString fileName)
 
         connect(specificReader, &FileReader::resetNChannels, w, &MainWindow::resetNChannels);
         specificReader->readFile();
+
+        MeasurementData* newData = specificReader->getMeasurementData();
+
+        int nFuncs = newData->getFunctionalisation().getNFuncs();
+        nFuncs = nFuncs == 1 ? MVector::nChannels : nFuncs;
+
+        mData->copyFrom(newData);
+
+        // update title of MainWindow
+    //    w->setDataChanged(false, mData->getSaveFilename());
+
+        // check compability to loaded classifier
+        if (classifier != nullptr)
+        {
+            auto functionalisation = mData->getFunctionalisation();
+            auto sensorFailures = mData->getSensorFailures();
+            auto funcMap = functionalisation.getFuncMap(sensorFailures);
+
+            // check func preset
+            if (classifier->getN() != funcMap.size() || classifier->getPresetName() != mData->getFunctionalisation().getName())
+            {
+                QString error_message = "Functionalisation of the data loaded seems to be incompatible with the loaded classifier.\nWas the functionalisation set correctly? Is the classifier compatible with the sensor used?";
+                QMessageBox::warning(w, "Classifier error", error_message);
+            }
+        }
+
+        // if saving successfull:
+        // delete autosave
+        if (!mData->isChanged())
+            deleteAutosave();
     }
     catch (std::runtime_error e)
     {
         QMessageBox::critical(w, "Error loading measurement", e.what());
     }
-
-    MeasurementData* newData = specificReader->getMeasurementData();
-
-    int nFuncs = newData->getFunctionalisation().getNFuncs();
-    nFuncs = nFuncs == 1 ? MVector::nChannels : nFuncs;
-
-    mData->copyFrom(newData);
-
-    // update title of MainWindow
-//    w->setDataChanged(false, mData->getSaveFilename());
-
-    // check compability to loaded classifier
-    if (classifier != nullptr)
-    {
-        auto functionalisation = mData->getFunctionalisation();
-        auto sensorFailures = mData->getSensorFailures();
-        auto funcMap = functionalisation.getFuncMap(sensorFailures);
-
-        // check func preset
-        if (classifier->getN() != funcMap.size() || classifier->getPresetName() != mData->getFunctionalisation().getName())
-        {
-            QString error_message = "Functionalisation of the data loaded seems to be incompatible with the loaded classifier.\nWas the functionalisation set correctly? Is the classifier compatible with the sensor used?";
-            QMessageBox::warning(w, "Classifier error", error_message);
-        }
-    }
-
-    if (specificReader != nullptr)
-        delete specificReader;
-
-    // if saving successfull:
-    // delete autosave
-    if (!mData->isChanged())
-        deleteAutosave();
 }
 
 void Controler::setDataChanged(bool value)
