@@ -205,6 +205,10 @@ void Controler::loadCLArguments()
             throw std::runtime_error("No filename for curve fit specified!");
 
         loadData(parseResult.filename);
+        if (mData->getAbsoluteData().isEmpty()) {
+            qDebug() << "Measurement file could not be loaded or is empty!";
+            return;
+        }
         AutomatedFitWorker fitWorker(mData, parseResult.timeout, parseResult.nCores, parseResult.tExposition, parseResult.tRecovery, parseResult.tOffset);
         fitWorker.fit();
 

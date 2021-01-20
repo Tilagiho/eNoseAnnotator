@@ -1775,6 +1775,12 @@ void LabviewFileReader::parseHeader(QString line)
     data->addAttributes(sensorAttributeIndexMap.keys());
 }
 
+/*!
+ * \brief LabviewFileReader::parseFuncs
+ * if number of funcs is smaller than number of channels, func is repeated until func size is equal to number of channels
+ * -> multiple detectors in one measurement are interpreted as one detector with many channels
+ * \param line
+ */
 void LabviewFileReader::parseFuncs(QString line)
 {
     auto resistanceKeys = resistanceIndexes.keys();
@@ -1782,9 +1788,18 @@ void LabviewFileReader::parseFuncs(QString line)
 
     functionalistation = Functionalisation(maxResChannel, 0);
     QStringList funcValues = line.split(" ");
+    funcValues.removeAll("");
+    if (funcValues.size() > resistanceKeys.size())
+        throw std::runtime_error("Error parsing functionalisation: More func values than resistance values!");
+    // fill up funcValues until it has the same number of elements as resistanceKeys
+    int originalNFuncs = funcValues.size();
+    int i=0;
+    while (funcValues.size() != resistanceKeys.size()) {
+        funcValues.append(funcValues[i%originalNFuncs]);
+        i++;
+    }
 
     bool readOk = true;
-    funcValues.removeAll("");
     for (size_t channel : resistanceIndexes.keys())
     {
         functionalistation[channel] = funcValues[channel].toInt(&readOk);
