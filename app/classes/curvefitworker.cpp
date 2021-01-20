@@ -723,9 +723,11 @@ std::vector<double> CurveFitWorker::getTau90() const
  * \param parent
  */
 AutomatedFitWorker::AutomatedFitWorker(MeasurementData *mData, int timeout, int nCores, int t_exposition, int t_recovery, int t_offset, QObject *parent):
-    mData(mData),
     QObject(parent),
-    timeoutInS(timeout)
+    mData(mData),
+    timeoutInS(timeout),
+    t_exposition(t_exposition),
+    t_offset(t_offset)
 {
     auto absoluteData = mData->getAbsoluteData();
     if (absoluteData.isEmpty())
@@ -769,6 +771,9 @@ void AutomatedFitWorker::fit()
     QThreadPool::globalInstance()->setMaxThreadCount(nCores);
     qDebug() << "\n--------\nStarting curve fit:";
     qDebug() << "max thread count:\t" << QString::number(QThreadPool::globalInstance()->maxThreadCount());
+    qDebug() << "t_offset:\t" << QString::number(t_offset);
+    qDebug() << "t_exposition:\t" << QString::number(t_exposition);
+    qDebug() << "t_recovery:\t" << QString::number(t_recovery);
     for (size_t i=0; i<mData->nChannels(); i++)
         QThreadPool::globalInstance()->start(worker);
 

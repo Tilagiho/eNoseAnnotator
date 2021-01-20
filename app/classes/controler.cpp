@@ -561,7 +561,7 @@ void Controler::parseArguments()
         throw std::runtime_error("One or more parameters are invalid!");
 
 //    QString filename = "/home/pingu/eNose-ml-engine/data/eNose-base-dataset/train/5_Ammoniak_200206.csv";
-    qDebug() << parseResult.toString();
+    qDebug().noquote() << parseResult.toString();
 }
 
 void Controler::saveSelection()

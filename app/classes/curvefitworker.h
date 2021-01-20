@@ -120,6 +120,8 @@ protected:
     CurveFitWorker* worker;
     int timeoutInS;
     int nCores;
+    int t_exposition;
+    int t_offset;
     uint t_exposition_start;
     uint t_exposition_end;
     uint t_recovery;
