@@ -1822,9 +1822,14 @@ void LabviewFileReader::parseValues(QString line)
 {
     QStringList values = line.split(" ");
 
-    int resMaxIndex = *std::max_element(resistanceIndexes.begin(), resistanceIndexes.end());
+    int resMaxIndex = 0;
+    if (!resistanceIndexes.isEmpty())
+        resMaxIndex = *std::max_element(resistanceIndexes.begin(), resistanceIndexes.end());
+
     QList<int> sensorAttributeIndexes = sensorAttributeIndexMap.values();
-    int sensAttrMaxIndex = *std::max_element(sensorAttributeIndexMap.begin(), sensorAttributeIndexMap.end());
+    int sensAttrMaxIndex = 0;
+    if (!sensorAttributeIndexes.isEmpty())
+        sensAttrMaxIndex = *std::max_element(sensorAttributeIndexMap.begin(), sensorAttributeIndexMap.end());
 
     // get max index needed
     int max = qMax(t_index, resMaxIndex);
@@ -1832,7 +1837,7 @@ void LabviewFileReader::parseValues(QString line)
 
     // check size of line
     if (values.size() <=max)
-        throw std::runtime_error("Error in line " + QString::number(lineCount+1).toStdString()+ ".\nLine has to contain at least " + QString::number(max).toStdString() + " values!");
+        throw std::runtime_error("Error in line " + QString::number(lineCount+1).toStdString()+ ".\nLine has to contain at least " + QString::number(max).toStdString() + " values!\nLine contains " + QString::number(values.size()).toStdString() + " entries.");
 
     uint time;
     MVector vector;
