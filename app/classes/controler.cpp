@@ -763,6 +763,8 @@ void Controler::makeSourceConnections()
     }); // error
 
     connect(source, &DataSource::statusSet, w, &MainWindow::setStatus);
+
+    connect(source, &DataSource::fanLevelSet, w, &MainWindow::setFanLevel);
 }
 
 void Controler::startMeasurement()

@@ -191,14 +191,14 @@ void USBDataSource::processLine(const QByteArray &data)
     // reset timer
     timer->start(timeout*1000);
 
-    if (!emitData)
-        return;
-
     QString line(data);
 
 //    qDebug() << line;
     if (line.startsWith("count"))
     {
+        if (!emitData)
+            return;
+
         uint timestamp = QDateTime::currentDateTime().toTime_t();
 
 //        qDebug() << timestamp << ": Received new vector";
@@ -253,6 +253,17 @@ void USBDataSource::processLine(const QByteArray &data)
 //            qDebug() << "Vector Received: \n" << vector.toString();
             emit vectorReceived(timestamp, vector);
         }
+    } else if (line.startsWith("fan"))
+    {
+        QString valueString = line.split(":")[1];
+
+        int fanLevel;
+        if (valueString.contains("off"))
+            fanLevel = 0;
+        else
+            fanLevel = valueString.toInt();
+
+        emit fanLevelSet(fanLevel);
     }
 }
 

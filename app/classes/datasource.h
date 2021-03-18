@@ -71,6 +71,8 @@ signals:
      */
     void statusSet(Status newStatus);
 
+    void fanLevelSet(int);
+
 public slots:
     virtual void init() = 0;
     virtual void start() = 0;

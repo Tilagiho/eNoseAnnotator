@@ -198,6 +198,10 @@ void MainWindow::setStatus(DataSource::Status newStatus)
     }
 }
 
+void MainWindow::setFanLevel(int level) {
+    measInfoWidget->setFanLevel(level);
+}
+
 void MainWindow::on_actionSave_Data_As_triggered()
 {
     emit saveDataAsRequested();
@@ -306,6 +310,7 @@ void MainWindow::sensorConnected(QString sensorId)
 {
     // info widget
     measInfoWidget->setSensorId(sensorId);
+    measInfoWidget->setFanLevel(0);
 
     // tool bar
     ui->actionStart->setEnabled(false);

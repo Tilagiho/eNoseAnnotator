@@ -74,6 +74,7 @@ public slots:
     void clearGraphs();
 
     void setStatus(DataSource::Status newStatus);
+    void setFanLevel(int level);
 
     void sensorConnected(QString sensorId);
 

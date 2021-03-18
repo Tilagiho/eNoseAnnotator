@@ -24,6 +24,7 @@ public slots:
     void setComment(QString comment);
     void setSensorFailures(std::vector<bool> failures);
     void setFunctionalisation(Functionalisation &functionalisation);
+    void setFanLevel(int fanLevel);
 
 signals:
     void mCommentChanged(QString comment);

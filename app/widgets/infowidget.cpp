@@ -68,3 +68,9 @@ void InfoWidget::setFunctionalisation(Functionalisation &functionalisation)
         label = label.left(label.size()-QString(".preset").size());
     ui->funcLabel->setText(label);
 }
+
+void InfoWidget::setFanLevel(int level)
+{
+    QString levelString = QString::number(level);
+    ui->fanLevelText->setText(levelString);
+}
