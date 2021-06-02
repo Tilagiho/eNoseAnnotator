@@ -2,14 +2,14 @@
 // important
 
 // optional
-- free zoom
-- stop measurement based on gradient, ui symbols for status
+- start/ stop measurement based on gradient, ui symbols for status
 
 // features
-- create new measurement without starting it
+- firmware update for the smell inspector via python scripts
+- implement new communication protocol, add control features for fan
+- add graphs for additional sensor date (temperature, humidity, etc)
 
 // bugs
-- widgets move when saving
 
 // ci
-- tavis ci: move to xenial
+- move to github actions
